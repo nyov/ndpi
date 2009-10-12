@@ -3,10 +3,10 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 lib_LTLIBRARIES = libopendpi.la
 
 
-# this will create a library 1.0.2
+# this will create a library 1.0.0
 LIB_AC=1
 LIB_REV=0
-LIB_ANC=2
+LIB_ANC=0
 
 libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
