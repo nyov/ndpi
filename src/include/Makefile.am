@@ -1,4 +1,7 @@
-include_HEADERS = ipq_api.h \
+
+library_includedir=$(includedir)/libopendpi-1.0/libopendpi
+
+library_include_HEADERS = ipq_api.h \
 		  ipq_basic_def.h \
 		  ipq_debug_functions.h \
 		  ipq_macros.h \

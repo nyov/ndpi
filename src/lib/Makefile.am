@@ -10,12 +10,6 @@ LIB_ANC=0
 
 libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
-
-# headers to install
-include_HEADERS = 	ipq_main.h \
- 			ipq_protocols.h \
-			ipq_structs.h
-
 libopendpi_la_SOURCES = ipq_main.c \
 			${include_HEADERS} \
 			protocols/applejuice.c \
