@@ -29,10 +29,14 @@
 #include <stdarg.h>
 #include <netinet/in.h>
 
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-#include <linux/if_ether.h>
+#ifdef __linux__
+# include <linux/ip.h>
+# include <linux/tcp.h>
+# include <linux/udp.h>
+# include <linux/if_ether.h>
+#else
+# include "linux_compat.h"
+#endif
 
 #include <pcap.h>
 

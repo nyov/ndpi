@@ -29,13 +29,19 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <endian.h>
-#include <byteswap.h>
-/* default includes */
+
+#ifdef __linux__
+# include <endian.h>
+# include <byteswap.h>
+# include <linux/ip.h>
+# include <linux/tcp.h>
+# include <linux/udp.h>
+#else
+# include <sys/types.h>
+# include <sys/endian.h>
+# include <netinet/in.h>
+#endif
 #include <netinet/ip6.h>
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
 
 //#include <arpa/inet.h>
 
@@ -54,6 +60,10 @@
 
 #include "ipq_api.h"
 #include "ipq_structs.h"
+
+#ifndef __linux__
+# include "linux_compat.h"
+#endif
 
 #define IPOQUE_USE_ASYMMETRIC_DETECTION             0
 #define IPQ_SELECTION_BITMASK_PROTOCOL_SIZE			u32

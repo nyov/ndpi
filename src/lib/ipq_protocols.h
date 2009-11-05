@@ -33,6 +33,12 @@
 /* new definitions to get little endian from network bytes */
 #define get_ul8(X,O) get_u8(X,O)
 
+#ifndef __BYTE_ORDER
+# define __BYTE_ORDER BYTE_ORDER
+# define __LITTLE_ENDIAN LITTLE_ENDIAN
+# define __BIG_ENDIAN BIG_ENDIAN
+#endif
+
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 
 #define get_l16(X,O)  get_u16(X,O)
