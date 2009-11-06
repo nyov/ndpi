@@ -44,12 +44,4 @@ struct udphdr {
     uint16_t check;
 };
 
-#define ETH_P_IP	0x0800
-
-struct ethhdr {
-	unsigned char	h_dest[6];
-	unsigned char	h_source[6];
-	uint16_t		h_proto;
-};
-
 #endif

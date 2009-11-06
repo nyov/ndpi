@@ -37,8 +37,10 @@
 # include <linux/tcp.h>
 # include <linux/udp.h>
 #else
+# ifndef __APPLE__
+#  include <sys/endian.h>
+# endif
 # include <sys/types.h>
-# include <sys/endian.h>
 # include <netinet/in.h>
 #endif
 #include <netinet/ip6.h>
