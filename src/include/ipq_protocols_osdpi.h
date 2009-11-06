@@ -130,9 +130,13 @@ extern "C" {
 #define IPOQUE_PROTOCOL_USENET					93
 #define IPOQUE_PROTOCOL_MGCP					94
 #define IPOQUE_PROTOCOL_IAX						95
+#define IPOQUE_PROTOCOL_TFTP					96
+#define IPOQUE_PROTOCOL_AFP						97
+#define IPOQUE_PROTOCOL_STEALTHNET				98
+#define IPOQUE_PROTOCOL_AIMINI					99
 
 
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL        95
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL        99
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS IPOQUE_LAST_IMPLEMENTED_PROTOCOL
@@ -145,14 +149,15 @@ extern "C" {
 	"MOVE","RTSP","Feidian","Icecast","PPLive","PPStream","Zatoo","SHOUTCast","SopCast","TVAnts","TVUplayer","VeohTV",\
 	"QQLive","Thunder/Webthunder","Soulseek","GaduGadu","IRC","Popo","Jabber","MSN","Oscar","Yahoo","Battlefield","Quake",\
 	"Second Life","Steam","Halflife2","World of Warcraft","Telnet","STUN","IPSEC","GRE","ICMP","IGMP","EGP","SCTP","OSPF",\
-	"IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX"
+	"IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp",\
 	"bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx",\
 	"manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi",\
 	"flash","ogg","mpeg","quicktime","realmedia","windowsmedia","mms","xbox","qq","move","rtsp","feidian","icecast","pplive",\
 	"ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","veohtv","qqlive","thunder","soulseek","gadugadu","irc",\
 	"popo","jabber","msn","oscar","yahoo","battlefield","quake","secondlife","steam","hl2","worldofwarcraft","telnet","stun",\
-	"ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere","ssl","ssh","usenet","mgcp","iax"
+	"ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere","ssl","ssh","usenet","mgcp","iax",\
+	"tftp","afp","stealthnet","aimini"
 
 #ifdef __cplusplus
 }

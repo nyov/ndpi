@@ -71,9 +71,10 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 
 	IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "search mail_smtp.\n");
 
+
 	if (packet->payload_packet_len > 2 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
 
-		u8 a = 0;
+		u8 a;
 		u8 bit_count = 0;
 
 		ipq_parse_packet_line_info(ipoque_struct);
@@ -95,30 +96,63 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 			}
 			// expected client requests
 			if (packet->line[a].len > 5) {
-				if (memcmp(packet->line[a].ptr, "HELO ", 5) == 0 || memcmp(packet->line[a].ptr, "helo ", 5) == 0 ||
-					memcmp(packet->line[a].ptr, "EHLO ", 5) == 0 || memcmp(packet->line[a].ptr, "ehlo ", 5) == 0) {
+				if ((((packet->line[a].ptr[0] == 'H' || packet->line[a].ptr[0] == 'h')
+					  && (packet->line[a].ptr[1] == 'E' || packet->line[a].ptr[1] == 'e'))
+					 || ((packet->line[a].ptr[0] == 'E' || packet->line[a].ptr[0] == 'e')
+						 && (packet->line[a].ptr[1] == 'H' || packet->line[a].ptr[1] == 'h')))
+					&& (packet->line[a].ptr[2] == 'L' || packet->line[a].ptr[2] == 'l')
+					&& (packet->line[a].ptr[3] == 'O' || packet->line[a].ptr[3] == 'o')
+					&& packet->line[a].ptr[4] == ' ') {
 					flow->smtp_command_bitmask |= SMTP_BIT_HELO_EHLO;
-				} else if (memcmp(packet->line[a].ptr, "MAIL ", 5) == 0 || memcmp(packet->line[a].ptr, "mail ", 5) == 0) {
+				} else if ((packet->line[a].ptr[0] == 'M' || packet->line[a].ptr[0] == 'm')
+						   && (packet->line[a].ptr[1] == 'A' || packet->line[a].ptr[1] == 'a')
+						   && (packet->line[a].ptr[2] == 'I' || packet->line[a].ptr[2] == 'i')
+						   && (packet->line[a].ptr[3] == 'L' || packet->line[a].ptr[3] == 'l')
+						   && packet->line[a].ptr[4] == ' ') {
 					flow->smtp_command_bitmask |= SMTP_BIT_MAIL;
-				} else if (memcmp(packet->line[a].ptr, "RCPT ", 5) == 0 || memcmp(packet->line[a].ptr, "rcpt ", 5) == 0) {
+				} else if ((packet->line[a].ptr[0] == 'R' || packet->line[a].ptr[0] == 'r')
+						   && (packet->line[a].ptr[1] == 'C' || packet->line[a].ptr[1] == 'c')
+						   && (packet->line[a].ptr[2] == 'P' || packet->line[a].ptr[2] == 'p')
+						   && (packet->line[a].ptr[3] == 'T' || packet->line[a].ptr[3] == 't')
+						   && packet->line[a].ptr[4] == ' ') {
 					flow->smtp_command_bitmask |= SMTP_BIT_RCPT;
-				} else if (memcmp(packet->line[a].ptr, "AUTH ", 5) == 0 || memcmp(packet->line[a].ptr, "auth ", 5) == 0) {
+				} else if ((packet->line[a].ptr[0] == 'A' || packet->line[a].ptr[0] == 'a')
+						   && (packet->line[a].ptr[1] == 'U' || packet->line[a].ptr[1] == 'u')
+						   && (packet->line[a].ptr[2] == 'T' || packet->line[a].ptr[2] == 't')
+						   && (packet->line[a].ptr[3] == 'H' || packet->line[a].ptr[3] == 'h')
+						   && packet->line[a].ptr[4] == ' ') {
 					flow->smtp_command_bitmask |= SMTP_BIT_AUTH;
 				}
 			}
 
 			if (packet->line[a].len > 8) {
-				if (memcmp(packet->line[a].ptr, "STARTTLS", 8) == 0 || memcmp(packet->line[a].ptr, "starttls", 8) == 0) {
+				if ((packet->line[a].ptr[0] == 'S' || packet->line[a].ptr[0] == 's')
+					&& (packet->line[a].ptr[1] == 'T' || packet->line[a].ptr[1] == 't')
+					&& (packet->line[a].ptr[2] == 'A' || packet->line[a].ptr[2] == 'a')
+					&& (packet->line[a].ptr[3] == 'R' || packet->line[a].ptr[3] == 'r')
+					&& (packet->line[a].ptr[4] == 'T' || packet->line[a].ptr[0] == 't')
+					&& (packet->line[a].ptr[5] == 'T' || packet->line[a].ptr[1] == 't')
+					&& (packet->line[a].ptr[6] == 'L' || packet->line[a].ptr[2] == 'l')
+					&& (packet->line[a].ptr[7] == 'S' || packet->line[a].ptr[3] == 's')) {
 					flow->smtp_command_bitmask |= SMTP_BIT_STARTTLS;
 				}
 			}
 
 			if (packet->line[a].len > 4) {
-				if (memcmp(packet->line[a].ptr, "DATA", 4) == 0 || memcmp(packet->line[a].ptr, "data", 4) == 0) {
+				if ((packet->line[a].ptr[0] == 'D' || packet->line[a].ptr[0] == 'd')
+					&& (packet->line[a].ptr[1] == 'A' || packet->line[a].ptr[1] == 'a')
+					&& (packet->line[a].ptr[2] == 'T' || packet->line[a].ptr[2] == 't')
+					&& (packet->line[a].ptr[3] == 'A' || packet->line[a].ptr[3] == 'a')) {
 					flow->smtp_command_bitmask |= SMTP_BIT_DATA;
-				} else if (memcmp(packet->line[a].ptr, "NOOP", 4) == 0 || memcmp(packet->line[a].ptr, "noop", 4) == 0) {
+				} else if ((packet->line[a].ptr[0] == 'N' || packet->line[a].ptr[0] == 'n')
+						   && (packet->line[a].ptr[1] == 'O' || packet->line[a].ptr[1] == 'o')
+						   && (packet->line[a].ptr[2] == 'O' || packet->line[a].ptr[2] == 'o')
+						   && (packet->line[a].ptr[3] == 'P' || packet->line[a].ptr[3] == 'p')) {
 					flow->smtp_command_bitmask |= SMTP_BIT_NOOP;
-				} else if (memcmp(packet->line[a].ptr, "RSET", 4) == 0 || memcmp(packet->line[a].ptr, "rset", 4) == 0) {
+				} else if ((packet->line[a].ptr[0] == 'R' || packet->line[a].ptr[0] == 'r')
+						   && (packet->line[a].ptr[1] == 'S' || packet->line[a].ptr[1] == 's')
+						   && (packet->line[a].ptr[2] == 'E' || packet->line[a].ptr[2] == 'e')
+						   && (packet->line[a].ptr[3] == 'T' || packet->line[a].ptr[3] == 't')) {
 					flow->smtp_command_bitmask |= SMTP_BIT_RSET;
 				}
 			}
@@ -126,8 +160,10 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 		}
 
 		// now count the bits set in the bitmask
-		for (a = 0; a < 16; a++) {
-			bit_count += (flow->smtp_command_bitmask >> a) & 0x01;
+		if (flow->smtp_command_bitmask != 0) {
+			for (a = 0; a < 16; a++) {
+				bit_count += (flow->smtp_command_bitmask >> a) & 0x01;
+			}
 		}
 		IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "seen smtp commands and responses: %u.\n",
 				bit_count);

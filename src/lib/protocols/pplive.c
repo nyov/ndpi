@@ -67,8 +67,7 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
 			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
 				(packet->tick_timestamp - src->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
-				flow->detected_protocol = IPOQUE_PROTOCOL_PPLIVE;
-				packet->detected_protocol = IPOQUE_PROTOCOL_PPLIVE;
+				ipoque_int_pplive_add_connection(ipoque_struct);
 				src->pplive_last_packet_time = packet->tick_timestamp;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp src.\n");
 				return;
@@ -83,8 +82,7 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
 			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
 				(packet->tick_timestamp - dst->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
-				flow->detected_protocol = IPOQUE_PROTOCOL_PPLIVE;
-				packet->detected_protocol = IPOQUE_PROTOCOL_PPLIVE;
+				ipoque_int_pplive_add_connection(ipoque_struct);
 				dst->pplive_last_packet_time = packet->tick_timestamp;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp dst.\n");
 				return;
@@ -166,6 +164,61 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 		}
 	} else if (packet->tcp != NULL) {
 
+
+		IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG,
+				"PPLIVE: TCP found, plen = %d, stage = %d, payload[0] = %x, payload[1] = %x, payload[2] = %x, payload[3] = %x \n",
+				packet->payload_packet_len, flow->pplive_stage, packet->payload[0], packet->payload[1],
+				packet->payload[2], packet->payload[3]);
+
+
+
+		if (src != NULL && src->pplive_vod_cli_port == packet->tcp->source
+			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
+			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+				(packet->tick_timestamp - src->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
+				ipoque_int_pplive_add_connection(ipoque_struct);
+				src->pplive_last_packet_time = packet->tick_timestamp;
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp src.\n");
+				return;
+			} else {
+				src->pplive_vod_cli_port = 0;
+				src->pplive_last_packet_time = 0;
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "PPLIVE: VOD port timer reset.\n");
+			}
+		}
+
+		if (dst != NULL && dst->pplive_vod_cli_port == packet->tcp->dest
+			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
+			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+				(packet->tick_timestamp - dst->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
+				ipoque_int_pplive_add_connection(ipoque_struct);
+				dst->pplive_last_packet_time = packet->tick_timestamp;
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp dst.\n");
+				return;
+			} else {
+				dst->pplive_vod_cli_port = 0;
+				dst->pplive_last_packet_time = 0;
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "PPLIVE: VOD port timer reset.\n");
+			}
+		}
+
+
+
+		if (packet->payload_packet_len > 20 && packet->payload[0] == 0x00 && packet->payload[1] == 0x00
+			&& ntohs(get_u16(packet->payload, 2)) == packet->payload_packet_len - 4) {
+			if (packet->payload[4] == 0x21 && packet->payload[5] == 0x00) {
+				if ((packet->payload[9] == packet->payload[10]) && (packet->payload[9] == packet->payload[11])) {
+					if ((packet->payload[16] == packet->payload[17]) &&
+						(packet->payload[16] == packet->payload[18]) && (packet->payload[16] == packet->payload[19])) {
+						IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
+								IPQ_LOG_DEBUG, "PPLIVE: direct server request or response found\n");
+						ipoque_int_pplive_add_connection(ipoque_struct);
+						return;
+					}
+				}
+			}
+		}
+
 		/* Adware in the PPLive Client -> first TCP Packet has length of 4 Bytes -> 2nd TCP Packet has length of 96 Bytes */
 		/* or */
 		/* Peer-List Requests over TCP -> first Packet has length of 4 Bytes -> 2nd TCP Packet has length of 71 Bytes */
@@ -177,9 +230,9 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 				packet->payload[0], packet->payload[1], packet->payload[2], packet->payload[3]);
 
 		/* generic pplive detection (independent of the stage) !!! */
-		if (packet->payload_packet_len > 11 && packet->payload[0] == (packet->payload_packet_len - 4)
-			&& packet->payload[1] == 0x00 && packet->payload[2] == 0x00 && packet->payload[3] == 0x00) {
-			if (packet->payload[4] == 0xe9 && packet->payload[5] == 0x03
+		if (packet->payload_packet_len > 11 && packet->payload[0] == 0x00 && packet->payload[1] == 0x00
+			&& packet->payload[2] == 0x00 && (packet->payload[3] == packet->payload_packet_len - 4)) {
+			if (packet->payload[4] == 0x21 && packet->payload[5] == 0x00
 				&& ((packet->payload[8] == 0x98 && packet->payload[9] == 0xab
 					 && packet->payload[10] == 0x01 && packet->payload[11] == 0x02)
 				)) {

@@ -45,7 +45,7 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 //  struct ipoque_id_struct *src = ipoque_struct->src;
 //  struct ipoque_id_struct *dst = ipoque_struct->dst;
 
-	u8 a = 0;
+	u16 a = 0;
 
 	if (packet->payload_packet_len > 20) {
 		/* test for match 0x13+"BitTorrent protocol" */
@@ -255,8 +255,13 @@ static void ipoque_int_search_bittorrent_tcp(struct ipoque_detection_module_stru
 											 *ipoque_struct)
 {
 
+	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	if (flow->bittorrent_stage == 0) {
+	if (packet->payload_packet_len == 0) {
+		return;
+	}
+
+	if (flow->bittorrent_stage == 0 && packet->payload_packet_len != 0) {
 		/* exclude stage 0 detection from next run */
 		flow->bittorrent_stage = 1;
 		if (ipoque_int_search_bittorrent_tcp_zero(ipoque_struct) != 0) {

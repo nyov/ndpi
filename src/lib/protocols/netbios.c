@@ -68,7 +68,17 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 					IPQ_LOG_DEBUG, "found netbios destination port 137 and payload_packet_len 50\n");
 
 
+			if (ntohs(get_u16(packet->payload, 2)) == 0 &&
+				ntohs(get_u16(packet->payload, 4)) == 1 &&
+				ntohs(get_u16(packet->payload, 6)) == 0 &&
+				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 0) {
 
+				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
+						IPQ_LOG_DEBUG, "found netbios with questions = 1 and answers = 0, authority = 0  \n");
+
+				ipoque_int_netbios_add_connection(ipoque_struct);
+				return;
+			}
 			if (packet->payload[2] == 0x80 &&
 				ntohs(get_u16(packet->payload, 4)) == 1 &&
 				ntohs(get_u16(packet->payload, 6)) == 0 &&

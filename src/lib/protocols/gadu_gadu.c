@@ -117,7 +117,26 @@ static u8 check_for_http(struct ipoque_detection_module_struct *ipoque_struct)
 		IPQ_LOG(IPOQUE_PROTOCOL_GADUGADU, ipoque_struct, IPQ_LOG_DEBUG,
 				"Gadu-Gadu: Is gadugadu host FOUND %s\n", packet->host_line.ptr);
 		ipoque_int_gadugadu_add_connection(ipoque_struct);
+	} else if (memcmp(packet->payload, "POST /send/message/", 15) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_GADUGADU, ipoque_struct, IPQ_LOG_DEBUG, "Gadu-Gadu: GET FOUND\n");
+
+		// parse packet
+		ipq_parse_packet_line_info(ipoque_struct);
+		if (packet->parsed_lines <= 1) {
+			return 0;
+		}
+		if (packet->host_line.ptr == NULL) {
+			return 0;
+		}
+		if (packet->host_line.len >= 17 && memcmp(packet->host_line.ptr, "life.gadu-gadu.pl", 17) != 0) {
+			return 0;
+		}
+		IPQ_LOG(IPOQUE_PROTOCOL_GADUGADU, ipoque_struct, IPQ_LOG_DEBUG,
+				"Gadu-Gadu: Is gadugadu post FOUND %s\n", packet->host_line.ptr);
+		ipoque_int_gadugadu_add_connection(ipoque_struct);
+
 	}
+
 	return 1;
 
 }

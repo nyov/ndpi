@@ -190,6 +190,9 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask,
 									   IPOQUE_PROTOCOL_WINDOWSMEDIA);
 #endif
+#ifdef IPOQUE_PROTOCOL_MMS
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_MMS);
+#endif
 #ifdef IPOQUE_PROTOCOL_OFF
 		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_OFF);
 #endif
@@ -380,6 +383,9 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 
 		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
 		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_MSN);
+#ifdef IPOQUE_PROTOCOL_HTTP
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_HTTP);
+#endif
 #ifdef IPOQUE_PROTOCOL_SSL
 		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_SSL);
 #endif
@@ -1175,7 +1181,9 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 			IPQ_SELECTION_BITMASK_PROTOCOL_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
 
 		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
-
+#ifdef	IPOQUE_PROTOCOL_HTTP
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_HTTP);
+#endif
 		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_SHOUTCAST);
 		a++;
 	}
@@ -1304,6 +1312,52 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 		a++;
 	}
 #endif
+#ifdef IPOQUE_PROTOCOL_TFTP
+	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_TFTP) != 0) {
+		ipoque_struct->callback_buffer[a].func = ipoque_search_tftp;
+		ipoque_struct->callback_buffer[a].ipq_selection_bitmask = IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_TFTP);
+		a++;
+	}
+#endif
+#ifdef IPOQUE_PROTOCOL_STEALTHNET
+	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_STEALTHNET) != 0) {
+		ipoque_struct->callback_buffer[a].func = ipoque_search_stealthnet;
+		ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+			IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_STEALTHNET);
+		a++;
+	}
+#endif
+#ifdef IPOQUE_PROTOCOL_AFP
+	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_AFP) != 0) {
+		ipoque_struct->callback_buffer[a].func = ipoque_search_afp;
+		ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+			IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_AFP);
+		a++;
+	}
+#endif
+#ifdef IPOQUE_PROTOCOL_AIMINI
+	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_AIMINI) != 0) {
+		ipoque_struct->callback_buffer[a].func = ipoque_search_aimini;
+		ipoque_struct->callback_buffer[a].ipq_selection_bitmask = IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_AIMINI);
+		a++;
+	}
+#endif
 	ipoque_struct->callback_buffer_size = a;
 
 	IPQ_LOG(IPOQUE_PROTOCOL_UNKNOWN, ipoque_struct, IPQ_LOG_DEBUG,
@@ -1370,9 +1424,12 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 	}
 }
 
-static inline int ipq_init_packet_header(struct ipoque_detection_module_struct *ipoque_struct, unsigned short packetlen)
+
+
+
+static int ipq_init_packet_header(struct ipoque_detection_module_struct *ipoque_struct, unsigned short packetlen)
 {
-	const struct iphdr *decaps_iph;
+	const struct iphdr *decaps_iph = NULL;
 	u16 l3len;
 	u16 l4len;
 	u8 *l4ptr;
@@ -1384,6 +1441,7 @@ static inline int ipq_init_packet_header(struct ipoque_detection_module_struct *
 
 	ipoque_struct->packet.tcp = NULL;
 	ipoque_struct->packet.udp = NULL;
+	ipoque_struct->packet.generic_l4_ptr = NULL;
 	if (ipoque_struct->packet.iph->version == 4 && ipoque_struct->packet.iph->ihl >= 5) {
 		IPQ_LOG(IPOQUE_PROTOCOL_UNKNOWN, ipoque_struct, IPQ_LOG_DEBUG, "ipv4 header\n");
 	} else {
@@ -1417,7 +1475,7 @@ static inline int ipq_init_packet_header(struct ipoque_detection_module_struct *
 		return 1;
 	}
 
-
+	ipoque_struct->packet.l4_protocol = l4protocol;
 	ipoque_struct->packet.l4_packet_len = l4len;
 
 	/* tcp / udp detection */
@@ -1453,6 +1511,8 @@ static inline int ipq_init_packet_header(struct ipoque_detection_module_struct *
 		ipoque_struct->packet.udp = (struct udphdr *) l4ptr;
 		ipoque_struct->packet.payload_packet_len = ipoque_struct->packet.l4_packet_len - 8;
 		ipoque_struct->packet.payload = ((u8 *) ipoque_struct->packet.udp) + 8;
+	} else {
+		ipoque_struct->packet.generic_l4_ptr = l4ptr;
 	}
 	return 0;
 }
@@ -1727,7 +1787,7 @@ u64 ipq_bytestream_to_number64(const u8 * str, u16 max_chars_to_read, u16 * byte
 	u64 val;
 	val = 0;
 	// cancel if eof, ' ' or line end chars are reached
-	while (*str >= '0' && *str <= '9' && max_chars_to_read > 0) {
+	while (max_chars_to_read > 0 && *str >= '0' && *str <= '9') {
 		val *= 10;
 		val += *str - '0';
 		str++;
@@ -1899,7 +1959,8 @@ void ipq_parse_packet_line_info(struct ipoque_detection_module_struct
 				packet->http_transfer_encoding.len = packet->line[packet->parsed_lines].len - 19;
 			}
 			if (packet->line[packet->parsed_lines].len > 16
-				&& memcmp(packet->line[packet->parsed_lines].ptr, "Content-Length: ", 16) == 0) {
+				&& ((memcmp(packet->line[packet->parsed_lines].ptr, "Content-Length: ", 16) == 0)
+					|| (memcmp(packet->line[packet->parsed_lines].ptr, "content-length: ", 16) == 0))) {
 				packet->http_contentlen.ptr = &packet->line[packet->parsed_lines].ptr[16];
 				packet->http_contentlen.len = packet->line[packet->parsed_lines].len - 16;
 			}

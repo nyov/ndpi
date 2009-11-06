@@ -51,9 +51,8 @@ void ipoque_search_rtp_udp(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	u8 stage = (packet->packet_direction == 0 ? flow->rtp_stage1 : flow->rtp_stage2);
+	u8 stage;
 	u8 packet_difference = 0;
-
 
 	IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct, IPQ_LOG_DEBUG, "search rtp.\n");
 
@@ -68,6 +67,12 @@ void ipoque_search_rtp_udp(struct ipoque_detection_module_struct *ipoque_struct)
 		goto exclude_rtp;
 	}
 
+	if (packet->payload_packet_len == 12
+		&& get_u32(packet->payload, 0) == 0 && get_u32(packet->payload, 4) == 0 && get_u32(packet->payload, 8) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct, IPQ_LOG_DEBUG, "skipping packet with len = 12 and only 0-bytes.\n");
+		return;
+	}
+
 	if ((packet->payload[0] & 0xc0) != 0x80) {
 		IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct,
 				IPQ_LOG_DEBUG, "rtp version must be 2, first two bits of a packets must be 10.\n");
@@ -80,6 +85,18 @@ void ipoque_search_rtp_udp(struct ipoque_detection_module_struct *ipoque_struct)
 		return;
 	}
 
+	if (flow->rtp_payload_type != 0 && flow->rtp_payload_type != packet->payload[1]) {
+		/* payload_type has changed, sequence numbers and stages have to be reseted */
+		IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct,
+				IPQ_LOG_DEBUG, "payload_type has changed, reset sequence numbers.\n");
+		flow->rtp_ssid[packet->packet_direction] = 0;
+		flow->rtp_seqnum[packet->packet_direction] = 0;
+		flow->rtp_stage1 = 0;
+		flow->rtp_stage2 = 0;
+	}
+	flow->rtp_payload_type = packet->payload[1];
+
+	stage = (packet->packet_direction == 0 ? flow->rtp_stage1 : flow->rtp_stage2);
 
 	if (stage > 0) {
 		IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct,
@@ -100,7 +117,11 @@ void ipoque_search_rtp_udp(struct ipoque_detection_module_struct *ipoque_struct)
 				IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct, IPQ_LOG_DEBUG, "goto exclude rtp III.\n");
 				goto exclude_rtp;
 			}
+		} else if (ntohs(get_u16(packet->payload, 2)) == flow->rtp_seqnum[packet->packet_direction]) {
+			IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct, IPQ_LOG_DEBUG, "maybe \"retransmission\", need next packet.\n");
+			return;
 		} else {
+
 			IPQ_LOG(IPOQUE_PROTOCOL_RTP, ipoque_struct, IPQ_LOG_DEBUG, "goto exclude rtp IV.\n");
 			goto exclude_rtp;
 		}

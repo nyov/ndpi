@@ -119,7 +119,6 @@ static inline void search_passive_ftp_mode(struct ipoque_detection_module_struct
 	u32 ftp_ip;
 
 
-
 	if (packet->payload_packet_len > 30
 		&& (ipq_mem_cmp(packet->payload, "227 Entering Passive Mode", 25) == 0
 			|| ipq_mem_cmp(packet->payload, "227 Entering passive mode", 25) == 0)) {
@@ -162,47 +161,47 @@ static inline void search_passive_ftp_mode(struct ipoque_detection_module_struct
 
 		}
 		if (dst != NULL) {
-			dst->ftp_ip = htonl(ftp_ip);
+			dst->ftp_ip.ipv4 = htonl(ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %u\n",
-					ftp_ip);
+			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
+					ipq_get_ip_string(ipoque_struct, &dst->ftp_ip));
 		}
 		if (src != NULL) {
-			src->ftp_ip = packet->iph->daddr;
+			src->ftp_ip.ipv4 = packet->iph->daddr;
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %u\n",
-					ftp_ip);
+			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
+					ipq_get_ip_string(ipoque_struct, &src->ftp_ip));
 		}
 		return;
 	}
 
 	if (packet->payload_packet_len > 34 && ipq_mem_cmp(packet->payload, "229 Entering Extended Passive Mode", 34) == 0) {
 		if (dst != NULL) {
-			dst->ftp_ip = packet->iph->saddr;
+			ipq_packet_src_ip_get(packet, &dst->ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
-					"FTP Extended PASSIVE MODE FOUND: use Server %u\n", ntohl(dst->ftp_ip));
+					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ipoque_struct, &dst->ftp_ip));
 		}
 		if (src != NULL) {
-			src->ftp_ip = packet->iph->daddr;
+			ipq_packet_dst_ip_get(packet, &src->ftp_ip);
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
-					"FTP Extended PASSIVE MODE FOUND: use Server %u\n", ntohl(src->ftp_ip));
+					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ipoque_struct, &src->ftp_ip));
 		}
 		return;
 	}
 }
 
 
-static inline void search_active_ftp_mode(struct ipoque_detection_module_struct *ipoque_struct)
+static void search_active_ftp_mode(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_id_struct *src = ipoque_struct->src;
@@ -213,14 +212,14 @@ static inline void search_active_ftp_mode(struct ipoque_detection_module_struct 
 
 		//src->local_ftp_data_port = htons(data_port_number);
 		if (src != NULL) {
-			src->ftp_ip = packet->iph->daddr;
+			ipq_packet_dst_ip_get(packet, &src->ftp_ip);
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
 					packet->payload);
 		}
 		if (dst != NULL) {
-			dst->ftp_ip = packet->iph->saddr;
+			ipq_packet_src_ip_get(packet, &dst->ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
 			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
@@ -240,8 +239,7 @@ void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 
 
 
-
-	if (src != NULL && src->ftp_ip == packet->iph->daddr
+	if (src != NULL && ipq_packet_dst_ip_eql(packet, &src->ftp_ip)
 		&& packet->tcp->syn != 0 && packet->tcp->ack == 0
 		&& packet->detected_protocol == IPOQUE_PROTOCOL_UNKNOWN
 		&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask,
@@ -259,7 +257,7 @@ void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 		}
 	}
 
-	if (dst != NULL && dst->ftp_ip == packet->iph->saddr
+	if (dst != NULL && ipq_packet_src_ip_eql(packet, &dst->ftp_ip)
 		&& packet->tcp->syn != 0 && packet->tcp->ack == 0
 		&& packet->detected_protocol == IPOQUE_PROTOCOL_UNKNOWN
 		&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask,
@@ -281,7 +279,7 @@ void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 
 
 	/* skip packets without payload */
-	if (packet->payload_packet_len == 0 || (packet->detected_protocol == IPOQUE_PROTOCOL_FTP)) {
+	if (packet->payload_packet_len == 0) {
 		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
 				"FTP test skip because of data connection or zero byte packet_payload.\n");
 		return;
@@ -298,6 +296,12 @@ void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 		return;
 	}
 
+
+	if (packet->detected_protocol == IPOQUE_PROTOCOL_UNKNOWN && search_ftp(ipoque_struct) != 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "unknown. need next packet.\n");
+
+		return;
+	}
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_FTP);
 	IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "exclude ftp.\n");
 

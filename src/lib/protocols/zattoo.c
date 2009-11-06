@@ -139,6 +139,11 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 				IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct,
 						IPQ_LOG_DEBUG, "need next packet, seen pattern 0x030400040a00\n");
 				return;
+			} else if (packet->payload_packet_len == 1412 && packet->payload[0] == 0x06
+					   && ntohl(get_u32(packet->payload, 5)) == 0x0a000c02) {
+				flow->zattoo_stage = 5 + packet->packet_direction;
+				IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "maybe zattoo, need next packet.\n");
+				return;
 			}
 		} else if (flow->zattoo_stage == 2 - packet->packet_direction
 				   && packet->payload_packet_len > 50 && packet->payload[0] == 0x03 && packet->payload[1] == 0x04) {
@@ -164,6 +169,10 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 		} else if (flow->zattoo_stage == 4 - packet->packet_direction
 				   && packet->payload_packet_len > 50 && packet->payload[0] == 0x03 && packet->payload[1] == 0x04) {
 			IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "add connection over tcp with 0x0304.\n");
+			ipoque_int_zattoo_add_connection(ipoque_struct);
+			return;
+		} else if (flow->zattoo_stage == 5 + packet->packet_direction && (packet->payload_packet_len == 125)) {
+			IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "detected zattoo.\n");
 			ipoque_int_zattoo_add_connection(ipoque_struct);
 			return;
 		}

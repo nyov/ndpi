@@ -58,10 +58,14 @@ void ipoque_search_mail_imap_tcp(struct ipoque_detection_module_struct
 
 	IPQ_LOG(IPOQUE_PROTOCOL_MAIL_IMAP, ipoque_struct, IPQ_LOG_DEBUG, "search IMAP.\n");
 
+
+
 	if (packet->payload_packet_len >= 4 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
 		// the DONE command appears without a tag
-		if (packet->payload_packet_len == 6 &&
-			(memcmp(packet->payload, "done", 4) == 0 || memcmp(packet->payload, "DONE", 4) == 0)) {
+		if (packet->payload_packet_len == 6 && ((packet->payload[0] == 'D' || packet->payload[0] == 'd')
+												&& (packet->payload[1] == 'O' || packet->payload[1] == 'o')
+												&& (packet->payload[2] == 'N' || packet->payload[2] == 'n')
+												&& (packet->payload[3] == 'E' || packet->payload[3] == 'e'))) {
 			flow->mail_imap_stage += 1;
 			saw_command = 1;
 		} else {
@@ -104,73 +108,150 @@ void ipoque_search_mail_imap_tcp(struct ipoque_detection_module_struct
 			command = &(packet->payload[command_start]);
 
 			if ((command_start + 3) < packet->payload_packet_len) {
-				if (memcmp(command, "OK ", 3) == 0) {
+				if ((packet->payload[command_start] == 'O' || packet->payload[command_start] == 'o')
+					&& (packet->payload[command_start + 1] == 'K' || packet->payload[command_start + 1] == 'k')
+					&& packet->payload[command_start + 2] == ' ') {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "uid", 3) == 0 || memcmp(command, "UID", 3) == 0) {
+				} else if ((packet->payload[command_start] == 'U' || packet->payload[command_start] == 'u')
+						   && (packet->payload[command_start + 1] == 'I' || packet->payload[command_start + 1] == 'i')
+						   && (packet->payload[command_start + 2] == 'D' || packet->payload[command_start + 2] == 'd')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 10) < packet->payload_packet_len) {
-				if (memcmp(command, "capability", 10) == 0 || memcmp(command, "CAPABILITY", 10) == 0) {
+				if ((packet->payload[command_start] == 'C' || packet->payload[command_start] == 'c')
+					&& (packet->payload[command_start + 1] == 'A' || packet->payload[command_start + 1] == 'a')
+					&& (packet->payload[command_start + 2] == 'P' || packet->payload[command_start + 2] == 'p')
+					&& (packet->payload[command_start + 3] == 'A' || packet->payload[command_start + 3] == 'a')
+					&& (packet->payload[command_start + 4] == 'B' || packet->payload[command_start + 4] == 'b')
+					&& (packet->payload[command_start + 5] == 'I' || packet->payload[command_start + 5] == 'i')
+					&& (packet->payload[command_start + 6] == 'L' || packet->payload[command_start + 6] == 'l')
+					&& (packet->payload[command_start + 7] == 'I' || packet->payload[command_start + 7] == 'i')
+					&& (packet->payload[command_start + 8] == 'T' || packet->payload[command_start + 8] == 't')
+					&& (packet->payload[command_start + 9] == 'Y' || packet->payload[command_start + 9] == 'y')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 8) < packet->payload_packet_len) {
-				if (memcmp(command, "starttls", 8) == 0 || memcmp(command, "STARTTLS", 8) == 0) {
+				if ((packet->payload[command_start] == 'S' || packet->payload[command_start] == 's')
+					&& (packet->payload[command_start + 1] == 'T' || packet->payload[command_start + 1] == 't')
+					&& (packet->payload[command_start + 2] == 'A' || packet->payload[command_start + 2] == 'a')
+					&& (packet->payload[command_start + 3] == 'R' || packet->payload[command_start + 3] == 'r')
+					&& (packet->payload[command_start + 4] == 'T' || packet->payload[command_start + 4] == 't')
+					&& (packet->payload[command_start + 5] == 'T' || packet->payload[command_start + 5] == 't')
+					&& (packet->payload[command_start + 6] == 'L' || packet->payload[command_start + 6] == 'l')
+					&& (packet->payload[command_start + 7] == 'S' || packet->payload[command_start + 7] == 's')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 5) < packet->payload_packet_len) {
-				if (memcmp(command, "login", 5) == 0 || memcmp(command, "LOGIN", 5) == 0) {
+				if ((packet->payload[command_start] == 'L' || packet->payload[command_start] == 'l')
+					&& (packet->payload[command_start + 1] == 'O' || packet->payload[command_start + 1] == 'o')
+					&& (packet->payload[command_start + 2] == 'G' || packet->payload[command_start + 2] == 'g')
+					&& (packet->payload[command_start + 3] == 'I' || packet->payload[command_start + 3] == 'i')
+					&& (packet->payload[command_start + 4] == 'N' || packet->payload[command_start + 4] == 'n')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "fetch", 5) == 0 || memcmp(command, "FETCH", 5) == 0) {
+				} else if ((packet->payload[command_start] == 'F' || packet->payload[command_start] == 'f')
+						   && (packet->payload[command_start + 1] == 'E' || packet->payload[command_start + 1] == 'e')
+						   && (packet->payload[command_start + 2] == 'T' || packet->payload[command_start + 2] == 't')
+						   && (packet->payload[command_start + 3] == 'C' || packet->payload[command_start + 3] == 'c')
+						   && (packet->payload[command_start + 4] == 'H' || packet->payload[command_start + 4] == 'j')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "flags", 5) == 0 || memcmp(command, "FLAGS", 5) == 0) {
+				} else if ((packet->payload[command_start] == 'F' || packet->payload[command_start] == 'f')
+						   && (packet->payload[command_start + 1] == 'L' || packet->payload[command_start + 1] == 'l')
+						   && (packet->payload[command_start + 2] == 'A' || packet->payload[command_start + 2] == 'a')
+						   && (packet->payload[command_start + 3] == 'G' || packet->payload[command_start + 3] == 'g')
+						   && (packet->payload[command_start + 4] == 'S' || packet->payload[command_start + 4] == 's')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "check", 5) == 0 || memcmp(command, "CHECK", 5) == 0) {
+				} else if ((packet->payload[command_start] == 'C' || packet->payload[command_start] == 'c')
+						   && (packet->payload[command_start + 1] == 'H' || packet->payload[command_start + 1] == 'h')
+						   && (packet->payload[command_start + 2] == 'E' || packet->payload[command_start + 2] == 'e')
+						   && (packet->payload[command_start + 3] == 'C' || packet->payload[command_start + 3] == 'c')
+						   && (packet->payload[command_start + 4] == 'K' || packet->payload[command_start + 4] == 'k')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 12) < packet->payload_packet_len) {
-				if (memcmp(command, "authenticate", 12) == 0 || memcmp(command, "AUTHENTICATE", 12) == 0) {
+				if ((packet->payload[command_start] == 'A' || packet->payload[command_start] == 'a')
+					&& (packet->payload[command_start + 1] == 'U' || packet->payload[command_start + 1] == 'u')
+					&& (packet->payload[command_start + 2] == 'T' || packet->payload[command_start + 2] == 't')
+					&& (packet->payload[command_start + 3] == 'H' || packet->payload[command_start + 3] == 'h')
+					&& (packet->payload[command_start + 4] == 'E' || packet->payload[command_start + 4] == 'e')
+					&& (packet->payload[command_start + 5] == 'N' || packet->payload[command_start + 5] == 'n')
+					&& (packet->payload[command_start + 6] == 'T' || packet->payload[command_start + 6] == 't')
+					&& (packet->payload[command_start + 7] == 'I' || packet->payload[command_start + 7] == 'i')
+					&& (packet->payload[command_start + 8] == 'C' || packet->payload[command_start + 8] == 'c')
+					&& (packet->payload[command_start + 9] == 'A' || packet->payload[command_start + 9] == 'a')
+					&& (packet->payload[command_start + 10] == 'T' || packet->payload[command_start + 10] == 't')
+					&& (packet->payload[command_start + 11] == 'E' || packet->payload[command_start + 11] == 'e')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 9) < packet->payload_packet_len) {
-				if (memcmp(command, "namespace", 9) == 0 || memcmp(command, "NAMESPACE", 9) == 0) {
+				if ((packet->payload[command_start] == 'N' || packet->payload[command_start] == 'n')
+					&& (packet->payload[command_start + 1] == 'A' || packet->payload[command_start + 1] == 'a')
+					&& (packet->payload[command_start + 2] == 'M' || packet->payload[command_start + 2] == 'm')
+					&& (packet->payload[command_start + 3] == 'E' || packet->payload[command_start + 3] == 'e')
+					&& (packet->payload[command_start + 4] == 'S' || packet->payload[command_start + 4] == 's')
+					&& (packet->payload[command_start + 5] == 'P' || packet->payload[command_start + 5] == 'p')
+					&& (packet->payload[command_start + 6] == 'A' || packet->payload[command_start + 6] == 'a')
+					&& (packet->payload[command_start + 7] == 'C' || packet->payload[command_start + 7] == 'c')
+					&& (packet->payload[command_start + 8] == 'E' || packet->payload[command_start + 8] == 'e')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 4) < packet->payload_packet_len) {
-				if (memcmp(command, "lsub", 4) == 0 || memcmp(command, "LSUB", 4) == 0) {
+				if ((packet->payload[command_start] == 'L' || packet->payload[command_start] == 's')
+					&& (packet->payload[command_start + 1] == 'S' || packet->payload[command_start + 1] == 's')
+					&& (packet->payload[command_start + 2] == 'U' || packet->payload[command_start + 2] == 'u')
+					&& (packet->payload[command_start + 3] == 'B' || packet->payload[command_start + 3] == 'b')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "list", 4) == 0 || memcmp(command, "LIST", 4) == 0) {
+				} else if ((packet->payload[command_start] == 'L' || packet->payload[command_start] == 'l')
+						   && (packet->payload[command_start + 1] == 'I' || packet->payload[command_start + 1] == 'i')
+						   && (packet->payload[command_start + 2] == 'S' || packet->payload[command_start + 2] == 's')
+						   && (packet->payload[command_start + 3] == 'T' || packet->payload[command_start + 3] == 't')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "noop", 4) == 0 || memcmp(command, "NOOP", 4) == 0) {
+				} else if ((packet->payload[command_start] == 'N' || packet->payload[command_start] == 'n')
+						   && (packet->payload[command_start + 1] == 'O' || packet->payload[command_start + 1] == 'o')
+						   && (packet->payload[command_start + 2] == 'O' || packet->payload[command_start + 2] == 'o')
+						   && (packet->payload[command_start + 3] == 'P' || packet->payload[command_start + 3] == 'p')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "idle", 4) == 0 || memcmp(command, "IDLE", 4) == 0) {
+				} else if ((packet->payload[command_start] == 'I' || packet->payload[command_start] == 'i')
+						   && (packet->payload[command_start + 1] == 'D' || packet->payload[command_start + 1] == 'd')
+						   && (packet->payload[command_start + 2] == 'L' || packet->payload[command_start + 2] == 'l')
+						   && (packet->payload[command_start + 3] == 'E' || packet->payload[command_start + 3] == 'e')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}
 			}
 			if ((command_start + 6) < packet->payload_packet_len) {
-				if (memcmp(command, "select", 6) == 0 || memcmp(command, "SELECT", 6) == 0) {
+				if ((packet->payload[command_start] == 'S' || packet->payload[command_start] == 's')
+					&& (packet->payload[command_start + 1] == 'E' || packet->payload[command_start + 1] == 'e')
+					&& (packet->payload[command_start + 2] == 'L' || packet->payload[command_start + 2] == 'l')
+					&& (packet->payload[command_start + 3] == 'E' || packet->payload[command_start + 3] == 'e')
+					&& (packet->payload[command_start + 4] == 'C' || packet->payload[command_start + 4] == 'c')
+					&& (packet->payload[command_start + 5] == 'T' || packet->payload[command_start + 5] == 't')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
-				} else if (memcmp(command, "exists", 6) == 0 || memcmp(command, "EXISTS", 6) == 0) {
+				} else if ((packet->payload[command_start] == 'E' || packet->payload[command_start] == 'e')
+						   && (packet->payload[command_start + 1] == 'X' || packet->payload[command_start + 1] == 'x')
+						   && (packet->payload[command_start + 2] == 'I' || packet->payload[command_start + 2] == 'i')
+						   && (packet->payload[command_start + 3] == 'S' || packet->payload[command_start + 3] == 's')
+						   && (packet->payload[command_start + 4] == 'T' || packet->payload[command_start + 4] == 't')
+						   && (packet->payload[command_start + 5] == 'S' || packet->payload[command_start + 5] == 's')) {
 					flow->mail_imap_stage += 1;
 					saw_command = 1;
 				}

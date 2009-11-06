@@ -59,7 +59,15 @@ void ipoque_search_fasttrack_tcp(struct ipoque_detection_module_struct
 	if (packet->payload_packet_len > 6 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
 		IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "detected 0d0a at the end of the packet.\n");
 
-		if (memcmp(packet->payload, "GIVE ", 5) == 0) {
+		if (memcmp(packet->payload, "GIVE ", 5) == 0 && packet->payload_packet_len >= 8) {
+			u16 i;
+			for (i = 5; i < (packet->payload_packet_len - 2); i++) {
+				// make shure that the argument to GIVE is numeric
+				if (!(packet->payload[i] >= '0' && packet->payload[i] <= '9')) {
+					goto exclude_fasttrack;
+				}
+			}
+
 			IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "FASTTRACK GIVE DETECTED\n");
 			ipoque_int_fasttrack_add_connection(ipoque_struct);
 			return;
@@ -81,6 +89,8 @@ void ipoque_search_fasttrack_tcp(struct ipoque_detection_module_struct
 		}
 	}
 
+  exclude_fasttrack:
+	IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "fasttrack/kazaa excluded.\n");
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_FASTTRACK);
 }
 #endif

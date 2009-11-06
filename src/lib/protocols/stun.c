@@ -102,6 +102,7 @@ void ipoque_search_stun_udp(struct ipoque_detection_module_struct *ipoque_struct
 							|| packet->payload[a + 1] == 0x08
 							|| packet->payload[a + 1] == 0x15
 							|| packet->payload[a + 1] == 0x20
+							|| packet->payload[a + 1] == 0x22
 							|| packet->payload[a + 1] == 0x28
 							|| packet->payload[a + 1] == 0x2a
 							|| packet->payload[a + 1] == 0x29

@@ -259,7 +259,8 @@ static void ipoque_search_directconnect_tcp(struct ipoque_detection_module_struc
 				flow->directconnect_stage = 1;
 				return;
 			}
-			if (packet->payload[0] == '$'
+			if (packet->payload_packet_len > 7
+				&& packet->payload[0] == '$'
 				&& packet->payload[packet->payload_packet_len - 1] == '|'
 				&& (memcmp(&packet->payload[1], "MyNick ", 7) == 0)) {
 				IPQ_LOG(IPOQUE_PROTOCOL_DIRECTCONNECT, ipoque_struct,

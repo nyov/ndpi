@@ -60,7 +60,7 @@ void ipoque_search_dns(struct ipoque_detection_module_struct *ipoque_struct)
 
 	u16 dport = 0;
 
-#define IPOQUE_MAX_DNS_REQUESTS			10
+#define IPOQUE_MAX_DNS_REQUESTS			16
 
 	IPQ_LOG(IPOQUE_PROTOCOL_DNS, ipoque_struct, IPQ_LOG_DEBUG, "search DNS.\n");
 

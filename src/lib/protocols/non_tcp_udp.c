@@ -71,9 +71,10 @@ void ipoque_search_in_non_tcp_udp(struct ipoque_detection_module_struct
 	struct ipoque_id_struct *src = ipoque_struct->src;
 	struct ipoque_id_struct *dst = ipoque_struct->dst;
 
-	if (packet->iph == NULL)
+	if (packet->iph == NULL) {
 		return;
-	switch (packet->iph->protocol) {
+	}
+	switch (packet->l4_protocol) {
 #ifdef IPOQUE_PROTOCOL_IPSEC
 	case IPQ_IPSEC_PROTOCOL_ESP:
 	case IPQ_IPSEC_PROTOCOL_AH:

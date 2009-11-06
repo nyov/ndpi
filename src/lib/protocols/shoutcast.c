@@ -50,27 +50,50 @@ void ipoque_search_shoutcast_tcp(struct ipoque_detection_module_struct
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
 
+	IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "search shoutcast.\n");
+
 	if (flow->packet_counter == 1) {
 
-
-		if (packet->payload_packet_len > 1
-			&& packet->payload_packet_len < 80 && packet->payload[packet->payload_packet_len - 1] == 0x0a) {
-			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "Shoutcast stage 1, end is 0x0a.\n");
+/* this case in paul_upload_oddcast_002.pcap */
+		if (packet->payload_packet_len >= 6
+			&& packet->payload_packet_len < 80 && memcmp(packet->payload, "123456", 6) == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "Shoutcast stage 1, \"123456\".\n");
 			return;
-		} else
-			goto exclude_shoutcast;
+		}
+		if (flow->packet_counter < 3 && packet->detected_protocol == IPOQUE_PROTOCOL_HTTP) {
+			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG,
+					"http detected, need next packet for shoutcast detection.\n");
+			return;
+		}
 
+
+		/*  else
+		   goto exclude_shoutcast; */
+
+	}
+	/* evtl. für asym detection noch User-Agent:Winamp dazunehmen. */
+	if (packet->payload_packet_len > 11 && memcmp(packet->payload, "ICY 200 OK\x0d\x0a", 12) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "found shoutcast by ICY 200 OK.\n");
+		ipoque_int_shoutcast_add_connection(ipoque_struct);
+		return;
 	}
 	if (flow->packet_counter == 2) {
 
 
-		if (packet->payload_packet_len > 3 && ipq_mem_cmp(&packet->payload[0], "OK2", 3) == 0) {
+
+		if (packet->payload_packet_len == 2 && memcmp(packet->payload, "\x0d\x0a", 2) == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "Shoutcast stage 1 continuation.\n");
+			return;
+		} else if (packet->payload_packet_len > 3 && ipq_mem_cmp(&packet->payload[0], "OK2", 3) == 0) {
 			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "Shoutcast stage 2, OK2 found.\n");
 			return;
 		} else
 			goto exclude_shoutcast;
-	} else if (flow->packet_counter == 3) {
-		if (packet->payload_packet_len > 4 && ipq_mem_cmp(&packet->payload[0], "icy-", 4) == 0) {
+	} else if (flow->packet_counter == 3 || flow->packet_counter == 4) {
+		if (packet->payload_packet_len > 3 && ipq_mem_cmp(&packet->payload[0], "OK2", 3) == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "Shoutcast stage 2, OK2 found.\n");
+			return;
+		} else if (packet->payload_packet_len > 4 && ipq_mem_cmp(&packet->payload[0], "icy-", 4) == 0) {
 			IPQ_LOG(IPOQUE_PROTOCOL_SHOUTCAST, ipoque_struct, IPQ_LOG_DEBUG, "Shoutcast detected.\n");
 			ipoque_int_shoutcast_add_connection(ipoque_struct);
 			return;

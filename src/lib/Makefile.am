@@ -12,6 +12,8 @@ libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
 libopendpi_la_SOURCES = ipq_main.c \
 			${include_HEADERS} \
+			protocols/afp.c \
+			protocols/aimini.c \
 			protocols/applejuice.c \
 			protocols/battlefield.c \
 			protocols/bgp.c \
@@ -75,11 +77,13 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/ssdp.c \
 			protocols/ssh.c \
 			protocols/ssl.c \
+			protocols/stealthnet.c \
 			protocols/steam.c \
 			protocols/stun.c \
 			protocols/syslog.c \
 			protocols/tds.c \
 			protocols/telnet.c \
+			protocols/tftp.c \
 			protocols/thunder.c \
 			protocols/tvants.c \
 			protocols/tvuplayer.c \

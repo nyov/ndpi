@@ -26,6 +26,10 @@
 
 
 #define MAX_PACKET_COUNTER 250
+typedef union {
+	u32 ipv4;
+	u8 ipv4_u8[4];
+} ipq_ip_addr_t;
 typedef struct ipoque_id_struct {
 	/* detected_protocol_bitmask:
 	 * access this bitmask to find out whether an id has used skype or not
@@ -51,7 +55,7 @@ typedef struct ipoque_id_struct {
 	IPOQUE_TIMESTAMP_COUNTER_SIZE last_time_port_used[16];
 #endif
 #ifdef IPOQUE_PROTOCOL_FTP
-	u32 ftp_ip;
+	ipq_ip_addr_t ftp_ip;
 	IPOQUE_TIMESTAMP_COUNTER_SIZE ftp_timer;
 #endif
 #ifdef IPOQUE_PROTOCOL_IMESH
@@ -71,7 +75,7 @@ typedef struct ipoque_id_struct {
 #endif
 #ifdef IPOQUE_PROTOCOL_RTSP
 	IPOQUE_TIMESTAMP_COUNTER_SIZE rtsp_timer;
-	u32 rtsp_ip_address;
+	ipq_ip_addr_t rtsp_ip_address;
 #endif
 #ifdef IPOQUE_PROTOCOL_OSCAR
 //  IPOQUE_TIMESTAMP_COUNTER_SIZE oscar_timer;
@@ -197,6 +201,9 @@ typedef struct ipoque_flow_struct {
 	u8 packet_direction_counter[2];
 
 	u8 protocol_subtype;		// protocol subtype fro various protocols
+#ifdef IPOQUE_PROTOCOL_RTP
+	u8 rtp_payload_type;
+#endif
 #ifdef IPOQUE_PROTOCOL_TDS
 	u8 tds_login_version;
 #endif
@@ -213,8 +220,8 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_GNUTELLA
 	u8 gnutella_msg_id[3];
 #endif
-#ifdef IPOQUE_PROTOCOL_IPTV
-	u8 iptv_seqnum;
+#ifdef IPOQUE_PROTOCOL_MAIL_POP
+	u8 pop_command_bitmask;
 #endif
 	/* init parameter, internal used to set up timestamp,... */
 	u32 init_finished:1;
@@ -275,6 +282,7 @@ typedef struct ipoque_flow_struct {
 	u32 http_setup_dir:2;
 	u32 http_stage:2;
 	u32 server_direction:1;
+	u32 http_empty_line_seen:1;
 #endif							// IPOQUE_PROTOCOL_HTTP
 #ifdef IPOQUE_PROTOCOL_FLASH
 	u32 flash_stage:3;
@@ -295,9 +303,6 @@ typedef struct ipoque_flow_struct {
 #endif
 #ifdef IPOQUE_PROTOCOL_PPLIVE
 	u32 pplive_stage:3;			// 0-7
-#endif
-#ifdef IPOQUE_PROTOCOL_IPTV
-	u32 iptv_packets:3;
 #endif
 #ifdef IPOQUE_PROTOCOL_MSN
 	u32 msn_stage:3;
@@ -362,6 +367,9 @@ typedef struct ipoque_flow_struct {
 #endif
 #ifdef IPOQUE_PROTOCOL_TFTP
 	u32 tftp_stage:1;
+#endif
+#ifdef IPOQUE_PROTOCOL_AIMINI
+	u32 aimini_stage:5;
 #endif
 } ipoque_flow_struct_t;
 #endif							/* __IPOQUE_STRUCTS_INCLUDE_FILE__ */

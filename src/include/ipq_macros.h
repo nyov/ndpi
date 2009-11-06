@@ -64,6 +64,7 @@ extern "C" {
 #define IPOQUE_BITMASK_CONTAINS_BITMASK(a,b)	(((a) & (b)) == (b))
 
 #define IPOQUE_BITMASK_ADD(a,b)	(a)|=(b)
+#define IPOQUE_BITMASK_AND(a,b)	(a)&=(b)
 #define IPOQUE_BITMASK_DEL(a,b) (a)=((a) & (~(b)))
 #define IPOQUE_BITMASK_SET(a,b)	(a)=(b)
 #define IPOQUE_PROTOCOL_BITMASK_NONE			((IPOQUE_PROTOCOL_BITMASK)0)
@@ -104,6 +105,7 @@ extern "C" {
 
 
 #define IPOQUE_BITMASK_ADD(a,b)		{(a).bitmask[0] |= (b).bitmask[0]; (a).bitmask[1] |= (b).bitmask[1];}
+#define IPOQUE_BITMASK_AND(a,b)		{(a).bitmask[0] &= (b).bitmask[0]; (a).bitmask[1] &= (b).bitmask[1];}
 #define IPOQUE_BITMASK_DEL(a,b) 	{(a).bitmask[0] = (a).bitmask[0] & (~((b).bitmask[0]));(a).bitmask[1] = (a).bitmask[1] & ( ~((b).bitmask[1]));}
 
 #define IPOQUE_BITMASK_SET(a,b)		{(a).bitmask[0] = ((b).bitmask[0]); (a).bitmask[1] = (b).bitmask[1];}
@@ -150,6 +152,7 @@ extern "C" {
 
 
 #define IPOQUE_BITMASK_ADD(a,b)   {(a).bitmask[0] |= (b).bitmask[0]; (a).bitmask[1] |= (b).bitmask[1]; (a).bitmask[2] |= (b).bitmask[2];}
+#define IPOQUE_BITMASK_AND(a,b)   {(a).bitmask[0] &= (b).bitmask[0]; (a).bitmask[1] &= (b).bitmask[1]; (a).bitmask[2] &= (b).bitmask[2];}
 #define IPOQUE_BITMASK_DEL(a,b)   {(a).bitmask[0] = (a).bitmask[0] & (~((b).bitmask[0])); (a).bitmask[1] = (a).bitmask[1] & ( ~((b).bitmask[1])); (a).bitmask[0] = (a).bitmask[0] & (~((b).bitmask[0]));}
 
 #define IPOQUE_BITMASK_SET(a,b)   {(a).bitmask[0] = ((b).bitmask[0]); (a).bitmask[1] = (b).bitmask[1]; (a).bitmask[2] = (b).bitmask[2];}

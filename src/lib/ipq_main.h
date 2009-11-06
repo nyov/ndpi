@@ -149,7 +149,7 @@
 
 #define IPOQUE_GADGADU_PEER_CONNECTION_TIMEOUT        		 120
 #define IPOQUE_EDONKEY_UPPER_PORTS_ONLY                          0
-#define IPOQUE_FTP_CONNECTION_TIMEOUT                            5
+#define IPOQUE_FTP_CONNECTION_TIMEOUT                            10
 #define IPOQUE_IMESH_CONNECTION_TIMEOUT                          5
 #define IPOQUE_PPLIVE_CONNECTION_TIMEOUT                         120
 #define IPOQUE_IRC_CONNECTION_TIMEOUT                            120
@@ -215,6 +215,7 @@ typedef struct ipoque_packet_struct {
 	const struct iphdr *iph;
 	const struct tcphdr *tcp;
 	const struct udphdr *udp;
+	const u8 *generic_l4_ptr;	/* is set only for non tcp-udp traffic */
 	const u8 *payload;
 	IPOQUE_TIMESTAMP_COUNTER_SIZE tick_timestamp;
 	u32 detected_protocol;
@@ -226,6 +227,7 @@ typedef struct ipoque_packet_struct {
 	u8 packet_direction;
 	u8 tcp_retransmission;
 	u8 detected_sub_protocol;
+	u8 l4_protocol;
 
 	u8 packet_lines_parsed_complete;
 	u8 packet_unix_lines_parsed_complete;
@@ -353,4 +355,93 @@ void ipq_parse_packet_line_info_unix(struct ipoque_detection_module_struct
 									 *ipoque_struct);
 
 u16 ipoque_check_for_email_address(struct ipoque_detection_module_struct *ipoque_struct, u16 counter);
+
+
+#define ATTRIBUTE_ALWAYS_INLINE __attribute__ ((always_inline))
+
+/* reset ip to zero */
+ATTRIBUTE_ALWAYS_INLINE static inline void ipq_ip_clear(ipq_ip_addr_t * ip)
+{
+	memset(ip, 0, sizeof(ipq_ip_addr_t));
+}
+
+/* check if given ip is not zero */
+ATTRIBUTE_ALWAYS_INLINE static inline int ipq_ip_is_set(const ipq_ip_addr_t * ip)
+{
+	return memcmp(ip, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", sizeof(ipq_ip_addr_t)) != 0;
+}
+
+/* check if the source ip address in packet and ip are equal */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline int ipq_packet_src_ip_eql(const struct ipoque_packet_struct *packet, const ipq_ip_addr_t * ip)
+{
+	if (packet->iph->saddr == ip->ipv4) {
+		return 1;
+	}
+	return 0;
+}
+
+/* check if the destination ip address in packet and ip are equal */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline int ipq_packet_dst_ip_eql(const struct ipoque_packet_struct *packet, const ipq_ip_addr_t * ip)
+{
+	if (packet->iph->daddr == ip->ipv4) {
+		return 1;
+	}
+	return 0;
+}
+
+/* get the source ip address from packet and put it into ip */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline void ipq_packet_src_ip_get(const struct ipoque_packet_struct *packet, ipq_ip_addr_t * ip)
+{
+	ipq_ip_clear(ip);
+	ip->ipv4 = packet->iph->saddr;
+}
+
+/* get the destination ip address from packet and put it into ip */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline void ipq_packet_dst_ip_get(const struct ipoque_packet_struct *packet, ipq_ip_addr_t * ip)
+{
+	ipq_ip_clear(ip);
+	ip->ipv4 = packet->iph->daddr;
+}
+
+#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
+/* get the string representation of ip
+ * returns a pointer to a static string
+ * only valid until the next call of this function */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline char *ipq_get_ip_string(struct ipoque_detection_module_struct *ipoque_struct,
+										  const ipq_ip_addr_t * ip)
+{
+	const u8 *a = (const u8 *) &ip->ipv4;
+
+	snprintf(ipoque_struct->ip_string, IPOQUE_IP_STRING_SIZE, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);
+	return ipoque_struct->ip_string;
+}
+
+
+/* get the string representation of the source ip address from packet */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline char *ipq_get_packet_src_ip_string(struct ipoque_detection_module_struct *ipoque_struct,
+													 const struct ipoque_packet_struct *packet)
+{
+	ipq_ip_addr_t ip;
+	ipq_packet_src_ip_get(packet, &ip);
+	return ipq_get_ip_string(ipoque_struct, &ip);
+}
+
+/* get the string representation of the destination ip address from packet */
+ATTRIBUTE_ALWAYS_INLINE
+	static inline char *ipq_get_packet_dst_ip_string(struct ipoque_detection_module_struct *ipoque_struct,
+													 const struct ipoque_packet_struct *packet)
+{
+	ipq_ip_addr_t ip;
+	ipq_packet_dst_ip_get(packet, &ip);
+	return ipq_get_ip_string(ipoque_struct, &ip);
+}
+#endif							/* IPOQUE_ENABLE_DEBUG_MESSAGES */
+
+
 #endif							/* __IPOQUE_MAIN_INCLUDE_FILE__ */

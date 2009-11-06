@@ -51,6 +51,30 @@ static void ipoque_int_mdns_add_connection(struct ipoque_detection_module_struct
 	}
 }
 
+static int ipoque_int_check_mdns_payload(struct ipoque_detection_module_struct
+										 *ipoque_struct)
+{
+	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+
+	if ((packet->payload[2] & 0x80) == 0 &&
+		ntohs(get_u16(packet->payload, 4)) <= IPOQUE_MAX_MDNS_REQUESTS &&
+		ntohs(get_u16(packet->payload, 6)) <= IPOQUE_MAX_MDNS_REQUESTS) {
+
+		IPQ_LOG(IPOQUE_PROTOCOL_MDNS, ipoque_struct, IPQ_LOG_DEBUG, "found MDNS with question query.\n");
+
+		return 1;
+	} else if ((packet->payload[2] & 0x80) != 0 &&
+			   ntohs(get_u16(packet->payload, 4)) == 0 &&
+			   ntohs(get_u16(packet->payload, 6)) <= IPOQUE_MAX_MDNS_REQUESTS &&
+			   ntohs(get_u16(packet->payload, 6)) != 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_MDNS, ipoque_struct, IPQ_LOG_DEBUG, "found MDNS with answer query.\n");
+
+		return 1;
+	}
+
+	return 0;
+}
+
 void ipoque_search_mdns(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
@@ -98,38 +122,20 @@ void ipoque_search_mdns(struct ipoque_detection_module_struct *ipoque_struct)
 			   *
 			 */
 
-			/* mdns protocol must have destination port  224.0.0.251 */
+			/* mdns protocol must have destination address  224.0.0.251 */
 			/* took this information from http://www.it-administrator.de/lexikon/multicast-dns.html */
 
-			if (ntohl(packet->iph->daddr) == 0xe00000fb) {
+			if (packet->iph != NULL && ntohl(packet->iph->daddr) == 0xe00000fb) {
 
 				IPQ_LOG(IPOQUE_PROTOCOL_MDNS, ipoque_struct,
-						IPQ_LOG_DEBUG, "found MDNS with destination port 224.0.0.251 (=0xe00000fb)\n");
+						IPQ_LOG_DEBUG, "found MDNS with destination address 224.0.0.251 (=0xe00000fb)\n");
 
-
-
-				if ((packet->payload[2] & 0x80) == 0 &&
-					ntohs(get_u16(packet->payload, 4)) <= IPOQUE_MAX_MDNS_REQUESTS &&
-					ntohs(get_u16(packet->payload, 6)) <= IPOQUE_MAX_MDNS_REQUESTS) {
-
-					IPQ_LOG(IPOQUE_PROTOCOL_MDNS, ipoque_struct, IPQ_LOG_DEBUG, "found MDNS with question query.\n");
-
+				if (ipoque_int_check_mdns_payload(ipoque_struct) == 1) {
 					ipoque_int_mdns_add_connection(ipoque_struct);
 					return;
-				} else if ((packet->payload[2] & 0x80) != 0 &&
-						   ntohs(get_u16(packet->payload, 4)) == 0 &&
-						   ntohs(get_u16(packet->payload, 6)) <= IPOQUE_MAX_MDNS_REQUESTS &&
-						   ntohs(get_u16(packet->payload, 6)) != 0) {
-					IPQ_LOG(IPOQUE_PROTOCOL_MDNS, ipoque_struct, IPQ_LOG_DEBUG, "found MDNS with answer query.\n");
-
-					ipoque_int_mdns_add_connection(ipoque_struct);
-					return;
-
 				}
-
-
-
 			}
+
 		}
 	}
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_MDNS);

@@ -151,7 +151,13 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 			} else if (packet->payload_packet_len == 6	// PATTERN : 06 00 04 00 00 00
 					   && get_l32(packet->payload, 0) == 0x00040006 && get_l16(packet->payload, 4) == 0x0000) {
 				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh new divided server login at stage 0: Payload %u\n", packet->payload_packet_len);
+						"iMesh new divided 6 byte server login at stage 0: Payload %u\n", packet->payload_packet_len);
+				flow->imesh_stage = 7 + packet->packet_direction;
+				return;
+			} else if (packet->payload_packet_len == 2	// PATTERN : 06 00
+					   && get_l16(packet->payload, 0) == 0x0006) {
+				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
+						"iMesh new divided 2 byte server login at stage 0: Payload %u\n", packet->payload_packet_len);
 				flow->imesh_stage = 7 + packet->packet_direction;
 				return;
 			}
@@ -256,6 +262,22 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 
 				flow->imesh_stage = 9 + packet->packet_direction;
 				return;
+			} else if (packet->payload_packet_len == 8 && get_l32(packet->payload, 0) == 0x00000004 &&
+					   get_l32(packet->payload, 4) == 0x00000000) {
+
+				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
+						"continuation of iMesh 2 byte server login :: Payload %u\n", packet->payload_packet_len);
+
+				flow->imesh_stage = 9 + packet->packet_direction;
+				return;
+			} else if (packet->payload_packet_len == 10 && get_l32(packet->payload, 0) == 0x00000006 &&
+					   get_l32(packet->payload, 4) == 0x00000001 && get_l16(packet->payload, 8) == 0x0000) {
+
+				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
+						"continuation of iMesh 2 byte server login :: Payload %u\n", packet->payload_packet_len);
+
+				flow->imesh_stage = 9 + packet->packet_direction;
+				return;
 			}
 		} else if ((10 - packet->packet_direction) == flow->imesh_stage) {
 			if (packet->payload_packet_len == 10
@@ -264,7 +286,7 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 				&& packet->payload[9] == 0x00) {
 
 				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"10 byte type 3 packet :: Payload %u\n", packet->payload_packet_len);
+						"10 byte type 3 packet : Payload %u\n", packet->payload_packet_len);
 
 				if (src != NULL) {
 					src->imesh_timer = packet->tick_timestamp;
@@ -274,6 +296,19 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 				}
 				ipoque_int_imesh_add_connection(ipoque_struct);
 				return;
+			} else if (packet->payload_packet_len == 2 && get_l16(packet->payload, 0) == 0x0006) {
+				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
+						"2 byte type 3 packet : Payload %u\n", packet->payload_packet_len);
+
+				if (src != NULL) {
+					src->imesh_timer = packet->tick_timestamp;
+				}
+				if (dst != NULL) {
+					dst->imesh_timer = packet->tick_timestamp;
+				}
+				ipoque_int_imesh_add_connection(ipoque_struct);
+				return;
+
 			}
 		}
 	}

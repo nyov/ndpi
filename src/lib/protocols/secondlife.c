@@ -52,17 +52,27 @@ void ipoque_search_secondlife(struct ipoque_detection_module_struct
 //      struct ipoque_id_struct         *src=ipoque_struct->src;
 //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
 
-	if ((ntohs(packet->udp->dest) == 12035 || ntohs(packet->udp->dest) == 12036 || (ntohs(packet->udp->dest) >= 13000 && ntohs(packet->udp->dest) <= 13050))	//port
-		&& packet->payload_packet_len > 6	// min length with no extra header, high frequency and 1 byte message body
-		&& get_u8(packet->payload, 0) == 0x40	// reliable packet
-		&& ntohl(get_u32(packet->payload, 1)) == 0x00000001	// sequence number equals 1
-		//ntohl (get_u32 (packet->payload, 5)) == 0x00FFFF00      // no extra header, low frequency message - can't use, message may have higher frequency
-		) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SECONDLIFE, ipoque_struct, IPQ_LOG_DEBUG, "Second Life detected.\n");
+	if (packet->payload_packet_len == 46
+		&& memcmp(packet->payload, "\x40\x00\x00\x00\x01\x00\xff\xff\x00\x03", 10) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_SECONDLIFE, ipoque_struct, IPQ_LOG_DEBUG, "Second Life 0xffff0003 detected.\n");
+		ipoque_int_secondlife_add_connection(ipoque_struct);
+		return;
+	}
+	if (packet->payload_packet_len == 54
+		&& memcmp(packet->payload, "\x40\x00\x00\x00\x01\x00\xff\xff\x00\x52", 10) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_SECONDLIFE, ipoque_struct, IPQ_LOG_DEBUG, "Second Life 0xffff0052 detected.\n");
+		ipoque_int_secondlife_add_connection(ipoque_struct);
+		return;
+	}
+	if (packet->payload_packet_len > 54 && memcmp(packet->payload, "\x40\x00\x00\x00\x01\x00\x08", 7) == 0 &&
+		get_u32(packet->payload, packet->payload_packet_len - 4) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_SECONDLIFE, ipoque_struct, IPQ_LOG_DEBUG, "Second Life 0x08 detected.\n");
 		ipoque_int_secondlife_add_connection(ipoque_struct);
 		return;
 	}
 
+
+	IPQ_LOG(IPOQUE_PROTOCOL_SECONDLIFE, ipoque_struct, IPQ_LOG_DEBUG, "Second Life excluded.\n");
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SECONDLIFE);
 }
 

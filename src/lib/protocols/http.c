@@ -73,217 +73,6 @@ static inline void qq_parse_packet_URL_and_hostname(struct ipoque_detection_modu
 }
 #endif
 
-#if defined(IPOQUE_PROTOCOL_CITRIX) && defined(IPOQUE_USE_CITRIX_CONNECTION_TRACKING)
-static void http_parse_citrix_connections(struct ipoque_detection_module_struct
-										  *ipoque_struct)
-{
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-//      struct ipoque_flow_struct       *flow=ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	u32 a;
-	u16 len;
-	if (dst != NULL) {
-		for (a = 0; a < packet->parsed_lines; a++) {
-			IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-					"http parsing line: %.*s\n", packet->line[a].len, packet->line[a].ptr);
-			if (packet->line[a].len > 16 && memcmp(packet->line[a].ptr, "InitialProgram=#", 16) == 0) {
-				len = packet->line[a].len - 16;
-				if (len > IPOQUCE_CITRIX_MAX_APPLICATION_NAME_LEN)
-					len = IPOQUCE_CITRIX_MAX_APPLICATION_NAME_LEN;
-				memcpy(dst->citrix_application_name, &packet->line[a].ptr[16], len);
-				dst->citrix_application_name_len = len;
-				dst->allow_citrix_ouput = 0;
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"Citrix: InitialProgram: %.*s\n",
-						dst->citrix_application_name_len, dst->citrix_application_name);
-			}
-			if (packet->line[a].len > 9 && memcmp(packet->line[a].ptr, "Username=", 9) == 0) {
-				len = packet->line[a].len - 9;
-				if (len > IPOQUCE_CITRIX_MAX_USREALMEDIAER_NAME_LEN)
-					len = IPOQUCE_CITRIX_MAX_USER_NAME_LEN;
-				memcpy(dst->citrix_user_name, &packet->line[a].ptr[9], len);
-				dst->citrix_user_name_len = len;
-				dst->allow_citrix_ouput = 0;
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"Citrix: Username: %.*s\n", dst->citrix_user_name_len, dst->citrix_user_name);
-			}
-			if (packet->line[a].len > 8 && memcmp(packet->line[a].ptr, "Address=", 8) == 0) {
-				u16 plen = ((unsigned long) &packet->line[a].ptr[8]) - ((unsigned long) packet->payload);
-
-				dst->citrix_ip =
-					ipq_bytestream_to_ipv4(&packet->payload[plen], packet->payload_packet_len - plen, &plen);
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"Citrix: Address: %u, next char: %c\n", ntohl(dst->citrix_ip), packet->payload[plen]);
-				if (dst->citrix_ip != 0 && packet->payload[plen] == ':' && (plen + 2) < packet->payload_packet_len) {
-					plen++;
-					dst->citrix_port =
-						htons(ipq_bytestream_to_number
-							  (&packet->payload[plen], packet->payload_packet_len - plen, &plen));
-					IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct,
-							IPQ_LOG_DEBUG, "Citrix: Port: %u\n", ntohs(dst->citrix_port));
-				}
-				dst->allow_citrix_ouput = 0;
-			}
-			if (packet->line[a].len > 13 && memcmp(packet->line[a].ptr, "CGPAddress=*:", 13) == 0) {
-				u16 plen = ((unsigned long) &packet->line[a].ptr[13]) - ((unsigned long) packet->payload);
-
-				dst->citrix_cgp_port =
-					htons(ipq_bytestream_to_number(&packet->payload[plen], packet->payload_packet_len - plen, &plen));
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"Citrix: CGPPort: %u\n", ntohs(dst->citrix_cgp_port));
-				dst->allow_citrix_ouput = 0;
-			}
-		}
-	}
-}
-
-/* returns != 0 if citrix connection */
-static u8 xml_parse_citrix_connections(struct ipoque_detection_module_struct
-									   *ipoque_struct)
-{
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-//      struct ipoque_flow_struct       *flow=ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	u16 a, b;
-	u16 len;
-	if (src != NULL) {
-		for (a = 0; a < packet->parsed_lines; a++) {
-			IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-					"xml parsing line: %.*s\n", packet->line[a].len, packet->line[a].ptr);
-			if (packet->line[a].len > 23 && memcmp(packet->line[a].ptr, "<NFuseProtocol version=", 23) == 0) {
-				for (b = 0; b < packet->line[a].len - 17; b++) {
-					if (memcmp(&packet->line[a].ptr[b], "<UnspecifiedName>", 17) == 0) {
-						b += 17;
-
-						src->citrix_application_name_len = 0;
-						src->allow_citrix_ouput = 0;
-						while (b < packet->line[a].len && packet->line[a].ptr[b] != '<') {
-							src->citrix_application_name_len++;
-							b++;
-						}
-
-						memcpy(src->citrix_application_name,
-							   &packet->line[a].ptr[b -
-													src->citrix_application_name_len],
-							   src->citrix_application_name_len);
-
-						IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct,
-								IPQ_LOG_DEBUG,
-								"Citrix: xml InitialProgram: %.*s\n",
-								src->citrix_application_name_len, src->citrix_application_name);
-						break;
-					}
-				}
-			}
-
-			if (packet->line[a].len > 23 && memcmp(packet->line[a].ptr, "<Credentials><UserName>", 23) == 0) {
-				b = 23;
-				src->citrix_user_name_len = 0;
-				src->allow_citrix_ouput = 0;
-				while (b < packet->line[a].len && packet->line[a].ptr[b] != '<') {
-					src->citrix_user_name_len++;
-					b++;
-				}
-				memcpy(src->citrix_user_name,
-					   &packet->line[a].ptr[b - src->citrix_user_name_len], src->citrix_user_name_len);
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"Citrix xml: Username: %.*s\n", src->citrix_user_name_len, src->citrix_user_name);
-			}
-		}
-	}
-	if (dst != NULL) {
-		for (a = 0; a < packet->parsed_lines; a++) {
-			IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-					"xml parsing line: %.*s\n", packet->line[a].len, packet->line[a].ptr);
-
-			/* we need the line: "Server: Citrix Web PN Server"
-			 * to avoid false positives
-			 */
-			if (packet->line[a].len == 28 && memcmp(packet->line[a].ptr, "Server: Citrix Web PN Server", 28) == 0)
-				break;
-		}
-
-
-		if (a >= packet->parsed_lines) {
-			return 0;
-		}
-
-		IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-				"xml parsing line: web server response found, packet->parsed_lines = %u\n", packet->parsed_lines);
-
-		if (packet->empty_line_position_set == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-					"xml parsing line: need content after web server response\n");
-
-			return 1;
-		}
-
-		a = packet->empty_line_position;
-		len = packet->payload_packet_len - a;
-
-		while (a < packet->payload_packet_len) {
-			if ((packet->payload_packet_len - a) > 38
-				&& memcmp(&packet->payload[a], "<ServerAddress addresstype=\"dot-port\">", 38) == 0) {
-				a += 38;
-				dst->citrix_ip = ipq_bytestream_to_ipv4(&packet->payload[a], packet->payload_packet_len - a, &a);
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"xml Citrix: Address: %u, next char: %c\n", ntohl(dst->citrix_ip), packet->payload[a]);
-				if (dst->citrix_ip != 0 && packet->payload[a] == ':' && (a + 2) < packet->payload_packet_len) {
-					a++;
-					dst->citrix_port =
-						htons(ipq_bytestream_to_number(&packet->payload[a], packet->payload_packet_len - a, &a));
-					IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct,
-							IPQ_LOG_DEBUG, "xml Citrix: Port: %u\n", ntohs(dst->citrix_port));
-				}
-				dst->allow_citrix_ouput = 0;
-			} else if ((packet->payload_packet_len - a) > 31
-					   && memcmp(&packet->payload[a], "<CGPAddress addresstype=\"port\">", 31) == 0) {
-				a += 31;
-
-				dst->citrix_cgp_port =
-					htons(ipq_bytestream_to_number(&packet->payload[a], packet->payload_packet_len - a, &a));
-				IPQ_LOG(IPOQUE_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG,
-						"xml Citrix: CGPPort: %u\n", ntohs(dst->citrix_cgp_port));
-				dst->allow_citrix_ouput = 0;
-			} else {
-				a++;
-				len--;
-			}
-		}
-		return 1;
-	}
-	return 0;
-}
-
-#endif							/* defined(IPOQUE_PROTOCOL_CITRIX) && defined(IPOQUE_USE_CITRIX_CONNECTION_TRACKING) */
-
-#ifdef IPOQUE_PROTOCOL_CITRIX
-static inline void citrix_parse_packet_contentline(struct ipoque_detection_module_struct
-												   *ipoque_struct)
-{
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-
-#if defined(IPOQUE_PROTOCOL_CITRIX) && defined(IPOQUE_USE_CITRIX_CONNECTION_TRACKING)
-	if (packet->content_line.len == 8 && memcmp(packet->content_line.ptr, "text/xml", 8) == 0) {
-		if (xml_parse_citrix_connections(ipoque_struct) != 0)
-			ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_CITRIX);
-		return;
-	}
-#endif
-
-	if (packet->content_line.len < 17 || memcmp(packet->content_line.ptr, "application/x-ica", 17) != 0)
-		return;
-
-	ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_CITRIX);
-#if defined(IPOQUE_PROTOCOL_CITRIX) && defined(IPOQUE_USE_CITRIX_CONNECTION_TRACKING)
-	http_parse_citrix_connections(ipoque_struct);
-#endif
-}
-#endif
 
 #ifdef IPOQUE_PROTOCOL_MPEG
 static inline void mpeg_parse_packet_contentline(struct ipoque_detection_module_struct
@@ -303,6 +92,11 @@ static inline void mpeg_parse_packet_contentline(struct ipoque_detection_module_
 	}
 	if (packet->content_line.len >= 11 && memcmp(packet->content_line.ptr, "audio/mpeg3", 11) == 0) {
 		IPQ_LOG(IPOQUE_PROTOCOL_MPEG, ipoque_struct, IPQ_LOG_DEBUG, "MPEG: Content-Type: audio/mpeg3 found.\n");
+		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_MPEG);
+		return;
+	}
+	if (packet->content_line.len >= 11 && memcmp(packet->content_line.ptr, "audio/mp4a", 10) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_MPEG, ipoque_struct, IPQ_LOG_DEBUG, "MPEG: Content-Type: audio/mp4a found.\n");
 		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_MPEG);
 		return;
 	}
@@ -372,8 +166,19 @@ static inline void flash_parse_packet_contentline(struct ipoque_detection_module
 		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FLASH);
 		return;
 	}
+	if (packet->content_line.len >= 29 && memcmp(packet->content_line.ptr, "application/x-shockwave-flash", 29) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG,
+				"FLASH: Content-Type: application/x-shockwave-flash found.\n");
+		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FLASH);
+		return;
+	}
 	if (packet->content_line.len >= 11 && memcmp(packet->content_line.ptr, "video/flash", 11) == 0) {
 		IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG, "FLASH: Content-Type: video/flash found.\n");
+		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FLASH);
+		return;
+	}
+	if (packet->content_line.len >= 15 && memcmp(packet->content_line.ptr, "application/flv", 15) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG, "FLASH: Content-Type: application/flv found.\n");
 		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FLASH);
 		return;
 	}
@@ -545,18 +350,42 @@ static inline void flash_check_http_payload(struct ipoque_detection_module_struc
 static inline void avi_check_http_payload(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	const u8 *pos;
+	struct ipoque_flow_struct *flow = ipoque_struct->flow;
 
-	if (packet->empty_line_position_set == 0 || (packet->empty_line_position + 20) > (packet->payload_packet_len))
+	IPQ_LOG(IPOQUE_PROTOCOL_AVI, ipoque_struct, IPQ_LOG_DEBUG, "called avi_check_http_payload: %u %u %u\n",
+			packet->empty_line_position_set, flow->http_empty_line_seen, packet->empty_line_position);
+
+	if (packet->empty_line_position_set == 0 && flow->http_empty_line_seen == 0)
 		return;
 
-	pos = &packet->payload[packet->empty_line_position] + 2;
+	if (packet->empty_line_position_set != 0 && ((packet->empty_line_position + 20) > (packet->payload_packet_len))
+		&& flow->http_empty_line_seen == 0) {
+		flow->http_empty_line_seen = 1;
+		return;
+	}
 
-	// check for avi header
-	// for reference see http://msdn.microsoft.com/archive/default.asp?url=/archive/en-us/directx9_c/directx/htm/avirifffilereference.asp
-	if (memcmp(pos, "RIFF", 4) == 0 && memcmp(pos + 8, "AVI LIST", 8) == 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_AVI, ipoque_struct, IPQ_LOG_DEBUG, "Avi content in http detected\n");
-		ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_AVI);
+	if (flow->http_empty_line_seen == 1) {
+		if (packet->payload_packet_len > 20 && memcmp(packet->payload, "RIFF", 4) == 0
+			&& memcmp(packet->payload + 8, "AVI LIST", 8) == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_AVI, ipoque_struct, IPQ_LOG_DEBUG, "Avi content in http detected\n");
+			ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_AVI);
+		}
+		flow->http_empty_line_seen = 0;
+		return;
+	}
+
+	if (packet->empty_line_position_set != 0) {
+		// check for avi header
+		// for reference see http://msdn.microsoft.com/archive/default.asp?url=/archive/en-us/directx9_c/directx/htm/avirifffilereference.asp
+		u32 p = packet->empty_line_position + 2;
+
+		IPQ_LOG(IPOQUE_PROTOCOL_AVI, ipoque_struct, IPQ_LOG_DEBUG, "p = %u\n", p);
+
+		if ((p + 16) <= packet->payload_packet_len && memcmp(&packet->payload[p], "RIFF", 4) == 0
+			&& memcmp(&packet->payload[p + 8], "AVI LIST", 8) == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_AVI, ipoque_struct, IPQ_LOG_DEBUG, "Avi content in http detected\n");
+			ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_AVI);
+		}
 	}
 }
 #endif
@@ -605,6 +434,16 @@ static inline void rtsp_parse_packet_acceptline(struct ipoque_detection_module_s
 static void check_content_type_and_change_protocol(struct ipoque_detection_module_struct
 												   *ipoque_struct)
 {
+#ifdef IPOQUE_PROTOCOL_MPEG
+	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+#endif
+#ifdef IPOQUE_PROTOCOL_AVI
+#endif
+//      struct ipoque_id_struct         *src=ipoque_struct->src;
+//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+
+	u8 a;
+
 	if (ipoque_struct->packet.content_line.ptr != NULL && ipoque_struct->packet.content_line.len != 0) {
 		IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "Content Type Line found %.*s\n",
 				ipoque_struct->packet.content_line.len, ipoque_struct->packet.content_line.ptr);
@@ -627,10 +466,6 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
 #ifdef IPOQUE_PROTOCOL_WINDOWSMEDIA
 		if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_WINDOWSMEDIA) != 0)
 			windowsmedia_parse_packet_contentline(ipoque_struct);
-#endif
-#ifdef IPOQUE_PROTOCOL_CITRIX
-		if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_CITRIX) != 0)
-			citrix_parse_packet_contentline(ipoque_struct);
 #endif
 #ifdef IPOQUE_PROTOCOL_MMS
 		if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_MMS) != 0)
@@ -683,10 +518,25 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
 		}
 #endif
 	}
+	/* search for line startin with "Icy-MetaData" */
+#ifdef IPOQUE_PROTOCOL_MPEG
+	for (a = 0; a < packet->parsed_lines; a++) {
+		if (packet->line[a].len > 11 && memcmp(packet->line[a].ptr, "Icy-MetaData", 12) == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_MPEG, ipoque_struct, IPQ_LOG_DEBUG, "MPEG: Icy-MetaData found.\n");
+			ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_MPEG);
+			return;
+		}
+	}
+#ifdef IPOQUE_PROTOCOL_AVI
+#endif
+#endif
+
 }
 
 static inline void check_http_payload(struct ipoque_detection_module_struct *ipoque_struct)
 {
+	IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "called check_http_payload.\n");
+
 #ifdef IPOQUE_PROTOCOL_FLASH
 	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_FLASH) != 0)
 		flash_check_http_payload(ipoque_struct);
@@ -760,9 +610,6 @@ static void http_bitmask_exclude(struct ipoque_flow_struct *flow)
 #endif
 #ifdef IPOQUE_PROTOCOL_XBOX
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_XBOX);
-#endif
-#ifdef IPOQUE_PROTOCOL_CITRIX
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_CITRIX);
 #endif
 }
 
@@ -903,13 +750,9 @@ void ipoque_search_http_tcp(struct ipoque_detection_module_struct *ipoque_struct
 		ipq_parse_packet_line_info(ipoque_struct);
 		check_content_type_and_change_protocol(ipoque_struct);
 
-#if defined(IPOQUE_PROTOCOL_CITRIX) && defined(IPOQUE_USE_CITRIX_CONNECTION_TRACKING)
-		if (packet->detected_protocol == IPOQUE_PROTOCOL_CITRIX) {
-			http_parse_citrix_connections(ipoque_struct);
-		}
-#endif							/* defined(IPOQUE_PROTOCOL_CITRIX) && defined(IPOQUE_USE_CITRIX_CONNECTION_TRACKING) */
 
-		if (packet->empty_line_position_set != 0) {
+		if (packet->empty_line_position_set != 0 || flow->http_empty_line_seen == 1) {
+			IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "empty line. check_http_payload.\n");
 			check_http_payload(ipoque_struct);
 		}
 		if (flow->http_stage == 2) {

@@ -91,7 +91,11 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 	 * x is now "0", but can be increased
 	 */
 	/* now we have a look at the first packet only. */
-	if (flow->packet_counter == 1) {
+	if (flow->packet_counter == 1
+#ifdef IPOQUE_PROTOCOL_SSL
+		|| ((packet->detected_protocol == IPOQUE_PROTOCOL_SSL) && flow->packet_counter <= 3)
+#endif
+		) {
 
 		/* this part is working asymmetrically */
 		if (packet->payload_packet_len > 32
@@ -105,26 +109,41 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 		}
 
 		/* this case works asymmetrically */
-		if (packet->payload_packet_len > 12 && packet->payload_packet_len < 100) {
+		if (packet->payload_packet_len > 10 && packet->payload_packet_len < 100) {
 			if (get_u8(packet->payload, packet->payload_packet_len - 2) == 0x0d
 				&& get_u8(packet->payload, packet->payload_packet_len - 1) == 0x0a) {
 				/* The MSNP string is used in XBOX clients. */
-				if (memcmp(packet->payload, "VER ", 4) == 0
-					&&
-					(memcmp
-					 (&packet->payload[packet->payload_packet_len - 6], "CVR",
-					  3) == 0 || memcmp(&packet->payload[packet->payload_packet_len - 8], "MSNP", 4) == 0)) {
-					IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
-							"found MSN by pattern VER...CVR/MSNP ODOA.\n");
-					ipoque_int_msn_add_connection(ipoque_struct);
-					return;
+				if (memcmp(packet->payload, "VER ", 4) == 0) {
+
+					if (memcmp(&packet->payload[packet->payload_packet_len - 6], "CVR",
+							   3) == 0 || memcmp(&packet->payload[packet->payload_packet_len - 8], "MSNP", 4) == 0) {
+						IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
+								"found MSN by pattern VER...CVR/MSNP ODOA.\n");
+						ipoque_int_msn_add_connection(ipoque_struct);
+						return;
+					}
+					if (memcmp(&packet->payload[4], "MSNFT", 5) == 0) {
+						IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
+								"found MSN FT by pattern VER MSNFT...0d0a.\n");
+						ipoque_int_msn_add_connection(ipoque_struct);
+						return;
+					}
 				}
 			}
 		}
+#ifdef IPOQUE_PROTOCOL_HTTP
+		/* we have to examine two http packets */
+		if (packet->detected_protocol == IPOQUE_PROTOCOL_HTTP) {
+		}
+#endif
 		/* not seen this pattern in any trace */
 		/* now test for http login, at least 100 a bytes packet */
 		if (packet->payload_packet_len > 100) {
-			if (memcmp(packet->payload, "POST http://", 12) == 0) {
+			if (
+#ifdef IPOQUE_PROTOCOL_HTTP
+				   packet->detected_protocol == IPOQUE_PROTOCOL_HTTP ||
+#endif
+				   memcmp(packet->payload, "POST http://", 12) == 0) {
 				/* scan packet if not already done... */
 				ipq_parse_packet_line_info(ipoque_struct);
 
@@ -142,7 +161,11 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 		/* now test for http login that uses a gateway, at least 400 a bytes packet */
 		/* for this case the asymmetric detection is asym (1) */
 		if (packet->payload_packet_len > 400) {
-			if ((memcmp(packet->payload, "POST ", 5) == 0)) {
+			if ((
+#ifdef IPOQUE_PROTOCOL_HTTP
+					packet->detected_protocol == IPOQUE_PROTOCOL_HTTP ||
+#endif
+					(memcmp(packet->payload, "POST ", 5) == 0))) {
 				u16 c;
 				if (memcmp(&packet->payload[5], "http://", 7) == 0) {
 					/*
@@ -154,7 +177,7 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 						if (memcmp(&packet->payload[c], "/", 1) == 0) {
 							if (memcmp(&packet->payload[c], "/gateway/gateway.dll", 20) == 0) {
 								IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
-										"found MSN by pattern http://.../gateway/gateway.ddl.\n");
+										"found  pattern http://.../gateway/gateway.ddl.\n");
 								status = 1;
 								break;
 							}
@@ -162,7 +185,7 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 					}
 				} else if ((memcmp(&packet->payload[5], "/gateway/gateway.dll", 20) == 0)) {
 					IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
-							"found MSN by pattern http://.../gateway/gateway.ddl.\n");
+							"found  pattern http://.../gateway/gateway.ddl.\n");
 					status = 1;
 				}
 			}
@@ -202,6 +225,28 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 				}
 			}
 		}
+		/* asym (1) ; possibly occurs in symmetric cases also. */
+		if (flow->packet_counter <= 2 && packet->payload_packet_len > 100) {
+			/* not necessary to check the length, because this has been done : >400. */
+			if (
+#ifdef IPOQUE_PROTOCOL_HTTP
+				   packet->detected_protocol == IPOQUE_PROTOCOL_HTTP ||
+#endif
+				   (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0)) {
+
+				ipq_parse_packet_line_info(ipoque_struct);
+
+				if (packet->content_line.ptr != NULL
+					&& packet->content_line.len == 27
+					&& memcmp(packet->content_line.ptr, "application/x-msn-messenger", 27) == 0) {
+					IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
+							"HTTP/1.0 200 OK .... application/x-msn-messenger.\n");
+					ipoque_int_msn_add_connection(ipoque_struct);
+					return;
+				}
+			}
+		}
+
 
 		/* did not find any trace with this pattern !!!!! */
 		/* now block proxy connection */
@@ -256,8 +301,35 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 		}
 	}
 
+/* finished examining the first packet only. */
 
-	/* finished examining the first packet only. */
+
+	/* asym (1) ; possibly occurs in symmetric cases also. */
+	if (flow->packet_counter <= 2 && packet->payload_packet_len > 100) {
+		/* not necessary to check the length, because this has been done : >400. */
+		if (
+#ifdef IPOQUE_PROTOCOL_HTTP
+			   packet->detected_protocol == IPOQUE_PROTOCOL_HTTP ||
+#endif
+			   (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0)) {
+
+			ipq_parse_packet_line_info(ipoque_struct);
+
+			if (packet->content_line.ptr != NULL
+				&& packet->content_line.len == 27
+				&& memcmp(packet->content_line.ptr, "application/x-msn-messenger", 27) == 0) {
+				IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
+						"HTTP/1.0 200 OK .... application/x-msn-messenger.\n");
+				ipoque_int_msn_add_connection(ipoque_struct);
+				return;
+			}
+		}
+	}
+
+
+
+
+	/* finished examining the secone packet only */
 	/* direct user connection (file transfer,...) */
 
 	if ((src != NULL && IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_MSN) != 0)

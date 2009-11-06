@@ -312,4 +312,9 @@ void ipoque_search_mdns(struct ipoque_detection_module_struct *ipoque_struct);
 void ipoque_search_ipp(struct ipoque_detection_module_struct *ipoque_struct);
 void ipoque_search_xdmcp(struct ipoque_detection_module_struct
 						 *ipoque_struct);
+void ipoque_search_tftp(struct ipoque_detection_module_struct *ipoque_struct);
+void ipoque_search_stealthnet(struct ipoque_detection_module_struct *ipoque_struct);
+void ipoque_search_afp(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_aimini(struct ipoque_detection_module_struct *ipoque_struct);
 #endif							/* __IPOQUE_PROTOCOLS_INCLUDE_FILE__ */

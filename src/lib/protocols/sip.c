@@ -94,6 +94,11 @@ static inline void ipoque_search_sip_handshake(struct ipoque_detection_module_st
 		return;
 	}
 
+	if (packet->payload_packet_len == 4 && get_u32(packet->payload, 0) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "maybe sip. need next packet.\n");
+		return;
+	}
+
 	IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "exclude sip.\n");
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SIP);
 	return;

@@ -125,12 +125,21 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 					|| (packet->line[c].len > 7 && memcmp(packet->line[c].ptr, "X-Queue:", 8) == 0)
 					|| (packet->line[c].len > 36 && memcmp(packet->line[c].ptr,
 														   "Content-Type: application/x-gnutella-", 37) == 0)) {
-					IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-									   IPQ_LOG_TRACE, "DETECTED GNUTELLA GET.\n");
+					IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
 					ipoque_int_gnutella_add_connection(ipoque_struct);
 					return;
 				}
 			}
+		}
+		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET / HTTP", 9) == 0))) {
+			ipq_parse_packet_line_info(ipoque_struct);
+			if ((packet->user_agent_line.len > 15 && memcmp(packet->user_agent_line.ptr, "BearShare Lite ", 15) == 0)
+				|| (packet->accept_line.len > 24
+					&& memcmp(packet->accept_line.ptr, "application n/x-gnutella", 24) == 0)) {
+				IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
+				ipoque_int_gnutella_add_connection(ipoque_struct);
+			}
+
 		}
 		/* haven't found this pattern in any trace. */
 		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET /get/", 9) == 0)

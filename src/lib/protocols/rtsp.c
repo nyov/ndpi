@@ -61,7 +61,7 @@ static void ipoque_search_rdt_connection(struct ipoque_detection_module_struct
 		if (src->rtsp_ts_set == 1
 			&& ((IPOQUE_TIMESTAMP_COUNTER_SIZE) (packet->tick_timestamp - src->rtsp_timer)) <
 			ipoque_struct->rtsp_connection_timeout) {
-			if (packet->iph->daddr == src->rtsp_ip_address
+			if (ipq_packet_dst_ip_eql(packet, &src->rtsp_ip_address)
 				&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_RTSP) != 0) {
 				if (packet->payload_packet_len == 3 && packet->payload[0] == 0x00 && packet->payload[1] == 0xff
 					&& packet->payload[2] == 0x03) {
@@ -92,12 +92,12 @@ void ipoque_search_rtsp_tcp_udp(struct ipoque_detection_module_struct
 	if (flow->detected_protocol == IPOQUE_PROTOCOL_RTSP && flow->rtsp_control_flow == 1) {
 		IPQ_LOG(IPOQUE_PROTOCOL_RTSP, ipoque_struct, IPQ_LOG_DEBUG, "RTSP control flow update timestamp.\n");
 		if (dst != NULL) {
-			dst->rtsp_ip_address = packet->iph->saddr;
+			ipq_packet_src_ip_get(packet, &dst->rtsp_ip_address);
 			dst->rtsp_timer = packet->tick_timestamp;
 			dst->rtsp_ts_set = 1;
 		}
 		if (src != NULL) {
-			src->rtsp_ip_address = packet->iph->daddr;
+			ipq_packet_dst_ip_get(packet, &src->rtsp_ip_address);
 			src->rtsp_timer = packet->tick_timestamp;
 			src->rtsp_ts_set = 1;
 		}
@@ -135,13 +135,13 @@ void ipoque_search_rtsp_tcp_udp(struct ipoque_detection_module_struct
 
 			if (dst != NULL) {
 				IPQ_LOG(IPOQUE_PROTOCOL_RTSP, ipoque_struct, IPQ_LOG_DEBUG, "found dst.\n");
-				dst->rtsp_ip_address = packet->iph->saddr;
+				ipq_packet_src_ip_get(packet, &dst->rtsp_ip_address);
 				dst->rtsp_timer = packet->tick_timestamp;
 				dst->rtsp_ts_set = 1;
 			}
 			if (src != NULL) {
 				IPQ_LOG(IPOQUE_PROTOCOL_RTSP, ipoque_struct, IPQ_LOG_DEBUG, "found src.\n");
-				src->rtsp_ip_address = packet->iph->daddr;
+				ipq_packet_dst_ip_get(packet, &src->rtsp_ip_address);
 				src->rtsp_timer = packet->tick_timestamp;
 				src->rtsp_ts_set = 1;
 			}
