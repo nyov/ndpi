@@ -1,5 +1,5 @@
 
-library_includedir=$(includedir)/libopendpi-1.0/libopendpi
+library_includedir=$(includedir)/libopendpi-1.1/libopendpi
 
 library_include_HEADERS = ipq_api.h \
 		  ipq_basic_def.h \

@@ -3,4 +3,4 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 bin_PROGRAMS = OpenDPI_demo
 OpenDPI_demo_SOURCES = OpenDPI_demo.c
 
-OpenDPI_demo_LDADD = $(top_builddir)/src/lib/libopendpi.la
+OpenDPI_demo_LDADD = $(top_builddir)/src/lib/libopendpi.la -lpcap

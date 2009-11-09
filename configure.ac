@@ -1,4 +1,4 @@
-AC_INIT([OpenDPI], [1.0.2])
+AC_INIT([OpenDPI], [1.1.0])
 AC_CONFIG_SRCDIR([src/lib/ipq_protocols.h])
 
 AM_INIT_AUTOMAKE([-Wall])

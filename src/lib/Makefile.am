@@ -2,16 +2,20 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 
 lib_LTLIBRARIES = libopendpi.la
 
+dist_include_HEADERS = ipq_main.h \
+			ipq_protocols.h \
+			ipq_structs.h \
+			linux_compat.h
 
-# this will create a library 1.0.0
+
+# this will create a library 1.1.0
 LIB_AC=1
-LIB_REV=0
+LIB_REV=1
 LIB_ANC=0
 
 libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
 libopendpi_la_SOURCES = ipq_main.c \
-			${include_HEADERS} \
 			protocols/afp.c \
 			protocols/aimini.c \
 			protocols/applejuice.c \
@@ -97,4 +101,3 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/yahoo.c \
 			protocols/zattoo.c
 
-libopendpi_la_LIBADD = -lpcap
