@@ -1,0 +1,12 @@
+=== OpenDPI 1.1 (2009/11/10) ===
+
+  * OpenDPI is now built using autotools
+  * OpenDPI now compiles on BSD-like systems
+  * added 4 new protocols (AFP, Aimini, Stealthnet, TFTP)
+  * Bittorrent detection has been fixed
+  * FTP detection has been fixed
+  * various small improvements and fixes
+
+=== OpenDPI 1.0 (2009/09/07) ===
+
+  * initial release
