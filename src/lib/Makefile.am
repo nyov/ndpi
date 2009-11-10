@@ -2,7 +2,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 
 lib_LTLIBRARIES = libopendpi.la
 
-dist_include_HEADERS = ipq_main.h \
+noinst_HEADERS = ipq_main.h \
 			ipq_protocols.h \
 			ipq_structs.h \
 			linux_compat.h
