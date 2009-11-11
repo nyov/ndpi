@@ -334,6 +334,10 @@ typedef struct ipoque_detection_module_struct {
 	u32 jabber_stun_timeout;
 	u32 jabber_file_transfer_timeout;
 	u32 manolito_subscriber_timeout;
+#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
+#define IPOQUE_IP_STRING_SIZE 40
+	char ip_string[IPOQUE_IP_STRING_SIZE];
+#endif
 } ipoque_detection_module_struct_t;
 u32 ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
 u64 ipq_bytestream_to_number64(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
