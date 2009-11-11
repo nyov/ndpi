@@ -1,3 +1,7 @@
+=== OpenDPI 1.1.1 (2009/11/11) ===
+
+  * fixed a compilation error that occurred when debug messages were enabled
+
 === OpenDPI 1.1 (2009/11/10) ===
 
   * OpenDPI is now built using autotools
