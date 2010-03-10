@@ -133,8 +133,9 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 		}
 		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET / HTTP", 9) == 0))) {
 			ipq_parse_packet_line_info(ipoque_struct);
-			if ((packet->user_agent_line.len > 15 && memcmp(packet->user_agent_line.ptr, "BearShare Lite ", 15) == 0)
-				|| (packet->accept_line.len > 24
+			if ((packet->user_agent_line.ptr != NULL && packet->user_agent_line.len > 15
+				 && memcmp(packet->user_agent_line.ptr, "BearShare Lite ", 15) == 0)
+				|| (packet->accept_line.ptr != NULL && packet->accept_line.len > 24
 					&& memcmp(packet->accept_line.ptr, "application n/x-gnutella", 24) == 0)) {
 				IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
 				ipoque_int_gnutella_add_connection(ipoque_struct);
