@@ -8,9 +8,9 @@ noinst_HEADERS = ipq_main.h \
 			linux_compat.h
 
 
-# this will create a library 1.1.0
+# this will create a library 1.2.0
 LIB_AC=1
-LIB_REV=1
+LIB_REV=2
 LIB_ANC=0
 
 libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
