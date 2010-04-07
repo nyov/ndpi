@@ -1,6 +1,6 @@
 /*
  * edonkey.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -111,12 +111,11 @@ static void ipoque_int_edonkey_tcp(struct ipoque_detection_module_struct *ipoque
 		if (packet->payload_packet_len >= 32 && get_l32(packet->payload, 1) <= (packet->payload_packet_len - 5)
 			&& (packet->payload[0] == 0xe3 || packet->payload[0] == 0xc5)) {
 
-			if (packet->payload[5] == 0x01 &&
-				((packet->payload[6] == 0x10
-				  && get_l32(packet->payload, 29) >= 0x00 && get_l32(packet->payload, 29) < 0x0F)
-				 || (get_l32(packet->payload, 28) > 0x00 && get_l32(packet->payload, 28) < 0x0F))) {
-				IPQ_LOG_EDONKEY(IPOQUE_PROTOCOL_EDONKEY, ipoque_struct,
-								IPQ_LOG_DEBUG, "edk hello meta tag recognized\n");
+			if (packet->payload[5] == 0x01 && ((packet->payload[6] == 0x10 && get_l32(packet->payload, 29) < 0x0F)
+											   || (get_l32(packet->payload, 28) > 0x00
+												   && get_l32(packet->payload, 28) < 0x0F))) {
+				IPQ_LOG_EDONKEY(IPOQUE_PROTOCOL_EDONKEY, ipoque_struct, IPQ_LOG_DEBUG,
+								"edk hello meta tag recognized\n");
 				flow->edk_stage = 16 + packet->packet_direction;
 				return;
 			}

@@ -1,6 +1,6 @@
 /*
  * oscar.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -94,6 +94,16 @@ static void ipoque_search_oscar_tcp_connect(struct ipoque_detection_module_struc
 
 
 	/* detect http connections */
+	if (packet->payload_packet_len > 40
+		&& ((memcmp(packet->payload, "GET /aim", 8) == 0) || (memcmp(packet->payload, "GET /im", 7) == 0))) {
+		IPQ_PARSE_PACKET_LINE_INFO(ipoque_struct, packet);
+		if (packet->user_agent_line.len > 15 && packet->user_agent_line.ptr != NULL &&
+			((memcmp(packet->user_agent_line.ptr, "mobileAIM/", 10) == 0) ||
+			 memcmp(packet->user_agent_line.ptr, "mobileICQ/", 10) == 0)) {
+			ipoque_int_oscar_add_connection(ipoque_struct);
+			return;
+		}
+	}
 	if (packet->payload_packet_len > 40 && memcmp(packet->payload, "CONNECT ", 8) == 0) {
 		if (memcmp(packet->payload, "CONNECT login.icq.com:443 HTTP/1.", 33) == 0) {
 			IPQ_LOG(IPOQUE_PROTOCOL_OSCAR, ipoque_struct, IPQ_LOG_DEBUG, "OSCAR ICQ-HTTP FOUND\n");
@@ -179,8 +189,9 @@ static void ipoque_search_oscar_tcp_connect(struct ipoque_detection_module_struc
 																				  4))) {
 		return;
 	}
-
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_OSCAR);
+	if (packet->detected_protocol != IPOQUE_PROTOCOL_OSCAR) {
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_OSCAR);
+	}
 }
 
 void ipoque_search_oscar(struct ipoque_detection_module_struct *ipoque_struct)

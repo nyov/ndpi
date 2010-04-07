@@ -1,23 +1,23 @@
 /*
  * ipq_protocols_osdpi.h
- * Copyright (C) 2009 by ipoque GmbH
- * 
+ * Copyright (C) 2009-2010 by ipoque GmbH
+ *
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
- * 
+ *
  * OpenDPI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * OpenDPI is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with OpenDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -89,7 +89,7 @@ extern "C" {
 #define IPOQUE_PROTOCOL_ICECAST					52
 #define IPOQUE_PROTOCOL_PPLIVE					53
 #define IPOQUE_PROTOCOL_PPSTREAM				54
-#define IPOQUE_PROTOCOL_ZATOO					55
+#define IPOQUE_PROTOCOL_ZATTOO					55
 #define IPOQUE_PROTOCOL_SHOUTCAST				56
 #define IPOQUE_PROTOCOL_SOPCAST					57
 #define IPOQUE_PROTOCOL_TVANTS					58
@@ -134,9 +134,10 @@ extern "C" {
 #define IPOQUE_PROTOCOL_AFP						97
 #define IPOQUE_PROTOCOL_STEALTHNET				98
 #define IPOQUE_PROTOCOL_AIMINI					99
+#define IPOQUE_PROTOCOL_SIP						100
+#define IPOQUE_PROTOCOL_TRUPHONE				101
 
-
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL        99
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL        101
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS IPOQUE_LAST_IMPLEMENTED_PROTOCOL
@@ -146,10 +147,10 @@ extern "C" {
 	"NETBIOS","NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","PostgreSQL","MySQL","TDS","DirectDownloadLink","I23V5",\
 	"AppleJuice","DirectConnect","Socrates","WinMX","MANOLITO","PANDO","Filetopia","iMESH","Kontiki","OpenFT","Kazaa/Fasttrack",\
 	"Gnutella","eDonkey","Bittorrent","OFF","AVI","Flash","OGG","MPEG","QuickTime","RealMedia","Windowsmedia","MMS","XBOX","QQ",\
-	"MOVE","RTSP","Feidian","Icecast","PPLive","PPStream","Zatoo","SHOUTCast","SopCast","TVAnts","TVUplayer","VeohTV",\
+	"MOVE","RTSP","Feidian","Icecast","PPLive","PPStream","Zattoo","SHOUTCast","SopCast","TVAnts","TVUplayer","VeohTV",\
 	"QQLive","Thunder/Webthunder","Soulseek","GaduGadu","IRC","Popo","Jabber","MSN","Oscar","Yahoo","Battlefield","Quake",\
 	"Second Life","Steam","Halflife2","World of Warcraft","Telnet","STUN","IPSEC","GRE","ICMP","IGMP","EGP","SCTP","OSPF",\
-	"IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini"
+	"IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini","SIP","Truphone"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp",\
 	"bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx",\
 	"manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi",\
@@ -157,7 +158,7 @@ extern "C" {
 	"ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","veohtv","qqlive","thunder","soulseek","gadugadu","irc",\
 	"popo","jabber","msn","oscar","yahoo","battlefield","quake","secondlife","steam","hl2","worldofwarcraft","telnet","stun",\
 	"ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere","ssl","ssh","usenet","mgcp","iax",\
-	"tftp","afp","stealthnet","aimini"
+	"tftp","afp","stealthnet","aimini","sip","truphone"
 
 #ifdef __cplusplus
 }

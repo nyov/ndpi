@@ -1,6 +1,6 @@
 /*
  * netbios.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -62,10 +62,10 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 		IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "netbios udp start\n");
 
 		/*check standard NETBIOS over udp to port 137 */
-		if (dport == 137 && packet->payload_packet_len >= 50) {
+		if ((dport == 137 || 0) && packet->payload_packet_len >= 50) {
 
 			IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-					IPQ_LOG_DEBUG, "found netbios destination port 137 and payload_packet_len 50\n");
+					IPQ_LOG_DEBUG, "found netbios port 137 and payload_packet_len 50\n");
 
 
 			if (ntohs(get_u16(packet->payload, 2)) == 0 &&
@@ -169,12 +169,13 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 
 		/*netbios header token from http://www.protocolbase.net/protocols/protocol_NBDGM.php */
 
-		if (dport == 138 &&
+		if ((dport == 138 ||
+			 0) &&
 			packet->payload_packet_len >= 14 &&
 			ntohs(get_u16(packet->payload, 10)) == packet->payload_packet_len - 14) {
 
 			IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-					IPQ_LOG_DEBUG, "found netbios destination port 138 and payload length >= 112 \n");
+					IPQ_LOG_DEBUG, "found netbios port 138 and payload length >= 112 \n");
 
 
 			if (packet->payload[0] >= 0x11 && packet->payload[0] <= 0x16) {
@@ -221,6 +222,7 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				}
 			}
 		}
+
 	}
 
 	IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "exclude netbios\n");

@@ -1,6 +1,6 @@
 /*
  * http.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -34,6 +34,7 @@ static void ipoque_int_http_add_connection(struct ipoque_detection_module_struct
 	struct ipoque_id_struct *src = ipoque_struct->src;
 	struct ipoque_id_struct *dst = ipoque_struct->dst;
 
+	flow->http_detected = 1;
 	flow->detected_protocol = protocol;
 	flow->server_direction = packet->packet_direction;
 	packet->detected_protocol = protocol;
@@ -47,8 +48,8 @@ static void ipoque_int_http_add_connection(struct ipoque_detection_module_struct
 }
 
 #ifdef IPOQUE_PROTOCOL_QQ
-static inline void qq_parse_packet_URL_and_hostname(struct ipoque_detection_module_struct
-													*ipoque_struct)
+static void qq_parse_packet_URL_and_hostname(struct ipoque_detection_module_struct
+											 *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	u32 a;
@@ -75,8 +76,8 @@ static inline void qq_parse_packet_URL_and_hostname(struct ipoque_detection_modu
 
 
 #ifdef IPOQUE_PROTOCOL_MPEG
-static inline void mpeg_parse_packet_contentline(struct ipoque_detection_module_struct
-												 *ipoque_struct)
+static void mpeg_parse_packet_contentline(struct ipoque_detection_module_struct
+										  *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -122,8 +123,8 @@ static inline void mpeg_parse_packet_contentline(struct ipoque_detection_module_
 
 
 #ifdef IPOQUE_PROTOCOL_OGG
-static inline void ogg_parse_packet_contentline(struct ipoque_detection_module_struct
-												*ipoque_struct)
+static void ogg_parse_packet_contentline(struct ipoque_detection_module_struct
+										 *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -146,8 +147,8 @@ static inline void ogg_parse_packet_contentline(struct ipoque_detection_module_s
 #endif
 
 #ifdef IPOQUE_PROTOCOL_FLASH
-static inline void flash_parse_packet_contentline(struct ipoque_detection_module_struct
-												  *ipoque_struct)
+static void flash_parse_packet_contentline(struct ipoque_detection_module_struct
+										   *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -192,8 +193,8 @@ static inline void flash_parse_packet_contentline(struct ipoque_detection_module
 #endif
 
 #ifdef IPOQUE_PROTOCOL_QUICKTIME
-static inline void qt_parse_packet_contentline(struct ipoque_detection_module_struct
-											   *ipoque_struct)
+static void qt_parse_packet_contentline(struct ipoque_detection_module_struct
+										*ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -218,8 +219,8 @@ static inline void qt_parse_packet_contentline(struct ipoque_detection_module_st
 #endif
 
 #ifdef IPOQUE_PROTOCOL_REALMEDIA
-static inline void realmedia_parse_packet_contentline(struct ipoque_detection_module_struct
-													  *ipoque_struct)
+static void realmedia_parse_packet_contentline(struct ipoque_detection_module_struct
+											   *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -239,8 +240,8 @@ static inline void realmedia_parse_packet_contentline(struct ipoque_detection_mo
 #endif
 
 #ifdef IPOQUE_PROTOCOL_WINDOWSMEDIA
-static inline void windowsmedia_parse_packet_contentline(struct ipoque_detection_module_struct
-														 *ipoque_struct)
+static void windowsmedia_parse_packet_contentline(struct ipoque_detection_module_struct
+												  *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -285,8 +286,8 @@ static inline void windowsmedia_parse_packet_contentline(struct ipoque_detection
 	}
 }
 
-static inline void winmedia_parse_packet_useragentline(struct ipoque_detection_module_struct
-													   *ipoque_struct)
+static void winmedia_parse_packet_useragentline(struct ipoque_detection_module_struct
+												*ipoque_struct)
 {
 	if (ipoque_struct->packet.user_agent_line.len >= 9
 		&& memcmp(ipoque_struct->packet.user_agent_line.ptr, "NSPlayer/", 9) == 0) {
@@ -297,8 +298,8 @@ static inline void winmedia_parse_packet_useragentline(struct ipoque_detection_m
 #endif
 
 #ifdef IPOQUE_PROTOCOL_MMS
-static inline void mms_parse_packet_contentline(struct ipoque_detection_module_struct
-												*ipoque_struct)
+static void mms_parse_packet_contentline(struct ipoque_detection_module_struct
+										 *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -310,9 +311,10 @@ static inline void mms_parse_packet_contentline(struct ipoque_detection_module_s
 }
 #endif
 
+
 #ifdef IPOQUE_PROTOCOL_XBOX
-static inline void xbox_parse_packet_useragentline(struct ipoque_detection_module_struct
-												   *ipoque_struct)
+static void xbox_parse_packet_useragentline(struct ipoque_detection_module_struct
+											*ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -325,8 +327,8 @@ static inline void xbox_parse_packet_useragentline(struct ipoque_detection_modul
 
 
 #ifdef IPOQUE_PROTOCOL_FLASH
-static inline void flash_check_http_payload(struct ipoque_detection_module_struct
-											*ipoque_struct)
+static void flash_check_http_payload(struct ipoque_detection_module_struct
+									 *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	const u8 *pos;
@@ -347,7 +349,7 @@ static inline void flash_check_http_payload(struct ipoque_detection_module_struc
 #endif
 
 #ifdef IPOQUE_PROTOCOL_AVI
-static inline void avi_check_http_payload(struct ipoque_detection_module_struct *ipoque_struct)
+static void avi_check_http_payload(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
@@ -391,8 +393,8 @@ static inline void avi_check_http_payload(struct ipoque_detection_module_struct 
 #endif
 
 #ifdef IPOQUE_PROTOCOL_OFF
-static inline void off_parse_packet_contentline(struct ipoque_detection_module_struct
-												*ipoque_struct)
+static void off_parse_packet_contentline(struct ipoque_detection_module_struct
+										 *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -404,8 +406,8 @@ static inline void off_parse_packet_contentline(struct ipoque_detection_module_s
 #endif
 
 #ifdef IPOQUE_PROTOCOL_MOVE
-static inline void move_parse_packet_contentline(struct ipoque_detection_module_struct
-												 *ipoque_struct)
+static void move_parse_packet_contentline(struct ipoque_detection_module_struct
+										  *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -419,8 +421,8 @@ static inline void move_parse_packet_contentline(struct ipoque_detection_module_
 #endif
 
 #ifdef IPOQUE_PROTOCOL_RTSP
-static inline void rtsp_parse_packet_acceptline(struct ipoque_detection_module_struct
-												*ipoque_struct)
+static void rtsp_parse_packet_acceptline(struct ipoque_detection_module_struct
+										 *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
@@ -533,7 +535,7 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
 
 }
 
-static inline void check_http_payload(struct ipoque_detection_module_struct *ipoque_struct)
+static void check_http_payload(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "called check_http_payload.\n");
 
@@ -698,6 +700,7 @@ void ipoque_search_http_tcp(struct ipoque_detection_module_struct *ipoque_struct
 						"HTTP START HTTP found in 2. packet, check host here...\n");
 				/* HTTP found, look for host... */
 				flow->http_stage = 2;
+
 				return;
 			}
 		}
@@ -713,14 +716,17 @@ void ipoque_search_http_tcp(struct ipoque_detection_module_struct *ipoque_struct
 			IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "HTTP RUN MAYBE NEXT GET/POST...\n");
 			// parse packet
 			ipq_parse_packet_line_info(ipoque_struct);
-			check_content_type_and_change_protocol(ipoque_struct);
 			/* check for url here */
 			filename_start = http_request_url_offset(ipoque_struct);
 			if (filename_start != 0 && packet->parsed_lines > 1 && packet->line[0].len >= (9 + filename_start)
 				&& memcmp(&packet->line[0].ptr[packet->line[0].len - 9], " HTTP/1.", 8) == 0) {
 				packet->http_url_name.ptr = &packet->payload[filename_start];
 				packet->http_url_name.len = packet->line[0].len - (filename_start + 9);
+				IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "next http action, "
+						"resetting to http and search for other protocols later.\n");
+				ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_HTTP);
 			}
+			check_content_type_and_change_protocol(ipoque_struct);
 			/* HTTP found, look for host... */
 			if (packet->host_line.ptr != NULL) {
 				IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG,

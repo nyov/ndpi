@@ -1,6 +1,6 @@
 /*
  * ipq_main.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -223,14 +223,19 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 		IPOQUE_DEL_PROTOCOL_FROM_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,
 										 IPOQUE_PROTOCOL_QQ);
 
+#ifdef IPOQUE_PROTOCOL_FLASH
 		IPOQUE_DEL_PROTOCOL_FROM_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,
 										 IPOQUE_PROTOCOL_FLASH);
+#endif
 
 		IPOQUE_DEL_PROTOCOL_FROM_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,
 										 IPOQUE_PROTOCOL_MMS);
 
 		IPOQUE_DEL_PROTOCOL_FROM_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,
 										 IPOQUE_PROTOCOL_RTSP);
+
+		IPOQUE_DEL_PROTOCOL_FROM_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,
+										 IPOQUE_PROTOCOL_XBOX);
 
 		IPOQUE_BITMASK_SET(ipoque_struct->generic_http_packet_bitmask,
 						   ipoque_struct->callback_buffer[a].detection_bitmask);
@@ -252,7 +257,11 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 	}
 #endif
 #ifdef IPOQUE_PROTOCOL_STUN
-	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_STUN) != 0) {
+	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_STUN) != 0
+#ifdef IPOQUE_PROTOCOL_RTP
+		|| IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_RTP) != 0
+#endif
+		) {
 		ipoque_struct->callback_buffer[a].func = ipoque_search_stun_udp;
 		ipoque_struct->callback_buffer[a].ipq_selection_bitmask = IPQ_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
@@ -390,7 +399,7 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_SSL);
 #endif
 		IPOQUE_BITMASK_RESET(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask);
-		//IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,IPOQUE_PROTOCOL_MSN);
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask,IPOQUE_PROTOCOL_MSN);
 
 		a++;
 	}
@@ -443,19 +452,6 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 
 		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_SOULSEEK);
 
-
-		a++;
-	}
-#endif
-#ifdef IPOQUE_PROTOCOL_MUTE
-	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_MUTE) != 0) {
-		ipoque_struct->callback_buffer[a].func = ipoque_search_mute_tcp;
-		ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
-			IPQ_SELECTION_BITMASK_PROTOCOL_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
-
-		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
-
-		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_MUTE);
 
 		a++;
 	}
@@ -1372,7 +1368,8 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 																		IPQ_SELECTION_BITMASK_PROTOCOL_COMPLETE_TRAFFIC))
 			!= 0) {
 			IPQ_LOG(IPOQUE_PROTOCOL_UNKNOWN, ipoque_struct, IPQ_LOG_DEBUG,
-					"callback_buffer_tcp_payload, adding buffer %u\n", a);
+					"callback_buffer_tcp_payload, adding buffer %u as entry %u\n", a,
+					ipoque_struct->callback_buffer_size_tcp_payload);
 
 			memcpy(&ipoque_struct->callback_buffer_tcp_payload[ipoque_struct->callback_buffer_size_tcp_payload],
 				   &ipoque_struct->callback_buffer[a], sizeof(struct ipq_call_function_struct));
@@ -1442,18 +1439,19 @@ static int ipq_init_packet_header(struct ipoque_detection_module_struct *ipoque_
 	ipoque_struct->packet.tcp = NULL;
 	ipoque_struct->packet.udp = NULL;
 	ipoque_struct->packet.generic_l4_ptr = NULL;
-	if (ipoque_struct->packet.iph->version == 4 && ipoque_struct->packet.iph->ihl >= 5) {
-		IPQ_LOG(IPOQUE_PROTOCOL_UNKNOWN, ipoque_struct, IPQ_LOG_DEBUG, "ipv4 header\n");
-	} else {
-		ipoque_struct->packet.iph = NULL;
-		return 1;
-	}
 
 	l3len = ipoque_struct->packet.l3_packet_len;
 
 
 	decaps_iph = ipoque_struct->packet.iph;
 
+
+	if (decaps_iph->version == 4 && decaps_iph->ihl >= 5) {
+		IPQ_LOG(IPOQUE_PROTOCOL_UNKNOWN, ipoque_struct, IPQ_LOG_DEBUG, "ipv4 header\n");
+	} else {
+		ipoque_struct->packet.iph = NULL;
+		return 1;
+	}
 
 	/* needed:
 	 *  - unfragmented packets
@@ -1683,6 +1681,8 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 			for (a = 0; a < ipoque_struct->callback_buffer_size_tcp_payload; a++) {
 				if ((ipoque_struct->callback_buffer_tcp_payload[a].ipq_selection_bitmask & ipq_selection_packet) ==
 					ipoque_struct->callback_buffer_tcp_payload[a].ipq_selection_bitmask
+					&& IPOQUE_BITMASK_COMPARE(ipoque_struct->flow->excluded_protocol_bitmask,
+											  ipoque_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
 					&& IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_tcp_payload[a].detection_bitmask,
 											  detection_bitmask) != 0) {
 					ipoque_struct->callback_buffer_tcp_payload[a].func(ipoque_struct);
@@ -1693,6 +1693,8 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 			for (a = 0; a < ipoque_struct->callback_buffer_size_tcp_no_payload; a++) {
 				if ((ipoque_struct->callback_buffer_tcp_no_payload[a].ipq_selection_bitmask & ipq_selection_packet) ==
 					ipoque_struct->callback_buffer_tcp_no_payload[a].ipq_selection_bitmask
+					&& IPOQUE_BITMASK_COMPARE(ipoque_struct->flow->excluded_protocol_bitmask,
+											  ipoque_struct->callback_buffer_tcp_no_payload[a].excluded_protocol_bitmask) == 0
 					&& IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_tcp_no_payload[a].detection_bitmask,
 											  detection_bitmask) != 0) {
 					ipoque_struct->callback_buffer_tcp_no_payload[a].func(ipoque_struct);
@@ -1703,6 +1705,8 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 		for (a = 0; a < ipoque_struct->callback_buffer_size_udp; a++) {
 			if ((ipoque_struct->callback_buffer_udp[a].ipq_selection_bitmask & ipq_selection_packet) ==
 				ipoque_struct->callback_buffer_udp[a].ipq_selection_bitmask
+				&& IPOQUE_BITMASK_COMPARE(ipoque_struct->flow->excluded_protocol_bitmask,
+										  ipoque_struct->callback_buffer_udp[a].excluded_protocol_bitmask) == 0
 				&& IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_udp[a].detection_bitmask,
 										  detection_bitmask) != 0) {
 				ipoque_struct->callback_buffer_udp[a].func(ipoque_struct);
@@ -1714,6 +1718,9 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 		for (a = 0; a < ipoque_struct->callback_buffer_size_non_tcp_udp; a++) {
 			if ((ipoque_struct->callback_buffer_non_tcp_udp[a].ipq_selection_bitmask & ipq_selection_packet) ==
 				ipoque_struct->callback_buffer_non_tcp_udp[a].ipq_selection_bitmask
+				&& (ipoque_struct->flow == NULL ||
+					IPOQUE_BITMASK_COMPARE(ipoque_struct->flow->excluded_protocol_bitmask,
+										   ipoque_struct->callback_buffer_non_tcp_udp[a].excluded_protocol_bitmask) == 0)
 				&& IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_non_tcp_udp[a].detection_bitmask,
 										  detection_bitmask) != 0) {
 
@@ -1881,15 +1888,25 @@ void ipq_parse_packet_line_info(struct ipoque_detection_module_struct
 	packet->empty_line_position_set = 0;
 
 	packet->host_line.ptr = NULL;
+	packet->host_line.len = 0;
 	packet->content_line.ptr = NULL;
+	packet->content_line.len = 0;
 	packet->accept_line.ptr = NULL;
+	packet->accept_line.len = 0;
 	packet->user_agent_line.ptr = NULL;
+	packet->user_agent_line.len = 0;
 	packet->http_url_name.ptr = NULL;
+	packet->http_url_name.len = 0;
 	packet->http_encoding.ptr = NULL;
+	packet->http_encoding.len = 0;
 	packet->http_transfer_encoding.ptr = NULL;
+	packet->http_transfer_encoding.len = 0;
 	packet->http_contentlen.ptr = NULL;
+	packet->http_contentlen.len = 0;
 	packet->http_cookie.ptr = NULL;
+	packet->http_cookie.len = 0;
 	packet->http_x_session_type.ptr = NULL;
+	packet->http_x_session_type.len = 0;
 
 	if (packet->payload_packet_len == 0)
 		return;
@@ -1982,7 +1999,7 @@ void ipq_parse_packet_line_info(struct ipoque_detection_module_struct
 			}
 
 			if (packet->parsed_lines >= (IPOQUE_MAX_PARSE_LINES_PER_PACKET - 1)) {
-				break;
+				return;
 			}
 
 			packet->parsed_lines++;
@@ -1991,10 +2008,18 @@ void ipq_parse_packet_line_info(struct ipoque_detection_module_struct
 
 			if ((a + 2) >= packet->payload_packet_len) {
 
-				break;
+				return;
 			}
 			a++;
 		}
+	}
+
+	if (packet->parsed_lines >= 1) {
+		packet->line[packet->parsed_lines].len
+			=
+			((unsigned long) &packet->payload[packet->payload_packet_len]) -
+			((unsigned long) packet->line[packet->parsed_lines].ptr);
+		packet->parsed_lines++;
 	}
 }
 

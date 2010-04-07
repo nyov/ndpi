@@ -1,6 +1,6 @@
 /*
  * xbox.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -61,6 +61,11 @@ void ipoque_search_xbox(struct ipoque_detection_module_struct *ipoque_struct)
 	/* this detection also works for asymmetric xbox udp traffic */
 	if (packet->udp != NULL) {
 
+		u16 dport = ntohs(packet->udp->dest);
+		u16 sport = ntohs(packet->udp->source);
+
+		IPQ_LOG(IPOQUE_PROTOCOL_XBOX, ipoque_struct, IPQ_LOG_DEBUG, "search xbox\n");
+
 		if (packet->payload_packet_len > 12 &&
 			get_u32(packet->payload, 0) == 0 && packet->payload[5] == 0x58 &&
 			memcmp(&packet->payload[7], "\x00\x00\x00", 3) == 0) {
@@ -76,9 +81,33 @@ void ipoque_search_xbox(struct ipoque_detection_module_struct *ipoque_struct)
 				return;
 			}
 		}
+		if ((dport == 3074 || sport == 3074)
+			&& ((packet->payload_packet_len == 24 && packet->payload[0] == 0x00)
+				|| (packet->payload_packet_len == 42 && packet->payload[0] == 0x4f && packet->payload[2] == 0x0a)
+				|| (packet->payload_packet_len == 80 && ntohs(get_u16(packet->payload, 0)) == 0x50bc
+					&& packet->payload[2] == 0x45)
+				|| (packet->payload_packet_len == 40 && ntohl(get_u32(packet->payload, 0)) == 0xcf5f3202)
+				|| (packet->payload_packet_len == 38 && ntohl(get_u32(packet->payload, 0)) == 0xc1457f03)
+				|| (packet->payload_packet_len == 28 && ntohl(get_u32(packet->payload, 0)) == 0x015f2c00))) {
+			if (flow->xbox_stage == 1) {
+				ipoque_int_xbox_add_connection(ipoque_struct);
+				IPQ_LOG(IPOQUE_PROTOCOL_XBOX, ipoque_struct, IPQ_LOG_DEBUG, "xbox udp connection detected\n");
+				return;
+			}
+			IPQ_LOG(IPOQUE_PROTOCOL_XBOX, ipoque_struct, IPQ_LOG_DEBUG, "maybe xbox.\n");
+			flow->xbox_stage++;
+			return;
+		}
 
-		IPQ_LOG(IPOQUE_PROTOCOL_XBOX, ipoque_struct, IPQ_LOG_DEBUG, "xbox udp excluded.\n");
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_XBOX);
+		/* exclude here all non matched udp traffic, exclude here tcp only if http has been excluded, because xbox could use http */
+		if (packet->tcp == NULL
+#ifdef IPOQUE_PROTOCOL_HTTP
+			|| IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_HTTP) != 0
+#endif
+			) {
+			IPQ_LOG(IPOQUE_PROTOCOL_XBOX, ipoque_struct, IPQ_LOG_DEBUG, "xbox udp excluded.\n");
+			IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_XBOX);
+		}
 	}
 	/* to not exclude tcp traffic here, done by http code... */
 }

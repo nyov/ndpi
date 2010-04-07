@@ -49,6 +49,7 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/mail_smtp.c \
 			protocols/manolito.c \
 			protocols/mdns.c \
+			protocols/meebo.c \
 			protocols/mgcp.c \
 			protocols/mms.c \
 			protocols/msn.c \

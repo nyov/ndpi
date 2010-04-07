@@ -1,6 +1,6 @@
 /*
  * mail_pop.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -25,13 +25,16 @@
 
 #ifdef IPOQUE_PROTOCOL_MAIL_POP
 
-#define POP_BIT_AUTH		0x01
-#define POP_BIT_APOP		0x02
-#define POP_BIT_USER		0x04
-#define POP_BIT_PASS		0x08
-#define POP_BIT_CAPA		0x10
-#define POP_BIT_LIST		0x20
-#define POP_BIT_STAT		0x40
+#define POP_BIT_AUTH		0x0001
+#define POP_BIT_APOP		0x0002
+#define POP_BIT_USER		0x0004
+#define POP_BIT_PASS		0x0008
+#define POP_BIT_CAPA		0x0010
+#define POP_BIT_LIST		0x0020
+#define POP_BIT_STAT		0x0040
+#define POP_BIT_UIDL		0x0080
+#define POP_BIT_RETR		0x0100
+#define POP_BIT_DELE		0x0200
 
 
 static void ipoque_int_mail_pop_add_connection(struct ipoque_detection_module_struct
@@ -106,6 +109,24 @@ static int ipoque_int_mail_pop_check_for_client_commands(struct ipoque_detection
 				   && (packet->payload[3] == 'T' || packet->payload[3] == 't')) {
 			flow->pop_command_bitmask |= POP_BIT_STAT;
 			return 1;
+		} else if ((packet->payload[0] == 'U' || packet->payload[0] == 'u')
+				   && (packet->payload[1] == 'I' || packet->payload[1] == 'i')
+				   && (packet->payload[2] == 'D' || packet->payload[2] == 'd')
+				   && (packet->payload[3] == 'L' || packet->payload[3] == 'l')) {
+			flow->pop_command_bitmask |= POP_BIT_UIDL;
+			return 1;
+		} else if ((packet->payload[0] == 'R' || packet->payload[0] == 'r')
+				   && (packet->payload[1] == 'E' || packet->payload[1] == 'e')
+				   && (packet->payload[2] == 'T' || packet->payload[2] == 't')
+				   && (packet->payload[3] == 'R' || packet->payload[3] == 'r')) {
+			flow->pop_command_bitmask |= POP_BIT_RETR;
+			return 1;
+		} else if ((packet->payload[0] == 'D' || packet->payload[0] == 'd')
+				   && (packet->payload[1] == 'E' || packet->payload[1] == 'e')
+				   && (packet->payload[2] == 'L' || packet->payload[2] == 'l')
+				   && (packet->payload[3] == 'E' || packet->payload[3] == 'e')) {
+			flow->pop_command_bitmask |= POP_BIT_DELE;
+			return 1;
 		}
 	}
 	return 0;
@@ -153,7 +174,7 @@ void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
 
 		// count the bits set in the bitmask
 		if (flow->pop_command_bitmask != 0) {
-			for (a = 0; a < 8; a++) {
+			for (a = 0; a < 16; a++) {
 				bit_count += (flow->pop_command_bitmask >> a) & 0x01;
 			}
 		}

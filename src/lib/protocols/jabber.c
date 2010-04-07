@@ -1,6 +1,6 @@
 /*
  * jabber.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -26,19 +26,45 @@
 #ifdef IPOQUE_PROTOCOL_UNENCRYPED_JABBER
 
 static void ipoque_int_jabber_add_connection(struct ipoque_detection_module_struct
-											 *ipoque_struct)
+											 *ipoque_struct, u32 protocol)
 {
 	struct ipoque_id_struct *src = ipoque_struct->src;
 	struct ipoque_id_struct *dst = ipoque_struct->dst;
 
 	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_UNENCRYPED_JABBER);
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, protocol);
 	}
 	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_UNENCRYPED_JABBER);
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, protocol);
 	}
 }
 
+
+static void check_content_type_and_change_protocol(struct ipoque_detection_module_struct
+												   *ipoque_struct, u16 x)
+{
+#ifdef IPOQUE_PROTOCOL_TRUPHONE
+	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+//  struct ipoque_flow_struct *flow = ipoque_struct->flow;
+
+//  struct ipoque_id_struct *src = ipoque_struct->src;
+//  struct ipoque_id_struct *dst = ipoque_struct->dst;
+
+
+	if (packet->payload_packet_len > x + 18 && packet->payload_packet_len > x && packet->payload_packet_len > 18) {
+		const u16 lastlen = packet->payload_packet_len - 18;
+		for (x = 0; x < lastlen; x++) {
+			if (ipq_mem_cmp(&packet->payload[x], "=\"im.truphone.com\">", 18) == 0) {
+				IPQ_LOG(IPOQUE_PROTOCOL_UNENCRYPED_JABBER, ipoque_struct, IPQ_LOG_TRACE, "changed to TRUPHONE.\n");
+				ipoque_int_jabber_add_connection(ipoque_struct, IPOQUE_PROTOCOL_TRUPHONE);
+			}
+		}
+	}
+#endif
+
+
+	return;
+}
 
 void ipoque_search_jabber_tcp(struct ipoque_detection_module_struct
 							  *ipoque_struct)
@@ -67,7 +93,7 @@ void ipoque_search_jabber_tcp(struct ipoque_detection_module_struct
 					   || src->jabber_file_transfer_port == packet->tcp->source) {
 				IPQ_LOG(IPOQUE_PROTOCOL_UNENCRYPED_JABBER, ipoque_struct, IPQ_LOG_DEBUG,
 						"found jabber file transfer.\n");
-				ipoque_int_jabber_add_connection(ipoque_struct);
+				ipoque_int_jabber_add_connection(ipoque_struct, IPOQUE_PROTOCOL_UNENCRYPED_JABBER);
 			}
 		}
 		if (dst != NULL && dst->jabber_file_transfer_port != 0) {
@@ -81,7 +107,7 @@ void ipoque_search_jabber_tcp(struct ipoque_detection_module_struct
 					   || dst->jabber_file_transfer_port == packet->tcp->source) {
 				IPQ_LOG(IPOQUE_PROTOCOL_UNENCRYPED_JABBER, ipoque_struct, IPQ_LOG_DEBUG,
 						"found jabber file transfer.\n");
-				ipoque_int_jabber_add_connection(ipoque_struct);
+				ipoque_int_jabber_add_connection(ipoque_struct, IPOQUE_PROTOCOL_UNENCRYPED_JABBER);
 			}
 		}
 		return;
@@ -135,7 +161,7 @@ void ipoque_search_jabber_tcp(struct ipoque_detection_module_struct
 					}
 
 					x += 6;
-					j_port = htons(ipq_bytestream_to_number(&packet->payload[x], packet->payload_packet_len, &x));
+					j_port = ntohs_ipq_bytestream_to_number(&packet->payload[x], packet->payload_packet_len, &x);
 					IPQ_LOG(IPOQUE_PROTOCOL_UNENCRYPED_JABBER, ipoque_struct,
 							IPQ_LOG_DEBUG, "JABBER port : %u\n", ntohs(j_port));
 
@@ -183,7 +209,10 @@ void ipoque_search_jabber_tcp(struct ipoque_detection_module_struct
 					 "xmlns:stream='http://etherx.jabber.org/streams'", 47) == 0
 					|| ipq_mem_cmp(&packet->payload[x], "xmlns:stream=\"http://etherx.jabber.org/streams\"", 47) == 0) {
 					IPQ_LOG(IPOQUE_PROTOCOL_UNENCRYPED_JABBER, ipoque_struct, IPQ_LOG_TRACE, "found JABBER.\n");
-					ipoque_int_jabber_add_connection(ipoque_struct);
+					x += 47;
+					ipoque_int_jabber_add_connection(ipoque_struct, IPOQUE_PROTOCOL_UNENCRYPED_JABBER);
+					/* search for other protocols: Truphone */
+					check_content_type_and_change_protocol(ipoque_struct, x);
 					return;
 				}
 			}

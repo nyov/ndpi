@@ -1,6 +1,6 @@
 /*
  * msn.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -64,11 +64,11 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 		} else if (flow->packet_counter == 7 && packet->payload_packet_len > 300) {
 			if (memcmp(packet->payload + 24, "MSNSLP", 6) == 0
 				|| (get_u32(packet->payload, 0) == htonl(0x30000000) && get_u32(packet->payload, 4) == 0x00000000)) {
-				ipoque_int_msn_add_connection(ipoque_struct);
 				if (0) {
 
 				}
 				IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE, "detected MSN File Transfer, ifdef ssl.\n");
+				ipoque_int_msn_add_connection(ipoque_struct);
 				return;
 			}
 		}
@@ -77,6 +77,8 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 				&& get_u32(packet->payload, 4) == 0x00000000)) {
 			flow->msn_ssl_ft++;
 			if (flow->msn_ssl_ft == 2) {
+				IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
+						"detected MSN File Transfer, ifdef ssl 2.\n");
 				ipoque_int_msn_add_connection(ipoque_struct);
 			}
 			return;
@@ -105,6 +107,7 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 			IPQ_LOG(IPOQUE_PROTOCOL_MSN, ipoque_struct, IPQ_LOG_TRACE,
 					"found MSN in packets that also contain voice.messenger.live.com.\n");
 			ipoque_int_msn_add_connection(ipoque_struct);
+
 			return;
 		}
 
@@ -232,7 +235,9 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 #ifdef IPOQUE_PROTOCOL_HTTP
 				   packet->detected_protocol == IPOQUE_PROTOCOL_HTTP ||
 #endif
-				   (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0)) {
+				   (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0) ||
+				   (memcmp(packet->payload, "HTTP/1.1 200 OK", 15) == 0)
+				) {
 
 				ipq_parse_packet_line_info(ipoque_struct);
 
@@ -311,7 +316,9 @@ static void ipoque_search_msn_tcp(struct ipoque_detection_module_struct *ipoque_
 #ifdef IPOQUE_PROTOCOL_HTTP
 			   packet->detected_protocol == IPOQUE_PROTOCOL_HTTP ||
 #endif
-			   (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0)) {
+			   (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0) ||
+			   (memcmp(packet->payload, "HTTP/1.1 200 OK", 15) == 0)
+			) {
 
 			ipq_parse_packet_line_info(ipoque_struct);
 

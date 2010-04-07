@@ -1,6 +1,6 @@
 /*
  * ipq_structs.h
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -25,7 +25,7 @@
 #define __IPOQUE_STRUCTS_INCLUDE_FILE__
 
 
-#define MAX_PACKET_COUNTER 250
+# define MAX_PACKET_COUNTER 65000
 typedef union {
 	u32 ipv4;
 	u8 ipv4_u8[4];
@@ -86,17 +86,23 @@ typedef struct ipoque_id_struct {
 	u32 gg_ft_ip_address;
 	IPOQUE_TIMESTAMP_COUNTER_SIZE gg_timeout;
 #endif
+
+#ifdef IPOQUE_PROTOCOL_ZATTOO
+	IPOQUE_TIMESTAMP_COUNTER_SIZE zattoo_ts;
+#endif
 #ifdef IPOQUE_PROTOCOL_UNENCRYPED_JABBER
 	IPOQUE_TIMESTAMP_COUNTER_SIZE jabber_stun_or_ft_ts;
 #endif
 #ifdef IPOQUE_PROTOCOL_MANOLITO
 	u32 manolito_last_pkt_arrival_time;
 #endif
+#ifdef IPOQUE_PROTOCOL_DIRECTCONNECT
+	IPOQUE_TIMESTAMP_COUNTER_SIZE directconnect_last_safe_access_time;
+#endif
 #ifdef IPOQUE_PROTOCOL_SOULSEEK
 	IPOQUE_TIMESTAMP_COUNTER_SIZE soulseek_last_safe_access_time;
 #endif
 #ifdef IPOQUE_PROTOCOL_DIRECTCONNECT
-	IPOQUE_TIMESTAMP_COUNTER_SIZE directconnect_last_safe_access_time;
 	u16 detected_directconnect_port;
 	u16 detected_directconnect_udp_port;
 	u16 detected_directconnect_ssl_port;
@@ -157,6 +163,9 @@ typedef struct ipoque_id_struct {
 #ifdef IPOQUE_PROTOCOL_RTSP
 	u32 rtsp_ts_set:1;
 #endif
+#ifdef IPOQUE_PROTOCOL_PPLIVE
+	u32 pplive_last_packet_time_set:1;
+#endif
 } ipoque_id_struct;
 typedef struct ipoque_flow_struct {
 
@@ -187,6 +196,9 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK
 	u32 hash_id_number;
 #endif							// IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK
+	/* Count Of Number of payloaded Packets in the Flow */
+	u16 packet_counter;			// can be 0-65000
+	u16 packet_direction_counter[2];
 #ifdef IPOQUE_PROTOCOL_FLASH
 	u16 flash_bytes;
 #endif
@@ -196,9 +208,9 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_MAIL_SMTP
 	u16 smtp_command_bitmask;
 #endif
-	/* Count Of Number of payloaded Packets in the Flow */
-	u8 packet_counter;			// can be 0-250
-	u8 packet_direction_counter[2];
+#ifdef IPOQUE_PROTOCOL_MAIL_POP
+	u16 pop_command_bitmask;
+#endif
 
 	u8 protocol_subtype;		// protocol subtype fro various protocols
 #ifdef IPOQUE_PROTOCOL_RTP
@@ -220,9 +232,6 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_GNUTELLA
 	u8 gnutella_msg_id[3];
 #endif
-#ifdef IPOQUE_PROTOCOL_MAIL_POP
-	u8 pop_command_bitmask;
-#endif
 	/* init parameter, internal used to set up timestamp,... */
 	u32 init_finished:1;
 	u32 setup_packet_direction:1;
@@ -240,6 +249,7 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_EDONKEY
 	u32 edk_stage:5;			// 0-17
 	u32 edk_ext:1;
+	u32 edonkey_added:1;
 #endif
 #ifdef IPOQUE_PROTOCOL_WINMX
 	u32 winmx_stage:1;			// 0-1
@@ -262,6 +272,9 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_BATTLEFIELD
 	u32 battlefield_stage:2;
 #endif
+#ifdef IPOQUE_PROTOCOL_YAHOO
+	u32 sip_yahoo_voice:1;
+#endif
 #ifdef IPOQUE_PROTOCOL_TDS
 	u32 tds_stage:3;
 #endif
@@ -283,6 +296,7 @@ typedef struct ipoque_flow_struct {
 	u32 http_stage:2;
 	u32 server_direction:1;
 	u32 http_empty_line_seen:1;
+	u32 http_detected:1;
 #endif							// IPOQUE_PROTOCOL_HTTP
 #ifdef IPOQUE_PROTOCOL_FLASH
 	u32 flash_stage:3;
@@ -300,6 +314,9 @@ typedef struct ipoque_flow_struct {
 
 #ifdef IPOQUE_PROTOCOL_YAHOO
 	u32 yahoo_detection_finished:2;
+#ifdef IPOQUE_PROTOCOL_HTTP
+	u32 yahoo_http_proxy_stage:2;
+#endif
 #endif
 #ifdef IPOQUE_PROTOCOL_PPLIVE
 	u32 pplive_stage:3;			// 0-7
@@ -307,6 +324,10 @@ typedef struct ipoque_flow_struct {
 #ifdef IPOQUE_PROTOCOL_MSN
 	u32 msn_stage:3;
 	u32 msn_ssl_ft:2;
+#endif
+
+#ifdef IPOQUE_PROTOCOL_ZATTOO
+	u32 zattoo_stage:3;
 #endif
 #ifdef IPOQUE_PROTOCOL_PPSTREAM
 	u32 ppstream_stage:3;		// 0-2
@@ -370,6 +391,9 @@ typedef struct ipoque_flow_struct {
 #endif
 #ifdef IPOQUE_PROTOCOL_AIMINI
 	u32 aimini_stage:5;
+#endif
+#ifdef IPOQUE_PROTOCOL_XBOX
+	u32 xbox_stage:1;
 #endif
 } ipoque_flow_struct_t;
 #endif							/* __IPOQUE_STRUCTS_INCLUDE_FILE__ */

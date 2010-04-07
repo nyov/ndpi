@@ -1,6 +1,6 @@
 /*
  * zattoo.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -128,7 +128,9 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 					return;
 				}
 			}
-		} else if (flow->zattoo_stage == 0) {
+		}
+
+		else if (flow->zattoo_stage == 0) {
 
 			if (packet->payload_packet_len > 50
 				&& packet->payload[0] == 0x03
@@ -139,12 +141,8 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 				IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct,
 						IPQ_LOG_DEBUG, "need next packet, seen pattern 0x030400040a00\n");
 				return;
-			} else if (packet->payload_packet_len == 1412 && packet->payload[0] == 0x06
-					   && ntohl(get_u32(packet->payload, 5)) == 0x0a000c02) {
-				flow->zattoo_stage = 5 + packet->packet_direction;
-				IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "maybe zattoo, need next packet.\n");
-				return;
 			}
+			/* the following is is searching for flash, not for zattoo. cust1 wants to do so. */
 		} else if (flow->zattoo_stage == 2 - packet->packet_direction
 				   && packet->payload_packet_len > 50 && packet->payload[0] == 0x03 && packet->payload[1] == 0x04) {
 			IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "add connection over tcp with 0x0304.\n");
@@ -175,12 +173,16 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 			IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "detected zattoo.\n");
 			ipoque_int_zattoo_add_connection(ipoque_struct);
 			return;
+		} else if (flow->zattoo_stage == 6 - packet->packet_direction && packet->payload_packet_len == 1412) {
+			IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG, "found zattoo.\n");
+			ipoque_int_zattoo_add_connection(ipoque_struct);
+			return;
 		}
 		IPQ_LOG(IPOQUE_PROTOCOL_ZATTOO, ipoque_struct, IPQ_LOG_DEBUG,
 				"ZATTOO: discarted the flow (TCP): packet_size: %u; Flowstage: %u\n",
 				packet->payload_packet_len, flow->zattoo_stage);
 
-
+#endif
 	} else if (packet->udp != NULL) {
 
 		if (packet->payload_packet_len > 20 && (packet->udp->dest == htons(5003)
@@ -208,4 +210,3 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_ZATTOO);
 
 }
-#endif

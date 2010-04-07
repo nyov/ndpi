@@ -1,6 +1,6 @@
 /*
  * directconnect.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -55,7 +55,7 @@ static u16 parse_binf_message(struct ipoque_detection_module_struct
 		if ((i + 30) < payload_len) {
 			if (memcmp(&payload[i], "DCTM", 4) == 0) {
 				if (memcmp(&payload[i + 15], "ADCS", 4) == 0) {
-					ssl_port = htons(ipq_bytestream_to_number(&payload[i + 25], 5, &bytes_read));
+					ssl_port = ntohs_ipq_bytestream_to_number(&payload[i + 25], 5, &bytes_read);
 					IPQ_LOG(IPOQUE_PROTOCOL_DIRECTCONNECT, ipoque_struct,
 							IPQ_LOG_DEBUG, "directconnect ssl port parsed %d", ssl_port);
 
@@ -149,14 +149,14 @@ static void ipoque_search_directconnect_tcp(struct ipoque_detection_module_struc
 				u16 bytes_read = 0;
 				if (dst != NULL) {
 					dst->detected_directconnect_ssl_port =
-						htons(ipq_bytestream_to_number(&packet->payload[25], 5, &bytes_read));
+						ntohs_ipq_bytestream_to_number(&packet->payload[25], 5, &bytes_read);
 					IPQ_LOG(IPOQUE_PROTOCOL_DIRECTCONNECT, ipoque_struct,
 							IPQ_LOG_DEBUG, "directconnect ssl port parsed %d",
 							ntohs(dst->detected_directconnect_ssl_port));
 				}
 				if (src != NULL) {
 					src->detected_directconnect_ssl_port =
-						htons(ipq_bytestream_to_number(&packet->payload[25], 5, &bytes_read));
+						ntohs_ipq_bytestream_to_number(&packet->payload[25], 5, &bytes_read);
 					IPQ_LOG(IPOQUE_PROTOCOL_DIRECTCONNECT, ipoque_struct,
 							IPQ_LOG_DEBUG, "directconnect ssl port parsed %d",
 							ntohs(src->detected_directconnect_ssl_port));
@@ -346,6 +346,7 @@ static void ipoque_search_directconnect_tcp(struct ipoque_detection_module_struc
 
 
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_DIRECTCONNECT);
+
 }
 
 static void ipoque_search_directconnect_udp(struct ipoque_detection_module_struct
@@ -442,6 +443,7 @@ static void ipoque_search_directconnect_udp(struct ipoque_detection_module_struc
 
 
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_DIRECTCONNECT);
+
 
 }
 

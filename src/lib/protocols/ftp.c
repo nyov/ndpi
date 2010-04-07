@@ -1,6 +1,6 @@
 /*
  * ftp.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -52,7 +52,7 @@ static void ipoque_int_ftp_add_connection(struct ipoque_detection_module_struct
   return 1 if a pop packet
 */
 
-static inline u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct)
+static u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct)
 {
 
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
@@ -109,7 +109,7 @@ static inline u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct
 }
 
 
-static inline void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoque_struct)
+static void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_id_struct *dst = ipoque_struct->dst;
@@ -119,24 +119,41 @@ static inline void search_passive_ftp_mode(struct ipoque_detection_module_struct
 	u32 ftp_ip;
 
 
-	if (packet->payload_packet_len > 30
-		&& (ipq_mem_cmp(packet->payload, "227 Entering Passive Mode", 25) == 0
-			|| ipq_mem_cmp(packet->payload, "227 Entering passive mode", 25) == 0)) {
+// TODO check if normal passive mode also needs adaption for ipv6
+	if ((packet->payload_packet_len > 30
+		 && (ipq_mem_cmp(packet->payload, "227 Entering Passive Mode", 25) == 0
+			 || ipq_mem_cmp(packet->payload, "227 Entering passive mode", 25) == 0))
+		|| (packet->payload_packet_len > 4 && memcmp(packet->payload, "227 =", 5) == 0)) {
 		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP passive mode initial string\n");
-		plen = 26;
-		for (;;) {
-			if (plen >= packet->payload_packet_len)
-				return;
-			if (packet->payload[plen] == '(')
-				break;
-			if (packet->payload[plen] != ' ')
-				return;
-			plen++;
+		if (packet->payload_packet_len > 4 && memcmp(packet->payload, "227 E", 5) == 0) {
+			plen = 26;
+		}
+		if (packet->payload_packet_len > 4 && memcmp(packet->payload, "227 =", 5) == 0) {
+			plen = 5;
 		}
 
+		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "plen = %u\n", plen);
+		for (;;) {
+			if (plen >= packet->payload_packet_len) {
+				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
+						"plen >= packet->payload_packet_len, return\n");
+				return;
+			}
+			if (packet->payload[plen] == '(') {
+				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "found (. break.\n");
+				break;
+			}
+			if (packet->payload[plen] != ' ') {
+				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "no 0x20. break.\n");
+				return;
+			}
+			plen++;
+		}
 		plen++;
+
 		if (plen >= packet->payload_packet_len)
 			return;
+
 
 		ftp_ip = 0;
 		for (i = 0; i < 4; i++) {

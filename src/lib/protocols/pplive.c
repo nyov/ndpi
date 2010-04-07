@@ -1,6 +1,6 @@
 /*
  * pplive.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -57,7 +57,6 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 
 	u16 a;
 
-
 	IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "search pplive.\n");
 
 
@@ -65,9 +64,10 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 
 		if (src != NULL && src->pplive_vod_cli_port == packet->udp->source
 			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
-			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+			if (src->pplive_last_packet_time_set == 1 && (IPOQUE_TIMESTAMP_COUNTER_SIZE)
 				(packet->tick_timestamp - src->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
 				ipoque_int_pplive_add_connection(ipoque_struct);
+				src->pplive_last_packet_time_set = 1;
 				src->pplive_last_packet_time = packet->tick_timestamp;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp src.\n");
 				return;
@@ -80,13 +80,15 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 
 		if (dst != NULL && dst->pplive_vod_cli_port == packet->udp->dest
 			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
-			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+			if (dst->pplive_last_packet_time_set == 1 && (IPOQUE_TIMESTAMP_COUNTER_SIZE)
 				(packet->tick_timestamp - dst->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
 				ipoque_int_pplive_add_connection(ipoque_struct);
+				dst->pplive_last_packet_time_set = 1;
 				dst->pplive_last_packet_time = packet->tick_timestamp;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp dst.\n");
 				return;
 			} else {
+				dst->pplive_last_packet_time_set = 0;
 				dst->pplive_vod_cli_port = 0;
 				dst->pplive_last_packet_time = 0;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "PPLIVE: VOD port timer reset.\n");
@@ -98,7 +100,7 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 			&& (packet->payload[1] == 0x00)
 			&& get_l32(packet->payload, 12) == 0 && (packet->payload[16] == 0 || packet->payload[16] == 1)
 			&& (packet->payload[17] == 0) && (packet->payload[24] == 0xac)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive over udp with pattern I.\n");
+			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive.\n");
 			ipoque_int_pplive_add_connection(ipoque_struct);
 			return;
 		}
@@ -107,14 +109,41 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 			&& packet->payload[1] == 0x03 && (packet->payload[3] == 0x00 || packet->payload[3] == 0x01)
 			&& packet->payload[4] == 0x98 && packet->payload[5] == 0xab
 			&& packet->payload[6] == 0x01 && packet->payload[7] == 0x02) {
-			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive over udp with pattern II.\n");
+			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive.\n");
 			ipoque_int_pplive_add_connection(ipoque_struct);
 			return;
 		}
+
+		if (packet->payload_packet_len == 94
+			&& packet->payload[8] == 0x00 && get_u32(packet->payload, 9) == ntohl(0x02010000)
+			&& get_u32(packet->payload, 58) == ntohl(0xb1130000)) {
+			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive.\n");
+			ipoque_int_pplive_add_connection(ipoque_struct);
+			return;
+		}
+
+		if ((packet->payload_packet_len >= 90 && packet->payload_packet_len <= 110)
+			&& (packet->payload[0] >= 0x0a && packet->payload[0] <= 0x0f)
+			&& get_u32(packet->payload, 86) == 0) {
+			int i;
+			for (i = 56; i < 68; i += 2) {
+				if ((get_u32(packet->payload, i) == ntohl(0x4fde7e7f))
+					&& (get_u16(packet->payload, i + 4) == 0)) {
+					IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive through "
+							"bitpattern 4f de 7e 7f 00 00.\n");
+					ipoque_int_pplive_add_connection(ipoque_struct);
+					return;
+				}
+			}
+		}
 		if (flow->packet_counter < 5 && !flow->pplive_stage) {	/* With in 1st 4 packets */
-			if ((packet->payload_packet_len >= 90 && packet->payload_packet_len <= 110)
-				&& !get_u32(packet->payload, packet->payload_packet_len - 16)) {
+			if (((packet->payload_packet_len >= 90 && packet->payload_packet_len <= 110)
+				 && (!get_u32(packet->payload, packet->payload_packet_len - 16)
+					 || !get_u32(packet->payload, packet->payload_packet_len - 4)))
+				) {
 				flow->pplive_stage = 2;	/* Now start looking for size(28 | 30) */
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG,
+						"Maybe found pplive packet. Now start looking for size(28 | 30).\n");
 			}
 			if (68 == packet->payload_packet_len
 				&& get_l16(packet->payload, 0) == 0x21 && packet->payload[19] == packet->payload[20]
@@ -140,20 +169,19 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
 						IPQ_LOG_DEBUG, "PPLIVE: VOD Port marked %u.\n", ntohs(packet->udp->dest));
 				dst->pplive_last_packet_time = packet->tick_timestamp;
+				dst->pplive_last_packet_time_set = 1;
 			}
-			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive over udp with pattern III.\n");
+			IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive.\n");
 			ipoque_int_pplive_add_connection(ipoque_struct);
 			return;
 		}
 
 		if (flow->pplive_stage == 2) {
-			if ((packet->payload_packet_len == 30 && (packet->payload[0] == 2 || packet->payload[0] == 3)
-				 && get_l32(packet->payload, 21) == 0x01000000)
-				|| (packet->payload_packet_len == 28 && (packet->payload[0] == 1 || packet->payload[0] == 0)
-					&& get_l32(packet->payload, 19) == 0x01000000)) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG,
-						"found pplive over udp with pattern VI.\n");
+			if ((packet->payload_packet_len == 30 && (packet->payload[0] == 0x02 || packet->payload[0] == 0x03)
+				 && get_u32(packet->payload, 21) == ntohl(0x00000001))
+				|| (packet->payload_packet_len == 28 && (packet->payload[0] == 0x01 || packet->payload[0] == 0x00)
+					&& (get_u32(packet->payload, 19) == ntohl(0x00000001)))) {
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "found pplive.\n");
 				ipoque_int_pplive_add_connection(ipoque_struct);
 				return;
 			}
@@ -164,19 +192,17 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 		}
 	} else if (packet->tcp != NULL) {
 
-
 		IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG,
 				"PPLIVE: TCP found, plen = %d, stage = %d, payload[0] = %x, payload[1] = %x, payload[2] = %x, payload[3] = %x \n",
 				packet->payload_packet_len, flow->pplive_stage, packet->payload[0], packet->payload[1],
 				packet->payload[2], packet->payload[3]);
 
-
-
 		if (src != NULL && src->pplive_vod_cli_port == packet->tcp->source
 			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
-			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+			if (src->pplive_last_packet_time_set == 1 && (IPOQUE_TIMESTAMP_COUNTER_SIZE)
 				(packet->tick_timestamp - src->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
 				ipoque_int_pplive_add_connection(ipoque_struct);
+				src->pplive_last_packet_time_set = 1;
 				src->pplive_last_packet_time = packet->tick_timestamp;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp src.\n");
 				return;
@@ -189,23 +215,49 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 
 		if (dst != NULL && dst->pplive_vod_cli_port == packet->tcp->dest
 			&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_PPLIVE)) {
-			if ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+			if (dst->pplive_last_packet_time_set == 1 && (IPOQUE_TIMESTAMP_COUNTER_SIZE)
 				(packet->tick_timestamp - dst->pplive_last_packet_time) < ipoque_struct->pplive_connection_timeout) {
-				ipoque_int_pplive_add_connection(ipoque_struct);
+				flow->detected_protocol = IPOQUE_PROTOCOL_PPLIVE;
+				packet->detected_protocol = IPOQUE_PROTOCOL_PPLIVE;
+				dst->pplive_last_packet_time_set = 1;
 				dst->pplive_last_packet_time = packet->tick_timestamp;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "timestamp dst.\n");
 				return;
 			} else {
+				dst->pplive_last_packet_time_set = 0;
 				dst->pplive_vod_cli_port = 0;
 				dst->pplive_last_packet_time = 0;
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "PPLIVE: VOD port timer reset.\n");
 			}
 		}
 
-
-
-		if (packet->payload_packet_len > 20 && packet->payload[0] == 0x00 && packet->payload[1] == 0x00
-			&& ntohs(get_u16(packet->payload, 2)) == packet->payload_packet_len - 4) {
+		if (packet->payload_packet_len > 4 && memcmp(packet->payload, "GET /", 5) == 0) {
+			ipq_parse_packet_line_info(ipoque_struct);
+			if (packet->parsed_lines == 8
+				&& packet->line[0].ptr != NULL && packet->line[0].len >= 8
+				&& memcmp(&packet->payload[packet->line[0].len - 8], "HTTP/1.", 7) == 0
+				&& packet->line[2].ptr != NULL && packet->line[2].len >= 16
+				&& memcmp(packet->line[2].ptr, "x-flash-version:", 16) == 0
+				&& packet->user_agent_line.ptr != NULL && packet->user_agent_line.len >= 11
+				&& memcmp(packet->user_agent_line.ptr, "Mozilla/4.0", 11) == 0
+				&& packet->line[6].ptr != NULL && packet->line[6].len >= 21
+				&& memcmp(packet->line[6].ptr, "Pragma: Client=PPLive", 21) == 0) {
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "PPLIVE: found HTTP request.\n");
+				ipoque_int_pplive_add_connection(ipoque_struct);
+				return;
+			} else if (packet->parsed_lines == 6
+					   && packet->line[0].ptr != NULL && packet->line[0].len >= 8
+					   && memcmp(&packet->payload[packet->line[0].len - 8], "HTTP/1.", 7) == 0
+					   && packet->user_agent_line.ptr != NULL && packet->user_agent_line.len >= 10
+					   && memcmp(packet->user_agent_line.ptr, "PPLive DAC", 10) == 0) {
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG, "PPLIVE: found HTTP request.\n");
+				ipoque_int_pplive_add_connection(ipoque_struct);
+				return;
+			}
+		}
+		// searches for packets > 20 byte that begin with a hex number == packet->payload_packet_len - 4
+		// and with the same number at position 16, 17, 18, 19
+		if (packet->payload_packet_len > 20 && ntohl(get_u32(packet->payload, 0)) == packet->payload_packet_len - 4) {
 			if (packet->payload[4] == 0x21 && packet->payload[5] == 0x00) {
 				if ((packet->payload[9] == packet->payload[10]) && (packet->payload[9] == packet->payload[11])) {
 					if ((packet->payload[16] == packet->payload[17]) &&
@@ -216,6 +268,40 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 						return;
 					}
 				}
+			}
+		}
+		// stage > 0, packet begins with 21 00, bytes at positions 5, 6, 7 are equal, bytes at positions 12, 13, 14, 15 are equal,
+		if (packet->payload_packet_len > 20 && flow->pplive_stage) {
+			if (packet->payload[0] == 0x21 && packet->payload[1] == 0x00) {
+				if (packet->payload[5] == packet->payload[6] && packet->payload[5] == packet->payload[7]) {
+					if (packet->payload[12] == packet->payload[13] && packet->payload[14] == packet->payload[15]
+						&& packet->payload[12] == packet->payload[14]) {
+						IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
+								IPQ_LOG_DEBUG, "PPLIVE: direct server request or response found\n");
+						ipoque_int_pplive_add_connection(ipoque_struct);
+						return;
+					}
+				}
+			}
+		}
+		// packet (len>11) begins with a hex number == packet->payload_packet_len - 4 and matches certain bitmuster
+		if (packet->payload_packet_len > 11 && ntohl(get_u32(packet->payload, 0)) == packet->payload_packet_len - 4) {
+			if (packet->payload[4] == 0xe9 && packet->payload[5] == 0x03 &&
+				((packet->payload[7] == packet->payload[10]) || (packet->payload[7] == packet->payload[11]))) {
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
+						IPQ_LOG_DEBUG, "PPLIVE: direct server request or response found\n");
+				ipoque_int_pplive_add_connection(ipoque_struct);
+				return;
+			}
+		}
+		// stage > 0, len>10, begins with e9 03, matches certain pattern
+		if (packet->payload_packet_len > 10 && flow->pplive_stage) {
+			if (packet->payload[0] == 0xe9 && packet->payload[1] == 0x03 &&
+				((packet->payload[3] == packet->payload[6]) || (packet->payload[3] == packet->payload[7]))) {
+				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
+						IPQ_LOG_DEBUG, "PPLIVE: direct server request or response found\n");
+				ipoque_int_pplive_add_connection(ipoque_struct);
+				return;
 			}
 		}
 
@@ -230,19 +316,18 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 				packet->payload[0], packet->payload[1], packet->payload[2], packet->payload[3]);
 
 		/* generic pplive detection (independent of the stage) !!! */
-		if (packet->payload_packet_len > 11 && packet->payload[0] == 0x00 && packet->payload[1] == 0x00
-			&& packet->payload[2] == 0x00 && (packet->payload[3] == packet->payload_packet_len - 4)) {
+		// len > 11, packet begins with a hex number == packet->payload_packet_len - 4, pattern: ?? ?? ?? ?? 21 00 ?? ?? 98 ab 01 02
+		if (packet->payload_packet_len > 11 && ntohl(get_u32(packet->payload, 0)) == packet->payload_packet_len - 4) {
 			if (packet->payload[4] == 0x21 && packet->payload[5] == 0x00
 				&& ((packet->payload[8] == 0x98 && packet->payload[9] == 0xab
 					 && packet->payload[10] == 0x01 && packet->payload[11] == 0x02)
 				)) {
 				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
 						IPQ_LOG_DEBUG, "PPLIVE: direct server request or response found\n");
-				IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG,
-						"found pplive over tcp with pattern i.\n");
 				ipoque_int_pplive_add_connection(ipoque_struct);
 				return;
 			}
+			// packet 4 to 19 have a hex representation from 0x30 to 0x39
 			if (packet->payload_packet_len > 20) {
 				a = 4;
 				while (a < 20) {
@@ -250,8 +335,6 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 						if (a == 19) {
 							IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct,
 									IPQ_LOG_DEBUG, "PPLIVE: direct new header format found\n");
-							IPQ_LOG(IPOQUE_PROTOCOL_PPLIVE, ipoque_struct, IPQ_LOG_DEBUG,
-									"found pplive over tcp with pattern ii.\n");
 							ipoque_int_pplive_add_connection(ipoque_struct);
 							return;
 						} else {
@@ -265,6 +348,7 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 		}
 
 		/* 1st and 2nd (KD: ??????? )Packet of Client is 4 Byte  */
+		// stage == 0, p_len == 4, pattern: 04 00 00 00 --> need next packet
 		if (flow->pplive_stage == 0) {
 			if (packet->payload_packet_len == 4 && packet->payload[0] > 0x04
 				&& packet->payload[1] == 0x00 && packet->payload[2] == 0x00 && packet->payload[3] == 0x00) {
@@ -305,6 +389,7 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 						ipoque_int_pplive_add_connection(ipoque_struct);
 						return;
 					}
+					// packet 4 to 19 have a hex representation from 0x30 to 0x39
 					if (packet->payload_packet_len > 16) {
 						a = 0;
 						while (a < 16) {
@@ -324,6 +409,7 @@ void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 							}
 						}
 					}
+					// p_len>79 and a lot of 00 in the end
 					if (packet->payload_packet_len > 79
 						&& get_u32(packet->payload, packet->payload_packet_len - 9) == 0x00000000
 						&& get_u32(packet->payload, packet->payload_packet_len - 5) == 0x00000000) {

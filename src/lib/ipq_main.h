@@ -1,6 +1,6 @@
 /*
  * ipq_main.h
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -47,18 +47,6 @@
 
 //#include <arpa/inet.h>
 
-#ifndef u64
-#define u64 	uint64_t
-#endif
-#ifndef u32
-#define u32 	uint32_t
-#endif
-#ifndef u16
-#define u16 	uint16_t
-#endif
-#ifndef u8
-#define u8 	uint8_t
-#endif
 
 #include "ipq_api.h"
 #include "ipq_structs.h"
@@ -217,24 +205,12 @@ typedef struct ipoque_packet_struct {
 	const struct udphdr *udp;
 	const u8 *generic_l4_ptr;	/* is set only for non tcp-udp traffic */
 	const u8 *payload;
-	IPOQUE_TIMESTAMP_COUNTER_SIZE tick_timestamp;
-	u32 detected_protocol;
-	u16 l3_packet_len;
-	u16 l4_packet_len;
-	u16 payload_packet_len;
-	u16 actual_payload_len;
-	u16 num_retried_bytes;
-	u8 packet_direction;
-	u8 tcp_retransmission;
-	u8 detected_sub_protocol;
-	u8 l4_protocol;
 
-	u8 packet_lines_parsed_complete;
-	u8 packet_unix_lines_parsed_complete;
-	u8 empty_line_position_set;
-	u16 parsed_lines;
-	u16 parsed_unix_lines;
-	u16 empty_line_position;
+	IPOQUE_TIMESTAMP_COUNTER_SIZE tick_timestamp;
+
+
+	u32 detected_protocol;
+
 	struct ipoque_int_one_line_struct line[IPOQUE_MAX_PARSE_LINES_PER_PACKET];
 	struct ipoque_int_one_line_struct
 	 unix_line[IPOQUE_MAX_PARSE_LINES_PER_PACKET];
@@ -249,7 +225,26 @@ typedef struct ipoque_packet_struct {
 	struct ipoque_int_one_line_struct http_contentlen;
 	struct ipoque_int_one_line_struct http_cookie;
 	struct ipoque_int_one_line_struct http_x_session_type;
+
+
+	u16 l3_packet_len;
+	u16 l4_packet_len;
+	u16 payload_packet_len;
+	u16 actual_payload_len;
+	u16 num_retried_bytes;
+	u16 parsed_lines;
+	u16 parsed_unix_lines;
+	u16 empty_line_position;
+	u8 tcp_retransmission;
+	u8 detected_sub_protocol;
+	u8 l4_protocol;
+
+	u8 packet_lines_parsed_complete;
+	u8 packet_unix_lines_parsed_complete;
+	u8 empty_line_position_set;
+	u8 packet_direction:1;
 } ipoque_packet_struct_t;
+
 
 
 typedef struct ipoque_detection_module_struct {
@@ -340,6 +335,16 @@ typedef struct ipoque_detection_module_struct {
 #endif
 } ipoque_detection_module_struct_t;
 u32 ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
+
+#define ATTRIBUTE_ALWAYS_INLINE __attribute__ ((always_inline))
+
+ATTRIBUTE_ALWAYS_INLINE static inline u16 ntohs_ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read,
+																		 u16 * bytes_read)
+{
+	u16 val = ipq_bytestream_to_number(str, max_chars_to_read, bytes_read);
+	return ntohs(val);
+}
+
 u64 ipq_bytestream_to_number64(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
 
 u32 ipq_bytestream_dec_or_hex_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
@@ -361,7 +366,6 @@ void ipq_parse_packet_line_info_unix(struct ipoque_detection_module_struct
 u16 ipoque_check_for_email_address(struct ipoque_detection_module_struct *ipoque_struct, u16 counter);
 
 
-#define ATTRIBUTE_ALWAYS_INLINE __attribute__ ((always_inline))
 
 /* reset ip to zero */
 ATTRIBUTE_ALWAYS_INLINE static inline void ipq_ip_clear(ipq_ip_addr_t * ip)

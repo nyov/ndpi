@@ -1,6 +1,6 @@
 /*
  * sopcast.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -53,17 +53,18 @@ static void ipoque_search_sopcast_tcp(struct ipoque_detection_module_struct
 
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	if (flow->packet_counter == 1 && packet->payload_packet_len == 54 && packet->payload[0] == 0x00
-		&& packet->payload[1] == 0x36) {
+	if (flow->packet_counter == 1 && packet->payload_packet_len == 54 && get_u16(packet->payload, 0) == ntohs(0x0036)) {
 		if ((packet->payload[2] == packet->payload[3] - 4 || packet->payload[2] == packet->payload[3] + 4)
 			&& (packet->payload[2] == packet->payload[4] - 1 || packet->payload[2] == packet->payload[4] + 1)
-			&& (packet->payload[2] == packet->payload[5] - 1 || packet->payload[2] == packet->payload[5] + 1)
-			&& packet->payload[2] == packet->payload[25]
+			&& packet->payload[4] == packet->payload[5]
+			&& packet->payload[3] == packet->payload[25]
 
-			&& packet->payload[4] == packet->payload[28] && packet->payload[4] == packet->payload[31]
-			&& packet->payload[4] == packet->payload[32] && packet->payload[4] == packet->payload[33]
-			&& packet->payload[4] == packet->payload[34] && packet->payload[4] == packet->payload[35]
-			&& packet->payload[4] == packet->payload[30] && packet->payload[2] == packet->payload[36]
+			&& packet->payload[4] == packet->payload[28]
+			&& packet->payload[28] == packet->payload[30]
+			&& packet->payload[30] == packet->payload[31]
+			&& get_u16(packet->payload, 30) == get_u16(packet->payload, 32)
+			&& get_u16(packet->payload, 32) == get_u16(packet->payload, 34)
+
 			&& packet->payload[42] == packet->payload[53]
 			&& (packet->payload[45] == packet->payload[46] + 1 || packet->payload[45] == packet->payload[46] - 1)
 			&& packet->payload[45] == packet->payload[49] && packet->payload[46] == packet->payload[50]
@@ -74,6 +75,7 @@ static void ipoque_search_sopcast_tcp(struct ipoque_detection_module_struct
 			return;
 		}
 	}
+
 	IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "exclude sopcast TCP.  \n");
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SOPCAST);
 
@@ -148,6 +150,16 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[9] == 0x01 && packet->payload[10] == 0x01
 		&& packet->payload[11] == 0x16 && packet->payload[12] == 0x00 && packet->payload[13] == 0x00) {
 		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if VI.  \n");
+		ipoque_int_sopcast_add_connection(ipoque_struct);
+		return;
+	}
+	if (packet->payload_packet_len == 76 && packet->payload[0] == 0xff
+		&& packet->payload[1] == 0xff && packet->payload[2] == 0x01
+		&& packet->payload[8] == 0x0c && packet->payload[9] == 0xff
+		&& packet->payload[10] == 0x00 && packet->payload[11] == 0x44
+		&& packet->payload[16] == 0x01 && packet->payload[15] == 0x01
+		&& packet->payload[12] == 0x00 && packet->payload[13] == 0x00 && packet->payload[14] == 0x00) {
+		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if VII.  \n");
 		ipoque_int_sopcast_add_connection(ipoque_struct);
 		return;
 	}

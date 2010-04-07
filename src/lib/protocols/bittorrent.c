@@ -1,6 +1,6 @@
 /*
  * bittorrent.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -100,30 +100,44 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 			return 1;
 		}
 
+		if (packet->user_agent_line.ptr != NULL
+			&& (packet->user_agent_line.len >= 9 && memcmp(packet->user_agent_line.ptr, "Shareaza ", 9) == 0)
+			&& (packet->parsed_lines > 8 && packet->line[8].ptr != 0
+				&& packet->line[8].len >= 9 && memcmp(packet->line[8].ptr, "X-Queue: ", 9) == 0)) {
+			IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
+							   IPQ_LOG_TRACE, "Bittorrent Shareaza detected.\n");
+			ipoque_add_connection_as_bittorrent(ipoque_struct,
+												IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_WEBSEED_DETECTION);
+			return 1;
+		}
+
 		/* this is a self built client, not possible to catch asymmetrically */
-		if (packet->parsed_lines == 10
+		if ((packet->parsed_lines == 10 || (packet->parsed_lines == 11 && packet->line[11].len == 0))
 			&& packet->user_agent_line.ptr != NULL
-			&& packet->host_line.ptr != NULL && packet->line[2].ptr != NULL
-			&& packet->line[3].ptr != NULL && packet->line[4].ptr != NULL
-			&& packet->line[5].ptr != NULL && packet->line[7].ptr != NULL
-			&& packet->line[8].ptr != NULL
 			&& packet->user_agent_line.len > 12
 			&& ipq_mem_cmp(packet->user_agent_line.ptr, "Mozilla/4.0 ",
-						   12) == 0 && packet->line[2].len > 14
+						   12) == 0
+			&& packet->host_line.ptr != NULL
+			&& packet->host_line.len >= 7
+			&& packet->line[2].ptr != NULL
+			&& packet->line[2].len > 14
 			&& ipq_mem_cmp(packet->line[2].ptr, "Keep-Alive: 300", 15) == 0
+			&& packet->line[3].ptr != NULL
 			&& packet->line[3].len > 21
-			&& ipq_mem_cmp(packet->line[3].ptr, "Connection: Keep-alive",
-						   22) == 0 && packet->line[4].len > 10
+			&& ipq_mem_cmp(packet->line[3].ptr, "Connection: Keep-alive", 22) == 0
+			&& packet->line[4].ptr != NULL
+			&& packet->line[4].len > 10
 			&& (ipq_mem_cmp(packet->line[4].ptr, "Accpet: */*", 11) == 0
-				|| ipq_mem_cmp(packet->line[4].ptr, "Accept: */*",
-							   11) == 0) && packet->line[5].len > 12
+				|| ipq_mem_cmp(packet->line[4].ptr, "Accept: */*", 11) == 0)
+
+			&& packet->line[5].ptr != NULL
+			&& packet->line[5].len > 12
 			&& ipq_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
+			&& packet->line[7].ptr != NULL
 			&& packet->line[7].len > 15
-			&& ipq_mem_cmp(packet->line[7].ptr, "Pragma: no-cache",
-						   16) == 0 && packet->line[8].len > 22
-			&& ipq_mem_cmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0 && packet->host_line.len >= 7
-//            && packet->host_line.len <= 15
-			) {
+			&& ipq_mem_cmp(packet->line[7].ptr, "Pragma: no-cache", 16) == 0
+			&& packet->line[8].ptr != NULL
+			&& packet->line[8].len > 22 && ipq_mem_cmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0) {
 
 			IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct, IPQ_LOG_TRACE, "Bitcomet LTS detected\n");
 			ipoque_add_connection_as_bittorrent(ipoque_struct,

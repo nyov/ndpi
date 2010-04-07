@@ -1,6 +1,6 @@
 /*
  * sip.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -61,16 +61,14 @@ static inline void ipoque_search_sip_handshake(struct ipoque_detection_module_st
 		if (packet->payload_packet_len >= 14)
 #endif
 		{
-			if ((ipq_mem_cmp(packet->payload, "REGISTER ", 9) == 0 || ipq_mem_cmp(packet->payload, "register ", 9) == 0)
-				&& (ipq_mem_cmp(&packet->payload[9], "SIP:", 4) == 0
-					|| ipq_mem_cmp(&packet->payload[9], "sip:", 4) == 0)) {
+			if ((memcmp(packet->payload, "REGISTER ", 9) == 0 || memcmp(packet->payload, "register ", 9) == 0)
+				&& (memcmp(&packet->payload[9], "SIP:", 4) == 0 || memcmp(&packet->payload[9], "sip:", 4) == 0)) {
 				IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "found sip REGISTER.\n");
 				ipoque_int_sip_add_connection(ipoque_struct);
 				return;
 			}
-			if ((ipq_mem_cmp(packet->payload, "INVITE ", 7) == 0 || ipq_mem_cmp(packet->payload, "invite ", 7) == 0)
-				&& (ipq_mem_cmp(&packet->payload[7], "SIP:", 4) == 0
-					|| ipq_mem_cmp(&packet->payload[7], "sip:", 4) == 0)) {
+			if ((memcmp(packet->payload, "INVITE ", 7) == 0 || memcmp(packet->payload, "invite ", 7) == 0)
+				&& (memcmp(&packet->payload[7], "SIP:", 4) == 0 || memcmp(&packet->payload[7], "sip:", 4) == 0)) {
 				IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "found sip INVITE.\n");
 				ipoque_int_sip_add_connection(ipoque_struct);
 				return;
@@ -79,8 +77,8 @@ static inline void ipoque_search_sip_handshake(struct ipoque_detection_module_st
 			 * maybe it could be deleted, if somebody sees it in the first direction,
 			 * please delete this comment.
 			 */
-			if (ipq_mem_cmp(packet->payload, "SIP/2.0 200 OK", 14) == 0
-				|| ipq_mem_cmp(packet->payload, "sip/2.0 200 OK", 14) == 0) {
+			if (memcmp(packet->payload, "SIP/2.0 200 OK", 14) == 0
+				|| memcmp(packet->payload, "sip/2.0 200 OK", 14) == 0) {
 				IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "found sip SIP/2.0 0K.\n");
 				ipoque_int_sip_add_connection(ipoque_struct);
 				return;
@@ -98,7 +96,17 @@ static inline void ipoque_search_sip_handshake(struct ipoque_detection_module_st
 		IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "maybe sip. need next packet.\n");
 		return;
 	}
-
+#ifdef IPOQUE_PROTOCOL_YAHOO
+	if (packet->payload_packet_len > 30 && packet->payload[0] == 0x90
+		&& packet->payload[3] == packet->payload_packet_len - 20 && get_u32(packet->payload, 4) == 0
+		&& get_u32(packet->payload, 8) == 0) {
+		flow->sip_yahoo_voice = 1;
+		IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "maybe sip yahoo. need next packet.\n");
+	}
+	if (flow->sip_yahoo_voice && flow->packet_counter < 10) {
+		return;
+	}
+#endif
 	IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "exclude sip.\n");
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SIP);
 	return;

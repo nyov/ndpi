@@ -1,6 +1,6 @@
 /*
  * imesh.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -73,11 +73,12 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 	if (packet->udp != NULL) {
 
 		IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "UDP FOUND\n");
+
 		// this is the login packet
 		if (					//&& ((IPOQUE_TIMESTAMP_COUNTER_SIZE)(packet->tick_timestamp - src->imesh_timer)) < ipoque_struct->imesh_connection_timeout
 			   packet->payload_packet_len == 28 && (get_l32(packet->payload, 0)) == 0x00000002	// PATTERN : 02 00 00 00
 			   && (get_l32(packet->payload, 24)) == 0x00000000	// PATTERN : 00 00 00 00
-			   && packet->udp->dest == htons(1864)) {
+			   && (packet->udp->dest == htons(1864) || packet->udp->source == htons(1864))) {
 			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "iMesh Login detected\n");
 			if (src != NULL) {
 				src->imesh_timer = packet->tick_timestamp;
@@ -91,8 +92,11 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 					  packet->payload_packet_len == 36 && (get_l32(packet->payload, 0)) == 0x00000002	// PATTERN : 02 00 00 00
 					  //&& packet->payload[35]==0x0f
 			) {
-			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "iMesh detected\n");
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "iMesh detected, %u\n",
+					ipoque_struct->imesh_connection_timeout);
 			if (src != NULL) {
+				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "iMesh: src < %u, %u, %u\n",
+						(packet->tick_timestamp - src->imesh_timer), packet->tick_timestamp, src->imesh_timer);
 				if (((IPOQUE_TIMESTAMP_COUNTER_SIZE)
 					 (packet->tick_timestamp - src->imesh_timer)) < ipoque_struct->imesh_connection_timeout) {
 					src->imesh_timer = packet->tick_timestamp;
@@ -100,6 +104,8 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 				}
 			}
 			if (dst != NULL) {
+				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "iMesh: dst < %u, %u, %u\n",
+						(packet->tick_timestamp - dst->imesh_timer), packet->tick_timestamp, dst->imesh_timer);
 				if (((IPOQUE_TIMESTAMP_COUNTER_SIZE)
 					 (packet->tick_timestamp - dst->imesh_timer)) < ipoque_struct->imesh_connection_timeout) {
 					dst->imesh_timer = packet->tick_timestamp;
@@ -117,203 +123,159 @@ void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
 		IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
 				"TCP FOUND :: Payload %u\n", packet->payload_packet_len);
 
-		if (flow->imesh_stage == 0) {
-			// this is the first package to the server
-			// we could implement a stage because the replay from the server is also
-			// 10 bytes long --> the only difference is that the packet has at [6] == 1 instead of 0
-			if (packet->payload_packet_len == 10
-				&& get_l32(packet->payload, 0) == 0x00040006
-				&& get_l32(packet->payload, 4) == 0x00000000 && get_l16(packet->payload, 8) == 0x0000
-				//&& packet->tcp->dest == htons(8080)
-				) {
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh central server connection detected\n");
-				flow->imesh_stage = 1 + packet->packet_direction;
-				//ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-			} else if (packet->payload_packet_len == 12 && get_l32(packet->payload, 0) == 0x00060006	// PATTERN : 06 00 06 00 00 00 64 00
-					   && get_l32(packet->payload, 4) == 0x00640000) {
+		if (packet->actual_payload_len == 0) {
+			return;
 
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh First Packet detected :: Payload %u\n", packet->payload_packet_len);
+		} else if ((packet->actual_payload_len == 8 || packet->payload_packet_len == 10)	/* PATTERN:: 04 00 00 00 00 00 00 00 [00 00] */
+				   &&packet->payload[0] == 0x04
+				   && packet->payload[1] == 0x00
+				   && packet->payload[2] == 0x00
+				   && packet->payload[3] == 0x00
+				   && packet->payload[4] == 0x00
+				   && packet->payload[5] == 0x00 && packet->payload[6] == 0x00 && packet->payload[7] == 0x00) {
+			flow->imesh_stage += 2;
 
-				flow->imesh_stage = 1 + packet->packet_direction;
-				return;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
 
-			} else if ((packet->payload_packet_len == 64 || packet->payload_packet_len == 52)
-					   && get_l16(packet->payload, 0) == (packet->payload_packet_len)
-					   && get_l32(packet->payload, 1) == 0x00000000) {
+		} else if (packet->actual_payload_len == 10	/* PATTERN:: ?? ?? 04|00 00 64|00 00 */
+				   && (packet->payload[2] == 0x04 || packet->payload[2] == 0x00)
+				   && packet->payload[3] == 0x00 && (packet->payload[4] == 0x00 || packet->payload[4] == 0x64)
+				   && packet->payload[5] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
 
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh new type 1 at stage 0: Payload %u\n", packet->payload_packet_len);
-				flow->imesh_stage = 1 + packet->packet_direction;
-				return;
-			} else if (packet->payload_packet_len == 6	// PATTERN : 06 00 04 00 00 00
-					   && get_l32(packet->payload, 0) == 0x00040006 && get_l16(packet->payload, 4) == 0x0000) {
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh new divided 6 byte server login at stage 0: Payload %u\n", packet->payload_packet_len);
-				flow->imesh_stage = 7 + packet->packet_direction;
-				return;
-			} else if (packet->payload_packet_len == 2	// PATTERN : 06 00
-					   && get_l16(packet->payload, 0) == 0x0006) {
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh new divided 2 byte server login at stage 0: Payload %u\n", packet->payload_packet_len);
-				flow->imesh_stage = 7 + packet->packet_direction;
-				return;
-			}
-		} else if ((2 - packet->packet_direction) == flow->imesh_stage) {
-			if (packet->payload_packet_len == 10
-				&& get_l32(packet->payload, 0) == 0x00040006
-				&& get_l32(packet->payload, 4) == 0x00010000 && get_l16(packet->payload, 8) == 0x0000
-				//&& packet->tcp->dest == htons(8080)
-				) {
+		} else if (packet->actual_payload_len == 2 && packet->payload[0] == 0x06 && packet->payload[1] == 0x00) {
+			flow->imesh_stage++;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
 
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh central server connection detected (finish)\n");
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-			} else if (packet->payload_packet_len == 95 && get_l16(packet->payload, 0) == (packet->payload_packet_len)
-					   && get_l32(packet->payload, 1) == 0x00000000) {
-				flow->imesh_stage = 3 + packet->packet_direction;
-				return;
-			} else if (packet->payload_packet_len >= 300 && packet->payload_packet_len <= 400) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh Second Packet detected :: Payload %u\n", packet->payload_packet_len);
-
-				flow->imesh_stage = 3 + packet->packet_direction;
-				return;
-			} else if (packet->payload_packet_len == 6 && get_l16(packet->payload, 0) == (packet->payload_packet_len)
-					   && get_l32(packet->payload, 2) == 0xee000000) {
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-			}
-		} else if ((4 - packet->packet_direction) == flow->imesh_stage) {
-			if ((packet->payload_packet_len == 26
-				 || packet->payload_packet_len == 29 || packet->payload_packet_len == 31)
-				&& get_l16(packet->payload, 0) == (packet->payload_packet_len)) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE, "iMesh download detected\n");
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-
-			} else if (packet->payload_packet_len >= 200 && packet->payload_packet_len <= 400) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh Third Packet detected :: Payload %u\n", packet->payload_packet_len);
-
-				flow->imesh_stage = 5 + packet->packet_direction;
-				return;
-			}
-		} else if ((6 - packet->packet_direction) == flow->imesh_stage) {
-			if (packet->payload_packet_len == 24	// PATTERN :: 06 00 12 00 00 00 34 00 00
-				&& get_l32(packet->payload, 0) == 0x00120006
-				&& get_l32(packet->payload, 4) == 0x00340000 && packet->payload[8] == 0x00) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh Fourth Packet detected :: Payload %u\n", packet->payload_packet_len);
-
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-			} else if (packet->payload_packet_len == 8	// PATTERN :: 06 00 02 00 00 00 33 00
-					   && get_l32(packet->payload, 0) == 0x00020006 && get_l32(packet->payload, 4) == 0x00330000) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"iMesh Fourth Packet detected :: Payload %u\n", packet->payload_packet_len);
-
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-			}
-		} else if ((7 + packet->packet_direction) == flow->imesh_stage) {
-			if (packet->payload_packet_len == 4 && get_l32(packet->payload, 0) == 0x00000000) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"NULL packet :: Payload %u\n", packet->payload_packet_len);
-
-				flow->imesh_stage = 9 + packet->packet_direction;
-				return;
-			} else if (packet->payload_packet_len == 8 && get_l32(packet->payload, 0) == 0x00000004 &&
-					   get_l32(packet->payload, 4) == 0x00000000) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"continuation of iMesh 2 byte server login :: Payload %u\n", packet->payload_packet_len);
-
-				flow->imesh_stage = 9 + packet->packet_direction;
-				return;
-			} else if (packet->payload_packet_len == 10 && get_l32(packet->payload, 0) == 0x00000006 &&
-					   get_l32(packet->payload, 4) == 0x00000001 && get_l16(packet->payload, 8) == 0x0000) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"continuation of iMesh 2 byte server login :: Payload %u\n", packet->payload_packet_len);
-
-				flow->imesh_stage = 9 + packet->packet_direction;
-				return;
-			}
-		} else if ((10 - packet->packet_direction) == flow->imesh_stage) {
-			if (packet->payload_packet_len == 10
-				&& get_l32(packet->payload, 0) == 0x00040006 && get_l32(packet->payload, 4) == 0x00010000
-				/* && packet->payload[8]==0x00 */
-				&& packet->payload[9] == 0x00) {
-
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"10 byte type 3 packet : Payload %u\n", packet->payload_packet_len);
-
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-			} else if (packet->payload_packet_len == 2 && get_l16(packet->payload, 0) == 0x0006) {
-				IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_TRACE,
-						"2 byte type 3 packet : Payload %u\n", packet->payload_packet_len);
-
-				if (src != NULL) {
-					src->imesh_timer = packet->tick_timestamp;
-				}
-				if (dst != NULL) {
-					dst->imesh_timer = packet->tick_timestamp;
-				}
-				ipoque_int_imesh_add_connection(ipoque_struct);
-				return;
-
-			}
+		} else if (packet->actual_payload_len == 10	/* PATTERN:: 06 00 04|00 00 01|00 00 01|00 00 ?? 00 */
+				   && packet->payload[0] == 0x06
+				   && packet->payload[1] == 0x00 && (packet->payload[2] == 0x04 || packet->payload[2] == 0x00)
+				   && packet->payload[3] == 0x00 && (packet->payload[4] == 0x00 || packet->payload[4] == 0x01)
+				   && packet->payload[5] == 0x00 && (packet->payload[6] == 0x01 || packet->payload[6] == 0x00)
+				   && packet->payload[7] == 0x00 && packet->payload[9] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
 		}
+
+		else if (packet->actual_payload_len == 24 && packet->payload[0] == 0x06	// PATTERN :: 06 00 12 00 00 00 34 00 00
+				 && packet->payload[1] == 0x00
+				 && packet->payload[2] == 0x12
+				 && packet->payload[3] == 0x00
+				 && packet->payload[4] == 0x00
+				 && packet->payload[5] == 0x00
+				 && packet->payload[6] == 0x34 && packet->payload[7] == 0x00 && packet->payload[8] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+		}
+
+		else if (packet->actual_payload_len == 8	/* PATTERN:: 06|00 00 02 00 00 00 33 00 */
+				 && (packet->payload[0] == 0x06 || packet->payload[0] == 0x00)
+				 && packet->payload[1] == 0x00
+				 && packet->payload[2] == 0x02
+				 && packet->payload[3] == 0x00
+				 && packet->payload[4] == 0x00
+				 && packet->payload[5] == 0x00 && packet->payload[6] == 0x33 && packet->payload[7] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+		}
+
+		else if (packet->payload_packet_len == 6	/* PATTERN:: 02 00 00 00 33 00 */
+				 && packet->payload[0] == 0x02
+				 && packet->payload[1] == 0x00
+				 && packet->payload[2] == 0x00
+				 && packet->payload[3] == 0x00 && packet->payload[4] == 0x33 && packet->payload[5] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+		}
+
+		else if (packet->actual_payload_len == 12 && packet->payload[0] == 0x06	// PATTERN : 06 00 06 00 00 00 64 00
+				 && packet->payload[1] == 0x00
+				 && packet->payload[2] == 0x06
+				 && packet->payload[3] == 0x00
+				 && packet->payload[4] == 0x00
+				 && packet->payload[5] == 0x00 && packet->payload[6] == 0x64 && packet->payload[7] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+		}
+
+		else if (packet->actual_payload_len == 10	/* PATTERN:: 06 00 04|01 00 00 00 01|00 00 ?? 00 */
+				 && packet->payload[0] == 0x06
+				 && packet->payload[1] == 0x00 && (packet->payload[2] == 0x04 || packet->payload[2] == 0x01)
+				 && packet->payload[3] == 0x00
+				 && packet->payload[4] == 0x00
+				 && packet->payload[5] == 0x00 && (packet->payload[6] == 0x01 || packet->payload[6] == 0x00)
+				 && packet->payload[7] == 0x00
+				 /* && packet->payload[8]==0x00 */
+				 && packet->payload[9] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+
+		} else if ((packet->actual_payload_len == 64 || packet->actual_payload_len == 52	/* PATTERN:: [len] 00 00 00 00 */
+					|| packet->actual_payload_len == 95)
+				   && get_u16(packet->payload, 0) == (packet->actual_payload_len)
+				   && packet->payload[1] == 0x00 && packet->payload[2] == 0x00
+				   && packet->payload[3] == 0x00 && packet->payload[4] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+
+		} else if (packet->actual_payload_len == 6 && packet->payload[0] == 0x06	// PATTERN : 06 00 04|6c 00|01 00 00
+				   && packet->payload[1] == 0x00 && (packet->payload[2] == 0x04 || packet->payload[2] == 0x6c)
+				   && (packet->payload[3] == 0x00 || packet->payload[3] == 0x01)
+				   && packet->payload[4] == 0x00 && packet->payload[5] == 0x00) {
+
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+
+		} else if (packet->actual_payload_len == 6	/* PATTERN:: [len] ?? ee 00 00 00 */
+				   && get_u16(packet->payload, 0) == (packet->actual_payload_len)
+				   && packet->payload[2] == 0xee
+				   && packet->payload[3] == 0x00 && packet->payload[4] == 0x00 && packet->payload[5] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+		}
+
+		else if (packet->actual_payload_len == 10	/* PATTERN:: 06 00 00 00 00 00 00 00 */
+				 && packet->payload[0] == 0x06
+				 && packet->payload[1] == 0x00
+				 && packet->payload[2] == 0x00
+				 && packet->payload[3] == 0x00
+				 && packet->payload[4] == 0x00
+				 && packet->payload[5] == 0x00 && packet->payload[6] == 0x00 && packet->payload[7] == 0x00) {
+			flow->imesh_stage += 2;
+			IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG,
+					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
+
+		}
+	}
+
+	/*give one packet tolerance for detection */
+	if (flow->imesh_stage >= 4)
+
+		ipoque_int_imesh_add_connection(ipoque_struct);
+
+
+	else if ((flow->packet_counter < 5) || packet->actual_payload_len == 0) {
+		return;
+	} else {
+		goto imesh_not_found_end;
 	}
 
   imesh_not_found_end:
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_IMESH);
+	IPQ_LOG(IPOQUE_PROTOCOL_IMESH, ipoque_struct, IPQ_LOG_DEBUG, "iMesh excluded at stage %d\n", flow->imesh_stage);
+
 }
 #endif

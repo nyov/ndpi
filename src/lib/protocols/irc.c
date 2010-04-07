@@ -1,6 +1,6 @@
 /*
  * irc.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -607,9 +607,8 @@ void ipoque_search_irc_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 										if (src != NULL) {
 											k = j;
 											port =
-												htons
-												(ipq_bytestream_to_number
-												 (&packet->line[i].ptr[j], packet->payload_packet_len - j, &j));
+												ntohs_ipq_bytestream_to_number
+												(&packet->line[i].ptr[j], packet->payload_packet_len - j, &j);
 											IPQ_LOG(IPOQUE_PROTOCOL_IRC, ipoque_struct, IPQ_LOG_TRACE, "port %u.",
 													port);
 											j = k;
@@ -649,9 +648,8 @@ void ipoque_search_irc_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 											}
 										}
 										if (dst != NULL) {
-											port = htons
-												(ipq_bytestream_to_number
-												 (&packet->line[i].ptr[j], packet->payload_packet_len - j, &j));
+											port = ntohs_ipq_bytestream_to_number
+												(&packet->line[i].ptr[j], packet->payload_packet_len - j, &j);
 											IPQ_LOG(IPOQUE_PROTOCOL_IRC, ipoque_struct, IPQ_LOG_TRACE, "port %u.",
 													port);
 											// hier das gleiche wie oben.

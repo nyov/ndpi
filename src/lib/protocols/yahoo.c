@@ -1,6 +1,6 @@
 /*
  * yahoo.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -202,11 +202,13 @@ static void ipoque_search_yahoo_tcp(struct ipoque_detection_module_struct *ipoqu
 
 	if (packet->payload_packet_len > 50 && (memcmp(packet->payload, "content-length: ", 16) == 0)) {
 		ipq_parse_packet_line_info(ipoque_struct);
-		if (packet->http_contentlen.ptr != 0 && packet->http_contentlen.len > 13
-			&& memcmp(packet->http_contentlen.ptr, "<Ymsg Command=", 14) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_TRACE, "YAHOO web chat found\n");
-			ipoque_int_yahoo_add_connection(ipoque_struct);
-			return;
+		if (packet->parsed_lines > 2 && packet->line[1].len == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_TRACE, "first line is empty.\n");
+			if (packet->line[2].len > 13 && memcmp(packet->line[2].ptr, "<Ymsg Command=", 14) == 0) {
+				IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_TRACE, "YAHOO web chat found\n");
+				ipoque_int_yahoo_add_connection(ipoque_struct);
+				return;
+			}
 		}
 	}
 
@@ -230,8 +232,10 @@ static void ipoque_search_yahoo_tcp(struct ipoque_detection_module_struct *ipoqu
 
 
 		if (packet->payload_packet_len == 8
-			&& (memcmp(packet->payload, "<SNDIMG>", 8) == 0 || memcmp(packet->payload, "<REQIMG>", 8) == 0)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_TRACE, "YAHOO SNDIMG or REQIMG FOUND\n");
+			&& (memcmp(packet->payload, "<SNDIMG>", 8) == 0 || memcmp(packet->payload, "<REQIMG>", 8) == 0
+				|| memcmp(packet->payload, "<RVWCFG>", 8) == 0 || memcmp(packet->payload, "<RUPCFG>", 8) == 0)) {
+			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_TRACE,
+					"YAHOO SNDIMG or REQIMG or RVWCFG or RUPCFG FOUND\n");
 			if (src != NULL) {
 				if (memcmp(packet->payload, "<SNDIMG>", 8) == 0) {
 					src->yahoo_video_lan_dir = 0;
@@ -249,7 +253,7 @@ static void ipoque_search_yahoo_tcp(struct ipoque_detection_module_struct *ipoqu
 				dst->yahoo_video_lan_timer = packet->tick_timestamp;
 
 			}
-			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_DEBUG, "found YAHOO");
+			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_DEBUG, "found YAHOO subtype VIDEO");
 			ipoque_int_yahoo_add_connection(ipoque_struct);
 			return;
 		}
@@ -276,6 +280,41 @@ static void ipoque_search_yahoo_tcp(struct ipoque_detection_module_struct *ipoqu
 
 		}
 	}
+
+	/* detect YAHOO over HTTP proxy */
+#ifdef IPOQUE_PROTOCOL_HTTP
+	if (packet->detected_protocol == IPOQUE_PROTOCOL_HTTP) {
+		if (flow->yahoo_http_proxy_stage == 0) {
+			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_DEBUG,
+					"YAHOO maybe HTTP proxy packet 1 => need next packet\n");
+			flow->yahoo_http_proxy_stage = 1 + packet->packet_direction;
+			return;
+		}
+		if (flow->yahoo_http_proxy_stage == 1 + packet->packet_direction) {
+			IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_DEBUG,
+					"YAHOO maybe HTTP proxy still initial direction => need next packet\n");
+			return;
+		}
+		if (flow->yahoo_http_proxy_stage == 2 - packet->packet_direction) {
+
+			ipq_parse_packet_line_info_unix(ipoque_struct);
+
+			if (packet->parsed_unix_lines >= 9) {
+
+				if (packet->unix_line[4].ptr != NULL && packet->unix_line[4].len >= 9 &&
+					packet->unix_line[8].ptr != NULL && packet->unix_line[8].len >= 6 &&
+					memcmp(packet->unix_line[4].ptr, "<Session ", 9) == 0 &&
+					memcmp(packet->unix_line[8].ptr, "<Ymsg ", 6) == 0) {
+
+					IPQ_LOG(IPOQUE_PROTOCOL_YAHOO, ipoque_struct, IPQ_LOG_DEBUG, "found YAHOO over HTTP proxy");
+					ipoque_int_yahoo_add_connection(ipoque_struct);
+					return;
+				}
+			}
+		}
+	}
+#endif
+
 //  flow->yahoo_detection_finished = 1;
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_YAHOO);
 }
@@ -284,7 +323,7 @@ static inline void ipoque_search_yahoo_udp(struct ipoque_detection_module_struct
 {
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
 	struct ipoque_id_struct *src = ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+
 	if (src == NULL || IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_YAHOO) == 0) {
 		goto excl_yahoo_udp;
 	}

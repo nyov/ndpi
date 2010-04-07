@@ -1,6 +1,6 @@
 /*
  * mail_smtp.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -77,11 +77,11 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 		u8 a;
 		u8 bit_count = 0;
 
-		ipq_parse_packet_line_info(ipoque_struct);
+		IPQ_PARSE_PACKET_LINE_INFO(ipoque_struct, packet);
 		for (a = 0; a < packet->parsed_lines; a++) {
 
 			// expected server responses
-			if (packet->line[a].len > 3) {
+			if (packet->line[a].len >= 3) {
 				if (memcmp(packet->line[a].ptr, "220", 3) == 0) {
 					flow->smtp_command_bitmask |= SMTP_BIT_220;
 				} else if (memcmp(packet->line[a].ptr, "250", 3) == 0) {
@@ -95,7 +95,7 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 				}
 			}
 			// expected client requests
-			if (packet->line[a].len > 5) {
+			if (packet->line[a].len >= 5) {
 				if ((((packet->line[a].ptr[0] == 'H' || packet->line[a].ptr[0] == 'h')
 					  && (packet->line[a].ptr[1] == 'E' || packet->line[a].ptr[1] == 'e'))
 					 || ((packet->line[a].ptr[0] == 'E' || packet->line[a].ptr[0] == 'e')
@@ -125,7 +125,7 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 				}
 			}
 
-			if (packet->line[a].len > 8) {
+			if (packet->line[a].len >= 8) {
 				if ((packet->line[a].ptr[0] == 'S' || packet->line[a].ptr[0] == 's')
 					&& (packet->line[a].ptr[1] == 'T' || packet->line[a].ptr[1] == 't')
 					&& (packet->line[a].ptr[2] == 'A' || packet->line[a].ptr[2] == 'a')
@@ -138,7 +138,7 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 				}
 			}
 
-			if (packet->line[a].len > 4) {
+			if (packet->line[a].len >= 4) {
 				if ((packet->line[a].ptr[0] == 'D' || packet->line[a].ptr[0] == 'd')
 					&& (packet->line[a].ptr[1] == 'A' || packet->line[a].ptr[1] == 'a')
 					&& (packet->line[a].ptr[2] == 'T' || packet->line[a].ptr[2] == 't')
@@ -171,6 +171,9 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 		if (bit_count >= 3) {
 			IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "mail smtp identified\n");
 			ipoque_int_mail_smtp_add_connection(ipoque_struct);
+			return;
+		}
+		if (bit_count >= 1 && flow->packet_counter < 12) {
 			return;
 		}
 	}

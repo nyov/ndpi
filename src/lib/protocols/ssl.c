@@ -1,6 +1,6 @@
 /*
  * ssl.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -51,7 +51,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 															ipoque_detection_module_struct
 															*ipoque_struct)
 {
-#if defined(IPOQUE_PROTOCOL_SOFTETHER) || defined(IPOQUE_PROTOCOL_TOR) || defined(IPOQUE_PROTOCOL_VPN_X) || defined(IPOQUE_PROTOCOL_UNENCRYPED_JABBER) || defined (IPOQUE_PROTOCOL_OOVOO) || defined (IPOQUE_PROTOCOL_ISKOOT) || defined (IPOQUE_PROTOCOL_OSCAR)
+#if defined(IPOQUE_PROTOCOL_SOFTETHER) || defined(IPOQUE_PROTOCOL_MEEBO)|| defined(IPOQUE_PROTOCOL_TOR) || defined(IPOQUE_PROTOCOL_VPN_X) || defined(IPOQUE_PROTOCOL_UNENCRYPED_JABBER) || defined (IPOQUE_PROTOCOL_OOVOO) || defined (IPOQUE_PROTOCOL_ISKOOT) || defined (IPOQUE_PROTOCOL_OSCAR)
 
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 #ifdef IPOQUE_PROTOCOL_ISKOOT
@@ -73,7 +73,6 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_OSCAR) != 0)
 		goto check_for_ssl_payload;
 #endif
-
 
 	goto no_check_for_ssl_payload;
 
@@ -129,12 +128,13 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 			}
 		}
 #endif
-
 	}
   no_check_for_ssl_payload:
 #endif
+	IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "found ssl connection.\n");
 	ipoque_int_ssl_add_connection(ipoque_struct, IPOQUE_PROTOCOL_SSL);
 }
+
 
 static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *ipoque_struct)
 {
@@ -158,6 +158,25 @@ static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *
 		if (packet->payload_packet_len == temp
 			|| (temp < packet->payload_packet_len && packet->payload_packet_len > 500)) {
 			return 1;
+		}
+
+		if (packet->payload_packet_len < temp && temp < 5000 && packet->payload_packet_len > 9) {
+			/* the server hello maybe split into small packets */
+			u32 cert_start;
+
+			IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+					"maybe SSLv3 server hello split into smaller packets\n", temp);
+
+			/* lets hope at least the server hello and the start of the certificate block are in the first packet */
+			cert_start = ntohs(get_u16(packet->payload, 7)) + 5 + 4;
+			IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "suspected start of certificate: %u\n",
+					cert_start);
+
+			if (cert_start < packet->payload_packet_len && packet->payload[cert_start] == 0x0b) {
+				IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+						"found 0x0b at suspected start of certificate block\n", cert_start);
+				return 1;
+			}
 		}
 
 

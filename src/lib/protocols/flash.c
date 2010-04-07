@@ -1,6 +1,6 @@
 /*
  * flash.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -52,16 +52,23 @@ void ipoque_search_flash(struct ipoque_detection_module_struct *ipoque_struct)
 //      struct ipoque_id_struct         *src=ipoque_struct->src;
 //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
 
-	if ((packet->tcp->dest == htons(1935) || packet->tcp->dest == htons(80))) {
-
+	if (1 /*(packet->tcp->dest == htons(1935) || packet->tcp->dest == htons(80) || packet->tcp->dest == htons(443)) */ ) {
 		if (flow->flash_stage == 0 && packet->payload_packet_len > 0
-			&& packet->tcp->psh == 0 && packet->payload[0] == 0x03) {
-			IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG, "FLASH pass 1: \n");
-			flow->flash_stage = packet->packet_direction + 1;
+			&& (packet->payload[0] == 0x03 || packet->payload[0] == 0x06)) {
 			flow->flash_bytes = packet->payload_packet_len;
-			IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG,
-					"FLASH pass 1: flash_stage: %u, flash_bytes: %u\n", flow->flash_stage, flow->flash_bytes);
-			return;
+			if (packet->tcp->psh == 0) {
+				IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG, "FLASH pass 1: \n");
+				flow->flash_stage = packet->packet_direction + 1;
+
+				IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG,
+						"FLASH pass 1: flash_stage: %u, flash_bytes: %u\n", flow->flash_stage, flow->flash_bytes);
+				return;
+			} else if (packet->tcp->psh != 0 && flow->flash_bytes == 1537) {
+				IPQ_LOG(IPOQUE_PROTOCOL_FLASH, ipoque_struct, IPQ_LOG_DEBUG,
+						"FLASH hit: flash_stage: %u, flash_bytes: %u\n", flow->flash_stage, flow->flash_bytes);
+				ipoque_int_flash_add_connection(ipoque_struct);
+				return;
+			}
 		} else if (flow->flash_stage == 1 + packet->packet_direction) {
 			flow->flash_bytes += packet->payload_packet_len;
 			if (packet->tcp->psh != 0 && flow->flash_bytes == 1537) {

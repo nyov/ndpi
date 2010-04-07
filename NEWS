@@ -1,3 +1,8 @@
+=== OpenDPI 1.2 (2010/04/07) ===
+
+  * added new protocol Meebo
+  * various improvements and fixes
+
 === OpenDPI 1.1.1 (2009/11/11) ===
 
   * fixed a compilation error that occurred when debug messages were enabled

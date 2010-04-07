@@ -1,6 +1,6 @@
 /*
  * rtsp.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -24,6 +24,15 @@
 #include "ipq_protocols.h"
 
 #ifdef IPOQUE_PROTOCOL_RTSP
+#ifndef IPOQUE_PROTOCOL_RTP
+#error RTSP requires RTP detection to work correctly
+#endif
+#ifndef IPOQUE_PROTOCOL_RTSP
+#error RTSP requires RTSP detection to work correctly
+#endif
+#ifndef IPOQUE_PROTOCOL_RDP
+#error RTSP requires RDP detection to work correctly
+#endif
 
 static void ipoque_int_rtsp_add_connection(struct ipoque_detection_module_struct
 										   *ipoque_struct)

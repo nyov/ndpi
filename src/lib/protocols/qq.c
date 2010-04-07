@@ -1,6 +1,6 @@
 /*
  * qq.c
- * Copyright (C) 2009 by ipoque GmbH
+ * Copyright (C) 2009-2010 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -51,7 +51,8 @@ static inline void ipoque_search_qq_udp(struct ipoque_detection_module_struct *i
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
 //  struct ipoque_id_struct *src = ipoque_struct->src;
 //  struct ipoque_id_struct *dst = ipoque_struct->dst;
-
+	static const u16 p8000_patt_02[10] = { 0x1549, 0x1801, 0x0961, 0x01501, 0x0e35, 0x113f, 0x0b37, 0x1131, 0x163a };
+	u16 no_of_patterns = 9, index = 0;
 
 
 	IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "search qq udp.\n");
@@ -68,7 +69,11 @@ static inline void ipoque_search_qq_udp(struct ipoque_detection_module_struct *i
 														 && packet->payload[2] == 0x37)
 													 || (ntohs(get_u16(packet->payload, 0)) == 0x0015
 														 && packet->payload[2] == 0x49)))
-			|| (ntohs(get_u16(packet->payload, 0)) == 0x000b && packet->payload[2] == 0x37)) {
+			|| (packet->payload_packet_len > 10
+				&& ((ntohs(get_u16(packet->payload, 0)) == 0x000b && packet->payload[2] == 0x37)
+					|| (ntohl(get_u32(packet->payload, 0)) == 0x04163a00
+						&& packet->payload[packet->payload_packet_len - 1] == 0x03
+						&& packet->payload[4] == packet->payload_packet_len)))) {
 			flow->qq_stage++;
 			if (flow->qq_stage == 3) {
 				IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
@@ -78,75 +83,68 @@ static inline void ipoque_search_qq_udp(struct ipoque_detection_module_struct *i
 			}
 			return;
 		}
-		if (packet->udp->dest == htons(8000) || packet->udp->source == htons(8000)) {
-			if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02 || packet->payload[0] == 0x04)
-				&& ntohs(get_u16(packet->payload, 1)) == 0x1549
-				&& packet->payload[packet->payload_packet_len - 1] == 0x03) {
-				flow->qq_stage++;
-				if (flow->qq_stage == 3) {
-					IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-							"found qq udp pattern 02/04 1549 ... 03 four times.\n");
-					ipoque_int_qq_add_connection(ipoque_struct);
+		if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02)) {
+			u16 pat = ntohs(get_u16(packet->payload, 1));
+			for (index = 0; index < no_of_patterns; index++) {
+				if (pat == p8000_patt_02[index] && packet->payload[packet->payload_packet_len - 1] == 0x03) {
+					flow->qq_stage++;
+					if (flow->qq_stage == 3) {
+						IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
+								"found qq udp pattern 02 ... 03 four times.\n");
+						ipoque_int_qq_add_connection(ipoque_struct);
+						return;
+					}
 					return;
 				}
+			}
+		}
+		if (packet->payload_packet_len > 2 && packet->payload[0] == 0x04
+			&& (ntohs(get_u16(packet->payload, 1)) == 0x1549
+				|| ntohs(get_u16(packet->payload, 1)) == 0x1801 || ntohs(get_u16(packet->payload, 1)) == 0x0961)
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03) {
+			flow->qq_stage++;
+			if (flow->qq_stage == 3) {
+				IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
+						"found qq udp pattern 04 1159 ... 03 four times.\n");
+				ipoque_int_qq_add_connection(ipoque_struct);
 				return;
 			}
-			if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02)
-				&& ntohs(get_u16(packet->payload, 1)) == 0x01501
-				&& packet->payload[packet->payload_packet_len - 1] == 0x03) {
+			return;
+		}
+		if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x06 || packet->payload[0] == 0x02)
+			&& ntohs(get_u16(packet->payload, 1)) == 0x0100
+			&& (packet->payload[packet->payload_packet_len - 1] == 0x00
+				|| packet->payload[packet->payload_packet_len - 1] == 0x03)) {
+			flow->qq_stage++;
+			if (flow->qq_stage == 3) {
+				IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
+						"found qq udp pattern 02/06 0100 ... 03/00 four times.\n");
+				ipoque_int_qq_add_connection(ipoque_struct);
+				return;
+			}
+			return;
+		}
+
+		if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02)
+			&& ntohs(get_u16(packet->payload, 1)) == 0x1131 && packet->payload[packet->payload_packet_len - 1] == 0x03) {
+			flow->qq_stage++;
+			if (flow->qq_stage == 3) {
+				IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
+						"found qq udp pattern 02 1131 ... 03 four times.\n");
+				ipoque_int_qq_add_connection(ipoque_struct);
+				return;
+			}
+			return;
+		}
+
+		if (packet->udp->dest == htons(9000) || packet->udp->source == htons(9000)) {
+			if (packet->payload_packet_len > 3
+				&& ntohs(get_u16(packet->payload, 0)) == 0x0202
+				&& ntohs(get_u16(packet->payload, 2)) == packet->payload_packet_len) {
 				flow->qq_stage++;
 				if (flow->qq_stage == 3) {
 					IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-							"found qq udp pattern 02 0e35 ... 03 four times.\n");
-					ipoque_int_qq_add_connection(ipoque_struct);
-					return;
-				}
-				return;
-			}
-			if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02)
-				&& ntohs(get_u16(packet->payload, 1)) == 0x0e35
-				&& packet->payload[packet->payload_packet_len - 1] == 0x03) {
-				flow->qq_stage++;
-				if (flow->qq_stage == 3) {
-					IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-							"found qq udp pattern 02 0e35 ... 03 four times.\n");
-					ipoque_int_qq_add_connection(ipoque_struct);
-					return;
-				}
-				return;
-			}
-			if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02)
-				&& ntohs(get_u16(packet->payload, 1)) == 0x113f
-				&& packet->payload[packet->payload_packet_len - 1] == 0x03) {
-				flow->qq_stage++;
-				if (flow->qq_stage == 3) {
-					IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-							"found qq udp pattern 02 113f ... 03 four times.\n");
-					ipoque_int_qq_add_connection(ipoque_struct);
-					return;
-				}
-				return;
-			}
-			if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x06 || packet->payload[0] == 0x02)
-				&& ntohs(get_u16(packet->payload, 1)) == 0x0100
-				&& (packet->payload[packet->payload_packet_len - 1] == 0x00
-					|| packet->payload[packet->payload_packet_len - 1] == 0x03)) {
-				flow->qq_stage++;
-				if (flow->qq_stage == 3) {
-					IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-							"found qq udp pattern 02/06 0100 ... 03/00 four times.\n");
-					ipoque_int_qq_add_connection(ipoque_struct);
-					return;
-				}
-				return;
-			}
-			if (packet->payload_packet_len > 2 && (packet->payload[0] == 0x02)
-				&& ntohs(get_u16(packet->payload, 1)) == 0x0b37
-				&& packet->payload[packet->payload_packet_len - 1] == 0x03) {
-				flow->qq_stage++;
-				if (flow->qq_stage == 3) {
-					IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-							"found qq udp pattern 02 0b37 ... 03 four times.\n");
+							"found qq udp pattern 02 02 <length> four times.\n");
 					ipoque_int_qq_add_connection(ipoque_struct);
 					return;
 				}
@@ -154,6 +152,10 @@ static inline void ipoque_search_qq_udp(struct ipoque_detection_module_struct *i
 			}
 
 		}
+	}
+
+	if (flow->qq_stage && flow->packet_counter <= 5) {
+		return;
 	}
 
 	IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "QQ excluded\n");
@@ -171,7 +173,7 @@ static inline void ipoque_search_qq_tcp(struct ipoque_detection_module_struct *i
 
 
 	u16 i = 0;
-	u16 a = 0;
+//  u16 a = 0;
 
 	IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "search qq tcp.\n");
 
@@ -180,7 +182,7 @@ static inline void ipoque_search_qq_tcp(struct ipoque_detection_module_struct *i
 		 && ntohs(get_u16(packet->payload, 2)) == 0x0212 && packet->payload[4] == 0x0b)
 		|| (packet->payload_packet_len > 9 && ntohl(get_u32(packet->payload, 0)) == 0x04154900
 			&& get_l16(packet->payload, 4) == packet->payload_packet_len
-			&& packet->payload[9] == 0x33 && packet->payload[packet->payload_packet_len - 1] == 0x03)
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03)
 		|| (packet->payload_packet_len > 9 && ntohl(get_u32(packet->payload, 0)) == 0x040e3500
 			&& get_l16(packet->payload, 4) == packet->payload_packet_len
 			&& packet->payload[9] == 0x33 && packet->payload[packet->payload_packet_len - 1] == 0x03)
@@ -189,7 +191,25 @@ static inline void ipoque_search_qq_tcp(struct ipoque_detection_module_struct *i
 			&& packet->payload[9] == 0x33 && packet->payload[packet->payload_packet_len - 1] == 0x03)
 		|| (packet->payload_packet_len > 6 && ntohl(get_u32(packet->payload, 2)) == 0x020d5500
 			&& ntohs(get_u16(packet->payload, 0)) == packet->payload_packet_len
-			&& packet->payload[packet->payload_packet_len - 1] == 0x03)) {
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03)
+		|| (packet->payload_packet_len > 6 && ntohs(get_u16(packet->payload, 0)) == 0x0418
+			&& packet->payload[2] == 0x01
+			&& ntohs(get_u16(packet->payload, 3)) == packet->payload_packet_len
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03)
+		|| (packet->payload_packet_len > 6 && ntohs(get_u16(packet->payload, 0)) == 0x0411
+			&& packet->payload[2] == 0x31
+			&& ntohs(get_u16(packet->payload, 3)) == packet->payload_packet_len
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03)
+		|| (packet->payload_packet_len > 6 && ntohs(get_u16(packet->payload, 0)) == packet->payload_packet_len
+			&& ntohs(get_u16(packet->payload, 2)) == 0x0211 && packet->payload[4] == 0x31
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03)
+		|| (packet->payload_packet_len > 6 && ntohs(get_u16(packet->payload, 0)) == packet->payload_packet_len
+			&& ntohs(get_u16(packet->payload, 2)) == 0x0218 && packet->payload[4] == 0x01
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03)
+		|| (packet->payload_packet_len > 10 && ntohl(get_u32(packet->payload, 0)) == 0x04163a00
+			&& packet->payload[packet->payload_packet_len - 1] == 0x03
+			&& packet->payload[4] == packet->payload_packet_len)
+		) {
 		flow->qq_stage++;
 		if (flow->qq_stage == 3) {
 			IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "found qq over tcp.\n");
@@ -231,30 +251,9 @@ static inline void ipoque_search_qq_tcp(struct ipoque_detection_module_struct *i
 				ipoque_int_qq_add_connection(ipoque_struct);
 				return;
 			}
-			if (packet->line[i].len > 10 && memcmp(packet->line[i].ptr, "Referer:", 8) == 0) {
-				IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "found Referer.\n");
-				for (a = 0; a < packet->line[i].len - 1; a++) {
-					if (packet->line[i].ptr[a] == 'q' && memcmp(&packet->line[i].ptr[a + 1], "q.com", 5) == 0) {
-						IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-								"found qq over tcp GET... Referer:...qq... \n");
-						ipoque_int_qq_add_connection(ipoque_struct);
-						return;
-					}
-				}
-			}
 		}
 		if (packet->host_line.ptr != NULL) {
 			IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "host line ptr\n");
-			if (packet->host_line.len > 5) {
-				for (i = 0; i < packet->host_line.len - 5; i++) {
-					if (memcmp(&packet->host_line.ptr[i], "qq.com", 6) == 0) {
-						IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG,
-								"found qq over tcp Host: ...qq.com...\n");
-						ipoque_int_qq_add_connection(ipoque_struct);
-						return;
-					}
-				}
-			}
 			if (packet->host_line.len > 11 && memcmp(&packet->host_line.ptr[0], "www.qq.co.za", 12) == 0) {
 				IPQ_LOG(IPOQUE_PROTOCOL_QQ, ipoque_struct, IPQ_LOG_DEBUG, "found qq over tcp Host: www.qq.co.za\n");
 				ipoque_int_qq_add_connection(ipoque_struct);
