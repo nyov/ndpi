@@ -182,7 +182,6 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 				"ZATTOO: discarted the flow (TCP): packet_size: %u; Flowstage: %u\n",
 				packet->payload_packet_len, flow->zattoo_stage);
 
-#endif
 	} else if (packet->udp != NULL) {
 
 		if (packet->payload_packet_len > 20 && (packet->udp->dest == htons(5003)
@@ -210,3 +209,5 @@ void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_ZATTOO);
 
 }
+#endif
+
