@@ -43,6 +43,24 @@ struct iphdr {
       uint32_t daddr;
 };
 
+#include <arpa/inet.h>
+#define s6_addr16		__u6_addr.__u6_addr16
+#define s6_addr32		__u6_addr.__u6_addr32
+
+struct ip6_hdr {
+	union {
+		struct ip6_hdrctl {
+			uint32_t ip6_un1_flow;
+			uint16_t ip6_un1_plen;
+			uint8_t ip6_un1_nxt;
+			uint8_t ip6_un1_hlim;
+		} ip6_un1;
+		uint8_t ip6_un2_vfc;
+	} ip6_ctlun;
+	struct in6_addr ip6_src;
+	struct in6_addr ip6_dst;
+};
+
 struct tcphdr {
     uint16_t source;
     uint16_t dest;

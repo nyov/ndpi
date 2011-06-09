@@ -1,6 +1,6 @@
 /*
  * winmx.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -32,21 +32,7 @@ static void ipoque_int_winmx_add_connection(struct ipoque_detection_module_struc
 static void ipoque_int_winmx_add_connection(struct ipoque_detection_module_struct
 											*ipoque_struct)
 {
-
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	flow->detected_protocol = IPOQUE_PROTOCOL_WINMX;
-	packet->detected_protocol = IPOQUE_PROTOCOL_WINMX;
-
-	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_WINMX);
-	}
-	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_WINMX);
-	}
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_WINMX, IPOQUE_REAL_PROTOCOL);
 }
 
 
@@ -58,7 +44,7 @@ void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struc
 //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
 
 
-	if (flow->winmx_stage == 0) {
+	if (flow->l4.tcp.winmx_stage == 0) {
 		if (packet->payload_packet_len == 1 || (packet->payload_packet_len > 1 && packet->payload[0] == 0x31)) {
 			return;
 		}
@@ -67,7 +53,7 @@ void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struc
 			&& (memcmp(packet->payload, "SEND", 4) == 0)) {
 
 			IPQ_LOG(IPOQUE_PROTOCOL_WINMX, ipoque_struct, IPQ_LOG_DEBUG, "maybe WinMX Send\n");
-			flow->winmx_stage = 1;
+			flow->l4.tcp.winmx_stage = 1;
 			return;
 		}
 
@@ -94,7 +80,7 @@ void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struc
 			}
 		}
 		/* did not see this pattern in any trace that we have */
-	} else if (flow->winmx_stage == 1) {
+	} else if (flow->l4.tcp.winmx_stage == 1) {
 		if (packet->payload_packet_len > 10 && packet->payload_packet_len < 1000) {
 			u16 left = packet->payload_packet_len - 1;
 			while (left > 0) {

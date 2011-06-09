@@ -1,6 +1,6 @@
 /*
  * snmp.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -27,21 +27,7 @@
 static void ipoque_int_snmp_add_connection(struct ipoque_detection_module_struct
 										   *ipoque_struct)
 {
-
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	flow->detected_protocol = IPOQUE_PROTOCOL_SNMP;
-	packet->detected_protocol = IPOQUE_PROTOCOL_SNMP;
-
-	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_SNMP);
-	}
-	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_SNMP);
-	}
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_SNMP, IPOQUE_REAL_PROTOCOL);
 }
 
 void ipoque_search_snmp(struct ipoque_detection_module_struct *ipoque_struct)
@@ -78,7 +64,7 @@ void ipoque_search_snmp(struct ipoque_detection_module_struct *ipoque_struct)
 			goto excl;
 		}
 
-		if (flow->snmp_stage == 0) {
+		if (flow->l4.udp.snmp_stage == 0) {
 			if (packet->udp->dest == htons(161) || packet->udp->dest == htons(162)) {
 				IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG, "SNMP detected due to port.\n");
 				ipoque_int_snmp_add_connection(ipoque_struct);
@@ -86,38 +72,38 @@ void ipoque_search_snmp(struct ipoque_detection_module_struct *ipoque_struct)
 			}
 			IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG, "SNMP stage 0.\n");
 			if (packet->payload[offset + 2] == 3) {
-				flow->snmp_msg_id = ntohs(get_u32(packet->payload, offset + 8));
+				flow->l4.udp.snmp_msg_id = ntohs(get_u32(packet->payload, offset + 8));
 			} else if (packet->payload[offset + 2] == 0) {
-				flow->snmp_msg_id = get_u8(packet->payload, offset + 15);
+				flow->l4.udp.snmp_msg_id = get_u8(packet->payload, offset + 15);
 			} else {
-				flow->snmp_msg_id = ntohs(get_u16(packet->payload, offset + 15));
+				flow->l4.udp.snmp_msg_id = ntohs(get_u16(packet->payload, offset + 15));
 			}
-			flow->snmp_stage = 1 + packet->packet_direction;
+			flow->l4.udp.snmp_stage = 1 + packet->packet_direction;
 			return;
-		} else if (flow->snmp_stage == 1 + packet->packet_direction) {
+		} else if (flow->l4.udp.snmp_stage == 1 + packet->packet_direction) {
 			if (packet->payload[offset + 2] == 0) {
-				if (flow->snmp_msg_id != get_u8(packet->payload, offset + 15) - 1) {
+				if (flow->l4.udp.snmp_msg_id != get_u8(packet->payload, offset + 15) - 1) {
 					IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG,
 							"SNMP v1 excluded, message ID doesn't match\n");
 					goto excl;
 				}
 			}
-		} else if (flow->snmp_stage == 2 - packet->packet_direction) {
+		} else if (flow->l4.udp.snmp_stage == 2 - packet->packet_direction) {
 			IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG, "SNMP stage 1-2.\n");
 			if (packet->payload[offset + 2] == 3) {
-				if (flow->snmp_msg_id != ntohs(get_u32(packet->payload, offset + 8))) {
+				if (flow->l4.udp.snmp_msg_id != ntohs(get_u32(packet->payload, offset + 8))) {
 					IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG,
 							"SNMP v3 excluded, message ID doesn't match\n");
 					goto excl;
 				}
 			} else if (packet->payload[offset + 2] == 0) {
-				if (flow->snmp_msg_id != get_u8(packet->payload, offset + 15)) {
+				if (flow->l4.udp.snmp_msg_id != get_u8(packet->payload, offset + 15)) {
 					IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG,
 							"SNMP v1 excluded, message ID doesn't match\n");
 					goto excl;
 				}
 			} else {
-				if (flow->snmp_msg_id != ntohs(get_u16(packet->payload, offset + 15))) {
+				if (flow->l4.udp.snmp_msg_id != ntohs(get_u16(packet->payload, offset + 15))) {
 					IPQ_LOG(IPOQUE_PROTOCOL_SNMP, ipoque_struct, IPQ_LOG_DEBUG,
 							"SNMP v2 excluded, message ID doesn't match\n");
 					goto excl;

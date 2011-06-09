@@ -1,6 +1,6 @@
 /*
  * OpenDPI_demo.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -30,10 +30,11 @@
 #include <netinet/in.h>
 
 #ifdef __linux__
-# include <linux/ip.h>
-# include <linux/tcp.h>
-# include <linux/udp.h>
-# include <linux/if_ether.h>
+#include <linux/ip.h>
+#include <netinet/ip6.h>
+#include <linux/tcp.h>
+#include <linux/udp.h>
+#include <linux/if_ether.h>
 #else
 # include "linux_compat.h"
 #endif
@@ -68,10 +69,22 @@ static u64 total_bytes = 0;
 static u64 protocol_counter[IPOQUE_MAX_SUPPORTED_PROTOCOLS + 1];
 static u64 protocol_counter_bytes[IPOQUE_MAX_SUPPORTED_PROTOCOLS + 1];
 
-
 // id tracking
+
+struct osdpi_ip_addr {
+#ifdef IPOQUE_DETECTION_SUPPORT_IPV6
+	u32 is_ip_v6;
+#endif
+	union {
+		u32 ipv4;
+#ifdef IPOQUE_DETECTION_SUPPORT_IPV6
+		struct in6_addr ipv6;
+#endif
+	};
+};
+
 typedef struct osdpi_id {
-	u8 ip[4];
+	struct osdpi_ip_addr ip;
 	struct ipoque_id_struct *ipoque_id;
 } osdpi_id_t;
 
@@ -83,11 +96,7 @@ static u32 osdpi_id_count = 0;
 
 // flow tracking
 typedef struct osdpi_flow {
-	u32 lower_ip;
-	u32 upper_ip;
-	u16 lower_port;
-	u16 upper_port;
-	u8 protocol;
+	struct ipoque_unique_flow_ipv4_and_6_struct key;
 	struct ipoque_flow_struct *ipoque_flow;
 
 	// result only, not used for flow identification
@@ -210,11 +219,12 @@ static void free_wrapper(void *freeable)
 	free(freeable);
 }
 
-static void *get_id(const u8 * ip)
+static void *get_id(const struct osdpi_ip_addr *ip)
 {
 	u32 i;
+
 	for (i = 0; i < osdpi_id_count; i++) {
-		if (memcmp(osdpi_ids[i].ip, ip, sizeof(u8) * 4) == 0) {
+		if (memcmp(&osdpi_ids[i].ip, ip, sizeof(struct osdpi_ip_addr)) == 0) {
 			return osdpi_ids[i].ipoque_id;
 		}
 	}
@@ -223,7 +233,7 @@ static void *get_id(const u8 * ip)
 		exit(-1);
 	} else {
 		struct ipoque_id_struct *ipoque_id;
-		memcpy(osdpi_ids[osdpi_id_count].ip, ip, sizeof(u8) * 4);
+		osdpi_ids[osdpi_id_count].ip = *ip;
 		ipoque_id = osdpi_ids[osdpi_id_count].ipoque_id;
 
 		osdpi_id_count += 1;
@@ -234,81 +244,36 @@ static void *get_id(const u8 * ip)
 static struct osdpi_flow *get_osdpi_flow(const struct iphdr *iph, u16 ipsize)
 {
 	u32 i;
-	u16 l4_packet_len;
-	struct tcphdr *tcph = NULL;
-	struct udphdr *udph = NULL;
+	const u8 *l4 = NULL;
+	u16 l4_len = 0;
+	u8 l4_protocol = 0;
+	struct ipoque_unique_flow_ipv4_and_6_struct key;
+	u8 dir = 0;
 
-	u32 lower_ip;
-	u32 upper_ip;
-	u16 lower_port;
-	u16 upper_port;
+	if (ipoque_detection_get_l4((u8*)iph, ipsize, &l4, &l4_len, &l4_protocol, 0) == 0) {
+		if (ipoque_detection_build_key((u8*)iph, ipsize, l4, l4_len, l4_protocol, &key, &dir, 0) == 0) {
 
-	if (ipsize < 20)
-		return NULL;
+			for (i = 0; i < osdpi_flow_count; i++) {
+				if (memcmp(&osdpi_flows[i].key, &key, sizeof(struct ipoque_unique_flow_ipv4_and_6_struct)) == 0) {
+					return &osdpi_flows[i];
+				}
+			}
+			if (osdpi_flow_count == MAX_OSDPI_FLOWS) {
+				printf("ERROR: maximum flow count (%u) has been exceeded\n", MAX_OSDPI_FLOWS);
+				exit(-1);
+			} else {
+				struct osdpi_flow *flow;
+				osdpi_flows[osdpi_flow_count].key = key;
+				flow = &osdpi_flows[osdpi_flow_count];
 
-	if ((iph->ihl * 4) > ipsize || ipsize < ntohs(iph->tot_len)
-		|| (iph->frag_off & htons(0x1FFF)) != 0)
-		return NULL;
+				osdpi_flow_count += 1;
+				return flow;
+			}
 
-	l4_packet_len = ntohs(iph->tot_len) - (iph->ihl * 4);
-
-	if (iph->saddr < iph->daddr) {
-		lower_ip = iph->saddr;
-		upper_ip = iph->daddr;
-	} else {
-		lower_ip = iph->daddr;
-		upper_ip = iph->saddr;
-	}
-
-	if (iph->protocol == 6 && l4_packet_len >= 20) {
-		// tcp
-		tcph = (struct tcphdr *) ((u8 *) iph + iph->ihl * 4);
-		if (iph->saddr < iph->daddr) {
-			lower_port = tcph->source;
-			upper_port = tcph->dest;
-		} else {
-			lower_port = tcph->dest;
-			upper_port = tcph->source;
-		}
-	} else if (iph->protocol == 17 && l4_packet_len >= 8) {
-		// udp
-		udph = (struct udphdr *) ((u8 *) iph + iph->ihl * 4);
-		if (iph->saddr < iph->daddr) {
-			lower_port = udph->source;
-			upper_port = udph->dest;
-		} else {
-			lower_port = udph->dest;
-			upper_port = udph->source;
-		}
-	} else {
-		// non tcp/udp protocols
-		lower_port = 0;
-		upper_port = 0;
-	}
-
-	for (i = 0; i < osdpi_flow_count; i++) {
-		if (osdpi_flows[i].protocol == iph->protocol &&
-			osdpi_flows[i].lower_ip == lower_ip &&
-			osdpi_flows[i].upper_ip == upper_ip &&
-			osdpi_flows[i].lower_port == lower_port && osdpi_flows[i].upper_port == upper_port) {
-			return &osdpi_flows[i];
 		}
 	}
-	if (osdpi_flow_count == MAX_OSDPI_FLOWS) {
-		printf("ERROR: maximum flow count (%u) has been exceeded\n", MAX_OSDPI_FLOWS);
-		exit(-1);
-	} else {
-		struct osdpi_flow *flow;
-		osdpi_flows[osdpi_flow_count].protocol = iph->protocol;
-		osdpi_flows[osdpi_flow_count].lower_ip = lower_ip;
-		osdpi_flows[osdpi_flow_count].upper_ip = upper_ip;
-		osdpi_flows[osdpi_flow_count].lower_port = lower_port;
-		osdpi_flows[osdpi_flow_count].upper_port = upper_port;
-		flow = &osdpi_flows[osdpi_flow_count];
 
-		osdpi_flow_count += 1;
-		return flow;
-	}
+	return NULL;
 }
 
 static void setupDetection(void)
@@ -387,13 +352,34 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 	struct ipoque_flow_struct *ipq_flow = NULL;
 	u32 protocol = 0;
 
+	struct osdpi_ip_addr src_ip, dst_ip;
+	memset(&src_ip, 0, sizeof(struct osdpi_ip_addr));
+	memset(&dst_ip, 0, sizeof(struct osdpi_ip_addr));
 
-	src = get_id((u8 *) & iph->saddr);
-	dst = get_id((u8 *) & iph->daddr);
+#ifdef IPOQUE_DETECTION_SUPPORT_IPV6
+	if (iph->version == 6 && ipsize >= sizeof(struct ip6_hdr)) {
+		struct ip6_hdr *ip6h = (struct ip6_hdr *)iph;
+		src_ip.is_ip_v6 = 1;
+		src_ip.ipv6 = ip6h->ip6_src;
+		dst_ip.is_ip_v6 = 1;
+		dst_ip.ipv6 = ip6h->ip6_dst;
+	} else
+#endif
+	if (iph->version == 4 && ipsize >= sizeof(struct iphdr)) {
+		src_ip.ipv4 = iph->saddr;
+		dst_ip.ipv4 = iph->daddr;
+	} else {
+		return 1;
+	}
+
+	src = get_id(&src_ip);
+	dst = get_id(&dst_ip);
 
 	flow = get_osdpi_flow(iph, ipsize);
 	if (flow != NULL) {
 		ipq_flow = flow->ipoque_flow;
+	} else {
+		return 1;
 	}
 
 	ip_packet_count++;
@@ -407,12 +393,8 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 #endif
 
 	// only handle unfragmented packets
-	if ((iph->frag_off & htons(0x1FFF)) == 0) {
+	if (iph->version == 4 && (iph->frag_off & htons(0x1FFF)) != 0) {
 
-		// here the actual detection is performed
-		protocol = ipoque_detection_process_packet(ipoque_struct, ipq_flow, (uint8_t *) iph, ipsize, time, src, dst);
-
-	} else {
 		static u8 frag_warning_used = 0;
 		if (frag_warning_used == 0) {
 			printf("\n\nWARNING: fragmented ip packets are not supported and will be skipped \n\n");
@@ -420,6 +402,12 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 			frag_warning_used = 1;
 		}
 		return 0;
+
+	} else {
+
+		// here the actual detection is performed
+		protocol = ipoque_detection_process_packet(ipoque_struct, ipq_flow, (uint8_t *) iph, ipsize, time, src, dst);
+
 	}
 
 	protocol_counter[protocol]++;
@@ -506,7 +494,12 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 	type = ethernet->h_proto;
 
 	// just work on Ethernet packets that contain IP
-	if (_pcap_datalink_type == DLT_EN10MB && type == htons(ETH_P_IP)
+	if (_pcap_datalink_type == DLT_EN10MB &&
+		(type == htons(ETH_P_IP)
+#ifdef IPOQUE_DETECTION_SUPPORT_IPV6
+		|| type == htons(ETH_P_IPV6)
+#endif
+		)
 		&& header->caplen >= sizeof(struct ethhdr)) {
 
 		if (header->caplen < header->len) {
@@ -519,19 +512,11 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 			}
 		}
 
-		if (iph->version != 4) {
-			static u8 ipv4_warning_used = 0;
-			if (ipv4_warning_used == 0) {
-				printf("\n\nWARNING: only IPv4 packets are supported, all other packets will be discarded\n\n");
-				sleep(2);
-				ipv4_warning_used = 1;
-			}
-			return;
+		if (header->len >= (sizeof(struct ethhdr) + sizeof(struct iphdr))) {
+			// process the packet
+			packet_processing(time, iph, header->len - sizeof(struct ethhdr), header->len);
 		}
-		// process the packet
-		packet_processing(time, iph, header->len - sizeof(struct ethhdr), header->len);
 	}
-
 }
 
 static void runPcapLoop(void)

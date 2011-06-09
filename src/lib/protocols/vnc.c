@@ -1,6 +1,6 @@
 /*
  * vnc.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -28,21 +28,7 @@
 static void ipoque_int_vnc_add_connection(struct ipoque_detection_module_struct
 										  *ipoque_struct)
 {
-
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	flow->detected_protocol = IPOQUE_PROTOCOL_VNC;
-	packet->detected_protocol = IPOQUE_PROTOCOL_VNC;
-
-	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_VNC);
-	}
-	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_VNC);
-	}
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_VNC, IPOQUE_REAL_PROTOCOL);
 }
 
 /*
@@ -58,14 +44,14 @@ void ipoque_search_vnc_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
 
 
-	if (flow->vnc_stage == 0) {
+	if (flow->l4.tcp.vnc_stage == 0) {
 		if (packet->payload_packet_len == 12
 			&& memcmp(packet->payload, "RFB 003.00", 10) == 0 && packet->payload[11] == 0x0a) {
 			IPQ_LOG(IPOQUE_PROTOCOL_POPO, ipoque_struct, IPQ_LOG_DEBUG, "reached vnc stage one\n");
-			flow->vnc_stage = 1 + packet->packet_direction;
+			flow->l4.tcp.vnc_stage = 1 + packet->packet_direction;
 			return;
 		}
-	} else if (flow->vnc_stage == 2 - packet->packet_direction) {
+	} else if (flow->l4.tcp.vnc_stage == 2 - packet->packet_direction) {
 		if (packet->payload_packet_len == 12
 			&& memcmp(packet->payload, "RFB 003.00", 10) == 0 && packet->payload[11] == 0x0a) {
 			IPQ_LOG(IPOQUE_PROTOCOL_VNC, ipoque_struct, IPQ_LOG_DEBUG, "found vnc\n");

@@ -1,6 +1,6 @@
 /*
  * edonkey.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -30,12 +30,7 @@
 static void ipoque_add_connection_as_edonkey(struct ipoque_detection_module_struct
 											 *ipoque_struct, const u8 save_detection, const u8 encrypted_connection)
 {
-
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	flow->detected_protocol = IPOQUE_PROTOCOL_EDONKEY;
-	packet->detected_protocol = IPOQUE_PROTOCOL_EDONKEY;
-
+	ipoque_int_change_protocol(ipoque_struct, IPOQUE_PROTOCOL_EDONKEY, IPOQUE_REAL_PROTOCOL);
 }
 
 static inline u8 check_edk_len(const u8 * payload, u16 payload_packet_len)
@@ -73,7 +68,7 @@ static void ipoque_int_edonkey_tcp(struct ipoque_detection_module_struct *ipoque
 	/*len range increase if safe mode and also only once */
 	if (ipoque_struct->edonkey_safe_mode == 0)
 		edk_stage2_len = 140;
-	else if (!flow->edk_ext) {
+	else if (!flow->l4.tcp.edk_ext || packet->payload_packet_len == 212) {
 		edk_stage2_len = 300;
 
 	} else
@@ -102,7 +97,7 @@ static void ipoque_int_edonkey_tcp(struct ipoque_detection_module_struct *ipoque
 		return;
 
 	/* skip marked packets */
-	if (flow->edk_stage == 0 && packet->detected_protocol != IPOQUE_PROTOCOL_UNKNOWN)
+	if (flow->edk_stage == 0 && packet->detected_protocol_stack[0] != IPOQUE_PROTOCOL_UNKNOWN)
 		return;
 
 	/* first: check for unencrypted traffic */
@@ -160,7 +155,7 @@ static void ipoque_int_edonkey_tcp(struct ipoque_detection_module_struct *ipoque
 void ipoque_search_edonkey(struct ipoque_detection_module_struct *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	if (packet->detected_protocol != IPOQUE_PROTOCOL_EDONKEY) {
+	if (packet->detected_protocol_stack[0] != IPOQUE_PROTOCOL_EDONKEY) {
 		/* check for retransmission here */
 		if (packet->tcp != NULL && packet->tcp_retransmission == 0)
 			ipoque_int_edonkey_tcp(ipoque_struct);

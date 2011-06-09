@@ -1,6 +1,6 @@
 /*
  * directdownloadlink.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -37,20 +37,10 @@ static void ipoque_int_direct_download_link_add_connection(struct
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
 
-	flow->detected_protocol = IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK;
-	packet->detected_protocol = IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK;
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, IPOQUE_CORRELATED_PROTOCOL);
 
-	flow->ddlink_server_direction = packet->packet_direction;
-
-	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK);
-	}
-	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK);
-	}
+	flow->l4.tcp.ddlink_server_direction = packet->packet_direction;
 }
 
 
@@ -120,8 +110,6 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 		}
 	}
 	// then start automated code generation
-
-
 
 	if (host_line_len_without_port >= 0 + 4
 		&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 0 - 4], ".com", 4) == 0) {
@@ -369,6 +357,12 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 					|| packet->host_line.ptr[host_line_len_without_port - 5 - 11 - 1] == '.')) {
 				goto end_ddl_found;
 			}
+			if (host_line_len_without_port >= 5 + 8 + 1
+				&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 5 - 8], "fileserv", 8) == 0
+				&& (packet->host_line.ptr[host_line_len_without_port - 5 - 8 - 1] == ' '
+					|| packet->host_line.ptr[host_line_len_without_port - 5 - 8 - 1] == '.')) {
+				goto end_ddl_found;
+			}
 			goto end_ddl_nothing_found;
 		}
 		if (host_line_len_without_port >= 4 + 1 && packet->host_line.ptr[host_line_len_without_port - 4 - 1] == 's') {
@@ -436,6 +430,18 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 				goto end_ddl_found;
 			}
 			goto end_ddl_nothing_found;
+		}
+		if (host_line_len_without_port >= 4 + 9 + 1
+			&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 4 - 9], "mega.1280", 9) == 0
+			&& (packet->host_line.ptr[host_line_len_without_port - 4 - 9 - 1] == ' '
+				|| packet->host_line.ptr[host_line_len_without_port - 4 - 9 - 1] == '.')) {
+			goto end_ddl_found;
+		}
+		if (host_line_len_without_port >= 4 + 9 + 1
+			&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 4 - 9], "filesonic", 9) == 0
+			&& (packet->host_line.ptr[host_line_len_without_port - 4 - 9 - 1] == ' '
+				|| packet->host_line.ptr[host_line_len_without_port - 4 - 9 - 1] == '.')) {
+			goto end_ddl_found;
 		}
 		goto end_ddl_nothing_found;
 	}
@@ -624,11 +630,30 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 		}
 		goto end_ddl_nothing_found;
 	}
-	if (host_line_len_without_port >= 0 + 10 + 1
-		&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 0 - 10], "netload.in", 10) == 0
-		&& (packet->host_line.ptr[host_line_len_without_port - 0 - 10 - 1] == ' '
-			|| packet->host_line.ptr[host_line_len_without_port - 0 - 10 - 1] == '.')) {
-		goto end_ddl_found;
+	if (host_line_len_without_port >= 0 + 1 && packet->host_line.ptr[host_line_len_without_port - 0 - 1] == 'n') {
+		if (host_line_len_without_port >= 1 + 9 + 1
+			&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 1 - 9], "netload.i", 9) == 0
+			&& (packet->host_line.ptr[host_line_len_without_port - 1 - 9 - 1] == ' '
+				|| packet->host_line.ptr[host_line_len_without_port - 1 - 9 - 1] == '.')) {
+			goto end_ddl_found;
+		}
+		if (host_line_len_without_port >= 1 + 2
+			&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 1 - 2], ".v", 2) == 0) {
+			if (host_line_len_without_port >= 3 + 7 + 1
+				&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 3 - 7], "4shared", 7) == 0
+				&& (packet->host_line.ptr[host_line_len_without_port - 3 - 7 - 1] == ' '
+					|| packet->host_line.ptr[host_line_len_without_port - 3 - 7 - 1] == '.')) {
+				goto end_ddl_found;
+			}
+			if (host_line_len_without_port >= 3 + 9 + 1
+				&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 3 - 9], "megashare", 9) == 0
+				&& (packet->host_line.ptr[host_line_len_without_port - 3 - 9 - 1] == ' '
+					|| packet->host_line.ptr[host_line_len_without_port - 3 - 9 - 1] == '.')) {
+				goto end_ddl_found;
+			}
+			goto end_ddl_nothing_found;
+		}
+		goto end_ddl_nothing_found;
 	}
 	if (host_line_len_without_port >= 0 + 3
 		&& memcmp((void *) &packet->host_line.ptr[host_line_len_without_port - 0 - 3], ".de", 3) == 0) {
@@ -689,10 +714,11 @@ void ipoque_search_direct_download_link_tcp(struct
 	struct ipoque_flow_struct *flow = ipoque_struct->flow;
 //      struct ipoque_id_struct         *src=ipoque_struct->src;
 //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+#if 0
 	if (ipoque_struct->direct_download_link_counter_callback != NULL) {
 		if (packet->detected_protocol == IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
 			/* skip packets not requests from the client to the server */
-			if (packet->packet_direction == flow->ddlink_server_direction) {
+			if (packet->packet_direction == flow->l4.tcp.ddlink_server_direction) {
 				search_ddl_domains(ipoque_struct);	// do the detection again in order to get the URL in keep alive streams
 			} else {
 				// just count the packet
@@ -701,8 +727,9 @@ void ipoque_search_direct_download_link_tcp(struct
 		}
 		return;
 	}
+#endif
 	// do not detect again if it is already ddl
-	if (packet->detected_protocol != IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
+	if (packet->detected_protocol_stack[0] != IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
 		if (search_ddl_domains(ipoque_struct) != 0) {
 			return;
 		}

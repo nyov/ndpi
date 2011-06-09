@@ -1,6 +1,6 @@
 /*
  * thunder.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -25,26 +25,20 @@
 #ifdef IPOQUE_PROTOCOL_THUNDER
 
 static void ipoque_int_thunder_add_connection(struct ipoque_detection_module_struct
-											  *ipoque_struct)
+											  *ipoque_struct, ipoque_protocol_type_t protocol_type)
 {
-
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
 	struct ipoque_id_struct *src = ipoque_struct->src;
 	struct ipoque_id_struct *dst = ipoque_struct->dst;
 
-	flow->detected_protocol = IPOQUE_PROTOCOL_THUNDER;
-	packet->detected_protocol = IPOQUE_PROTOCOL_THUNDER;
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_THUNDER, protocol_type);
 
 	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_THUNDER);
 		src->thunder_ts = packet->tick_timestamp;
 	}
 	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_THUNDER);
 		dst->thunder_ts = packet->tick_timestamp;
 	}
-
 }
 
 
@@ -60,7 +54,7 @@ static inline void ipoque_int_search_thunder_udp(struct ipoque_detection_module_
 		&& packet->payload[0] < 0x40 && packet->payload[1] == 0 && packet->payload[2] == 0 && packet->payload[3] == 0) {
 		if (flow->thunder_stage == 3) {
 			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG, "THUNDER udp detected\n");
-			ipoque_int_thunder_add_connection(ipoque_struct);
+			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
 			return;
 		}
 
@@ -88,7 +82,7 @@ static inline void ipoque_int_search_thunder_tcp(struct ipoque_detection_module_
 		&& packet->payload[0] < 0x40 && packet->payload[1] == 0 && packet->payload[2] == 0 && packet->payload[3] == 0) {
 		if (flow->thunder_stage == 3) {
 			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG, "THUNDER tcp detected\n");
-			ipoque_int_thunder_add_connection(ipoque_struct);
+			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
 			return;
 		}
 
@@ -118,7 +112,7 @@ static inline void ipoque_int_search_thunder_tcp(struct ipoque_detection_module_
 			&& packet->payload[packet->empty_line_position + 5] == 0x00) {
 			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
 					"maybe thunder http POST packet application does match\n");
-			ipoque_int_thunder_add_connection(ipoque_struct);
+			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
 			return;
 		}
 	}
@@ -136,7 +130,7 @@ static inline void ipoque_int_search_thunder_http(struct ipoque_detection_module
 	struct ipoque_id_struct *dst = ipoque_struct->dst;
 
 
-	if (packet->detected_protocol == IPOQUE_PROTOCOL_THUNDER) {
+	if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_THUNDER) {
 		if (src != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
 							(packet->tick_timestamp - src->thunder_ts) < ipoque_struct->thunder_timeout)) {
 			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
@@ -174,7 +168,7 @@ static inline void ipoque_int_search_thunder_http(struct ipoque_detection_module
 						   "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)", 50) == 0) {
 			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
 					"Thunder HTTP download detected, adding flow.\n");
-			ipoque_int_thunder_add_connection(ipoque_struct);
+			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
 		}
 	}
 }

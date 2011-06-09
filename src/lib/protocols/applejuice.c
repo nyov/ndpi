@@ -1,6 +1,6 @@
 /*
  * applejuice.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -28,21 +28,7 @@
 static void ipoque_int_applejuice_add_connection(struct ipoque_detection_module_struct
 												 *ipoque_struct)
 {
-
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	flow->detected_protocol = IPOQUE_PROTOCOL_APPLEJUICE;
-	packet->detected_protocol = IPOQUE_PROTOCOL_APPLEJUICE;
-
-	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_APPLEJUICE);
-	}
-	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_APPLEJUICE);
-	}
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_APPLEJUICE, IPOQUE_REAL_PROTOCOL);
 }
 
 void ipoque_search_applejuice_tcp(struct ipoque_detection_module_struct

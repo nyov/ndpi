@@ -1,6 +1,6 @@
 /*
  * quake.c
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -21,27 +21,13 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ipq_utils.h"
 #ifdef IPOQUE_PROTOCOL_QUAKE
 
 static void ipoque_int_quake_add_connection(struct ipoque_detection_module_struct
 											*ipoque_struct)
 {
-
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-
-	flow->detected_protocol = IPOQUE_PROTOCOL_QUAKE;
-	packet->detected_protocol = IPOQUE_PROTOCOL_QUAKE;
-
-	if (src != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_QUAKE);
-	}
-	if (dst != NULL) {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_QUAKE);
-	}
+	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_QUAKE, IPOQUE_REAL_PROTOCOL);
 }
 
 void ipoque_search_quake(struct ipoque_detection_module_struct *ipoque_struct)
@@ -63,6 +49,27 @@ void ipoque_search_quake(struct ipoque_detection_module_struct *ipoque_struct)
 		return;
 	}
 
+	/* Quake III/Quake Live */
+	if (packet->payload_packet_len == 15 && get_u32(packet->payload, 0) == 0xffffffff
+		&& memcmp(&packet->payload[4], "getinfo", IPQ_STATICSTRING_LEN("getinfo")) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_QUAKE, ipoque_struct, IPQ_LOG_DEBUG, "Quake III Arena/Quake Live detected.\n");
+		ipoque_int_quake_add_connection(ipoque_struct);
+		return;
+	}
+	if (packet->payload_packet_len == 16 && get_u32(packet->payload, 0) == 0xffffffff
+		&& memcmp(&packet->payload[4], "getchallenge", IPQ_STATICSTRING_LEN("getchallenge")) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_QUAKE, ipoque_struct, IPQ_LOG_DEBUG, "Quake III Arena/Quake Live detected.\n");
+		ipoque_int_quake_add_connection(ipoque_struct);
+		return;
+	}
+	if (packet->payload_packet_len > 20 && packet->payload_packet_len < 30
+		&& get_u32(packet->payload, 0) == 0xffffffff
+		&& memcmp(&packet->payload[4], "getservers", IPQ_STATICSTRING_LEN("getservers")) == 0) {
+		IPQ_LOG(IPOQUE_PROTOCOL_QUAKE, ipoque_struct, IPQ_LOG_DEBUG, "Quake III Arena/Quake Live detected.\n");
+		ipoque_int_quake_add_connection(ipoque_struct);
+		return;
+	}
+
 
 
 	/* ports for startup packet:
@@ -74,6 +81,7 @@ void ipoque_search_quake(struct ipoque_detection_module_struct *ipoque_struct)
 	   Quake Wars     ?????
 	 */
 
+	IPQ_LOG(IPOQUE_PROTOCOL_QUAKE, ipoque_struct, IPQ_LOG_DEBUG, "Quake excluded.\n");
 	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_QUAKE);
 }
 

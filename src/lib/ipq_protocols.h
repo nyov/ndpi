@@ -1,6 +1,6 @@
 /*
  * ipq_protocols.h
- * Copyright (C) 2009-2010 by ipoque GmbH
+ * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -60,7 +60,6 @@
 
 /* define memory callback function */
 #define ipq_mem_cmp memcmp
-#define ipq_mem_cpy memcpy
 void ipoque_search_bittorrent(struct ipoque_detection_module_struct
 							  *ipoque_struct);
 /* edonkey entry function*/
@@ -195,8 +194,8 @@ void ipoque_search_veohtv_tcp(struct ipoque_detection_module_struct
 void ipoque_search_openft_tcp(struct ipoque_detection_module_struct
 							  *ipoque_struct);
 /* stun entry */
-void ipoque_search_stun_udp(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ipoque_search_stun(struct ipoque_detection_module_struct
+						*ipoque_struct);
 /* Pando entry */
 void ipoque_search_pando_tcp_udp(struct ipoque_detection_module_struct
 								 *ipoque_struct);
@@ -209,8 +208,8 @@ void ipoque_search_sopcast(struct ipoque_detection_module_struct
 void ipoque_search_tvuplayer(struct ipoque_detection_module_struct
 							 *ipoque_struct);
 
-void ipoque_search_ppstream_tcp(struct ipoque_detection_module_struct
-								*ipoque_struct);
+void ipoque_search_ppstream(struct ipoque_detection_module_struct
+							*ipoque_struct);
 
 void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
 								  *ipoque_struct);
@@ -222,8 +221,8 @@ void ipoque_search_mgcp(struct ipoque_detection_module_struct
 void ipoque_search_gadugadu(struct ipoque_detection_module_struct
 							*ipoque_struct);
 
-void ipoque_search_zattoo_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ipoque_search_zattoo(struct ipoque_detection_module_struct
+						  *ipoque_struct);
 void ipoque_search_qq(struct ipoque_detection_module_struct *ipoque_struct);
 void ipoque_search_feidian(struct ipoque_detection_module_struct
 						   *ipoque_struct);
@@ -236,6 +235,8 @@ void ipoque_search_popo_tcp_udp(struct ipoque_detection_module_struct
 
 void ipoque_search_thunder(struct ipoque_detection_module_struct
 						   *ipoque_struct);
+void ipoque_search_activesync(struct ipoque_detection_module_struct *ipoque_struct);
+
 void ipoque_search_in_non_tcp_udp(struct ipoque_detection_module_struct
 								  *ipoque_struct);
 
@@ -264,8 +265,8 @@ void ipoque_search_ntp_udp(struct ipoque_detection_module_struct
 
 void ipoque_search_nfs(struct ipoque_detection_module_struct *ipoque_struct);
 
-void ipoque_search_rtp_udp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ipoque_search_rtp(struct ipoque_detection_module_struct
+					   *ipoque_struct);
 void ipoque_search_ssdp(struct ipoque_detection_module_struct
 						*ipoque_struct);
 
@@ -310,11 +311,40 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 void ipoque_search_mdns(struct ipoque_detection_module_struct *ipoque_struct);
 
 void ipoque_search_ipp(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_ldap(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_warcraft3(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_kerberos(struct ipoque_detection_module_struct *ipoque_struct);
+
 void ipoque_search_xdmcp(struct ipoque_detection_module_struct
 						 *ipoque_struct);
 void ipoque_search_tftp(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_mssql(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_pptp(struct ipoque_detection_module_struct *ipoque_struct);
+
 void ipoque_search_stealthnet(struct ipoque_detection_module_struct *ipoque_struct);
+void ipoque_search_dhcpv6_udp(struct ipoque_detection_module_struct *ipoque_struct);
 void ipoque_search_afp(struct ipoque_detection_module_struct *ipoque_struct);
 
 void ipoque_search_aimini(struct ipoque_detection_module_struct *ipoque_struct);
+void ipoque_search_florensia(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_maplestory(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_dofus(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_world_of_kung_fu(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_fiesta(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_crossfire_tcp_udp(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_guildwars_tcp(struct ipoque_detection_module_struct *ipoque_struct);
+
+void ipoque_search_armagetron_udp(struct ipoque_detection_module_struct *ipoque_struct);
+
 #endif							/* __IPOQUE_PROTOCOLS_INCLUDE_FILE__ */
