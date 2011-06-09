@@ -33,22 +33,36 @@
 /* new definitions to get little endian from network bytes */
 #define get_ul8(X,O) get_u8(X,O)
 
-#ifndef __BYTE_ORDER
-# define __BYTE_ORDER BYTE_ORDER
-# define __LITTLE_ENDIAN LITTLE_ENDIAN
-# define __BIG_ENDIAN BIG_ENDIAN
+#ifndef OPENDPI_NETFILTER_MODULE
+# ifndef __BYTE_ORDER
+#  define __BYTE_ORDER BYTE_ORDER
+#  define __LITTLE_ENDIAN LITTLE_ENDIAN
+#  define __BIG_ENDIAN BIG_ENDIAN
+# endif
+#else
+# ifdef __BIG_ENDIAN
+#  define __BYTE_ORDER __BIG_ENDIAN
+# else
+#  define __BYTE_ORDER __LITTLE_ENDIAN
+# endif
 #endif
 
-#if __BYTE_ORDER == __LITTLE_ENDIAN
+
+#if defined( __LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN
 
 #define get_l16(X,O)  get_u16(X,O)
 #define get_l32(X,O)  get_u32(X,O)
 
-#elif __BYTE_ORDER == __BIG_ENDIAN
+#elif defined( __BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN
 
 /* convert the bytes from big to little endian */
-#define get_l16(X,O) bswap_16(get_u16(X,O))
-#define get_l32(X,O) bswap_32(get_u32(X,O))
+#ifndef OPENDPI_NETFILTER_MODULE
+# define get_l16(X,O) bswap_16(get_u16(X,O))
+# define get_l32(X,O) bswap_32(get_u32(X,O))
+#else
+# define get_l16(X,O) __cpu_to_le16(get_u16(X,O))
+# define get_l32(X,O) __cpu_to_le32(get_u32(X,O))
+#endif
 
 #else
 
@@ -328,6 +342,7 @@ void ipoque_search_pptp(struct ipoque_detection_module_struct *ipoque_struct);
 
 void ipoque_search_stealthnet(struct ipoque_detection_module_struct *ipoque_struct);
 void ipoque_search_dhcpv6_udp(struct ipoque_detection_module_struct *ipoque_struct);
+void ipoque_search_meebo(struct ipoque_detection_module_struct *ipoque_struct);
 void ipoque_search_afp(struct ipoque_detection_module_struct *ipoque_struct);
 
 void ipoque_search_aimini(struct ipoque_detection_module_struct *ipoque_struct);

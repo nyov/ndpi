@@ -25,14 +25,22 @@
 #define __IPOQUE_MAIN_INCLUDE_FILE__
 
 
+#ifndef OPENDPI_NETFILTER_MODULE
 #include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#endif
 
 #if 1 && !defined __APPLE__
-#include <endian.h>
-#include <byteswap.h>
+
+#ifndef OPENDPI_NETFILTER_MODULE
+#  include <endian.h>
+#  include <byteswap.h>
+#else
+#  include <asm/byteorder.h>
+#endif
+
 #endif							/* not WIN32 && not APPLE) */
 
 /* default includes */
@@ -46,7 +54,10 @@
 
 #else							/* APPLE */
 
-#include <netinet/in.h>
+#ifndef OPENDPI_NETFILTER_MODULE
+#  include <netinet/in.h>
+#endif
+
 #include <linux/ip.h>
 #include <linux/tcp.h>
 #include <linux/udp.h>

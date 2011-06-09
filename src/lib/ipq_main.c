@@ -1488,6 +1488,21 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 		a++;
 	}
 #endif
+#ifdef IPOQUE_PROTOCOL_MEEBO
+	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_MEEBO) != 0) {
+		ipoque_struct->callback_buffer[a].func = ipoque_search_meebo;
+		ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+			IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+#ifdef IPOQUE_PROTOCOL_FLASH
+		IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_FLASH);
+#endif
+
+		IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_MEEBO);
+		a++;
+	}
+#endif
 #ifdef IPOQUE_PROTOCOL_AFP
 	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_AFP) != 0) {
 		ipoque_struct->callback_buffer[a].func = ipoque_search_afp;

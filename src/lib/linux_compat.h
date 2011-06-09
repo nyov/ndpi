@@ -24,6 +24,16 @@
 #ifndef __IPOQUE_LINUX_COMPAT_H__
 #define __IPOQUE_LINUX_COMPAT_H__
 
+#if defined(BYTE_ORDER) && !defined(__BYTE_ORDER)
+# define __BYTE_ORDER BYTE_ORDER
+#endif
+#if defined(LITTLE_ENDIAN) && !defined(__LITTLE_ENDIAN)
+# define __LITTLE_ENDIAN LITTLE_ENDIAN
+#endif
+#if defined(BIG_ENDIAN) && !defined(__BIG_ENDIAN)
+# define __BIG_ENDIAN BIG_ENDIAN
+#endif
+
 struct iphdr {
 #if BYTE_ORDER == LITTLE_ENDIAN
       uint8_t ihl:4, version:4;

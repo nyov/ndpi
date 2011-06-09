@@ -44,9 +44,9 @@ struct ipq_ip6_addr {
 
 struct ipq_ipv6hdr {
 /* use userspace and kernelspace compatible compile parameters */
-#if defined(__LITTLE_ENDIAN_BITFIELD) || __BYTE_ORDER == __LITTLE_ENDIAN
+#if defined(__LITTLE_ENDIAN_BITFIELD) || (defined( __LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN)
 	u8 priority:4, version:4;
-#elif defined(__BIG_ENDIAN_BITFIELD) || __BYTE_ORDER == __BIG_ENDIAN
+#elif defined(__BIG_ENDIAN_BITFIELD) || (defined( __BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN)
 	u8 version:4, priority:4;
 #else
 #error	"__LITTLE_ENDIAN_BITFIELD or __BIG_ENDIAN_BITFIELD must be defined, should be done by <asm/byteorder.h>"
