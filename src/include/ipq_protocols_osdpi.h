@@ -157,8 +157,12 @@ extern "C" {
 #define IPOQUE_PROTOCOL_WORLD_OF_KUNG_FU		117
 #define IPOQUE_PROTOCOL_MEEBO					118
 
+#ifdef HAVE_NTOP
+#define IPOQUE_PROTOCOL_FACEBOOK				119
+#define IPOQUE_PROTOCOL_TWITTER					120
+#endif
 
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL        118
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL        120
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS IPOQUE_LAST_IMPLEMENTED_PROTOCOL
@@ -173,7 +177,7 @@ extern "C" {
 	"Second Life","Steam","Halflife2","World of Warcraft","Telnet","STUN","IPSEC","GRE","ICMP","IGMP","EGP","SCTP","OSPF",\
 	"IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini","SIP","Truphone",\
 	"ICMPv6","DHCPv6","Armagetron","CrossFire","Dofus","Fiesta","Florensia","Guildwars","HTTP Application Activesync","Kerberos",\
-	"LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World of Kung Fu","MEEBO"
+    "LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World of Kung Fu","MEEBO","FaceBook","Twitter"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp",\
 	"bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx",\
 	"manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi",\
@@ -182,7 +186,7 @@ extern "C" {
 	"popo","jabber","msn","oscar","yahoo","battlefield","quake","secondlife","steam","hl2","worldofwarcraft","telnet","stun",\
 	"ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere","ssl","ssh","usenet","mgcp","iax",\
 	"tftp","afp","stealthnet","aimini","sip","truphone","icmpv6","dhcpv6","armagetron","crossfire","dofus","fiesta","florensia",\
-	"guildwars","httpactivesync","kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo"
+	"guildwars","httpactivesync","kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo","facebook","twitter"
 
 #ifdef __cplusplus
 }

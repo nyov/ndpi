@@ -1,0 +1,8 @@
+This directory contains a modified version of OpenDPI which
+includes ntop extensions. I have tried to push them into the
+OpenDPI source tree but nobody in answering emails so I have
+decided to create my own source tree
+
+
+--------------------------
+Luca Deri <deri@ntop.org>

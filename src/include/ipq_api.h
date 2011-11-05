@@ -23,6 +23,10 @@
 
 #ifndef __IPOQUE_API_INCLUDE_FILE__
 #define __IPOQUE_API_INCLUDE_FILE__
+
+
+#define HAVE_NTOP
+
 #ifdef __cplusplus
 extern "C" {
 #endif

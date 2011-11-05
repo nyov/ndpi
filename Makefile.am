@@ -1,2 +1,2 @@
-SUBDIRS = src/include src/lib src/examples/OpenDPI_demo
+SUBDIRS = src/include src/lib
 ACLOCAL_AMFLAGS = -I m4
