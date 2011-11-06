@@ -32,6 +32,7 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/directdownloadlink.c \
 			protocols/dns.c \
 			protocols/dofus.c \
+			protocols/dropbox.c \
 			protocols/edonkey.c \
 			protocols/fasttrack.c \
 			protocols/feidian.c \

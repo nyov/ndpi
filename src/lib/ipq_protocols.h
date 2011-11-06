@@ -362,4 +362,11 @@ void ipoque_search_guildwars_tcp(struct ipoque_detection_module_struct *ipoque_s
 
 void ipoque_search_armagetron_udp(struct ipoque_detection_module_struct *ipoque_struct);
 
+
+/* ntop */
+void ntop_search_dropbox(struct ipoque_detection_module_struct *ipoque_struct);
+
+
+
+
 #endif							/* __IPOQUE_PROTOCOLS_INCLUDE_FILE__ */

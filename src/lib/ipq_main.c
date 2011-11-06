@@ -321,6 +321,19 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
   }
 #endif
 
+#ifdef NTOP_PROTOCOL_DROPBOX
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_DROPBOX) != 0) {
+    ipoque_struct->callback_buffer[a].func = ntop_search_dropbox;
+    ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+      IPQ_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
+
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_DROPBOX);
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_DROPBOX);
+    a++;
+  }
+#endif
+
 #ifdef IPOQUE_PROTOCOL_BITTORRENT
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_BITTORRENT) != 0) {
     ipoque_struct->callback_buffer[a].func = ipoque_search_bittorrent;

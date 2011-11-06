@@ -23,12 +23,20 @@
 
 #include "ipq_protocols.h"
 
+#ifdef HAVE_NTOP
+
+typedef struct {
+  char *string_to_match;
+  int protocol_id;
+} ntop_protocol_match;
+
+#endif
+
 #ifdef IPOQUE_PROTOCOL_HTTP
 
 static void ipoque_int_http_add_connection(struct ipoque_detection_module_struct
 					   *ipoque_struct, u32 protocol)
 {
-
   struct ipoque_flow_struct *flow = ipoque_struct->flow;
 
   if (protocol != IPOQUE_PROTOCOL_HTTP) {
@@ -426,6 +434,39 @@ static void rtsp_parse_packet_acceptline(struct ipoque_detection_module_struct
 }
 #endif
 
+#ifdef HAVE_NTOP
+static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_struct) {
+  int i = 0;
+  ntop_protocol_match host_match[] = {
+    { "twitter.com",      NTOP_PROTOCOL_TWITTER },
+    { "twttr.com",        NTOP_PROTOCOL_TWITTER },
+    { "facebook.com",     NTOP_PROTOCOL_FACEBOOK },
+    { "fbcdn.net",        NTOP_PROTOCOL_FACEBOOK },
+    { "dropbox.com",      NTOP_PROTOCOL_DROPBOX },
+    { ".gmail.",          NTOP_PROTOCOL_GMAIL },
+    { "maps.google.com",  NTOP_PROTOCOL_GOOGLE_MAPS },
+    { "maps.gstatic.com", NTOP_PROTOCOL_GOOGLE_MAPS },
+    { "gstatic.com",      NTOP_PROTOCOL_GOOGLE },
+    { "google.com",       NTOP_PROTOCOL_GOOGLE },
+    { ".youtube.",        NTOP_PROTOCOL_YOUTUBE },
+    { NULL, 0 }
+  };
+
+  if (ipoque_struct->packet.detected_protocol_stack[0] != IPOQUE_PROTOCOL_HTTP) 
+    return;
+
+  while(host_match[i].string_to_match != NULL) {
+    if(strnstr(ipoque_struct->packet.host_line.ptr, 
+	       host_match[i].string_to_match, 
+	       ipoque_struct->packet.host_line.len) != NULL) {
+      ipoque_struct->packet.detected_protocol_stack[0] = host_match[i].protocol_id;
+      break;
+    } else
+      i++;
+  }
+}
+#endif
+
 static void check_content_type_and_change_protocol(struct ipoque_detection_module_struct
 						   *ipoque_struct)
 {
@@ -502,7 +543,12 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
       qq_parse_packet_URL_and_hostname(ipoque_struct);
     }
 #endif
+
+#ifdef HAVE_NTOP
+    parseHttpSubprotocol(ipoque_struct);
+#endif
   }
+
   /* check for accept line */
   if (ipoque_struct->packet.accept_line.ptr != NULL) {
     IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "Accept Line found %.*s\n",
