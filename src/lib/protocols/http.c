@@ -435,6 +435,31 @@ static void rtsp_parse_packet_acceptline(struct ipoque_detection_module_struct
 #endif
 
 #ifdef HAVE_NTOP
+
+/*
+ * Find the first occurrence of find in s, where the search is limited to the
+ * first slen characters of s.
+ */
+char* ntop_strnstr(const char *s, const char *find, size_t slen) {
+  char c, sc;
+  size_t len;
+
+  if ((c = *find++) != '\0') {
+    len = strlen(find);
+    do {
+      do {
+	if (slen-- < 1 || (sc = *s++) == '\0')
+	  return (NULL);
+      } while (sc != c);
+      if (len > slen)
+	return (NULL);
+    } while (strncmp(s, find, len) != 0);
+    s--;
+  }
+  return ((char *)s);
+}
+
+
 static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_struct) {
   int i = 0;
   ntop_protocol_match host_match[] = {
@@ -456,7 +481,7 @@ static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_s
     return;
 
   while(host_match[i].string_to_match != NULL) {
-    if(strnstr(ipoque_struct->packet.host_line.ptr, 
+    if(ntop_strnstr(ipoque_struct->packet.host_line.ptr, 
 	       host_match[i].string_to_match, 
 	       ipoque_struct->packet.host_line.len) != NULL) {
       ipoque_struct->packet.detected_protocol_stack[0] = host_match[i].protocol_id;
