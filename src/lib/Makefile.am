@@ -15,6 +15,9 @@ LIB_AC=1
 LIB_REV=3
 LIB_ANC=0
 
+# ntop
+AM_CFLAGS=-fPIC
+
 libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
 libopendpi_la_SOURCES = ipq_main.c \
