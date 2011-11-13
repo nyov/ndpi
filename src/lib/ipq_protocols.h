@@ -363,9 +363,10 @@ void ipoque_search_guildwars_tcp(struct ipoque_detection_module_struct *ipoque_s
 void ipoque_search_armagetron_udp(struct ipoque_detection_module_struct *ipoque_struct);
 
 
-/* ntop */
+#ifdef HAVE_NTOP
 void ntop_search_dropbox(struct ipoque_detection_module_struct *ipoque_struct);
-
+void ntop_search_skype(struct ipoque_detection_module_struct *ipoque_struct);
+#endif
 
 
 

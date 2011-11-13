@@ -35,7 +35,6 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/directdownloadlink.c \
 			protocols/dns.c \
 			protocols/dofus.c \
-			protocols/dropbox.c \
 			protocols/edonkey.c \
 			protocols/fasttrack.c \
 			protocols/feidian.c \
@@ -121,5 +120,8 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/xbox.c \
 			protocols/xdmcp.c \
 			protocols/yahoo.c \
-			protocols/zattoo.c
+			protocols/zattoo.c \
+			protocols/dropbox.c \
+			protocols/skype.c
 
+# NTOP protocols are at the end

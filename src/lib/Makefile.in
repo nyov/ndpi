@@ -75,9 +75,9 @@ libopendpi_la_LIBADD =
 am_libopendpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
 	armagetron.lo battlefield.lo bgp.lo bittorrent.lo crossfire.lo \
 	dhcp.lo dhcpv6.lo directconnect.lo directdownloadlink.lo \
-	dns.lo dofus.lo dropbox.lo edonkey.lo fasttrack.lo feidian.lo \
-	fiesta.lo filetopia.lo flash.lo florensia.lo ftp.lo \
-	gadu_gadu.lo gnutella.lo guildwars.lo halflife2_and_mods.lo \
+	dns.lo dofus.lo edonkey.lo fasttrack.lo feidian.lo fiesta.lo \
+	filetopia.lo flash.lo florensia.lo ftp.lo gadu_gadu.lo \
+	gnutella.lo guildwars.lo halflife2_and_mods.lo \
 	http_activesync.lo http.lo i23v5.lo iax.lo icecast.lo imesh.lo \
 	ipp.lo irc.lo jabber.lo kerberos.lo kontiki.lo ldap.lo \
 	mail_imap.lo mail_pop.lo mail_smtp.lo manolito.lo \
@@ -90,7 +90,7 @@ am_libopendpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
 	steam.lo stun.lo syslog.lo tds.lo telnet.lo tftp.lo thunder.lo \
 	tvants.lo tvuplayer.lo usenet.lo veohtv.lo vnc.lo warcraft3.lo \
 	winmx.lo world_of_kung_fu.lo world_of_warcraft.lo xbox.lo \
-	xdmcp.lo yahoo.lo zattoo.lo
+	xdmcp.lo yahoo.lo zattoo.lo dropbox.lo skype.lo
 libopendpi_la_OBJECTS = $(am_libopendpi_la_OBJECTS)
 libopendpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -239,6 +239,9 @@ noinst_HEADERS = ipq_main.h \
 LIB_AC = 1
 LIB_REV = 3
 LIB_ANC = 0
+
+# ntop
+AM_CFLAGS = -fPIC
 libopendpi_la_LDFLAGS = -version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 libopendpi_la_SOURCES = ipq_main.c \
 			protocols/afp.c \
@@ -255,7 +258,6 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/directdownloadlink.c \
 			protocols/dns.c \
 			protocols/dofus.c \
-			protocols/dropbox.c \
 			protocols/edonkey.c \
 			protocols/fasttrack.c \
 			protocols/feidian.c \
@@ -341,7 +343,9 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/xbox.c \
 			protocols/xdmcp.c \
 			protocols/yahoo.c \
-			protocols/zattoo.c
+			protocols/zattoo.c \
+			protocols/dropbox.c \
+			protocols/skype.c
 
 all: all-am
 
@@ -490,6 +494,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/secondlife.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shoutcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sip.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skype.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/snmp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socrates.Plo@am__quote@
@@ -638,13 +643,6 @@ dofus.lo: protocols/dofus.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/dofus.c' object='dofus.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dofus.lo `test -f 'protocols/dofus.c' || echo '$(srcdir)/'`protocols/dofus.c
-
-dropbox.lo: protocols/dropbox.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dropbox.lo -MD -MP -MF $(DEPDIR)/dropbox.Tpo -c -o dropbox.lo `test -f 'protocols/dropbox.c' || echo '$(srcdir)/'`protocols/dropbox.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/dropbox.Tpo $(DEPDIR)/dropbox.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/dropbox.c' object='dropbox.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dropbox.lo `test -f 'protocols/dropbox.c' || echo '$(srcdir)/'`protocols/dropbox.c
 
 edonkey.lo: protocols/edonkey.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT edonkey.lo -MD -MP -MF $(DEPDIR)/edonkey.Tpo -c -o edonkey.lo `test -f 'protocols/edonkey.c' || echo '$(srcdir)/'`protocols/edonkey.c
@@ -1248,6 +1246,20 @@ zattoo.lo: protocols/zattoo.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o zattoo.lo `test -f 'protocols/zattoo.c' || echo '$(srcdir)/'`protocols/zattoo.c
 
+dropbox.lo: protocols/dropbox.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dropbox.lo -MD -MP -MF $(DEPDIR)/dropbox.Tpo -c -o dropbox.lo `test -f 'protocols/dropbox.c' || echo '$(srcdir)/'`protocols/dropbox.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/dropbox.Tpo $(DEPDIR)/dropbox.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/dropbox.c' object='dropbox.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dropbox.lo `test -f 'protocols/dropbox.c' || echo '$(srcdir)/'`protocols/dropbox.c
+
+skype.lo: protocols/skype.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT skype.lo -MD -MP -MF $(DEPDIR)/skype.Tpo -c -o skype.lo `test -f 'protocols/skype.c' || echo '$(srcdir)/'`protocols/skype.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/skype.Tpo $(DEPDIR)/skype.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/skype.c' object='skype.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o skype.lo `test -f 'protocols/skype.c' || echo '$(srcdir)/'`protocols/skype.c
+
 mostlyclean-libtool:
 	-rm -f *.lo
 
@@ -1455,6 +1467,8 @@ uninstall-am: uninstall-libLTLIBRARIES
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am uninstall-libLTLIBRARIES
 
+
+# NTOP protocols are at the end
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
