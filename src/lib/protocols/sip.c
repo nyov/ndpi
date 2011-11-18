@@ -34,7 +34,13 @@ static void ipoque_int_sip_add_connection(struct ipoque_detection_module_struct
 }
 
 
-static inline void ipoque_search_sip_handshake(struct ipoque_detection_module_struct
+	
+#if !(defined(HAVE_NTOP) && defined(WIN32))
+ static inline
+#else
+__forceinline static
+#endif
+	 void ipoque_search_sip_handshake(struct ipoque_detection_module_struct
 											   *ipoque_struct)
 {
 	struct ipoque_packet_struct *packet = &ipoque_struct->packet;

@@ -1858,7 +1858,12 @@ static u8 ipoque_detection_get_l4_internal(struct ipoque_detection_module_struct
   return 0;
 }
 
-ATTRIBUTE_ALWAYS_INLINE static inline void ipoque_apply_flow_protocol_to_packet(struct ipoque_flow_struct *flow,
+#if !(defined(HAVE_NTOP) && defined(WIN32))
+#define ATTRIBUTE_ALWAYS_INLINE static inline
+#else
+__forceinline static
+#endif
+	 void ipoque_apply_flow_protocol_to_packet(struct ipoque_flow_struct *flow,
 										struct ipoque_packet_struct *packet)
 {
   memcpy(&packet->detected_protocol_stack[0],
@@ -1988,7 +1993,13 @@ static int ipq_init_packet_header(struct ipoque_detection_module_struct *ipoque_
   return 0;
 }
 
-static inline void ipoque_connection_tracking(struct ipoque_detection_module_struct
+	
+#if !(defined(HAVE_NTOP) && defined(WIN32))
+ static inline
+#else
+__forceinline static
+#endif
+	void ipoque_connection_tracking(struct ipoque_detection_module_struct
 					      *ipoque_struct)
 {
   /* const for gcc code optimisation and cleaner code */
