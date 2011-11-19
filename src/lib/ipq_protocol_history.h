@@ -62,7 +62,7 @@ void ipoque_int_change_packet_protocol(struct ipoque_detection_module_struct *ip
  * 2.update the packet protocol stack with the new protocol
  */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -77,7 +77,7 @@ __forceinline static
 
 /* turns a packet back to unknown */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -96,7 +96,7 @@ __forceinline static
 
 /* turns a flow back to unknown */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif

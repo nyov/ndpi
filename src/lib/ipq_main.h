@@ -413,12 +413,11 @@ u32 ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_
 
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
-	u16 ntohs_ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read,
-																		 u16 * bytes_read)
+	u16 ntohs_ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read)
 {
 	u16 val = ipq_bytestream_to_number(str, max_chars_to_read, bytes_read);
 	return ntohs(val);
@@ -449,7 +448,7 @@ u16 ipoque_check_for_email_address(struct ipoque_detection_module_struct *ipoque
 /* reset ip to zero */
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -460,7 +459,7 @@ __forceinline static
 
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -472,7 +471,7 @@ __forceinline static
 /* check if the source ip address in packet and ip are equal */
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -498,7 +497,7 @@ __forceinline static
 /* check if the destination ip address in packet and ip are equal */
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -523,7 +522,7 @@ __forceinline static
 /* get the source ip address from packet and put it into ip */
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -542,7 +541,7 @@ __forceinline static
 /* get the destination ip address from packet and put it into ip */
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -563,7 +562,7 @@ __forceinline static
  * returns a pointer to a static string
  * only valid until the next call of this function */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -588,7 +587,7 @@ __forceinline static
 
 /* get the string representation of the source ip address from packet */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
@@ -602,7 +601,7 @@ __forceinline static
 
 /* get the string representation of the destination ip address from packet */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#define ATTRIBUTE_ALWAYS_INLINE static inline
+static inline
 #else
 __forceinline static
 #endif
