@@ -462,6 +462,8 @@ char* ntop_strnstr(const char *s, const char *find, size_t slen) {
 
 static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_struct) {
   int i = 0;
+  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+
   ntop_protocol_match host_match[] = {
     { "twitter.com",      NTOP_PROTOCOL_TWITTER },
     { "twttr.com",        NTOP_PROTOCOL_TWITTER },
@@ -477,6 +479,16 @@ static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_s
     { NULL, 0 }
   };
 
+  /* 
+     Twitter Inc. TWITTER-NETWORK (NET-199-59-148-0-1) 199.59.148.0 - 199.59.151.255
+     199.59.148.0/22
+  */
+  if(((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)
+     || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)) {
+    ipoque_struct->packet.detected_protocol_stack[0] = NTOP_PROTOCOL_TWITTER;
+    return;
+  }
+    
   if (ipoque_struct->packet.detected_protocol_stack[0] != IPOQUE_PROTOCOL_HTTP) 
     return;
 
