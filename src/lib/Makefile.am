@@ -122,6 +122,9 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/yahoo.c \
 			protocols/zattoo.c \
 			protocols/dropbox.c \
-			protocols/skype.c
+			protocols/skype.c \
+			protocols/dcerpc.c \
+			protocols/netflow.c \
+			protocols/sflow.c
 
 # NTOP protocols are at the end

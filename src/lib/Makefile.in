@@ -90,7 +90,8 @@ am_libopendpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
 	steam.lo stun.lo syslog.lo tds.lo telnet.lo tftp.lo thunder.lo \
 	tvants.lo tvuplayer.lo usenet.lo veohtv.lo vnc.lo warcraft3.lo \
 	winmx.lo world_of_kung_fu.lo world_of_warcraft.lo xbox.lo \
-	xdmcp.lo yahoo.lo zattoo.lo dropbox.lo skype.lo
+	xdmcp.lo yahoo.lo zattoo.lo dropbox.lo skype.lo dcerpc.lo \
+	netflow.lo sflow.lo
 libopendpi_la_OBJECTS = $(am_libopendpi_la_OBJECTS)
 libopendpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -345,7 +346,10 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/yahoo.c \
 			protocols/zattoo.c \
 			protocols/dropbox.c \
-			protocols/skype.c
+			protocols/skype.c \
+			protocols/dcerpc.c \
+			protocols/netflow.c \
+			protocols/sflow.c
 
 all: all-am
 
@@ -429,6 +433,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bgp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bittorrent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crossfire.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dcerpc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dhcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dhcpv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/directconnect.Plo@am__quote@
@@ -474,6 +479,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mssql.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mysql.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netbios.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/netflow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nfs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/non_tcp_udp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ntp.Plo@am__quote@
@@ -492,6 +498,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtsp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/secondlife.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sflow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shoutcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/skype.Plo@am__quote@
@@ -1259,6 +1266,27 @@ skype.lo: protocols/skype.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/skype.c' object='skype.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o skype.lo `test -f 'protocols/skype.c' || echo '$(srcdir)/'`protocols/skype.c
+
+dcerpc.lo: protocols/dcerpc.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT dcerpc.lo -MD -MP -MF $(DEPDIR)/dcerpc.Tpo -c -o dcerpc.lo `test -f 'protocols/dcerpc.c' || echo '$(srcdir)/'`protocols/dcerpc.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/dcerpc.Tpo $(DEPDIR)/dcerpc.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/dcerpc.c' object='dcerpc.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o dcerpc.lo `test -f 'protocols/dcerpc.c' || echo '$(srcdir)/'`protocols/dcerpc.c
+
+netflow.lo: protocols/netflow.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT netflow.lo -MD -MP -MF $(DEPDIR)/netflow.Tpo -c -o netflow.lo `test -f 'protocols/netflow.c' || echo '$(srcdir)/'`protocols/netflow.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/netflow.Tpo $(DEPDIR)/netflow.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/netflow.c' object='netflow.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o netflow.lo `test -f 'protocols/netflow.c' || echo '$(srcdir)/'`protocols/netflow.c
+
+sflow.lo: protocols/sflow.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT sflow.lo -MD -MP -MF $(DEPDIR)/sflow.Tpo -c -o sflow.lo `test -f 'protocols/sflow.c' || echo '$(srcdir)/'`protocols/sflow.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/sflow.Tpo $(DEPDIR)/sflow.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/sflow.c' object='sflow.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o sflow.lo `test -f 'protocols/sflow.c' || echo '$(srcdir)/'`protocols/sflow.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

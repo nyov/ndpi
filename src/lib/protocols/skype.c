@@ -21,14 +21,6 @@
 #include "ipq_utils.h"
 
 #ifdef NTOP_PROTOCOL_SKYPE
-static void ntop_int_skype_add_connection(struct ipoque_detection_module_struct
-					    *ipoque_struct, u8 due_to_correlation)
-{
-  ipoque_int_add_connection(ipoque_struct,
-			    NTOP_PROTOCOL_SKYPE,
-			    due_to_correlation ? IPOQUE_CORRELATED_PROTOCOL : IPOQUE_REAL_PROTOCOL);
-}
-
 
 static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struct)
 {
@@ -36,20 +28,23 @@ static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struc
   struct ipoque_flow_struct *flow = ipoque_struct->flow;
   const u8 *packet_payload = packet->payload;
   u32 payload_len = packet->payload_packet_len;
-
-  if(ipoque_struct->packet.udp != NULL) {
-    if(payload_len >= 16) {
-      /* skype-to-skype */
-      if(packet->payload[2] == 0x02) {
-	IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
-	ntop_int_skype_add_connection(ipoque_struct, 0);
-	return;
-      }
-    }
-  }
   
-  IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "exclude skype.\n");
-  IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+#if 0
+  printf("[len=%u][%02X %02X %02X %02X]\n", payload_len, 
+	 packet->payload[0] & 0xFF,
+	 packet->payload[1] & 0xFF,
+	 packet->payload[2] & 0xFF,
+	 packet->payload[3] & 0xFF);
+#endif
+
+  if((ipoque_struct->packet.udp != NULL)
+     && (payload_len >= 16)      
+     && (packet->payload[2] == 0x02) /* skype-to-skype */) {
+    IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
+    ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
+    // IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_HTTP);
+    return;
+  }
 }
 
 void ntop_search_skype(struct ipoque_detection_module_struct *ipoque_struct)
@@ -59,11 +54,8 @@ void ntop_search_skype(struct ipoque_detection_module_struct *ipoque_struct)
   IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "skype detection...\n");
 
   /* skip marked packets */
-  if (packet->detected_protocol_stack[0] != NTOP_PROTOCOL_SKYPE) {
-    if (packet->tcp_retransmission == 0) {
-      ntop_check_skype(ipoque_struct);
-    }
-  }
+  if(packet->detected_protocol_stack[0] != NTOP_PROTOCOL_SKYPE)
+    ntop_check_skype(ipoque_struct);
 }
 
 #endif

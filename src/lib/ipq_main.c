@@ -347,6 +347,45 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
   }
 #endif
 
+#ifdef NTOP_PROTOCOL_DCERPC
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_DCERPC) != 0) {
+    ipoque_struct->callback_buffer[a].func = ntop_search_dcerpc;
+    ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+      IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_DCERPC);
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_DCERPC);
+    a++;
+  }
+#endif
+
+#ifdef NTOP_PROTOCOL_NETFLOW
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_NETFLOW) != 0) {
+    ipoque_struct->callback_buffer[a].func = ntop_search_netflow;
+    ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+      IPQ_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
+
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_NETFLOW);
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_NETFLOW);
+    a++;
+  }
+#endif
+
+#ifdef NTOP_PROTOCOL_SFLOW
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_SFLOW) != 0) {
+    ipoque_struct->callback_buffer[a].func = ntop_search_sflow;
+    ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+      IPQ_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
+
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_SFLOW);
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_SFLOW);
+    a++;
+  }
+#endif
+
 #ifdef IPOQUE_PROTOCOL_BITTORRENT
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_BITTORRENT) != 0) {
     ipoque_struct->callback_buffer[a].func = ipoque_search_bittorrent;
@@ -2208,6 +2247,11 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 	    && IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_tcp_payload[a].detection_bitmask,
 				      detection_bitmask) != 0) {
 	  ipoque_struct->callback_buffer_tcp_payload[a].func(ipoque_struct);
+
+#ifdef HAVE_NTOP
+	  if(ipoque_struct->flow->detected_protocol_stack[0] != IPOQUE_PROTOCOL_UNKNOWN)
+	    break; /* Stop after detecting the first protocol */
+#endif
 	}
       }
     } else {				/* no payload */
@@ -2221,6 +2265,11 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 	    && IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_tcp_no_payload[a].detection_bitmask,
 				      detection_bitmask) != 0) {
 	  ipoque_struct->callback_buffer_tcp_no_payload[a].func(ipoque_struct);
+
+#ifdef HAVE_NTOP
+	  if(ipoque_struct->flow->detected_protocol_stack[0] != IPOQUE_PROTOCOL_UNKNOWN)
+	    break; /* Stop after detecting the first protocol */
+#endif
 	}
       }
     }
@@ -2233,7 +2282,11 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 	  && IPOQUE_BITMASK_COMPARE(ipoque_struct->callback_buffer_udp[a].detection_bitmask,
 				    detection_bitmask) != 0) {
 	ipoque_struct->callback_buffer_udp[a].func(ipoque_struct);
-
+	
+#ifdef HAVE_NTOP
+	if(ipoque_struct->flow->detected_protocol_stack[0] != IPOQUE_PROTOCOL_UNKNOWN)
+	  break; /* Stop after detecting the first protocol */
+#endif
       }
     }
   } else {
@@ -2250,15 +2303,14 @@ unsigned int ipoque_detection_process_packet(struct ipoque_detection_module_stru
 				    detection_bitmask) != 0) {
 
 	ipoque_struct->callback_buffer_non_tcp_udp[a].func(ipoque_struct);
-      }
 
+#ifdef HAVE_NTOP
+	if(ipoque_struct->flow->detected_protocol_stack[0] != IPOQUE_PROTOCOL_UNKNOWN)
+	  break; /* Stop after detecting the first protocol */
+#endif
+      }
     }
   }
-
-
-
-
-
 
   a = ipoque_struct->packet.detected_protocol_stack[0];
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, a)
@@ -3174,3 +3226,33 @@ u8 ipoque_detection_flow_protocol_history_contains_protocol(struct ipoque_detect
 
   return 0;
 }
+
+
+#ifdef HAVE_NTOP
+
+inline u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
+  return(((match_port == sport) || (match_port == dport)) ? 1 : 0);
+}
+
+/* ****************************************************** */
+
+unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_int16_t dport) {
+
+  printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
+
+  if(proto == IPPROTO_UDP) {
+  } else if(proto == IPPROTO_TCP) {
+    if(is_port(sport, dport, 443))      return(IPOQUE_PROTOCOL_SSL);
+    else if(is_port(sport, dport, 445)) return(IPOQUE_PROTOCOL_SMB);
+    else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
+    else if(is_port(sport, dport, 143) || is_port(sport, dport, 993)) return(IPOQUE_PROTOCOL_MAIL_IMAP);
+    else if(is_port(sport, dport, 25)  || is_port(sport, dport, 465)) return(IPOQUE_PROTOCOL_MAIL_SMTP);
+    else if(is_port(sport, dport, 135)) return(NTOP_PROTOCOL_DCERPC);
+
+
+  }
+
+  return(IPOQUE_PROTOCOL_UNKNOWN);
+}
+
+#endif
