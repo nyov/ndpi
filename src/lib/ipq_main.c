@@ -3237,8 +3237,7 @@ inline u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
 /* ****************************************************** */
 
 unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_int16_t dport) {
-
-  printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
+  //   printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
 
   if(proto == IPPROTO_UDP) {
   } else if(proto == IPPROTO_TCP) {
