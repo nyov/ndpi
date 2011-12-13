@@ -169,11 +169,12 @@ extern "C" {
 #define NTOP_PROTOCOL_DCERPC				        127
 #define NTOP_PROTOCOL_NETFLOW				        128
 #define NTOP_PROTOCOL_SFLOW				        129
+#define NTOP_PROTOCOL_HTTP_CONNECT				130
 
 /* NOTE: REMEMBER TO UPDATE IPOQUE_PROTOCOL_LONG_STRING / IPOQUE_PROTOCOL_SHORT_STRING */
 #endif
 
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        129
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        130
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS IPOQUE_LAST_IMPLEMENTED_PROTOCOL
@@ -189,7 +190,8 @@ extern "C" {
     "IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini","SIP","Truphone", \
     "ICMPv6","DHCPv6","Armagetron","CrossFire","Dofus","Fiesta","Florensia","Guildwars","HTTP Application Activesync","Kerberos", \
     "LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World of Kung Fu","MEEBO", \
-    "FaceBook","Twitter","DropBox","Gmail","Google Maps","YouTube","Skype","Google","DCE RPC","NetFlow_IPFIX","sFlow"
+    "FaceBook","Twitter","DropBox","Gmail","Google Maps","YouTube","Skype","Google","DCE RPC","NetFlow_IPFIX","sFlow", \
+    "HTTP Connect"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp", \
     "bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx", \
     "manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi", \
@@ -199,7 +201,8 @@ extern "C" {
     "ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere","ssl","ssh","usenet","mgcp","iax", \
     "tftp","afp","stealthnet","aimini","sip","truphone","icmpv6","dhcpv6","armagetron","crossfire","dofus","fiesta","florensia", \
     "guildwars","httpactivesync","kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo",\
-    "facebook","twitter","dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow"
+    "facebook","twitter","dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow", \
+    "http_connect"
 
 #ifdef __cplusplus
 }

@@ -38,7 +38,10 @@ static void ntop_check_dropbox(struct ipoque_detection_module_struct *ipoque_str
   u32 payload_len = packet->payload_packet_len;
 
   if(ipoque_struct->packet.udp != NULL) {
-    if(ipoque_struct->packet.udp->source == ipoque_struct->packet.udp->dest == htons(17500)) {
+    u16 dropbox_port = htons(17500);
+
+    if((ipoque_struct->packet.udp->source == dropbox_port)
+       && (ipoque_struct->packet.udp->dest == dropbox_port)) {
       if(payload_len > 2) {
 	if(strncmp(packet->payload, "{\"", 2) == 0) {
 	  IPQ_LOG(NTOP_PROTOCOL_DROPBOX, ipoque_struct, IPQ_LOG_DEBUG, "Found dropbox.\n");

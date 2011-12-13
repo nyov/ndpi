@@ -768,7 +768,7 @@ void ipoque_search_http_tcp(struct ipoque_detection_module_struct *ipoque_struct
 
 	IPQ_LOG(IPOQUE_PROTOCOL_HTTP, ipoque_struct, IPQ_LOG_DEBUG, "http structure detected, adding\n");
 
-	ipoque_int_http_add_connection(ipoque_struct, IPOQUE_PROTOCOL_HTTP);
+	ipoque_int_http_add_connection(ipoque_struct, (filename_start == 8) ? NTOP_PROTOCOL_HTTP_CONNECT : IPOQUE_PROTOCOL_HTTP);
 	check_content_type_and_change_protocol(ipoque_struct);
 	/* HTTP found, look for host... */
 	if (packet->host_line.ptr != NULL) {
