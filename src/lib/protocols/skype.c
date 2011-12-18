@@ -50,37 +50,33 @@ static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struc
 	 packet->payload[3] & 0xFF);
 #endif
 
-  if((ipoque_struct->packet.udp != NULL)
-     && (payload_len >= 16)
-     && (packet->payload[2] == 0x02) /* skype-to-skype */) {
-    IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
-    ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
-    return;
-  }
-
-  /*
-     Let's check if:
-     - the two peers connect with private IPs
-     - one of the two ports is 2240
-     - protocol can either be TCP or UDP
-  */
-
-  if(is_private_addr(packet->iph->saddr) && is_private_addr(packet->iph->daddr)) {
-    u16 sport, dport;
-
-    if(ipoque_struct->packet.udp != NULL)
-      sport=ntohs(packet->udp->source), dport=ntohs(packet->udp->dest);
-    else
-      sport=ntohs(packet->tcp->source), dport=ntohs(packet->tcp->dest);
-
-    if((sport == 2240) || (dport == 2240)) {
+  if(ipoque_struct->packet.udp != NULL) {
+    if((payload_len >= 16)
+       && (packet->payload[2] == 0x02) /* skype-to-skype */) {
       IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
       ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
       return;
     }
-  }
 
-  IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+    return;
+  } else if(ipoque_struct->packet.tcp != NULL) {
+    flow->l4.tcp.packet_id++;
+
+    if(flow->l4.tcp.packet_id < 3) {
+      ; /* Too early */
+    } else if(flow->l4.tcp.packet_id == 3) {
+      if((payload_len == 8) || (payload_len == 3)) {
+	IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
+	ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
+      }
+
+      /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.packet_id, payload_len);  */
+    } else
+      IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+
+    return;
+  }
 }
 
 void ntop_search_skype(struct ipoque_detection_module_struct *ipoque_struct)

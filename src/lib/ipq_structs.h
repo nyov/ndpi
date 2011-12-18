@@ -342,7 +342,11 @@ struct ipoque_flow_tcp_struct {
 	u32 mail_imap_stage:3;
 #endif
 
+#ifdef NTOP_PROTOCOL_SKYPE
+  u8 packet_id;
+#endif
 } 
+
 #if !(defined(HAVE_NTOP) && defined(WIN32))
 __attribute__ ((__packed__))
 #endif
