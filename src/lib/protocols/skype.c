@@ -65,7 +65,11 @@ static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struc
 
     if(flow->l4.tcp.packet_id < 3) {
       ; /* Too early */
-    } else if(flow->l4.tcp.packet_id == 3) {
+    } else if((flow->l4.tcp.packet_id == 3)
+	      /* We have seen the 3-way handshake */
+	      && flow->l4.tcp.seen_syn
+	      && flow->l4.tcp.seen_syn_ack
+	      && flow->l4.tcp.seen_ack) {
       if((payload_len == 8) || (payload_len == 3)) {
 	IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
 	ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
