@@ -3242,6 +3242,8 @@ unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_i
   //   printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
 
   if(proto == IPPROTO_UDP) {
+    if(is_port(sport, dport, 67) || is_port(sport, dport, 68))      return(IPOQUE_PROTOCOL_DHCP);
+    else if(is_port(sport, dport, 53)) return(IPOQUE_PROTOCOL_DHCP);
   } else if(proto == IPPROTO_TCP) {
     if(is_port(sport, dport, 443))      return(IPOQUE_PROTOCOL_SSL);
     else if(is_port(sport, dport, 445)) return(IPOQUE_PROTOCOL_SMB);
@@ -3251,8 +3253,7 @@ unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_i
     else if(is_port(sport, dport, 25)  || is_port(sport, dport, 465)) return(IPOQUE_PROTOCOL_MAIL_SMTP);
     else if(is_port(sport, dport, 135)) return(NTOP_PROTOCOL_DCERPC);
     else if(is_port(sport, dport, 1494)) return(NTOP_PROTOCOL_CITRIX);
-
-
+    else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
   }
 
   return(IPOQUE_PROTOCOL_UNKNOWN);
