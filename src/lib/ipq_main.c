@@ -3249,16 +3249,16 @@ unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_i
     else if(is_port(sport, dport, 53)) return(IPOQUE_PROTOCOL_DNS);
   } else if(proto == IPPROTO_TCP) {
     if(is_port(sport, dport, 443))      return(IPOQUE_PROTOCOL_SSL);
-    else if(is_port(sport, dport, 22))      return(IPOQUE_PROTOCOL_SSH);
-    else if(is_port(sport, dport, 23))      return(IPOQUE_PROTOCOL_TELNET);
+    else if(is_port(sport, dport, 22))  return(IPOQUE_PROTOCOL_SSH);
+    else if(is_port(sport, dport, 23))  return(IPOQUE_PROTOCOL_TELNET);
     else if(is_port(sport, dport, 445)) return(IPOQUE_PROTOCOL_SMB);
     else if(is_port(sport, dport, 80) || is_port(sport, dport, 3128)) return(IPOQUE_PROTOCOL_HTTP);
     else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
     else if(is_port(sport, dport, 143) || is_port(sport, dport, 993)) return(IPOQUE_PROTOCOL_MAIL_IMAP);
     else if(is_port(sport, dport, 25)  || is_port(sport, dport, 465)) return(IPOQUE_PROTOCOL_MAIL_SMTP);
-    else if(is_port(sport, dport, 135)) return(NTOP_PROTOCOL_DCERPC);
+    else if(is_port(sport, dport, 135))  return(NTOP_PROTOCOL_DCERPC);
     else if(is_port(sport, dport, 1494)) return(NTOP_PROTOCOL_CITRIX);
-    else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
+    else if(is_port(sport, dport, 389))  return(IPOQUE_PROTOCOL_LDAP);
   }
 
   return(IPOQUE_PROTOCOL_UNKNOWN);
