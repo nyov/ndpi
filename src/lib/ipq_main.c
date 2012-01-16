@@ -3242,10 +3242,15 @@ unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_i
   //   printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
 
   if(proto == IPPROTO_UDP) {
-    if(is_port(sport, dport, 67) || is_port(sport, dport, 68))      return(IPOQUE_PROTOCOL_DHCP);
-    else if(is_port(sport, dport, 53)) return(IPOQUE_PROTOCOL_DHCP);
+    if(is_port(sport, dport, 67) || is_port(sport, dport, 68))          return(IPOQUE_PROTOCOL_DHCP);
+    else if(is_port(sport, dport, 137) || is_port(sport, dport, 138))   return(IPOQUE_PROTOCOL_NETBIOS);
+    else if(is_port(sport, dport, 161) || is_port(sport, dport, 162))   return(IPOQUE_PROTOCOL_SNMP);
+    else if(is_port(sport, dport, 5353) || is_port(sport, dport, 5354)) return(IPOQUE_PROTOCOL_MDNS);
+    else if(is_port(sport, dport, 53)) return(IPOQUE_PROTOCOL_DNS);
   } else if(proto == IPPROTO_TCP) {
     if(is_port(sport, dport, 443))      return(IPOQUE_PROTOCOL_SSL);
+    else if(is_port(sport, dport, 22))      return(IPOQUE_PROTOCOL_SSH);
+    else if(is_port(sport, dport, 23))      return(IPOQUE_PROTOCOL_TELNET);
     else if(is_port(sport, dport, 445)) return(IPOQUE_PROTOCOL_SMB);
     else if(is_port(sport, dport, 80) || is_port(sport, dport, 3128)) return(IPOQUE_PROTOCOL_HTTP);
     else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
