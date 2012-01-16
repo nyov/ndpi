@@ -171,11 +171,12 @@ extern "C" {
 #define NTOP_PROTOCOL_SFLOW				        129
 #define NTOP_PROTOCOL_HTTP_CONNECT				130
 #define NTOP_PROTOCOL_CITRIX				        131
+#define NTOP_PROTOCOL_NETFLIX				        132
 
 /* NOTE: REMEMBER TO UPDATE IPOQUE_PROTOCOL_LONG_STRING / IPOQUE_PROTOCOL_SHORT_STRING */
 #endif
 
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        131
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        132
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS (IPOQUE_LAST_IMPLEMENTED_PROTOCOL + 1)
@@ -192,7 +193,7 @@ extern "C" {
     "ICMPv6","DHCPv6","Armagetron","CrossFire","Dofus","Fiesta","Florensia","Guildwars","HTTP Application Activesync","Kerberos", \
     "LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World of Kung Fu","MEEBO", \
     "FaceBook","Twitter","DropBox","Gmail","Google Maps","YouTube","Skype","Google","DCE RPC","NetFlow_IPFIX","sFlow", \
-    "HTTP Connect","Citrix"
+    "HTTP Connect","Citrix","Netflix"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp", \
     "bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx", \
     "manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi", \
@@ -203,7 +204,7 @@ extern "C" {
     "tftp","afp","stealthnet","aimini","sip","truphone","icmpv6","dhcpv6","armagetron","crossfire","dofus","fiesta","florensia", \
     "guildwars","httpactivesync","kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo",\
     "facebook","twitter","dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow", \
-    "http_connect","Citrix"
+    "http_connect","Citrix","Netflix"
 
 #ifdef __cplusplus
 }

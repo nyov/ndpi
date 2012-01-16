@@ -465,28 +465,43 @@ static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_s
   struct ipoque_packet_struct *packet = &ipoque_struct->packet;
 
   ntop_protocol_match host_match[] = {
-    { "twitter.com",      NTOP_PROTOCOL_TWITTER },
-    { "twttr.com",        NTOP_PROTOCOL_TWITTER },
-    { "facebook.com",     NTOP_PROTOCOL_FACEBOOK },
-    { "fbcdn.net",        NTOP_PROTOCOL_FACEBOOK },
-    { "dropbox.com",      NTOP_PROTOCOL_DROPBOX },
+    { ".twitter.com",      NTOP_PROTOCOL_TWITTER },
+    { ".netflix.com",      NTOP_PROTOCOL_NETFLIX },
+    { ".twttr.com",        NTOP_PROTOCOL_TWITTER },
+    { ".facebook.com",     NTOP_PROTOCOL_FACEBOOK },
+    { ".fbcdn.net",        NTOP_PROTOCOL_FACEBOOK },
+    { ".dropbox.com",      NTOP_PROTOCOL_DROPBOX },
     { ".gmail.",          NTOP_PROTOCOL_GMAIL },
     { "maps.google.com",  NTOP_PROTOCOL_GOOGLE_MAPS },
     { "maps.gstatic.com", NTOP_PROTOCOL_GOOGLE_MAPS },
-    { "gstatic.com",      NTOP_PROTOCOL_GOOGLE },
-    { "google.com",       NTOP_PROTOCOL_GOOGLE },
+    { ".gstatic.com",      NTOP_PROTOCOL_GOOGLE },
+    { ".google.com",       NTOP_PROTOCOL_GOOGLE },
     { ".youtube.",        NTOP_PROTOCOL_YOUTUBE },
     { NULL, 0 }
   };
 
-  /* 
-     Twitter Inc. TWITTER-NETWORK (NET-199-59-148-0-1) 199.59.148.0 - 199.59.151.255
-     199.59.148.0/22
-  */
-  if(((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)
-     || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)) {
-    ipoque_struct->packet.detected_protocol_stack[0] = NTOP_PROTOCOL_TWITTER;
-    return;
+  if(packet->iph /* IPv4 only */) {
+    /* 
+       Twitter Inc. TWITTER-NETWORK (NET-199-59-148-0-1) 199.59.148.0 - 199.59.151.255
+       199.59.148.0/22
+    */
+    if(((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)
+       || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)) {
+      ipoque_struct->packet.detected_protocol_stack[0] = NTOP_PROTOCOL_TWITTER;
+      return;
+    }
+
+
+    /* 
+       CIDR:           69.53.224.0/19
+       OriginAS:       AS2906
+       NetName:        NETFLIX-INC
+    */
+    if(((ntohl(packet->iph->saddr) & 0xFFFFE000 /* 255.255.224.0 */) == 0x4535E000 /* 69.53.224.0 */)
+       || ((ntohl(packet->iph->daddr) & 0xFFFFE000 /* 255.255.224.0 */) == 0x4535E000 /* 69.53.224.0 */)) {
+      ipoque_struct->packet.detected_protocol_stack[0] = NTOP_PROTOCOL_NETFLIX;
+      return;
+    }
   }
     
   if (ipoque_struct->packet.detected_protocol_stack[0] != IPOQUE_PROTOCOL_HTTP) 
