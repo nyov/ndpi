@@ -29,7 +29,7 @@ static void ntop_check_citrix(struct ipoque_detection_module_struct *ipoque_stru
   const u8 *packet_payload = packet->payload;
   u32 payload_len = packet->payload_packet_len;
 
-#if 1
+#if 0
   printf("[len=%u][%02X %02X %02X %02X]\n", payload_len,
 	 packet->payload[0] & 0xFF,
 	 packet->payload[1] & 0xFF,
@@ -48,14 +48,26 @@ static void ntop_check_citrix(struct ipoque_detection_module_struct *ipoque_stru
       if(payload_len == 6) {
 	char citrix_header[] = { 0x07, 0x07, 0x49, 0x43, 0x41, 0x00 };
 	
-	if(memcmp(packet->payload, citrix_header, 6) == 0) {
+	if(memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0) {
 	  IPQ_LOG(NTOP_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG, "Found citrix.\n");
 	  ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_CITRIX, IPOQUE_REAL_PROTOCOL);
 	}
+
+	return;
+      } else if(payload_len > 4) {
+	char citrix_header[] = { 0x1a, 0x43, 0x47, 0x50, 0x2f, 0x30, 0x31 };
 	
-	/* printf("[CITRIX] [id: %u][len: %d]\n", flow->l4.tcp.packet_id, payload_len);  */
-      } else
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
+	if((memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0)
+	   || (strnstr(packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
+	  IPQ_LOG(NTOP_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG, "Found citrix.\n");
+	  ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_CITRIX, IPOQUE_REAL_PROTOCOL);
+	}
+
+	return;	
+      }
+      
+      
+      IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
     } else if(flow->l4.tcp.packet_id > 3)
       IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
     
