@@ -123,6 +123,7 @@ libopendpi_la_SOURCES = ipq_main.c \
 			protocols/zattoo.c \
 			protocols/dropbox.c \
 			protocols/skype.c \
+			protocols/citrix.c \
 			protocols/dcerpc.c \
 			protocols/netflow.c \
 			protocols/sflow.c

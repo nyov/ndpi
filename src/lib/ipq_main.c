@@ -1654,6 +1654,19 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
   }
 #endif
 
+#ifdef NTOP_PROTOCOL_CITRIX
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_CITRIX) != 0) {
+    ipoque_struct->callback_buffer[a].func = ntop_search_citrix;
+    ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+    IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_CITRIX);
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
+    a++;
+  }
+#endif
+
 #ifdef NTOP_PROTOCOL_DCERPC
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_DCERPC) != 0) {
     ipoque_struct->callback_buffer[a].func = ntop_search_dcerpc;
@@ -3252,7 +3265,8 @@ unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int16_t sport, u_i
     else if(is_port(sport, dport, 22))  return(IPOQUE_PROTOCOL_SSH);
     else if(is_port(sport, dport, 23))  return(IPOQUE_PROTOCOL_TELNET);
     else if(is_port(sport, dport, 445)) return(IPOQUE_PROTOCOL_SMB);
-    else if(is_port(sport, dport, 80) || is_port(sport, dport, 3128)) return(IPOQUE_PROTOCOL_HTTP);
+    else if(is_port(sport, dport, 80))  return(IPOQUE_PROTOCOL_HTTP);
+    else if(is_port(sport, dport, 8080) || is_port(sport, dport, 3128)) return(NTOP_PROTOCOL_HTTP_PROXY);
     else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
     else if(is_port(sport, dport, 143) || is_port(sport, dport, 993)) return(IPOQUE_PROTOCOL_MAIL_IMAP);
     else if(is_port(sport, dport, 25)  || is_port(sport, dport, 465)) return(IPOQUE_PROTOCOL_MAIL_SMTP);

@@ -366,6 +366,7 @@ void ipoque_search_armagetron_udp(struct ipoque_detection_module_struct *ipoque_
 #ifdef HAVE_NTOP
 void ntop_search_dropbox(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_skype(struct ipoque_detection_module_struct *ipoque_struct);
+void ntop_search_citrix(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_dcerpc(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_netflow(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_sflow(struct ipoque_detection_module_struct *ipoque_struct);
