@@ -58,7 +58,7 @@ static void ntop_check_citrix(struct ipoque_detection_module_struct *ipoque_stru
 	char citrix_header[] = { 0x1a, 0x43, 0x47, 0x50, 0x2f, 0x30, 0x31 };
 	
 	if((memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0)
-	   || (strnstr(packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
+	   || (ntop_strnstr(packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
 	  IPQ_LOG(NTOP_PROTOCOL_CITRIX, ipoque_struct, IPQ_LOG_DEBUG, "Found citrix.\n");
 	  ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_CITRIX, IPOQUE_REAL_PROTOCOL);
 	}
