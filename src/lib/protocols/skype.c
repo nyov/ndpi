@@ -51,21 +51,27 @@ static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struc
 #endif
 
   if(ipoque_struct->packet.udp != NULL) {
-    if((payload_len >= 16)
-       && (packet->payload[2] == 0x02) /* skype-to-skype */) {
-      IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
+    flow->l4.udp.skype_packet_id++;
+
+    if(flow->l4.udp.skype_packet_id < 5) {
+      /* skype-to-skype */
+      if(((payload_len == 3) && ((packet->payload[2] & 0x0F)== 0x0d))
+	 || ((payload_len >= 16) && (packet->payload[2] == 0x02))) {
+	IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
+	ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);	
+      }
+      
       return;
     }
 
     IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
     return;
   } else if(ipoque_struct->packet.tcp != NULL) {
-    flow->l4.tcp.packet_id++;
+    flow->l4.tcp.skype_packet_id++;
 
-    if(flow->l4.tcp.packet_id < 3) {
+    if(flow->l4.tcp.skype_packet_id < 3) {
       ; /* Too early */
-    } else if((flow->l4.tcp.packet_id == 3)
+    } else if((flow->l4.tcp.skype_packet_id == 3)
 	      /* We have seen the 3-way handshake */
 	      && flow->l4.tcp.seen_syn
 	      && flow->l4.tcp.seen_syn_ack
@@ -75,7 +81,7 @@ static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struc
 	ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);
       }
 
-      /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.packet_id, payload_len);  */
+      /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */
     } else
       IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
 

@@ -22,6 +22,8 @@
 
 #ifdef NTOP_PROTOCOL_CITRIX
 
+/* ************************************ */
+
 static void ntop_check_citrix(struct ipoque_detection_module_struct *ipoque_struct)
 {
   struct ipoque_packet_struct *packet = &ipoque_struct->packet;
@@ -38,9 +40,9 @@ static void ntop_check_citrix(struct ipoque_detection_module_struct *ipoque_stru
 #endif
 
   if(ipoque_struct->packet.tcp != NULL) {
-    flow->l4.tcp.packet_id++;
+    flow->l4.tcp.citrix_packet_id++;
     
-    if((flow->l4.tcp.packet_id == 3)
+    if((flow->l4.tcp.citrix_packet_id == 3)
        /* We have seen the 3-way handshake */
        && flow->l4.tcp.seen_syn
        && flow->l4.tcp.seen_syn_ack
@@ -68,7 +70,7 @@ static void ntop_check_citrix(struct ipoque_detection_module_struct *ipoque_stru
       
       
       IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
-    } else if(flow->l4.tcp.packet_id > 3)
+    } else if(flow->l4.tcp.citrix_packet_id > 3)
       IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
     
     return;

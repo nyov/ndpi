@@ -343,7 +343,11 @@ struct ipoque_flow_tcp_struct {
 #endif
 
 #ifdef NTOP_PROTOCOL_SKYPE
-  u8 packet_id;
+  u8 skype_packet_id;
+#endif
+
+#ifdef NTOP_PROTOCOL_CITRIX
+  u8 citrix_packet_id;
 #endif
 } 
 
@@ -384,7 +388,11 @@ struct ipoque_flow_udp_struct {
 	u32 xbox_stage:1;
 #endif
 
-} 
+#ifdef NTOP_PROTOCOL_SKYPE
+  u8 skype_packet_id;
+#endif
+}
+
 #if !(defined(HAVE_NTOP) && defined(WIN32))
 __attribute__ ((__packed__))
 #endif
