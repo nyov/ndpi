@@ -57,7 +57,7 @@ static void ntop_check_skype(struct ipoque_detection_module_struct *ipoque_struc
       /* skype-to-skype */
       if(((payload_len == 3) && ((packet->payload[2] & 0x0F)== 0x0d))
 	 || ((payload_len >= 16) 
-	     && (packet->payload[2] != 0x30) /* Avoid invalid SNMP detection */
+	     && (packet->payload[0] != 0x30) /* Avoid invalid SNMP detection */
 	     && (packet->payload[2] == 0x02))) {
 	IPQ_LOG(NTOP_PROTOCOL_SKYPE, ipoque_struct, IPQ_LOG_DEBUG, "Found skype.\n");
 	ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_SKYPE, IPOQUE_REAL_PROTOCOL);	
