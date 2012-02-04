@@ -54,7 +54,7 @@ struct iphdr {
 };
 
 
-#if defined(HAVE_NTOP) && defined(WIN32)
+#if defined(HAVE_NTOP) && (defined(WIN32) /* || defined(__FreeBSD__) */)
 
 typedef unsigned char  u_char;
 typedef unsigned short u_short;

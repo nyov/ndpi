@@ -36,7 +36,7 @@
 #endif
 
 #if !(defined(HAVE_NTOP) && defined(WIN32))
-#if 1 && !defined __APPLE__
+#if 1 && !defined __APPLE__ && !defined __FreeBSD__
 
 #ifndef OPENDPI_NETFILTER_MODULE
 #  include <endian.h>
@@ -50,14 +50,19 @@
 
 /* default includes */
 
-#if defined(__APPLE__) || (defined(HAVE_NTOP) && defined(WIN32))
+#if defined(__APPLE__) || (defined(HAVE_NTOP) && defined(WIN32)) || defined(__FreeBSD__)
 
 #ifndef WIN32
 #include <sys/param.h>
 #endif
 
+#if defined(__FreeBSD__)
+#include <netinet/in.h>
+#endif
+
 #include "../include/ipq_api.h"
 #include "linux_compat.h"
+
 
 #else							/* APPLE */
 
