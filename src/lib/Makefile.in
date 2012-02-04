@@ -77,8 +77,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libopendpi_la_LIBADD =
-am_libopendpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
+libndpi_la_LIBADD =
+am_libndpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
 	armagetron.lo battlefield.lo bgp.lo bittorrent.lo crossfire.lo \
 	dhcp.lo dhcpv6.lo directconnect.lo directdownloadlink.lo \
 	dns.lo dofus.lo edonkey.lo fasttrack.lo feidian.lo fiesta.lo \
@@ -98,10 +98,10 @@ am_libopendpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
 	winmx.lo world_of_kung_fu.lo world_of_warcraft.lo xbox.lo \
 	xdmcp.lo yahoo.lo zattoo.lo dropbox.lo skype.lo citrix.lo \
 	dcerpc.lo netflow.lo sflow.lo
-libopendpi_la_OBJECTS = $(am_libopendpi_la_OBJECTS)
-libopendpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
+libndpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(libopendpi_la_LDFLAGS) $(LDFLAGS) -o $@
+	$(libndpi_la_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -115,8 +115,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libopendpi_la_SOURCES)
-DIST_SOURCES = $(libopendpi_la_SOURCES)
+SOURCES = $(libndpi_la_SOURCES)
+DIST_SOURCES = $(libndpi_la_SOURCES)
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -233,7 +233,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I$(top_srcdir)/src/include/
-lib_LTLIBRARIES = libopendpi.la
+lib_LTLIBRARIES = libndpi.la
 noinst_HEADERS = ipq_main.h \
 			ipq_protocol_history.h \
 			ipq_protocols.h \
@@ -249,8 +249,8 @@ LIB_ANC = 0
 
 # ntop
 AM_CFLAGS = -fPIC
-libopendpi_la_LDFLAGS = -version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
-libopendpi_la_SOURCES = ipq_main.c \
+libndpi_la_LDFLAGS = -version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
+libndpi_la_SOURCES = ipq_main.c \
 			protocols/afp.c \
 			protocols/aimini.c \
 			protocols/applejuice.c \
@@ -423,8 +423,8 @@ clean-libLTLIBRARIES:
 	  echo "rm -f \"$${dir}/so_locations\""; \
 	  rm -f "$${dir}/so_locations"; \
 	done
-libopendpi.la: $(libopendpi_la_OBJECTS) $(libopendpi_la_DEPENDENCIES) 
-	$(libopendpi_la_LINK) -rpath $(libdir) $(libopendpi_la_OBJECTS) $(libopendpi_la_LIBADD) $(LIBS)
+libndpi.la: $(libndpi_la_OBJECTS) $(libndpi_la_DEPENDENCIES) 
+	$(libndpi_la_LINK) -rpath $(libdir) $(libndpi_la_OBJECTS) $(libndpi_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

@@ -1,6 +1,6 @@
 AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 
-lib_LTLIBRARIES = libopendpi.la
+lib_LTLIBRARIES = libndpi.la
 
 noinst_HEADERS = ipq_main.h \
 			ipq_protocol_history.h \
@@ -18,9 +18,9 @@ LIB_ANC=0
 # ntop
 AM_CFLAGS=-fPIC
 
-libopendpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
+libndpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
-libopendpi_la_SOURCES = ipq_main.c \
+libndpi_la_SOURCES = ipq_main.c \
 			protocols/afp.c \
 			protocols/aimini.c \
 			protocols/applejuice.c \
