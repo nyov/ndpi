@@ -477,6 +477,8 @@ static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_s
     { ".gstatic.com",      NTOP_PROTOCOL_GOOGLE },
     { ".google.com",       NTOP_PROTOCOL_GOOGLE },
     { ".youtube.",        NTOP_PROTOCOL_YOUTUBE },
+    { ".last.fm",        NTOP_PROTOCOL_LASTFM },
+    { ".grooveshark.com", NTOP_PROTOCOL_GROOVESHARK },
     { NULL, 0 }
   };
 
