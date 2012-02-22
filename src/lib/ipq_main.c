@@ -3245,15 +3245,15 @@ u8 ipoque_detection_flow_protocol_history_contains_protocol(struct ipoque_detect
 
 #ifdef HAVE_NTOP
 
-inline u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
+static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
   return(((match_port == sport) || (match_port == dport)) ? 1 : 0);
 }
 
 /* ****************************************************** */
 
-unsigned int ntop_guess_undetected_protocol(u_int8_t proto, 
-					    u_int32_t shost, u_int16_t sport, 
-					    u_int32_t dhost, u_int16_t dport) {
+unsigned int ntop_guess_undetected_protocol(u8 proto, 
+					    u32 shost, u16 sport, 
+					    u32 dhost, u16 dport) {
   //   printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
 
   if(proto == IPPROTO_UDP) {
