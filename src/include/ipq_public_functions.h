@@ -220,9 +220,8 @@ extern "C" {
 	u8 ipoque_detection_flow_protocol_history_contains_protocol(struct ipoque_detection_module_struct *ipoque_struct,
 																u16 protocol_id);
 #ifdef HAVE_NTOP
-  unsigned int ntop_guess_undetected_protocol(u8 proto,
-					      u32 shost, u16 sport,
-					      u32 dhost, u16 dport);
+  unsigned int ntop_find_port_based_protocol(u8 proto, u32 shost, u16 sport, u32 dhost, u16 dport);  
+  unsigned int ntop_guess_undetected_protocol(u8 proto, u32 shost, u16 sport, u32 dhost, u16 dport);
 #endif
 
 #ifdef __cplusplus

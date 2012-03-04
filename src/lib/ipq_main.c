@@ -3251,6 +3251,22 @@ static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
 
 /* ****************************************************** */
 
+unsigned int ntop_find_port_based_protocol(u8 proto, 
+					   u32 shost, u16 sport, 
+					   u32 dhost, u16 dport) {
+  /* Skyfile */
+  if((shost == 0xC1FCEAF6) || (dhost == 0xC1FCEAF6)
+     || (shost == 0x0A0A6650) || (dhost == 0x0A0A6650)) {
+    if((sport == 4708) || (dport == 4708)) return(NTOP_PROTOCOL_SKYFILE_PREPAID);
+    else if((sport == 4709) || (dport == 4709)) return(NTOP_PROTOCOL_SKYFILE_RUDICS);
+    else if((sport == 4710) || (dport == 4710)) return(NTOP_PROTOCOL_SKYFILE_POSTPAID);
+  }  
+
+  return(IPOQUE_PROTOCOL_UNKNOWN);
+}
+
+/* ****************************************************** */
+
 unsigned int ntop_guess_undetected_protocol(u8 proto, 
 					    u32 shost, u16 sport, 
 					    u32 dhost, u16 dport) {
@@ -3275,15 +3291,6 @@ unsigned int ntop_guess_undetected_protocol(u8 proto,
     else if(is_port(sport, dport, 135))  return(NTOP_PROTOCOL_DCERPC);
     else if(is_port(sport, dport, 1494) || is_port(sport, dport, 2598)) return(NTOP_PROTOCOL_CITRIX); /* http://support.citrix.com/article/CTX104147 */
     else if(is_port(sport, dport, 389))  return(IPOQUE_PROTOCOL_LDAP);
-  }
-
-  /* Skyfile */
-  if((shost == 0xC1A8EA7C) || (dhost == 0xC1A8EA7C)) {
-    if((shost == 0x0A0A6650) || (dhost == 0x0A0A6650)) {
-      if((sport == 4708) || (dport == 4708)) return(NTOP_PROTOCOL_SKYFILE_PREPAID);
-      else if((sport == 4709) || (dport == 4709)) return(NTOP_PROTOCOL_SKYFILE_RUDICS);
-      else if((sport == 4710) || (dport == 4710)) return(NTOP_PROTOCOL_SKYFILE_POSTPAID);
-    }
   }
 
   return(IPOQUE_PROTOCOL_UNKNOWN);
