@@ -312,7 +312,7 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_SIP) != 0) {
     ipoque_struct->callback_buffer[a].func = ipoque_search_sip;
     ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
-      IPQ_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
+      IPQ_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD; /* Fix courtesy of Miguel Quesada <mquesadab@gmail.com> */
 
     IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
     IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_SIP);
