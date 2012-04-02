@@ -89,6 +89,18 @@ __forceinline static
 				ipoque_int_sip_add_connection(ipoque_struct, 0);
 				return;
 			}
+
+#if defined(HAVE_NTOP) 
+			/* Courtesy of Miguel Quesada <mquesadab@gmail.com> */
+			if ((memcmp(packet_payload, "OPTIONS ", 8) == 0
+			     || memcmp(packet_payload, "options ", 8) == 0)
+			    && (memcmp(&packet_payload[8], "SIP:", 4) == 0
+				|| memcmp(&packet_payload[8], "sip:", 4) == 0)) {
+			  IPQ_LOG(IPOQUE_PROTOCOL_SIP, ipoque_struct, IPQ_LOG_DEBUG, "found sip OPTIONS.\n");
+			  ipoque_int_sip_add_connection(ipoque_struct, 0);
+			  return;
+			}
+#endif
 		}
 
 	/* add bitmask for tcp only, some stupid udp programs
