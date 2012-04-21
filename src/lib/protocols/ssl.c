@@ -38,7 +38,9 @@ static void ipoque_int_ssl_add_connection(struct ipoque_detection_module_struct
 }
 
 #ifdef HAVE_NTOP
+#ifndef WIN32
 inline int min(int a, int b) { return(a < b ? a : b); }
+#endif
 
 static void stripCertificateTrailer(char *buffer, int buffer_len) {
   int i;
@@ -47,7 +49,7 @@ static void stripCertificateTrailer(char *buffer, int buffer_len) {
     if((buffer[i] != '.')
        && (buffer[i] != '-')
        && (!isalpha(buffer[i]))
-       && (!number(buffer[i])))
+       && (!isdigit(buffer[i])))
       buffer[i] = '\0';
     break;
   }
@@ -173,7 +175,7 @@ int sslDetectProtocolFromCertificate(struct ipoque_detection_module_struct *ipoq
   if((packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN)
      || (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL)) {
     char certificate[64];
-    int i, rc = getSSLcertificate(ipoque_struct, certificate, sizeof(certificate));
+    int rc = getSSLcertificate(ipoque_struct, certificate, sizeof(certificate));
 
     if(rc > 0) {
       /* printf("***** [SSL] %s\n", certificate); */
@@ -281,9 +283,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 
   if((packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN)
      || (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL)) {
-    char buffer[64];
-
-    /*
+     /*
        Citrix GotoMeeting (AS16815, AS21866)
        216.115.208.0/20
        216.219.112.0/20
