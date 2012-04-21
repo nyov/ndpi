@@ -158,6 +158,12 @@ extern "C" {
 #define IPOQUE_PROTOCOL_MEEBO					118
 
 #ifdef HAVE_NTOP
+
+typedef struct {
+  char *string_to_match;
+  int protocol_id;
+} ntop_protocol_match;
+
 #define NTOP_PROTOCOL_FACEBOOK				        119
 #define NTOP_PROTOCOL_TWITTER				        120
 #define NTOP_PROTOCOL_DROPBOX				        121
@@ -178,13 +184,19 @@ extern "C" {
 #define NTOP_PROTOCOL_SKYFILE_PREPAID                           136
 #define NTOP_PROTOCOL_SKYFILE_RUDICS                            137
 #define NTOP_PROTOCOL_SKYFILE_POSTPAID                          138
-
+#define NTOP_PROTOCOL_CITRIX_ONLINE                             139
+#define NTOP_PROTOCOL_APPLE                                     140
+#define NTOP_PROTOCOL_WEBEX                                     141
+#define NTOP_PROTOCOL_WHATSAPP                                  142
+#define NTOP_PROTOCOL_APPLE_ICLOUD                              143
+#define NTOP_PROTOCOL_VIBER                                     144
+#define NTOP_PROTOCOL_APPLE_ITUNES                              145
 
 
 /* NOTE: REMEMBER TO UPDATE IPOQUE_PROTOCOL_LONG_STRING / IPOQUE_PROTOCOL_SHORT_STRING */
 #endif
 
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        138
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        145
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS (IPOQUE_LAST_IMPLEMENTED_PROTOCOL + 1)
@@ -202,7 +214,8 @@ extern "C" {
     "LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World of Kung Fu","MEEBO", \
     "FaceBook","Twitter","DropBox","Gmail","Google Maps","YouTube","Skype","Google","DCE RPC","NetFlow_IPFIX","sFlow", \
     "HTTP Connect","HTTP Proxy","Citrix","Netflix","Last.fm","Grooveshark", \
-    "Skyfile_prepaid","Skyfile_rudics","Skyfile_postpaid"
+    "Skyfile_prepaid","Skyfile_rudics","Skyfile_postpaid","CitrixOnline_GotoMeeting","Apple","Webex",\
+    "WhatsApp","Apple_iCloud","Viber","Apple_iTunes"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp", \
     "bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx", \
     "manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi", \
@@ -214,7 +227,7 @@ extern "C" {
     "guildwars","httpactivesync","kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo",\
     "facebook","twitter","dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow", \
     "http_connect","http_proxy","Citrix","Netflix","Last.fm","Grooveshark",\
-    "Skyfile_pre", "Skyfile_ru","Skyfile_post"
+    "Skyfile_pre", "Skyfile_ru","Skyfile_post","CitrixOnline","iMessage_Facetime","Webex","WhatsApp","iCloud","Viber","iTunes"
 
 #ifdef __cplusplus
 }

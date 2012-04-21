@@ -23,15 +23,6 @@
 
 #include "ipq_protocols.h"
 
-#ifdef HAVE_NTOP
-
-typedef struct {
-  char *string_to_match;
-  int protocol_id;
-} ntop_protocol_match;
-
-#endif
-
 #ifdef IPOQUE_PROTOCOL_HTTP
 
 static void ipoque_int_http_add_connection(struct ipoque_detection_module_struct
@@ -460,27 +451,54 @@ char* ntop_strnstr(const char *s, const char *find, size_t slen) {
 }
 
 
+static ntop_protocol_match host_match[] = {
+  { ".twitter.com",      NTOP_PROTOCOL_TWITTER },
+  { ".netflix.com",      NTOP_PROTOCOL_NETFLIX },
+  { ".twttr.com",        NTOP_PROTOCOL_TWITTER },
+  { ".facebook.com",     NTOP_PROTOCOL_FACEBOOK },
+  { ".fbcdn.net",        NTOP_PROTOCOL_FACEBOOK },
+  { ".dropbox.com",      NTOP_PROTOCOL_DROPBOX },
+  { ".gmail.",           NTOP_PROTOCOL_GMAIL },
+  { "maps.google.com",   NTOP_PROTOCOL_GOOGLE_MAPS },
+  { "maps.gstatic.com",  NTOP_PROTOCOL_GOOGLE_MAPS },
+  { ".gstatic.com",      NTOP_PROTOCOL_GOOGLE },
+  { ".google.com",       NTOP_PROTOCOL_GOOGLE },
+  { ".youtube.",         NTOP_PROTOCOL_YOUTUBE },
+  { "itunes.apple.com",  NTOP_PROTOCOL_APPLE_ITUNES },
+  { ".apple.com",        NTOP_PROTOCOL_APPLE },
+  { ".mzstatic.com",     NTOP_PROTOCOL_APPLE },
+  { ".facebook.com",     NTOP_PROTOCOL_FACEBOOK },
+  { ".icloud.com",       NTOP_PROTOCOL_APPLE_ICLOUD },
+  { ".viber.com",        NTOP_PROTOCOL_VIBER },
+  { ".last.fm",          NTOP_PROTOCOL_LASTFM },
+  { ".grooveshark.com",  NTOP_PROTOCOL_GROOVESHARK },
+  { NULL, 0 }
+};
+
+int matchStringProtocol(struct ipoque_detection_module_struct *ipoque_struct, char *string_to_match, u_int string_to_match_len) {
+  int i = 0;
+  
+  while(host_match[i].string_to_match != NULL) {
+    if(ntop_strnstr(string_to_match, 
+		    host_match[i].string_to_match, 
+		    string_to_match_len) != NULL) {
+      ipoque_struct->packet.detected_protocol_stack[0] = host_match[i].protocol_id;
+      return(ipoque_struct->packet.detected_protocol_stack[0]);
+    } else
+      i++;
+  }
+
+#ifdef DEBUG
+  string_to_match[string_to_match_len] = '\0';
+  printf("[NTOP] Unable to find a match for '%s'\n", string_to_match);
+#endif
+
+  return(-1);
+}
+
 static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_struct) {
   int i = 0;
   struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-
-  ntop_protocol_match host_match[] = {
-    { ".twitter.com",      NTOP_PROTOCOL_TWITTER },
-    { ".netflix.com",      NTOP_PROTOCOL_NETFLIX },
-    { ".twttr.com",        NTOP_PROTOCOL_TWITTER },
-    { ".facebook.com",     NTOP_PROTOCOL_FACEBOOK },
-    { ".fbcdn.net",        NTOP_PROTOCOL_FACEBOOK },
-    { ".dropbox.com",      NTOP_PROTOCOL_DROPBOX },
-    { ".gmail.",          NTOP_PROTOCOL_GMAIL },
-    { "maps.google.com",  NTOP_PROTOCOL_GOOGLE_MAPS },
-    { "maps.gstatic.com", NTOP_PROTOCOL_GOOGLE_MAPS },
-    { ".gstatic.com",      NTOP_PROTOCOL_GOOGLE },
-    { ".google.com",       NTOP_PROTOCOL_GOOGLE },
-    { ".youtube.",        NTOP_PROTOCOL_YOUTUBE },
-    { ".last.fm",        NTOP_PROTOCOL_LASTFM },
-    { ".grooveshark.com", NTOP_PROTOCOL_GROOVESHARK },
-    { NULL, 0 }
-  };
 
   if(packet->iph /* IPv4 only */) {
     /* 
@@ -509,15 +527,9 @@ static void parseHttpSubprotocol(struct ipoque_detection_module_struct *ipoque_s
   if (ipoque_struct->packet.detected_protocol_stack[0] != IPOQUE_PROTOCOL_HTTP) 
     return;
 
-  while(host_match[i].string_to_match != NULL) {
-    if(ntop_strnstr(ipoque_struct->packet.host_line.ptr, 
-	       host_match[i].string_to_match, 
-	       ipoque_struct->packet.host_line.len) != NULL) {
-      ipoque_struct->packet.detected_protocol_stack[0] = host_match[i].protocol_id;
-      break;
-    } else
-      i++;
-  }
+  matchStringProtocol(ipoque_struct, 
+		      (char*)ipoque_struct->packet.host_line.ptr, 
+		      ipoque_struct->packet.host_line.len);
 }
 #endif
 
