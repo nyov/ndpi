@@ -370,6 +370,7 @@ void ntop_search_citrix(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_dcerpc(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_netflow(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_sflow(struct ipoque_detection_module_struct *ipoque_struct);
+void ntop_search_radius(struct ipoque_detection_module_struct *ipoque_struct);
 #endif
 
 
