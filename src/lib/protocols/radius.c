@@ -26,7 +26,6 @@ struct radius_header {
   u_int8_t code;
   u_int8_t packet_id;
   u_int16_t len;
-  char authenticator[16];
 };
 
 static void ntop_check_radius(struct ipoque_detection_module_struct *ipoque_struct)
@@ -47,8 +46,10 @@ static void ntop_check_radius(struct ipoque_detection_module_struct *ipoque_stru
   if(ipoque_struct->packet.udp != NULL) {
     struct radius_header *h = (struct radius_header*)packet->payload;
 
+    h->len = ntohs(h->len);
+
     if((payload_len > sizeof(struct radius_header))
-       && (h->code < 5)
+       && (h->code <= 5)
        && (h->len == payload_len)) {
       IPQ_LOG(NTOP_PROTOCOL_RADIUS, ipoque_struct, IPQ_LOG_DEBUG, "Found radius.\n");
       ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_RADIUS, IPOQUE_REAL_PROTOCOL);	
