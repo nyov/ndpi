@@ -1654,6 +1654,19 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
   }
 #endif
 
+#ifdef NTOP_PROTOCOL_RADIUS
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_RADIUS) != 0) {
+    ipoque_struct->callback_buffer[a].func = ntop_search_radius;
+    ipoque_struct->callback_buffer[a].ipq_selection_bitmask =
+      IPQ_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
+
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_UNKNOWN);
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_RADIUS);
+    IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_RADIUS);
+    a++;
+  }
+#endif
+
 #ifdef NTOP_PROTOCOL_CITRIX
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_CITRIX) != 0) {
     ipoque_struct->callback_buffer[a].func = ntop_search_citrix;
@@ -3254,7 +3267,7 @@ static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
 unsigned int ntop_find_port_based_protocol(u8 proto, 
 					   u32 shost, u16 sport, 
 					   u32 dhost, u16 dport) {
-  /* Skyfile */
+  /* Skyfile (host 193.252.234.246 or host 10.10.102.80) */
   if((shost == 0xC1FCEAF6) || (dhost == 0xC1FCEAF6)
      || (shost == 0x0A0A6650) || (dhost == 0x0A0A6650)) {
     if((sport == 4708) || (dport == 4708)) return(NTOP_PROTOCOL_SKYFILE_PREPAID);

@@ -126,6 +126,7 @@ libndpi_la_SOURCES = ipq_main.c \
 			protocols/citrix.c \
 			protocols/dcerpc.c \
 			protocols/netflow.c \
-			protocols/sflow.c
+			protocols/sflow.c \
+			protocols/radius.c
 
 # NTOP protocols are at the end
