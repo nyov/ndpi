@@ -387,7 +387,9 @@ struct ipoque_flow_udp_struct {
 #ifdef IPOQUE_PROTOCOL_XBOX
 	u32 xbox_stage:1;
 #endif
-
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
+  u32 wsus_stage:1;
+#endif
 #ifdef NTOP_PROTOCOL_SKYPE
   u8 skype_packet_id;
 #endif

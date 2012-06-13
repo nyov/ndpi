@@ -137,7 +137,7 @@ extern "C" {
 #define IPOQUE_PROTOCOL_AFP						97
 #define IPOQUE_PROTOCOL_STEALTHNET				98
 #define IPOQUE_PROTOCOL_AIMINI					99
-#define IPOQUE_PROTOCOL_SIP						100
+#define IPOQUE_PROTOCOL_SIP					100
 #define IPOQUE_PROTOCOL_TRUPHONE				101
 #define IPOQUE_PROTOCOL_ICMPV6					102
 #define IPOQUE_PROTOCOL_DHCPV6					103
@@ -154,7 +154,7 @@ extern "C" {
 #define IPOQUE_PROTOCOL_MSSQL					114
 #define IPOQUE_PROTOCOL_PPTP					115
 #define IPOQUE_PROTOCOL_WARCRAFT3				116
-#define IPOQUE_PROTOCOL_WORLD_OF_KUNG_FU		117
+#define IPOQUE_PROTOCOL_WORLD_OF_KUNG_FU		        117
 #define IPOQUE_PROTOCOL_MEEBO					118
 
 #ifdef HAVE_NTOP
@@ -192,12 +192,12 @@ typedef struct {
 #define NTOP_PROTOCOL_VIBER                                     144
 #define NTOP_PROTOCOL_APPLE_ITUNES                              145
 #define NTOP_PROTOCOL_RADIUS                                    146
-
+#define NTOP_PROTOCOL_WINDOWS_UPDATE                            147 /* Thierry Laurion */
 
 /* NOTE: REMEMBER TO UPDATE IPOQUE_PROTOCOL_LONG_STRING / IPOQUE_PROTOCOL_SHORT_STRING */
 #endif
 
-#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        146
+#define IPOQUE_LAST_IMPLEMENTED_PROTOCOL                        147
 
 
 #define IPOQUE_MAX_SUPPORTED_PROTOCOLS (IPOQUE_LAST_IMPLEMENTED_PROTOCOL + 1)
@@ -216,7 +216,7 @@ typedef struct {
     "FaceBook","Twitter","DropBox","Gmail","Google Maps","YouTube","Skype","Google","DCE RPC","NetFlow_IPFIX","sFlow", \
     "HTTP Connect","HTTP Proxy","Citrix","Netflix","Last.fm","Grooveshark", \
     "Skyfile_prepaid","Skyfile_rudics","Skyfile_postpaid","CitrixOnline_GotoMeeting","Apple","Webex",\
-    "WhatsApp","Apple_iCloud","Viber","Apple_iTunes","Radius"
+    "WhatsApp","Apple_iCloud","Viber","Apple_iTunes","Radius","WindowsUpdate"
 #define IPOQUE_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp", \
     "bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx", \
     "manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi", \
@@ -229,7 +229,7 @@ typedef struct {
     "facebook","twitter","dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow", \
     "http_connect","http_proxy","Citrix","Netflix","Last.fm","Grooveshark",\
     "Skyfile_pre", "Skyfile_ru","Skyfile_post","CitrixOnline","iMessage_Facetime","Webex","WhatsApp","iCloud","Viber","iTunes", \
-    "Radius"
+    "Radius","WinUpdate"
 
 #ifdef __cplusplus
 }

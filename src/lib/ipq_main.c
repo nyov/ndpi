@@ -144,6 +144,10 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_XBOX) != 0)
     goto hack_do_http_detection;
 #endif
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE  
+  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE) != 0)    
+    goto hack_do_http_detection;
+#endif
 #ifdef IPOQUE_PROTOCOL_QQ
   if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, IPOQUE_PROTOCOL_QQ) != 0)
     goto hack_do_http_detection;
@@ -199,6 +203,9 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 #endif
 #ifdef IPOQUE_PROTOCOL_XBOX
     IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_XBOX);
+#endif
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE    
+    IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE);    
 #endif
 #ifdef IPOQUE_PROTOCOL_QQ
     IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_QQ);
@@ -372,7 +379,9 @@ void ipoque_set_protocol_detection_bitmask2(struct ipoque_detection_module_struc
 #ifdef IPOQUE_PROTOCOL_XBOX
     IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, IPOQUE_PROTOCOL_XBOX);
 #endif
-
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
+  IPOQUE_ADD_PROTOCOL_TO_BITMASK(ipoque_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE);
+#endif
     IPOQUE_SAVE_AS_BITMASK(ipoque_struct->callback_buffer[a].excluded_protocol_bitmask, IPOQUE_PROTOCOL_GNUTELLA);
 
     a++;

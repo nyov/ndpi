@@ -317,6 +317,19 @@ static void xbox_parse_packet_useragentline(struct ipoque_detection_module_struc
 }
 #endif
 
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
+
+static void windows_update_packet_useragentline(struct ipoque_detection_module_struct						
+						*ipoque_struct)
+{  
+  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+
+  if(packet->user_agent_line.len >= 20 && memcmp(packet->user_agent_line.ptr, "Windows-Update-Agent", 20) == 0) {
+    IPQ_LOG(NTOP_PROTOCOL_WINDOWS_UPDATE, ipoque_struct, IPQ_LOG_DEBUG, "WSUS: User Agent: Windows-Update-Agent\n");
+    ipoque_int_http_add_connection(ipoque_struct, NTOP_PROTOCOL_WINDOWS_UPDATE);
+  }
+}
+#endif
 
 #ifdef IPOQUE_PROTOCOL_FLASH
 static void flash_check_http_payload(struct ipoque_detection_module_struct
@@ -565,6 +578,10 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
     if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_REALMEDIA) != 0)
       realmedia_parse_packet_contentline(ipoque_struct);
 #endif
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE    
+    if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE) != 0)
+      windows_update_packet_useragentline(ipoque_struct);
+#endif
 #ifdef IPOQUE_PROTOCOL_WINDOWSMEDIA
     if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_WINDOWSMEDIA) != 0)
       windowsmedia_parse_packet_contentline(ipoque_struct);
@@ -701,6 +718,9 @@ static u16 http_request_url_offset(struct ipoque_detection_module_struct *ipoque
 static void http_bitmask_exclude(struct ipoque_flow_struct *flow)
 {
   IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_HTTP);
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
+  IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE);
+#endif
 #ifdef IPOQUE_PROTOCOL_MPEG
   IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_MPEG);
 #endif

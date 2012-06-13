@@ -268,6 +268,7 @@ void ipoque_search_halflife2(struct ipoque_detection_module_struct
 
 void ipoque_search_xbox(struct ipoque_detection_module_struct
 						*ipoque_struct);
+
 void ipoque_search_smb_tcp(struct ipoque_detection_module_struct
 						   *ipoque_struct);
 
@@ -371,6 +372,8 @@ void ntop_search_dcerpc(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_netflow(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_sflow(struct ipoque_detection_module_struct *ipoque_struct);
 void ntop_search_radius(struct ipoque_detection_module_struct *ipoque_struct);
+void ntop_search_wsus(struct ipoque_detection_module_struct *ipoque_struct);
+
 #endif
 
 
