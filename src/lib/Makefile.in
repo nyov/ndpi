@@ -94,7 +94,7 @@ am_libndpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
 	tvants.lo tvuplayer.lo usenet.lo veohtv.lo vnc.lo warcraft3.lo \
 	winmx.lo world_of_kung_fu.lo world_of_warcraft.lo xbox.lo \
 	xdmcp.lo yahoo.lo zattoo.lo dropbox.lo skype.lo citrix.lo \
-	dcerpc.lo netflow.lo sflow.lo radius.lo
+	dcerpc.lo netflow.lo sflow.lo radius.lo teamviewer.lo
 libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
 libndpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -356,7 +356,8 @@ libndpi_la_SOURCES = ipq_main.c \
 			protocols/dcerpc.c \
 			protocols/netflow.c \
 			protocols/sflow.c \
-			protocols/radius.c
+			protocols/radius.c \
+			protocols/teamviewer.c
 
 all: all-am
 
@@ -524,6 +525,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stun.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/syslog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/teamviewer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/telnet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tftp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thunder.Plo@am__quote@
@@ -1310,6 +1312,13 @@ radius.lo: protocols/radius.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/radius.c' object='radius.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o radius.lo `test -f 'protocols/radius.c' || echo '$(srcdir)/'`protocols/radius.c
+
+teamviewer.lo: protocols/teamviewer.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT teamviewer.lo -MD -MP -MF $(DEPDIR)/teamviewer.Tpo -c -o teamviewer.lo `test -f 'protocols/teamviewer.c' || echo '$(srcdir)/'`protocols/teamviewer.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/teamviewer.Tpo $(DEPDIR)/teamviewer.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/teamviewer.c' object='teamviewer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o teamviewer.lo `test -f 'protocols/teamviewer.c' || echo '$(srcdir)/'`protocols/teamviewer.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

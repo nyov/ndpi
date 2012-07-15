@@ -3320,6 +3320,8 @@ unsigned int ntop_guess_undetected_protocol(u8 proto,
     else if(is_port(sport, dport, 23))  return(IPOQUE_PROTOCOL_TELNET);
     else if(is_port(sport, dport, 445)) return(IPOQUE_PROTOCOL_SMB);
     else if(is_port(sport, dport, 80))  return(IPOQUE_PROTOCOL_HTTP);
+    else if(is_port(sport, dport, 3000))  return(IPOQUE_PROTOCOL_HTTP); /* ntop */
+    else if(is_port(sport, dport, 3001))  return(IPOQUE_PROTOCOL_SSL);  /* ntop */
     else if(is_port(sport, dport, 8080) || is_port(sport, dport, 3128)) return(NTOP_PROTOCOL_HTTP_PROXY);
     else if(is_port(sport, dport, 389)) return(IPOQUE_PROTOCOL_LDAP);
     else if(is_port(sport, dport, 143) || is_port(sport, dport, 993)) return(IPOQUE_PROTOCOL_MAIL_IMAP);
