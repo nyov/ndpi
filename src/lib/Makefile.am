@@ -127,6 +127,7 @@ libndpi_la_SOURCES = ipq_main.c \
 			protocols/dcerpc.c \
 			protocols/netflow.c \
 			protocols/sflow.c \
-			protocols/radius.c
+			protocols/radius.c \
+			protocols/teamviewer.c
 
 # NTOP protocols are at the end
