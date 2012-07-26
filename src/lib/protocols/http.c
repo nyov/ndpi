@@ -506,6 +506,7 @@ static ntop_protocol_match host_match[] = {
   { ".viber.com",        NTOP_PROTOCOL_VIBER },
   { ".last.fm",          NTOP_PROTOCOL_LASTFM },
   { ".grooveshark.com",  NTOP_PROTOCOL_GROOVESHARK },
+  { ".tuenti.com",       NTOP_PROTOCOL_TUENTI },
   { NULL, 0 }
 };
 
