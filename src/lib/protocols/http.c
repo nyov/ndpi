@@ -600,10 +600,6 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
     if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_REALMEDIA) != 0)
       realmedia_parse_packet_contentline(ipoque_struct);
 #endif
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE    
-    if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE) != 0)
-      windows_update_packet_useragentline(ipoque_struct);
-#endif
 #ifdef IPOQUE_PROTOCOL_WINDOWSMEDIA
     if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_WINDOWSMEDIA) != 0)
       windowsmedia_parse_packet_contentline(ipoque_struct);
@@ -632,6 +628,10 @@ static void check_content_type_and_change_protocol(struct ipoque_detection_modul
 #ifdef IPOQUE_PROTOCOL_XBOX
     if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_XBOX) != 0)
       xbox_parse_packet_useragentline(ipoque_struct);
+#endif
+#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE    
+    if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE) != 0)
+      windows_update_packet_useragentline(ipoque_struct);
 #endif
 #ifdef IPOQUE_PROTOCOL_WINDOWSMEDIA
     if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_WINDOWSMEDIA) != 0)
