@@ -181,9 +181,8 @@ int sslDetectProtocolFromCertificate(struct ipoque_detection_module_struct *ipoq
 
     if(rc > 0) {
       /* printf("***** [SSL] %s\n", certificate); */
-      matchStringProtocol(ipoque_struct, certificate, strlen(certificate));
-
-      return(rc);
+      if(matchStringProtocol(ipoque_struct, certificate, strlen(certificate)) != -1)
+	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
   }
 
