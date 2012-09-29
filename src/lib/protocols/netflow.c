@@ -22,14 +22,14 @@
 
 #ifdef NTOP_PROTOCOL_NETFLOW
 
-static void ntop_check_netflow(struct ndpi_detection_module_struct *ndpi_struct)
+static void ntop_check_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
-  const u8 *packet_payload = packet->payload;
-  u32 payload_len = packet->payload_packet_len;
+  struct ndpi_packet_struct *packet = &flow->packet;
   
-  if((ndpi_struct->packet.udp != NULL)
+  const u_int8_t *packet_payload = packet->payload;
+  u_int32_t payload_len = packet->payload_packet_len;
+  
+  if((packet->udp != NULL)
      && (payload_len >= 24)      
      && (packet->payload[0] == 0)
      && ((packet->payload[1] == 5)
@@ -44,16 +44,16 @@ static void ntop_check_netflow(struct ndpi_detection_module_struct *ndpi_struct)
 
     if((when >= 946684800 /* 1/1/2000 */) && (when <= time(NULL))) {
       NDPI_LOG(NTOP_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
-      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
       return;
     }
   }
 }
 
-void ntop_search_netflow(struct ndpi_detection_module_struct *ndpi_struct)
+void ntop_search_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   NDPI_LOG(NTOP_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
-  ntop_check_netflow(ndpi_struct);
+  ntop_check_netflow(ndpi_struct, flow);
 }
 
 #endif

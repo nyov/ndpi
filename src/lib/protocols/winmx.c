@@ -27,19 +27,19 @@
 
 
 static void ndpi_int_winmx_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct);
+											*ndpi_struct, struct ndpi_flow_struct *flow);
 
 static void ndpi_int_winmx_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct)
+											*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_WINMX, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINMX, NDPI_REAL_PROTOCOL);
 }
 
 
-void ndpi_search_winmx_tcp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_winmx_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -60,33 +60,33 @@ void ndpi_search_winmx_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 		if (((packet->payload_packet_len) == 3)
 			&& (memcmp(packet->payload, "GET", 3) == 0)) {
 			NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "found winmx by GET\n");
-			ndpi_int_winmx_add_connection(ndpi_struct);
+			ndpi_int_winmx_add_connection(ndpi_struct, flow);
 			return;
 		}
 
 
 		if (packet->payload_packet_len == 149 && packet->payload[0] == '8') {
 			NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "maybe WinMX\n");
-			if (get_u32(packet->payload, 17) == 0
-				&& get_u32(packet->payload, 21) == 0
-				&& get_u32(packet->payload, 25) == 0
-				&& get_u16(packet->payload, 39) == 0 && get_u16(packet->payload, 135) == htons(0x7edf)
-				&& get_u16(packet->payload, 147) == htons(0xf792)) {
+			if (get_u_int32_t(packet->payload, 17) == 0
+				&& get_u_int32_t(packet->payload, 21) == 0
+				&& get_u_int32_t(packet->payload, 25) == 0
+				&& get_u_int16_t(packet->payload, 39) == 0 && get_u_int16_t(packet->payload, 135) == htons(0x7edf)
+				&& get_u_int16_t(packet->payload, 147) == htons(0xf792)) {
 
 				NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG,
 						"found winmx by pattern in first packet\n");
-				ndpi_int_winmx_add_connection(ndpi_struct);
+				ndpi_int_winmx_add_connection(ndpi_struct, flow);
 				return;
 			}
 		}
 		/* did not see this pattern in any trace that we have */
 	} else if (flow->l4.tcp.winmx_stage == 1) {
 		if (packet->payload_packet_len > 10 && packet->payload_packet_len < 1000) {
-			u16 left = packet->payload_packet_len - 1;
+			u_int16_t left = packet->payload_packet_len - 1;
 			while (left > 0) {
 				if (packet->payload[left] == ' ') {
 					NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "found winmx in second packet\n");
-					ndpi_int_winmx_add_connection(ndpi_struct);
+					ndpi_int_winmx_add_connection(ndpi_struct, flow);
 					return;
 				} else if (packet->payload[left] < '0' || packet->payload[left] > '9') {
 					break;

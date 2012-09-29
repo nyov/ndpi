@@ -25,17 +25,16 @@
 #ifdef NDPI_PROTOCOL_APPLEJUICE
 
 
-static void ndpi_int_applejuice_add_connection(struct ndpi_detection_module_struct
-												 *ndpi_struct)
+static void ndpi_int_applejuice_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+					       struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_APPLEJUICE, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_APPLEJUICE, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_applejuice_tcp(struct ndpi_detection_module_struct
-								  *ndpi_struct)
+void ndpi_search_applejuice_tcp(struct ndpi_detection_module_struct *ndpi_struct,
+				struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -45,7 +44,7 @@ void ndpi_search_applejuice_tcp(struct ndpi_detection_module_struct
 		&& (packet->payload[7] == 0x0a)
 		&& (ndpi_mem_cmp(packet->payload, "ajprot", 6) == 0)) {
 		NDPI_LOG(NDPI_PROTOCOL_APPLEJUICE, ndpi_struct, NDPI_LOG_DEBUG, "detected applejuice.\n");
-		ndpi_int_applejuice_add_connection(ndpi_struct);
+		ndpi_int_applejuice_add_connection(ndpi_struct, flow);
 		return;
 	}
 

@@ -25,23 +25,22 @@
 #ifdef NDPI_PROTOCOL_HALFLIFE2
 
 
-static void ndpi_int_halflife2_add_connection(struct ndpi_detection_module_struct
-												*ndpi_struct)
+static void ndpi_int_halflife2_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_HALFLIFE2, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HALFLIFE2, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_halflife2(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_halflife2(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (flow->l4.udp.halflife2_stage == 0) {
 		if (packet->payload_packet_len >= 20
-			&& get_u32(packet->payload, 0) == 0xFFFFFFFF
-			&& get_u32(packet->payload, packet->payload_packet_len - 4) == htonl(0x30303000)) {
+			&& get_u_int32_t(packet->payload, 0) == 0xFFFFFFFF
+			&& get_u_int32_t(packet->payload, packet->payload_packet_len - 4) == htonl(0x30303000)) {
 			flow->l4.udp.halflife2_stage = 1 + packet->packet_direction;
 			NDPI_LOG(NDPI_PROTOCOL_HALFLIFE2, ndpi_struct, NDPI_LOG_DEBUG,
 					"halflife2 client req detected, waiting for server reply\n");
@@ -49,9 +48,9 @@ void ndpi_search_halflife2(struct ndpi_detection_module_struct *ndpi_struct)
 		}
 	} else if (flow->l4.udp.halflife2_stage == 2 - packet->packet_direction) {
 		if (packet->payload_packet_len >= 20
-			&& get_u32(packet->payload, 0) == 0xFFFFFFFF
-			&& get_u32(packet->payload, packet->payload_packet_len - 4) == htonl(0x30303000)) {
-			ndpi_int_halflife2_add_connection(ndpi_struct);
+			&& get_u_int32_t(packet->payload, 0) == 0xFFFFFFFF
+			&& get_u_int32_t(packet->payload, packet->payload_packet_len - 4) == htonl(0x30303000)) {
+			ndpi_int_halflife2_add_connection(ndpi_struct, flow);
 			NDPI_LOG(NDPI_PROTOCOL_HALFLIFE2, ndpi_struct, NDPI_LOG_DEBUG, "halflife2 server reply detected\n");
 			return;
 		}

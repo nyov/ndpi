@@ -22,28 +22,28 @@
 
 #ifdef NTOP_PROTOCOL_SFLOW
 
-static void ntop_check_sflow(struct ndpi_detection_module_struct *ndpi_struct)
+static void ntop_check_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
-  const u8 *packet_payload = packet->payload;
-  u32 payload_len = packet->payload_packet_len;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
+  const u_int8_t *packet_payload = packet->payload;
+  u_int32_t payload_len = packet->payload_packet_len;
 
-  if((ndpi_struct->packet.udp != NULL)
+  if((packet->udp != NULL)
      && (payload_len >= 24)
      /* Version */
      && (packet->payload[0] == 0) && (packet->payload[1] == 0) && (packet->payload[2] == 0)
      && ((packet->payload[3] == 2) || (packet->payload[3] == 5))) {
     NDPI_LOG(NTOP_PROTOCOL_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found sflow.\n");
-    ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_SFLOW, NDPI_REAL_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_SFLOW, NDPI_REAL_PROTOCOL);
     return;
   }
 }
 
-void ntop_search_sflow(struct ndpi_detection_module_struct *ndpi_struct)
+void ntop_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   NDPI_LOG(NTOP_PROTOCOL_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "sflow detection...\n");
-  ntop_check_sflow(ndpi_struct);
+  ntop_check_sflow(ndpi_struct, flow);
 }
 
 #endif

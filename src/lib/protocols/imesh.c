@@ -26,75 +26,73 @@
 #ifdef NDPI_PROTOCOL_IMESH
 
 
-static void ndpi_int_imesh_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct, ndpi_protocol_type_t protocol_type)
+static void ndpi_int_imesh_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+					  struct ndpi_flow_struct *flow, ndpi_protocol_type_t protocol_type)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_IMESH, protocol_type);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_IMESH, protocol_type);
 }
 
 
-void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
-								 *ndpi_struct)
+void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;	
 
 	if (packet->udp != NULL) {
 
 		NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "UDP FOUND\n");
 
 		// this is the login packet
-		if (packet->payload_packet_len == 28 && (get_u32(packet->payload, 0)) == htonl(0x02000000) &&
-			get_u32(packet->payload, 24) == 0 &&
+		if (packet->payload_packet_len == 28 && (get_u_int32_t(packet->payload, 0)) == htonl(0x02000000) &&
+			get_u_int32_t(packet->payload, 24) == 0 &&
 			(packet->udp->dest == htons(1864) || packet->udp->source == htons(1864))) {
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh Login detected\n");
-			ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if (packet->payload_packet_len == 36) {
-			if (get_u32(packet->payload, 0) == htonl(0x02000000) && packet->payload[4] != 0 &&
-				packet->payload[5] == 0 && get_u16(packet->payload, 6) == htons(0x0083) &&
-				get_u32(packet->payload, 24) == htonl(0x40000000) &&
+			if (get_u_int32_t(packet->payload, 0) == htonl(0x02000000) && packet->payload[4] != 0 &&
+				packet->payload[5] == 0 && get_u_int16_t(packet->payload, 6) == htons(0x0083) &&
+				get_u_int32_t(packet->payload, 24) == htonl(0x40000000) &&
 				(packet->payload[packet->payload_packet_len - 1] == packet->payload[packet->payload_packet_len - 5] ||
 				 packet->payload[packet->payload_packet_len - 1] - 1 == packet->payload[packet->payload_packet_len - 5]
 				 || packet->payload[packet->payload_packet_len - 1] ==
 				 packet->payload[packet->payload_packet_len - 5] - 1)) {
 				NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh detected\n");
-				ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+				ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 				return;
 			}
-			if (get_u16(packet->payload, 0) == htons(0x0200) && get_u16(packet->payload, 2) != 0 &&
-				get_u32(packet->payload, 4) == htonl(0x02000083) && get_u32(packet->payload, 24) == htonl(0x40000000) &&
+			if (get_u_int16_t(packet->payload, 0) == htons(0x0200) && get_u_int16_t(packet->payload, 2) != 0 &&
+				get_u_int32_t(packet->payload, 4) == htonl(0x02000083) && get_u_int32_t(packet->payload, 24) == htonl(0x40000000) &&
 				(packet->payload[packet->payload_packet_len - 1] == packet->payload[packet->payload_packet_len - 5] ||
 				 packet->payload[packet->payload_packet_len - 1] - 1 == packet->payload[packet->payload_packet_len - 5]
 				 || packet->payload[packet->payload_packet_len - 1] ==
 				 packet->payload[packet->payload_packet_len - 5] - 1)) {
 				NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh detected\n");
-				ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+				ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 				return;
 			}
 		}
-		if (packet->payload_packet_len == 24 && get_u16(packet->payload, 0) == htons(0x0200)
-			&& get_u16(packet->payload, 2) != 0 && get_u32(packet->payload, 4) == htonl(0x03000084) &&
+		if (packet->payload_packet_len == 24 && get_u_int16_t(packet->payload, 0) == htons(0x0200)
+			&& get_u_int16_t(packet->payload, 2) != 0 && get_u_int32_t(packet->payload, 4) == htonl(0x03000084) &&
 			(packet->payload[packet->payload_packet_len - 1] == packet->payload[packet->payload_packet_len - 5] ||
 			 packet->payload[packet->payload_packet_len - 1] - 1 == packet->payload[packet->payload_packet_len - 5] ||
 			 packet->payload[packet->payload_packet_len - 1] == packet->payload[packet->payload_packet_len - 5] - 1)) {
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh detected\n");
-			ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
-		if (packet->payload_packet_len == 32 && get_u32(packet->payload, 0) == htonl(0x02000000) &&
-			get_u16(packet->payload, 21) == 0 && get_u16(packet->payload, 26) == htons(0x0100)) {
-			if (get_u32(packet->payload, 4) == htonl(0x00000081) && packet->payload[11] == packet->payload[15] &&
+		if (packet->payload_packet_len == 32 && get_u_int32_t(packet->payload, 0) == htonl(0x02000000) &&
+			get_u_int16_t(packet->payload, 21) == 0 && get_u_int16_t(packet->payload, 26) == htons(0x0100)) {
+			if (get_u_int32_t(packet->payload, 4) == htonl(0x00000081) && packet->payload[11] == packet->payload[15] &&
 				get_l16(packet->payload, 24) == htons(packet->udp->source)) {
 				/* packet->payload[28] = source address */
 				NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh detected\n");
-				ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+				ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 				return;
 			}
-			if (get_u32(packet->payload, 4) == htonl(0x01000082)) {
+			if (get_u_int32_t(packet->payload, 4) == htonl(0x01000082)) {
 				NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh detected\n");
-				ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+				ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 				return;
 			}
 		}
@@ -105,28 +103,28 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 
 	if (packet->tcp != NULL) {
 
-		if (packet->payload_packet_len == 64 && get_u32(packet->payload, 0) == htonl(0x40000000) &&
-			get_u32(packet->payload, 4) == 0 && get_u32(packet->payload, 8) == htonl(0x0000fcff) &&
-			get_u32(packet->payload, 12) == htonl(0x04800100) && get_u32(packet->payload, 45) == htonl(0xff020000) &&
-			get_u16(packet->payload, 49) == htons(0x001a)) {
+		if (packet->payload_packet_len == 64 && get_u_int32_t(packet->payload, 0) == htonl(0x40000000) &&
+			get_u_int32_t(packet->payload, 4) == 0 && get_u_int32_t(packet->payload, 8) == htonl(0x0000fcff) &&
+			get_u_int32_t(packet->payload, 12) == htonl(0x04800100) && get_u_int32_t(packet->payload, 45) == htonl(0xff020000) &&
+			get_u_int16_t(packet->payload, 49) == htons(0x001a)) {
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "found imesh.\n");
-			ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
-		if (packet->payload_packet_len == 95 && get_u32(packet->payload, 0) == htonl(0x5f000000) &&
-			get_u16(packet->payload, 4) == 0 && get_u16(packet->payload, 7) == htons(0x0004) &&
-			get_u32(packet->payload, 20) == 0 && get_u32(packet->payload, 28) == htonl(0xc8000400) &&
-			packet->payload[9] == 0x80 && get_u32(packet->payload, 10) == get_u32(packet->payload, 24)) {
+		if (packet->payload_packet_len == 95 && get_u_int32_t(packet->payload, 0) == htonl(0x5f000000) &&
+			get_u_int16_t(packet->payload, 4) == 0 && get_u_int16_t(packet->payload, 7) == htons(0x0004) &&
+			get_u_int32_t(packet->payload, 20) == 0 && get_u_int32_t(packet->payload, 28) == htonl(0xc8000400) &&
+			packet->payload[9] == 0x80 && get_u_int32_t(packet->payload, 10) == get_u_int32_t(packet->payload, 24)) {
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "found imesh.\n");
-			ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
-		if (packet->payload_packet_len == 28 && get_u32(packet->payload, 0) == htonl(0x1c000000) &&
-			get_u16(packet->payload, 10) == htons(0xfcff) && get_u32(packet->payload, 12) == htonl(0x07801800) &&
-			(get_u16(packet->payload, packet->payload_packet_len - 2) == htons(0x1900) ||
-			 get_u16(packet->payload, packet->payload_packet_len - 2) == htons(0x1a00))) {
+		if (packet->payload_packet_len == 28 && get_u_int32_t(packet->payload, 0) == htonl(0x1c000000) &&
+			get_u_int16_t(packet->payload, 10) == htons(0xfcff) && get_u_int32_t(packet->payload, 12) == htonl(0x07801800) &&
+			(get_u_int16_t(packet->payload, packet->payload_packet_len - 2) == htons(0x1900) ||
+			 get_u_int16_t(packet->payload, packet->payload_packet_len - 2) == htons(0x1a00))) {
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "found imesh.\n");
-			ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
@@ -137,8 +135,8 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 			return;
 		}
 		if ((packet->actual_payload_len == 8 || packet->payload_packet_len == 10)	/* PATTERN:: 04 00 00 00 00 00 00 00 [00 00] */
-			&&get_u32(packet->payload, 0) == htonl(0x04000000)
-			&& get_u32(packet->payload, 4) == 0) {
+			&&get_u_int32_t(packet->payload, 0) == htonl(0x04000000)
+			&& get_u_int32_t(packet->payload, 4) == 0) {
 			flow->l4.tcp.imesh_stage += 2;
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG,
 					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
@@ -213,7 +211,7 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
 		} else if ((packet->actual_payload_len == 64 || packet->actual_payload_len == 52	/* PATTERN:: [len] 00 00 00 00 */
 					|| packet->actual_payload_len == 95)
-				   && get_u16(packet->payload, 0) == (packet->actual_payload_len)
+				   && get_u_int16_t(packet->payload, 0) == (packet->actual_payload_len)
 				   && packet->payload[1] == 0x00 && packet->payload[2] == 0x00
 				   && packet->payload[3] == 0x00 && packet->payload[4] == 0x00) {
 			flow->l4.tcp.imesh_stage += 2;
@@ -228,7 +226,7 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG,
 					"IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
 		} else if (packet->actual_payload_len == 6	/* PATTERN:: [len] ?? ee 00 00 00 */
-				   && get_u16(packet->payload, 0) == (packet->actual_payload_len)
+				   && get_u_int16_t(packet->payload, 0) == (packet->actual_payload_len)
 				   && packet->payload[2] == 0xee
 				   && packet->payload[3] == 0x00 && packet->payload[4] == 0x00 && packet->payload[5] == 0x00) {
 			flow->l4.tcp.imesh_stage += 2;
@@ -250,7 +248,7 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 		/* http login */
 		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("POST /registration") &&
 			memcmp(packet->payload, "POST /registration", NDPI_STATICSTRING_LEN("POST /registration")) == 0) {
-			ndpi_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct, flow);
 			if (packet->parsed_lines > 6 &&
 				packet->host_line.ptr != NULL &&
 				packet->host_line.len == NDPI_STATICSTRING_LEN("login.bearshare.com") &&
@@ -265,14 +263,14 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 				memcmp(packet->line[4].ptr, "Accept-Encoding: identity",
 					   NDPI_STATICSTRING_LEN("Accept-Encoding: identity") == 0)) {
 				NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "iMesh Login detected\n");
-				ndpi_int_imesh_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
+				ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 				return;
 			}
 		}
 		/*give one packet tolerance for detection */
 		if (flow->l4.tcp.imesh_stage >= 4) {
 			NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG, "found imesh.\n");
-			ndpi_int_imesh_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_imesh_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
 	}

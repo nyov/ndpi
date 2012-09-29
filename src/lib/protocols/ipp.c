@@ -24,21 +24,19 @@
 #include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_IPP
 
-static void ndpi_int_ipp_add_connection(struct ndpi_detection_module_struct
-										  *ndpi_struct, ndpi_protocol_type_t protocol_type)
+static void ndpi_int_ipp_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+					struct ndpi_flow_struct *flow, ndpi_protocol_type_t protocol_type)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_IPP, protocol_type);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_IPP, protocol_type);
 }
 
-void ndpi_search_ipp(struct ndpi_detection_module_struct
-					   *ndpi_struct)
+void ndpi_search_ipp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	u8 i;
+	u_int8_t i;
 
 	NDPI_LOG(NDPI_PROTOCOL_IPP, ndpi_struct, NDPI_LOG_DEBUG, "search ipp\n");
 	if (packet->payload_packet_len > 20) {
@@ -90,18 +88,18 @@ void ndpi_search_ipp(struct ndpi_detection_module_struct
 		}
 
 		NDPI_LOG(NDPI_PROTOCOL_IPP, ndpi_struct, NDPI_LOG_DEBUG, "found ipp\n");
-		ndpi_int_ipp_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+		ndpi_int_ipp_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 		return;
 	}
 
   search_for_next_pattern:
 
 	if (packet->payload_packet_len > 3 && memcmp(packet->payload, "POST", 4) == 0) {
-		ndpi_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct, flow);
 		if (packet->content_line.ptr != NULL && packet->content_line.len > 14
 			&& memcmp(packet->content_line.ptr, "application/ipp", 15) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_IPP, ndpi_struct, NDPI_LOG_DEBUG, "found ipp via POST ... application/ipp.\n");
-			ndpi_int_ipp_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
+			ndpi_int_ipp_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 			return;
 		}
 	}

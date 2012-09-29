@@ -26,16 +26,16 @@
 
 
 static void ndpi_int_xdmcp_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct)
+											*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_XDMCP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_XDMCP, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_xdmcp(struct ndpi_detection_module_struct
-						 *ndpi_struct)
+						 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -44,18 +44,18 @@ void ndpi_search_xdmcp(struct ndpi_detection_module_struct
 	if (packet->tcp != NULL && (ntohs(packet->tcp->dest) >= 6000 && ntohs(packet->tcp->dest) <= 6005)
 		&& packet->payload_packet_len == 48
 		&& packet->payload[0] == 0x6c && packet->payload[1] == 0x00
-		&& ntohs(get_u16(packet->payload, 6)) == 0x1200 && ntohs(get_u16(packet->payload, 8)) == 0x1000) {
+		&& ntohs(get_u_int16_t(packet->payload, 6)) == 0x1200 && ntohs(get_u_int16_t(packet->payload, 8)) == 0x1000) {
 
 		NDPI_LOG(NDPI_PROTOCOL_XDMCP, ndpi_struct, NDPI_LOG_DEBUG, "found xdmcp over tcp.\n");
-		ndpi_int_xdmcp_add_connection(ndpi_struct);
+		ndpi_int_xdmcp_add_connection(ndpi_struct, flow);
 		return;
 	}
 	if (packet->udp != NULL && ntohs(packet->udp->dest) == 177
-		&& packet->payload_packet_len >= 6 && packet->payload_packet_len == 6 + ntohs(get_u16(packet->payload, 4))
-		&& ntohs(get_u16(packet->payload, 0)) == 0x0001 && ntohs(get_u16(packet->payload, 2)) == 0x0002) {
+		&& packet->payload_packet_len >= 6 && packet->payload_packet_len == 6 + ntohs(get_u_int16_t(packet->payload, 4))
+		&& ntohs(get_u_int16_t(packet->payload, 0)) == 0x0001 && ntohs(get_u_int16_t(packet->payload, 2)) == 0x0002) {
 
 		NDPI_LOG(NDPI_PROTOCOL_XDMCP, ndpi_struct, NDPI_LOG_DEBUG, "found xdmcp over udp.\n");
-		ndpi_int_xdmcp_add_connection(ndpi_struct);
+		ndpi_int_xdmcp_add_connection(ndpi_struct, flow);
 		return;
 	}
 

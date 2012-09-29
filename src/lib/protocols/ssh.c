@@ -25,15 +25,15 @@
 #ifdef NDPI_PROTOCOL_SSH
 
 static void ndpi_int_ssh_add_connection(struct ndpi_detection_module_struct
-										  *ndpi_struct)
+										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_SSH, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSH, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -50,7 +50,7 @@ void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 		if (packet->payload_packet_len > 7 && packet->payload_packet_len < 100
 			&& memcmp(packet->payload, "SSH-", 4) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_SSH, ndpi_struct, NDPI_LOG_DEBUG, "found ssh\n");
-			ndpi_int_ssh_add_connection(ndpi_struct);
+			ndpi_int_ssh_add_connection(ndpi_struct, flow);
 			return;
 
 		}

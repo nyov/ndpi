@@ -28,27 +28,27 @@
 #ifdef NDPI_PROTOCOL_MSSQL
 
 static void ndpi_int_mssql_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct)
+											*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_MSSQL, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MSSQL, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_mssql(struct ndpi_detection_module_struct
-						 *ndpi_struct)
+						 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 
 
 
 	NDPI_LOG(NDPI_PROTOCOL_MSSQL, ndpi_struct, NDPI_LOG_DEBUG, "search mssql.\n");
 
 
-	if (packet->payload_packet_len > 51 && ntohs(get_u32(packet->payload, 0)) == 0x1201
-		&& ntohs(get_u16(packet->payload, 2)) == packet->payload_packet_len
-		&& ntohl(get_u32(packet->payload, 4)) == 0x00000100 && memcmp(&packet->payload[41], "sqlexpress", 10) == 0) {
+	if (packet->payload_packet_len > 51 && ntohs(get_u_int32_t(packet->payload, 0)) == 0x1201
+		&& ntohs(get_u_int16_t(packet->payload, 2)) == packet->payload_packet_len
+		&& ntohl(get_u_int32_t(packet->payload, 4)) == 0x00000100 && memcmp(&packet->payload[41], "sqlexpress", 10) == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_MSSQL, ndpi_struct, NDPI_LOG_DEBUG, "found mssql.\n");
-		ndpi_int_mssql_add_connection(ndpi_struct);
+		ndpi_int_mssql_add_connection(ndpi_struct, flow);
 		return;
 	}
 

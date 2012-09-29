@@ -1,5 +1,5 @@
 /*
- * ndpi_basic_def.h
+ * ndpi_protocol_history.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -21,39 +21,14 @@
  */
 
 
-#ifndef __NDPI_API_INCLUDE_FILE__
-#error CANNOT INCLUDE THIS .H FILE, INCLUDE NDPI_API.H
-#endif
 
-#ifndef __NDPI_BASIC_DEF_H__
-#define __NDPI_BASIC_DEF_H__
+#ifndef NDPI_PROTOCOL_HISTORY_H
+#define NDPI_PROTOCOL_HISTORY_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* define u64, u32, here
- * this is used for compatibility restrictions on different platforms
- *
- */
-
-#ifndef u64
-#define u64 	unsigned long long
-#endif
-#ifndef u32
-#define u32 	unsigned int
-#endif
-#ifndef u16
-#define u16 	unsigned short
-#endif
-#ifndef u8
-#define u8 	unsigned char
-#endif
+typedef enum {
+  NDPI_REAL_PROTOCOL = 0,
+  NDPI_CORRELATED_PROTOCOL = 1
+} ndpi_protocol_type_t;
 
 
-/* generic timestamp counter size */
-#define NDPI_TIMESTAMP_COUNTER_SIZE		u32
-#ifdef __cplusplus
-}
-#endif
 #endif

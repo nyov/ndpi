@@ -23,15 +23,15 @@
 #ifdef NTOP_PROTOCOL_DCERPC
 
 static void ntop_int_dcerpc_add_connection(struct ndpi_detection_module_struct
-					     *ndpi_struct)
+					     *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_DCERPC, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_DCERPC, NDPI_REAL_PROTOCOL);
 }
 
-void ntop_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct)
+void ntop_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
 
   if((packet->tcp != NULL) 
      && (packet->payload_packet_len > 64) 
@@ -40,7 +40,7 @@ void ntop_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct)
      && (packet->payload[2] < 16) /* Packet type */
      ) {	 
     NDPI_LOG(NDPI_PROTOCOL_DCERPC, ndpi_struct, NDPI_LOG_DEBUG, "DCERPC match\n");	  
-    ntop_int_dcerpc_add_connection(ndpi_struct);
+    ntop_int_dcerpc_add_connection(ndpi_struct, flow);
     return;
   }
 

@@ -25,17 +25,17 @@
 #ifdef NDPI_PROTOCOL_NTP
 
 static void ndpi_int_ntp_add_connection(struct ndpi_detection_module_struct
-										  *ndpi_struct)
+										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_NTP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_NTP, NDPI_REAL_PROTOCOL);
 }
 
 /* detection also works asymmetrically */
 
-void ndpi_search_ntp_udp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_ntp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -52,7 +52,7 @@ void ndpi_search_ntp_udp(struct ndpi_detection_module_struct *ndpi_struct)
 
 	if ((((packet->payload[0] & 0x38) >> 3) <= 4)) {
 		NDPI_LOG(NDPI_PROTOCOL_NTP, ndpi_struct, NDPI_LOG_DEBUG, "detected NTP.");
-		ndpi_int_ntp_add_connection(ndpi_struct);
+		ndpi_int_ntp_add_connection(ndpi_struct, flow);
 		return;
 	}
 

@@ -49,7 +49,7 @@
 {													\
 	if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask,nprot) != 0)		\
 	{												\
-	    ndpi_int_add_connection(ndpi_struct,    \
+	    ndpi_int_add_connection(ndpi_struct, flow,    \
                                   nprot,                \
 							      NDPI_REAL_PROTOCOL); \
 	}												\
@@ -57,9 +57,9 @@
 
 
 void ndpi_search_in_non_tcp_udp(struct ndpi_detection_module_struct
-								  *ndpi_struct)
+								  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_packet_struct *packet = &flow->packet;
 
 	if (packet->iph == NULL) {
 #ifdef NDPI_DETECTION_SUPPORT_IPV6

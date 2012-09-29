@@ -27,24 +27,22 @@
 #ifdef NDPI_PROTOCOL_FIESTA
 
 
-static void ndpi_int_fiesta_add_connection(struct ndpi_detection_module_struct
-											 *ndpi_struct)
+static void ndpi_int_fiesta_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_FIESTA, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FIESTA, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_fiesta(struct ndpi_detection_module_struct
-						  *ndpi_struct)
+void ndpi_search_fiesta(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "search fiesta.\n");
 
 	if (flow->l4.tcp.fiesta_stage == 0 && packet->payload_packet_len == 5
-		&& get_u16(packet->payload, 0) == ntohs(0x0407)
+		&& get_u_int16_t(packet->payload, 0) == ntohs(0x0407)
 		&& (packet->payload[2] == 0x08)
 		&& (packet->payload[4] == 0x00 || packet->payload[4] == 0x01)) {
 
@@ -60,23 +58,23 @@ void ndpi_search_fiesta(struct ndpi_detection_module_struct
 		goto maybe_fiesta;
 	}
 	if (flow->l4.tcp.fiesta_stage == (1 + packet->packet_direction)) {
-		if (packet->payload_packet_len == 4 && get_u32(packet->payload, 0) == htonl(0x03050c01)) {
+		if (packet->payload_packet_len == 4 && get_u_int32_t(packet->payload, 0) == htonl(0x03050c01)) {
 			goto add_fiesta;
 		}
-		if (packet->payload_packet_len == 5 && get_u32(packet->payload, 0) == htonl(0x04030c01)
+		if (packet->payload_packet_len == 5 && get_u_int32_t(packet->payload, 0) == htonl(0x04030c01)
 			&& packet->payload[4] == 0) {
 			goto add_fiesta;
 		}
-		if (packet->payload_packet_len == 6 && get_u32(packet->payload, 0) == htonl(0x050e080b)) {
+		if (packet->payload_packet_len == 6 && get_u_int32_t(packet->payload, 0) == htonl(0x050e080b)) {
 			goto add_fiesta;
 		}
 		if (packet->payload_packet_len == 100 && packet->payload[0] == 0x63 && packet->payload[61] == 0x52
-			&& packet->payload[81] == 0x5a && get_u16(packet->payload, 1) == htons(0x3810)
-			&& get_u16(packet->payload, 62) == htons(0x6f75)) {
+			&& packet->payload[81] == 0x5a && get_u_int16_t(packet->payload, 1) == htons(0x3810)
+			&& get_u_int16_t(packet->payload, 62) == htons(0x6f75)) {
 			goto add_fiesta;
 		}
 		if (packet->payload_packet_len > 3 && packet->payload_packet_len - 1 == packet->payload[0]
-			&& get_u16(packet->payload, 1) == htons(0x140c)) {
+			&& get_u_int16_t(packet->payload, 1) == htons(0x140c)) {
 			goto add_fiesta;
 		}
 	}
@@ -91,7 +89,7 @@ void ndpi_search_fiesta(struct ndpi_detection_module_struct
 
   add_fiesta:
 	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "detected fiesta.\n");
-	ndpi_int_fiesta_add_connection(ndpi_struct);
+	ndpi_int_fiesta_add_connection(ndpi_struct, flow);
 	return;
 }
 #endif

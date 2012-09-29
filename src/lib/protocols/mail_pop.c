@@ -39,17 +39,17 @@
 
 
 static void ndpi_int_mail_pop_add_connection(struct ndpi_detection_module_struct
-											   *ndpi_struct)
+											   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_MAIL_POP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MAIL_POP, NDPI_REAL_PROTOCOL);
 }
 
 
 static int ndpi_int_mail_pop_check_for_client_commands(struct ndpi_detection_module_struct
-														 *ndpi_struct)
+														 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //  struct ndpi_id_struct         *src=ndpi_struct->src;
 //  struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -128,18 +128,18 @@ static int ndpi_int_mail_pop_check_for_client_commands(struct ndpi_detection_mod
 
 
 void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
-								*ndpi_struct)
+								*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //  struct ndpi_id_struct         *src=ndpi_struct->src;
 //  struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	u8 a = 0;
-	u8 bit_count = 0;
+	u_int8_t a = 0;
+	u_int8_t bit_count = 0;
 
-	u16 dport = 0;
-	u16 sport = 0;
+	u_int16_t dport = 0;
+	u_int16_t sport = 0;
 
 
 	sport = ntohs(packet->tcp->source);
@@ -159,11 +159,11 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 				&& (packet->payload[3] == 'R' || packet->payload[3] == 'r')))) {
 		// +OK or -ERR seen
 		flow->l4.tcp.mail_pop_stage += 1;
-	} else if (!ndpi_int_mail_pop_check_for_client_commands(ndpi_struct)) {
+	} else if (!ndpi_int_mail_pop_check_for_client_commands(ndpi_struct, flow)) {
 		goto maybe_split_pop;
 	}
 
-	if (packet->payload_packet_len > 2 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
+	if (packet->payload_packet_len > 2 && ntohs(get_u_int16_t(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
 
 		// count the bits set in the bitmask
 		if (flow->l4.tcp.pop_command_bitmask != 0) {
@@ -178,7 +178,7 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 		if ((bit_count + flow->l4.tcp.mail_pop_stage) >= 3) {
 			if (flow->l4.tcp.mail_pop_stage > 0) {
 				NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "mail_pop identified\n");
-				ndpi_int_mail_pop_add_connection(ndpi_struct);
+				ndpi_int_mail_pop_add_connection(ndpi_struct, flow);
 				return;
 			} else {
 				return;
@@ -197,7 +197,7 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 
   maybe_split_pop:
 
-	if (((packet->payload_packet_len > 2 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a)
+	if (((packet->payload_packet_len > 2 && ntohs(get_u_int16_t(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a)
 		 || flow->l4.tcp.pop_command_bitmask != 0 || flow->l4.tcp.mail_pop_stage != 0) && flow->packet_counter < 12) {
 		// maybe part of a split pop packet
 		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,

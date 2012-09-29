@@ -24,13 +24,14 @@
 #include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_SIP
-static void ndpi_int_sip_add_connection(struct ndpi_detection_module_struct
-					  *ndpi_struct, u8 due_to_correlation)
+static void ndpi_int_sip_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+					struct ndpi_flow_struct *flow,
+					u_int8_t due_to_correlation)
 {
 
-  ndpi_int_add_connection(ndpi_struct,
-			    NDPI_PROTOCOL_SIP,
-			    due_to_correlation ? NDPI_CORRELATED_PROTOCOL : NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow,
+			  NDPI_PROTOCOL_SIP,
+			  due_to_correlation ? NDPI_CORRELATED_PROTOCOL : NDPI_REAL_PROTOCOL);
 }
 
 
@@ -41,19 +42,19 @@ static inline
 __forceinline static
 #endif
 void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
-				 *ndpi_struct)
+			       *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
   //      struct ndpi_id_struct         *src=ndpi_struct->src;
   //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
-  const u8 *packet_payload = packet->payload;
-  u32 payload_len = packet->payload_packet_len;
+  const u_int8_t *packet_payload = packet->payload;
+  u_int32_t payload_len = packet->payload_packet_len;
 
 
   if (payload_len > 4) {
     /* search for STUN Turn ChannelData Prefix */
-    u16 message_len = ntohs(get_u16(packet->payload, 2));
+    u_int16_t message_len = ntohs(get_u_int16_t(packet->payload, 2));
     if (payload_len - 4 == message_len) {
       NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "found STUN TURN ChannelData prefix.\n");
       payload_len -= 4;
@@ -73,7 +74,7 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	    && (memcmp(&packet_payload[7], "SIP:", 4) == 0 || memcmp(&packet_payload[7], "sip:", 4) == 0)) {
 
 	  NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "found sip NOTIFY.\n");
-	  ndpi_int_sip_add_connection(ndpi_struct, 0);
+	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
 #endif
@@ -82,13 +83,13 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	    && (memcmp(&packet_payload[9], "SIP:", 4) == 0 || memcmp(&packet_payload[9], "sip:", 4) == 0)) {
 
 	  NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "found sip REGISTER.\n");
-	  ndpi_int_sip_add_connection(ndpi_struct, 0);
+	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
 	if ((memcmp(packet_payload, "INVITE ", 7) == 0 || memcmp(packet_payload, "invite ", 7) == 0)
 	    && (memcmp(&packet_payload[7], "SIP:", 4) == 0 || memcmp(&packet_payload[7], "sip:", 4) == 0)) {
 	  NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "found sip INVITE.\n");
-	  ndpi_int_sip_add_connection(ndpi_struct, 0);
+	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
 	/* seen this in second direction on the third position,
@@ -97,7 +98,7 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	 */
 	if (memcmp(packet_payload, "SIP/2.0 200 OK", 14) == 0 || memcmp(packet_payload, "sip/2.0 200 OK", 14) == 0) {
 	  NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "found sip SIP/2.0 0K.\n");
-	  ndpi_int_sip_add_connection(ndpi_struct, 0);
+	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
 
@@ -108,7 +109,7 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	    && (memcmp(&packet_payload[8], "SIP:", 4) == 0
 		|| memcmp(&packet_payload[8], "sip:", 4) == 0)) {
 	  NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "found sip OPTIONS.\n");
-	  ndpi_int_sip_add_connection(ndpi_struct, 0);
+	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
 #endif
@@ -128,14 +129,14 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
   }
 #endif
 
-  if (payload_len == 4 && get_u32(packet_payload, 0) == 0) {
+  if (payload_len == 4 && get_u_int32_t(packet_payload, 0) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "maybe sip. need next packet.\n");
     return;
   }
 #ifdef NDPI_PROTOCOL_YAHOO
   if (payload_len > 30 && packet_payload[0] == 0x90
-      && packet_payload[3] == payload_len - 20 && get_u32(packet_payload, 4) == 0
-      && get_u32(packet_payload, 8) == 0) {
+      && packet_payload[3] == payload_len - 20 && get_u_int32_t(packet_payload, 4) == 0
+      && get_u_int32_t(packet_payload, 8) == 0) {
     flow->sip_yahoo_voice = 1;
     NDPI_LOG(NDPI_PROTOCOL_SIP, ndpi_struct, NDPI_LOG_DEBUG, "maybe sip yahoo. need next packet.\n");
   }
@@ -150,9 +151,9 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 
 }
 
-void ndpi_search_sip(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_sip(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_packet_struct *packet = &flow->packet;
   //  struct ndpi_flow_struct   *flow = ndpi_struct->flow;
   //      struct ndpi_id_struct         *src=ndpi_struct->src;
   //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
@@ -162,7 +163,7 @@ void ndpi_search_sip(struct ndpi_detection_module_struct *ndpi_struct)
   /* skip marked packets */
   if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_SIP) {
     if (packet->tcp_retransmission == 0) {
-      ndpi_search_sip_handshake(ndpi_struct);
+      ndpi_search_sip_handshake(ndpi_struct, flow);
     }
   }
 }

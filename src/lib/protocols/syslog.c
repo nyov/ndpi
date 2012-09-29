@@ -25,20 +25,20 @@
 #ifdef NDPI_PROTOCOL_SYSLOG
 
 static void ndpi_int_syslog_add_connection(struct ndpi_detection_module_struct
-											 *ndpi_struct)
+											 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_SYSLOG, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SYSLOG, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_syslog(struct ndpi_detection_module_struct
-						  *ndpi_struct)
+						  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	u8 i;
+	u_int8_t i;
 
 	NDPI_LOG(NDPI_PROTOCOL_SYSLOG, ndpi_struct, NDPI_LOG_DEBUG, "search syslog\n");
 
@@ -75,7 +75,7 @@ void ndpi_search_syslog(struct ndpi_detection_module_struct
 
 			NDPI_LOG(NDPI_PROTOCOL_SYSLOG, ndpi_struct, NDPI_LOG_DEBUG, "found syslog by 'last message' string.\n");
 
-			ndpi_int_syslog_add_connection(ndpi_struct);
+			ndpi_int_syslog_add_connection(ndpi_struct, flow);
 
 			return;
 		} else if (i + sizeof("snort: ") - 1 <= packet->payload_packet_len &&
@@ -85,7 +85,7 @@ void ndpi_search_syslog(struct ndpi_detection_module_struct
 
 			NDPI_LOG(NDPI_PROTOCOL_SYSLOG, ndpi_struct, NDPI_LOG_DEBUG, "found syslog by 'snort: ' string.\n");
 
-			ndpi_int_syslog_add_connection(ndpi_struct);
+			ndpi_int_syslog_add_connection(ndpi_struct, flow);
 
 			return;
 		}
@@ -115,7 +115,7 @@ void ndpi_search_syslog(struct ndpi_detection_module_struct
 			NDPI_LOG(NDPI_PROTOCOL_SYSLOG, ndpi_struct, NDPI_LOG_DEBUG,
 					"a month-shortname following: syslog detected.\n");
 
-			ndpi_int_syslog_add_connection(ndpi_struct);
+			ndpi_int_syslog_add_connection(ndpi_struct, flow);
 
 			return;
 		}

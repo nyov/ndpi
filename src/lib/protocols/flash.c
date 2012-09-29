@@ -24,16 +24,15 @@
 #include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_FLASH
 
-static void ndpi_int_flash_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct)
+static void ndpi_int_flash_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_FLASH, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FLASH, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_flash(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_flash(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -53,7 +52,7 @@ void ndpi_search_flash(struct ndpi_detection_module_struct *ndpi_struct)
 					"FLASH hit: flash_stage: %u, flash_bytes: %u\n", flow->l4.tcp.flash_stage,
 					flow->l4.tcp.flash_bytes);
 			flow->l4.tcp.flash_stage = 3;
-			ndpi_int_flash_add_connection(ndpi_struct);
+			ndpi_int_flash_add_connection(ndpi_struct, flow);
 			return;
 		}
 	} else if (flow->l4.tcp.flash_stage == 1 + packet->packet_direction) {
@@ -63,7 +62,7 @@ void ndpi_search_flash(struct ndpi_detection_module_struct *ndpi_struct)
 					"FLASH hit: flash_stage: %u, flash_bytes: %u\n", flow->l4.tcp.flash_stage,
 					flow->l4.tcp.flash_bytes);
 			flow->l4.tcp.flash_stage = 3;
-			ndpi_int_flash_add_connection(ndpi_struct);
+			ndpi_int_flash_add_connection(ndpi_struct, flow);
 			return;
 		} else if (packet->tcp->psh == 0 && flow->l4.tcp.flash_bytes < 1537) {
 			NDPI_LOG(NDPI_PROTOCOL_FLASH, ndpi_struct, NDPI_LOG_DEBUG,

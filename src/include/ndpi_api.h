@@ -38,14 +38,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/* basic definitions (u64, u32, timestamp size,...) */
-#include "ndpi_basic_def.h"
+
+/* basic definitions (u_int64_t, u_int32_t, timestamp size,...) */
 #include "ndpi_protocols_osdpi.h"
 /* macros for protocol / bitmask conversation if needed */
 #include "ndpi_macros.h"
-
 #include "ndpi_public_functions.h"
-
 #include "ndpi_debug_functions.h"
 #ifdef __cplusplus
 }

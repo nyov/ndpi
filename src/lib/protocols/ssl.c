@@ -27,13 +27,13 @@
 
 #define NDPI_MAX_SSL_REQUEST_SIZE 10000
 
-static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct
-					  *ndpi_struct, u32 protocol)
+static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+					struct ndpi_flow_struct *flow, u_int32_t protocol)
 {
   if (protocol != NDPI_PROTOCOL_SSL) {
-    ndpi_int_add_connection(ndpi_struct, protocol, NDPI_CORRELATED_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_CORRELATED_PROTOCOL);
   } else {
-    ndpi_int_add_connection(ndpi_struct, protocol, NDPI_REAL_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
   }
 }
 
@@ -55,8 +55,9 @@ static void stripCertificateTrailer(char *buffer, int buffer_len) {
   }
 }
 
-int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, char *buffer, int buffer_len) {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
+		      char *buffer, int buffer_len) {
+  struct ndpi_packet_struct *packet = &flow->packet;
 
   /* Nothing matched so far: let's decode the certificate with some heuristics */
   if(packet->payload[0] == 0x16 /* Handshake */) {
@@ -171,17 +172,17 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, char *bu
   return(0); /* Not found */
 }
 
-int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_struct) {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
+  struct ndpi_packet_struct *packet = &flow->packet;
 
   if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
      || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
     char certificate[64];
-    int rc = getSSLcertificate(ndpi_struct, certificate, sizeof(certificate));
+    int rc = getSSLcertificate(ndpi_struct, flow, certificate, sizeof(certificate));
 
     if(rc > 0) {
       /* printf("***** [SSL] %s\n", certificate); */
-      if(matchStringProtocol(ndpi_struct, certificate, strlen(certificate)) != -1)
+      if(matchStringProtocol(ndpi_struct, flow, certificate, strlen(certificate)) != -1)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
   }
@@ -193,18 +194,18 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
 
 static void ssl_mark_and_payload_search_for_other_protocols(struct
 							    ndpi_detection_module_struct
-							    *ndpi_struct)
+							    *ndpi_struct, struct ndpi_flow_struct *flow)
 {
 #if defined(NDPI_PROTOCOL_SOFTETHER) || defined(NDPI_PROTOCOL_MEEBO)|| defined(NDPI_PROTOCOL_TOR) || defined(NDPI_PROTOCOL_VPN_X) || defined(NDPI_PROTOCOL_UNENCRYPED_JABBER) || defined (NDPI_PROTOCOL_OOVOO) || defined (NDPI_PROTOCOL_ISKOOT) || defined (NDPI_PROTOCOL_OSCAR) || defined (NDPI_PROTOCOL_ITUNES) || defined (NDPI_PROTOCOL_GMAIL)
 
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_packet_struct *packet = &flow->packet;
 #ifdef NDPI_PROTOCOL_ISKOOT
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
+  
 #endif
-  //      struct ndpi_id_struct         *src=ndpi_struct->src;
-  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
-  u32 a;
-  u32 end;
+  //      struct ndpi_id_struct         *src=flow->src;
+  //      struct ndpi_id_struct         *dst=flow->dst;
+  u_int32_t a;
+  u_int32_t end;
 #if defined(NDPI_PROTOCOL_UNENCRYPED_JABBER)
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_UNENCRYPED_JABBER) != 0)
     goto check_for_ssl_payload;
@@ -228,7 +229,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 	NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "ssl jabber packet match\n");
 	if (NDPI_COMPARE_PROTOCOL_TO_BITMASK
 	    (ndpi_struct->detection_bitmask, NDPI_PROTOCOL_UNENCRYPED_JABBER) != 0) {
-	  ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_UNENCRYPED_JABBER);
+	  ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_UNENCRYPED_JABBER);
 	  return;
 	}
       }
@@ -250,13 +251,13 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 	      && memcmp(&packet->payload[a], "http://pki-info.aol.com/AOLMSPKI", 32) == 0)) {
 	NDPI_LOG(NDPI_PROTOCOL_OSCAR, ndpi_struct, NDPI_LOG_DEBUG, "OSCAR SERVER SSL DETECTED\n");
 
-	if (ndpi_struct->dst != NULL && packet->payload_packet_len > 75) {
-	  memcpy(ndpi_struct->dst->oscar_ssl_session_id, &packet->payload[44], 32);
-	  ndpi_struct->dst->oscar_ssl_session_id[32] = '\0';
-	  ndpi_struct->dst->oscar_last_safe_access_time = packet->tick_timestamp;
+	if (flow->dst != NULL && packet->payload_packet_len > 75) {
+	  memcpy(flow->dst->oscar_ssl_session_id, &packet->payload[44], 32);
+	  flow->dst->oscar_ssl_session_id[32] = '\0';
+	  flow->dst->oscar_last_safe_access_time = packet->tick_timestamp;
 	}
 
-	ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_OSCAR);
+	ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_OSCAR);
 	return;
       }
     }
@@ -266,7 +267,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 	  (memcmp(&packet->payload[a], "my.screenname.aol.com", 21) == 0
 	   || memcmp(&packet->payload[a], "sns-static.aolcdn.com", 21) == 0)) {
 	NDPI_LOG(NDPI_PROTOCOL_OSCAR, ndpi_struct, NDPI_LOG_DEBUG, "OSCAR SERVER SSL DETECTED\n");
-	ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_OSCAR);
+	ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_OSCAR);
 	return;
       }
     }
@@ -280,14 +281,14 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
   NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
 
 #ifdef HAVE_NTOP
-  sslDetectProtocolFromCertificate(ndpi_struct);
+  sslDetectProtocolFromCertificate(ndpi_struct, flow);
 
   if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
      || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
-     /*
-       Citrix GotoMeeting (AS16815, AS21866)
-       216.115.208.0/20
-       216.219.112.0/20
+    /*
+      Citrix GotoMeeting (AS16815, AS21866)
+      216.115.208.0/20
+      216.219.112.0/20
     */
 
     /* printf("[SSL] %08X / %08X\n", ntohl(packet->iph->saddr) , ntohl(packet->iph->daddr)); */
@@ -298,17 +299,17 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
        || ((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        ) {
-      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_CITRIX_ONLINE, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_CITRIX_ONLINE, NDPI_REAL_PROTOCOL);
       return;
     }
 
     /*
-       Apple (FaceTime, iMessage,...)
-       17.0.0.0/8
+      Apple (FaceTime, iMessage,...)
+      17.0.0.0/8
     */
     if(((ntohl(packet->iph->saddr) & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
-      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_APPLE, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_APPLE, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -318,7 +319,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x4272A000 /* 66.114.160.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) ==0x4272A000 /* 66.114.160.0 */)) {
-      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_WEBEX, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_WEBEX, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -328,34 +329,34 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000 /* 66.114.160.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 66.114.160.0 */)) {
-      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
       return;
     }
   }
 #endif
 
-  ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_SSL);
+  ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
 }
 
 
-static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi_struct)
+static u_int8_t ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
 
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  //  struct ndpi_flow_struct *flow = ndpi_struct->flow;
-  //      struct ndpi_id_struct         *src=ndpi_struct->src;
-  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  //  
+  //      struct ndpi_id_struct         *src=flow->src;
+  //      struct ndpi_id_struct         *dst=flow->dst;
 
 
   if (packet->payload_packet_len >= 5 && packet->payload[0] == 0x16 && packet->payload[1] == 0x03
       && (packet->payload[2] == 0x00 || packet->payload[2] == 0x01 || packet->payload[2] == 0x02)) {
-    u32 temp;
+    u_int32_t temp;
     NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "search sslv3\n");
     // SSLv3 Record
     if (packet->payload_packet_len >= 1300) {
       return 1;
     }
-    temp = ntohs(get_u16(packet->payload, 3)) + 5;
+    temp = ntohs(get_u_int16_t(packet->payload, 3)) + 5;
     NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "temp = %u.\n", temp);
     if (packet->payload_packet_len == temp
 	|| (temp < packet->payload_packet_len && packet->payload_packet_len > 500)) {
@@ -364,19 +365,19 @@ static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi
 
     if (packet->payload_packet_len < temp && temp < 5000 && packet->payload_packet_len > 9) {
       /* the server hello may be split into small packets */
-      u32 cert_start;
+      u_int32_t cert_start;
 
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
-	      "maybe SSLv3 server hello split into smaller packets\n");
+	       "maybe SSLv3 server hello split into smaller packets\n");
 
       /* lets hope at least the server hello and the start of the certificate block are in the first packet */
-      cert_start = ntohs(get_u16(packet->payload, 7)) + 5 + 4;
+      cert_start = ntohs(get_u_int16_t(packet->payload, 7)) + 5 + 4;
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "suspected start of certificate: %u\n",
-	      cert_start);
+	       cert_start);
 
       if (cert_start < packet->payload_packet_len && packet->payload[cert_start] == 0x0b) {
 	NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
-		"found 0x0b at suspected start of certificate block\n");
+		 "found 0x0b at suspected start of certificate block\n");
 	return 2;
       }
     }
@@ -384,19 +385,19 @@ static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi
     if ((packet->payload_packet_len > temp && packet->payload_packet_len > 100) && packet->payload_packet_len > 9) {
       /* the server hello may be split into small packets and the certificate has its own SSL Record
        * so temp contains only the length for the first ServerHello block */
-      u32 cert_start;
+      u_int32_t cert_start;
 
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
-	      "maybe SSLv3 server hello split into smaller packets but with seperate record for the certificate\n");
+	       "maybe SSLv3 server hello split into smaller packets but with seperate record for the certificate\n");
 
       /* lets hope at least the server hello record and the start of the certificate record are in the first packet */
-      cert_start = ntohs(get_u16(packet->payload, 7)) + 5 + 5 + 4;
+      cert_start = ntohs(get_u_int16_t(packet->payload, 7)) + 5 + 5 + 4;
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "suspected start of certificate: %u\n",
-	      cert_start);
+	       cert_start);
 
       if (cert_start < packet->payload_packet_len && packet->payload[cert_start] == 0x0b) {
 	NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
-		"found 0x0b at suspected start of certificate block\n");
+		 "found 0x0b at suspected start of certificate block\n");
 	return 2;
       }
     }
@@ -404,7 +405,7 @@ static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi
 
     if (packet->payload_packet_len >= temp + 5 && (packet->payload[temp] == 0x14 || packet->payload[temp] == 0x16)
 	&& packet->payload[temp + 1] == 0x03) {
-      u32 temp2 = ntohs(get_u16(packet->payload, temp + 3)) + 5;
+      u_int32_t temp2 = ntohs(get_u_int16_t(packet->payload, temp + 3)) + 5;
       if (temp + temp2 > NDPI_MAX_SSL_REQUEST_SIZE) {
 	return 1;
       }
@@ -415,7 +416,7 @@ static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi
       }
       if (packet->payload_packet_len >= temp + 5 &&
 	  packet->payload[temp] == 0x16 && packet->payload[temp + 1] == 0x03) {
-	temp2 = ntohs(get_u16(packet->payload, temp + 3)) + 5;
+	temp2 = ntohs(get_u_int16_t(packet->payload, temp + 3)) + 5;
 	if (temp + temp2 > NDPI_MAX_SSL_REQUEST_SIZE) {
 	  return 1;
 	}
@@ -426,7 +427,7 @@ static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi
 	}
 	if (packet->payload_packet_len >= temp + 5 &&
 	    packet->payload[temp] == 0x16 && packet->payload[temp + 1] == 0x03) {
-	  temp2 = ntohs(get_u16(packet->payload, temp + 3)) + 5;
+	  temp2 = ntohs(get_u_int16_t(packet->payload, temp + 3)) + 5;
 	  if (temp + temp2 > NDPI_MAX_SSL_REQUEST_SIZE) {
 	    return 1;
 	  }
@@ -447,14 +448,14 @@ static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi
 
 }
 
-void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
-  //      struct ndpi_id_struct         *src=ndpi_struct->src;
-  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
+  //      struct ndpi_id_struct         *src=flow->src;
+  //      struct ndpi_id_struct         *dst=flow->dst;
 
-  u8 ret;
+  u_int8_t ret;
 
   if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
     if (flow->l4.tcp.ssl_stage == 3 && packet->payload_packet_len > 20 && flow->packet_counter < 5) {
@@ -462,8 +463,8 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct)
        * so go on checking for certificate patterns for a couple more packets
        */
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
-	      "ssl flow but check another packet for patterns\n");
-      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
+	       "ssl flow but check another packet for patterns\n");
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct, flow);
       if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
 	/* still ssl so check another packet */
 	return;
@@ -484,11 +485,11 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 
     if((packet->payload_packet_len > 5)
        && (memcmp(packet->payload, whatsapp_pattern, sizeof(whatsapp_pattern)) == 0)) {
-      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_WHATSAPP, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_WHATSAPP, NDPI_REAL_PROTOCOL);
       return;
     } else {
       /* No whatsapp, let's try SSL */
-      if(sslDetectProtocolFromCertificate(ndpi_struct) > 0)
+      if(sslDetectProtocolFromCertificate(ndpi_struct, flow) > 0)
 	return;
     }
   }
@@ -507,7 +508,7 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 
     if (packet->payload[0] == 0x16 && packet->payload[1] == 0x03
 	&& (packet->payload[2] == 0x00 || packet->payload[2] == 0x01 || packet->payload[2] == 0x02)
-	&& (packet->payload_packet_len - ntohs(get_u16(packet->payload, 3)) == 5)) {
+	&& (packet->payload_packet_len - ntohs(get_u_int16_t(packet->payload, 3)) == 5)) {
       // SSLv3 Record
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv3 len match\n");
       flow->l4.tcp.ssl_stage = 1 + packet->packet_direction;
@@ -528,19 +529,19 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 	&& (packet->payload[4] == 0x00 || packet->payload[4] == 0x01 || packet->payload[4] == 0x02)
 	&& (packet->payload_packet_len - 2) >= packet->payload[1]) {
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv2 server len match\n");
-      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct, flow);
       return;
     }
 
-    ret = ndpi_search_sslv3_direction1(ndpi_struct);
+    ret = ndpi_search_sslv3_direction1(ndpi_struct, flow);
     if (ret == 1) {
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv3 server len match\n");
-      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct, flow);
       return;
     } else if (ret == 2) {
       NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
-	      "sslv3 server len match with split packet -> check some more packets for SSL patterns\n");
-      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
+	       "sslv3 server len match with split packet -> check some more packets for SSL patterns\n");
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct, flow);
       if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
 	flow->l4.tcp.ssl_stage = 3;
       }

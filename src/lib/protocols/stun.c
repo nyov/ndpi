@@ -25,9 +25,9 @@
 #ifdef NDPI_PROTOCOL_STUN
 
 
-static void ndpi_int_stun_add_connection(struct ndpi_detection_module_struct *ndpi_struct)
+static void ndpi_int_stun_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_STUN, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_STUN, NDPI_REAL_PROTOCOL);
 }
 
 
@@ -38,9 +38,9 @@ typedef enum {
 } ndpi_int_stun_result_t;
 
 static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_struct *ndpi_struct,
-													  const u8 * payload, const u16 payload_length)
+													  const u_int8_t * payload, const u_int16_t payload_length)
 {
-	u16 a;
+	u_int16_t a;
 
 	/*
 	 * token list of message types and attribute types from
@@ -58,13 +58,13 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 	 * 0x8003, 0x8004 used by facetime
 	 */
 
-	if (payload_length >= 20 && ntohs(get_u16(payload, 2)) + 20 == payload_length &&
+	if (payload_length >= 20 && ntohs(get_u_int16_t(payload, 2)) + 20 == payload_length &&
 		((payload[0] == 0x00 && (payload[1] >= 0x01 && payload[1] <= 0x04)) ||
 		 (payload[0] == 0x01 &&
 		  ((payload[1] >= 0x01 && payload[1] <= 0x04) || (payload[1] >= 0x11 && payload[1] <= 0x15))))) {
-		u8 mod;
-		u8 old = 1;
-		u8 padding = 0;
+		u_int8_t mod;
+		u_int8_t old = 1;
+		u_int8_t padding = 0;
 		NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "len and type match.\n");
 
 		if (payload_length == 20) {
@@ -139,10 +139,10 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 	return NDPI_IS_NOT_STUN;
 }
 
-void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 
 	NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "search stun.\n");
 
@@ -152,7 +152,7 @@ void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct)
 		/* STUN may be encapsulated in TCP packets */
 
 		if (packet->payload_packet_len >= 2 + 20 &&
-			ntohs(get_u16(packet->payload, 0)) + 2 == packet->payload_packet_len) {
+			ntohs(get_u_int16_t(packet->payload, 0)) + 2 == packet->payload_packet_len) {
 
 			/* TODO there could be several STUN packets in a single TCP packet so maybe the detection could be
 			 * improved by checking only the STUN packet of given length */
@@ -160,14 +160,14 @@ void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct)
 			if (ndpi_int_check_stun(ndpi_struct, packet->payload + 2, packet->payload_packet_len - 2) ==
 				NDPI_IS_STUN) {
 				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found TCP stun.\n");
-				ndpi_int_stun_add_connection(ndpi_struct);
+				ndpi_int_stun_add_connection(ndpi_struct, flow);
 				return;
 			}
 		}
 	}
 	if (ndpi_int_check_stun(ndpi_struct, packet->payload, packet->payload_packet_len) == NDPI_IS_STUN) {
 		NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found UDP stun.\n");
-		ndpi_int_stun_add_connection(ndpi_struct);
+		ndpi_int_stun_add_connection(ndpi_struct, flow);
 		return;
 	}
 

@@ -27,17 +27,17 @@
 #include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_DHCPV6
 
-static void ndpi_int_dhcpv6_add_connection(struct ndpi_detection_module_struct
-											 *ndpi_struct)
+static void ndpi_int_dhcpv6_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+					   struct ndpi_flow_struct *flow)
 {
 
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_DHCPV6, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DHCPV6, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_dhcpv6_udp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_dhcpv6_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //  struct ndpi_id_struct         *src=ndpi_struct->src;
 //  struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -47,7 +47,7 @@ void ndpi_search_dhcpv6_udp(struct ndpi_detection_module_struct *ndpi_struct)
 		packet->payload[0] >= 1 && packet->payload[0] <= 13) {
 
 		NDPI_LOG(NDPI_PROTOCOL_DHCPV6, ndpi_struct, NDPI_LOG_DEBUG, "DHCPv6 detected.\n");
-		ndpi_int_dhcpv6_add_connection(ndpi_struct);
+		ndpi_int_dhcpv6_add_connection(ndpi_struct, flow);
 		return;
 	}
 

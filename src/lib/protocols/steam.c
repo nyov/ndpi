@@ -26,21 +26,21 @@
 
 
 static void ndpi_int_steam_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct)
+											*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_STEAM, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_STEAM, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_steam(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_steam(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (flow->l4.tcp.steam_stage == 0) {
 		if (packet->payload_packet_len == 4
-			&& ntohl(get_u32(packet->payload, 0)) <= 0x07
+			&& ntohl(get_u_int32_t(packet->payload, 0)) <= 0x07
 			&& ntohs(packet->tcp->dest) >= 27030 && ntohs(packet->tcp->dest) <= 27040) {
 			flow->l4.tcp.steam_stage = 1 + packet->packet_direction;
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "steam stage 1\n");
@@ -50,7 +50,7 @@ void ndpi_search_steam(struct ndpi_detection_module_struct *ndpi_struct)
 	} else if (flow->l4.tcp.steam_stage == 2 - packet->packet_direction) {
 		if ((packet->payload_packet_len == 1 || packet->payload_packet_len == 5)
 			&& packet->payload[0] == 0x01) {
-			ndpi_int_steam_add_connection(ndpi_struct);
+			ndpi_int_steam_add_connection(ndpi_struct, flow);
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "steam detected\n");
 			return;
 		}

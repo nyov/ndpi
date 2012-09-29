@@ -308,7 +308,7 @@ hp2)
   # to use with these is +Maked; it writes dependencies to a file named
   # 'foo.d', which lands next to the object file, wherever that
   # happens to be.
-  # Much of this is similar to the tru64 case; see comments there.
+  # Much of this is similar to the tru_int64_t case; see comments there.
   dir=`echo "$object" | sed -e 's|/[^/]*$|/|'`
   test "x$dir" = "x$object" && dir=
   base=`echo "$object" | sed -e 's|^.*/||' -e 's/\.o$//' -e 's/\.lo$//'`
@@ -347,8 +347,8 @@ hp2)
   rm -f "$tmpdepfile" "$tmpdepfile2"
   ;;
 
-tru64)
-   # The Tru64 compiler uses -MD to generate dependencies as a side
+tru_int64_t)
+   # The Tru_int64_t compiler uses -MD to generate dependencies as a side
    # effect.  `cc -MD -o foo.o ...' puts the dependencies into `foo.o.d'.
    # At least on Alpha/Redhat 6.1, Compaq CCC V6.2-504 seems to put
    # dependencies in `foo.d' instead, so we check for that too.
@@ -358,7 +358,7 @@ tru64)
    base=`echo "$object" | sed -e 's|^.*/||' -e 's/\.o$//' -e 's/\.lo$//'`
 
    if test "$libtool" = yes; then
-      # With Tru64 cc, shared objects can also be used to make a
+      # With Tru_int64_t cc, shared objects can also be used to make a
       # static library.  This mechanism is used in libtool 1.4 series to
       # handle both shared and static libraries in a single compilation.
       # With libtool 1.4, dependencies were output in $dir.libs/$base.lo.d.

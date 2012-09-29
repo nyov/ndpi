@@ -27,18 +27,18 @@
 
 
 static void ndpi_int_usenet_add_connection(struct ndpi_detection_module_struct
-											 *ndpi_struct)
+											 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_USENET, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_USENET, NDPI_REAL_PROTOCOL);
 }
 
 
 
 void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
-							  *ndpi_struct)
+							  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -80,14 +80,14 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 			flow->l4.tcp.usenet_stage = 3 + packet->packet_direction;
 
 			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
-			ndpi_int_usenet_add_connection(ndpi_struct);
+			ndpi_int_usenet_add_connection(ndpi_struct, flow);
 			return;
 		} else if (packet->payload_packet_len == 13 && (ndpi_mem_cmp(packet->payload, "MODE READER\r\n", 13) == 0)) {
 			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG,
 					"USENET: no login necessary but we are a client.\n");
 
 			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
-			ndpi_int_usenet_add_connection(ndpi_struct);
+			ndpi_int_usenet_add_connection(ndpi_struct, flow);
 			return;
 		}
 	}

@@ -22,7 +22,7 @@
 
 #ifdef NTOP_PROTOCOL_SKYPE
 
-static u_int is_private_addr(u32 addr) {
+static u_int is_private_addr(u_int32_t addr) {
   addr = ntohl(addr);
 
   if(((addr & 0xFF000000) == 0x0A000000) /* 10.0.0.0/8  */
@@ -35,12 +35,12 @@ static u_int is_private_addr(u32 addr) {
     return(0);
 }
 
-static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct)
+static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
-  const u8 *packet_payload = packet->payload;
-  u32 payload_len = packet->payload_packet_len;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
+  const u_int8_t *packet_payload = packet->payload;
+  u_int32_t payload_len = packet->payload_packet_len;
 
 #if 0
   printf("[len=%u][%02X %02X %02X %02X]\n", payload_len,
@@ -50,7 +50,7 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct)
 	 packet->payload[3] & 0xFF);
 #endif
 
-  if(ndpi_struct->packet.udp != NULL) {
+  if(packet->udp != NULL) {
     flow->l4.udp.skype_packet_id++;
 
     if(flow->l4.udp.skype_packet_id < 5) {
@@ -60,7 +60,7 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct)
 	     && (packet->payload[0] != 0x30) /* Avoid invalid SNMP detection */
 	     && (packet->payload[2] == 0x02))) {
 	NDPI_LOG(NTOP_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);	
+	ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);	
       }
       
       return;
@@ -68,7 +68,7 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct)
 
     NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
     return;
-  } else if(ndpi_struct->packet.tcp != NULL) {
+  } else if(packet->tcp != NULL) {
     flow->l4.tcp.skype_packet_id++;
 
     if(flow->l4.tcp.skype_packet_id < 3) {
@@ -80,7 +80,7 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct)
 	      && flow->l4.tcp.seen_ack) {
       if((payload_len == 8) || (payload_len == 3)) {
 	NDPI_LOG(NTOP_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
       }
 
       /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */
@@ -91,15 +91,15 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct)
   }
 }
 
-void ntop_search_skype(struct ndpi_detection_module_struct *ndpi_struct)
+void ntop_search_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_packet_struct *packet = &flow->packet;
 
   NDPI_LOG(NTOP_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "skype detection...\n");
 
   /* skip marked packets */
   if(packet->detected_protocol_stack[0] != NTOP_PROTOCOL_SKYPE)
-    ntop_check_skype(ndpi_struct);
+    ntop_check_skype(ndpi_struct, flow);
 }
 
 #endif

@@ -95,7 +95,7 @@ if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
 else
   case `(set -o) 2>/dev/null` in *posix*) set -o posix;; esac
 fi
-BIN_SH=xpg4; export BIN_SH # for Tru64
+BIN_SH=xpg4; export BIN_SH # for Tru_int64_t
 DUALCASE=1; export DUALCASE # for MKS sh
 
 # A function that is used when there is no print builtin or printf.
@@ -3864,7 +3864,7 @@ if test -n \"\${ZSH_VERSION+set}\" && (emulate sh) >/dev/null 2>&1; then
 else
   case \`(set -o) 2>/dev/null\` in *posix*) set -o posix;; esac
 fi
-BIN_SH=xpg4; export BIN_SH # for Tru64
+BIN_SH=xpg4; export BIN_SH # for Tru_int64_t
 DUALCASE=1; export DUALCASE # for MKS sh
 
 # The HP-UX ksh and POSIX shell print the target directory to stdout
@@ -4500,7 +4500,7 @@ EOF
   XFREE (actual_cwrapper_path);
   XFREE (actual_cwrapper_name);
 
-  lt_setenv ("BIN_SH", "xpg4"); /* for Tru64 */
+  lt_setenv ("BIN_SH", "xpg4"); /* for Tru_int64_t */
   lt_setenv ("DUALCASE", "1");  /* for MSK sh */
   /* Update the DLL searchpath.  EXE_PATH_VALUE ($dllsearchpath) must
      be prepended before (that is, appear after) LIB_PATH_VALUE ($temp_rpath)
@@ -5644,7 +5644,7 @@ func_mode_link ()
 	continue
 	;;
 
-      # Tru64 UNIX uses -model [arg] to determine the layout of C++
+      # Tru_int64_t UNIX uses -model [arg] to determine the layout of C++
       # classes, name mangling, and exception handling.
       # Darwin uses the -arch flag to determine output architecture.
       -model|-arch|-isysroot|--sysroot)

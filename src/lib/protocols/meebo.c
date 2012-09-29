@@ -27,19 +27,19 @@
 #ifdef NDPI_PROTOCOL_MEEBO
 
 static void ndpi_int_meebo_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct)
+											*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_MEEBO, NDPI_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MEEBO, NDPI_CORRELATED_PROTOCOL);
 }
 
 
 
 
 void ndpi_search_meebo(struct ndpi_detection_module_struct
-						 *ndpi_struct)
+						 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 
 	// struct ndpi_id_struct *src=ndpi_struct->src;
 	// struct ndpi_id_struct *dst=ndpi_struct->dst;
@@ -62,7 +62,7 @@ void ndpi_search_meebo(struct ndpi_detection_module_struct
 			if (memcmp(packet->payload + 116, "tokbox/", NDPI_STATICSTRING_LEN("tokbox/")) == 0 ||
 				memcmp(packet->payload + 316, "tokbox/", NDPI_STATICSTRING_LEN("tokbox/")) == 0) {
 				NDPI_LOG(NDPI_PROTOCOL_MEEBO, ndpi_struct, NDPI_LOG_DEBUG, "found meebo/tokbox flash flow.\n");
-				ndpi_int_meebo_add_connection(ndpi_struct);
+				ndpi_int_meebo_add_connection(ndpi_struct, flow);
 				return;
 			}
 		}
@@ -84,9 +84,9 @@ void ndpi_search_meebo(struct ndpi_detection_module_struct
 			((packet->payload_packet_len > 3 && memcmp(packet->payload, "GET ", 4) == 0)
 			 || (packet->payload_packet_len > 4 && memcmp(packet->payload, "POST ", 5) == 0))
 		) && flow->packet_counter == 1) {
-		u8 host_or_referer_match = 0;
+		u_int8_t host_or_referer_match = 0;
 
-		ndpi_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct, flow);
 		if (packet->host_line.ptr != NULL
 			&& packet->host_line.len >= 9
 			&& memcmp(&packet->host_line.ptr[packet->host_line.len - 9], "meebo.com", 9) == 0) {
@@ -133,7 +133,7 @@ void ndpi_search_meebo(struct ndpi_detection_module_struct
 			if (host_or_referer_match == 1) {
 				NDPI_LOG(NDPI_PROTOCOL_MEEBO, ndpi_struct, NDPI_LOG_DEBUG,
 						"Found Meebo traffic based on host/referer\n");
-				ndpi_int_meebo_add_connection(ndpi_struct);
+				ndpi_int_meebo_add_connection(ndpi_struct, flow);
 				return;
 			}
 		}

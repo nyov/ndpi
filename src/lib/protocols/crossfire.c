@@ -27,18 +27,17 @@
 #ifdef NDPI_PROTOCOL_CROSSFIRE
 
 
-static void ndpi_int_crossfire_add_connection(struct ndpi_detection_module_struct
-												*ndpi_struct, ndpi_protocol_type_t protocol_type)
+static void ndpi_int_crossfire_add_connection(struct ndpi_detection_module_struct *ndpi_struct, 
+					      struct ndpi_flow_struct *flow, ndpi_protocol_type_t protocol_type)
 {
 
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_CROSSFIRE, protocol_type);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_CROSSFIRE, protocol_type);
 }
 
-void ndpi_search_crossfire_tcp_udp(struct ndpi_detection_module_struct
-									 *ndpi_struct)
+void ndpi_search_crossfire_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -46,19 +45,19 @@ void ndpi_search_crossfire_tcp_udp(struct ndpi_detection_module_struct
 
 
 	if (packet->udp != 0) {
-		if (packet->payload_packet_len == 25 && get_u32(packet->payload, 0) == ntohl(0xc7d91999)
-			&& get_u16(packet->payload, 4) == ntohs(0x0200)
-			&& get_u16(packet->payload, 22) == ntohs(0x7d00)
+		if (packet->payload_packet_len == 25 && get_u_int32_t(packet->payload, 0) == ntohl(0xc7d91999)
+			&& get_u_int16_t(packet->payload, 4) == ntohs(0x0200)
+			&& get_u_int16_t(packet->payload, 22) == ntohs(0x7d00)
 			) {
 			NDPI_LOG(NDPI_PROTOCOL_CROSSFIRE, ndpi_struct, NDPI_LOG_DEBUG, "Crossfire: found udp packet.\n");
-			ndpi_int_crossfire_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
+			ndpi_int_crossfire_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
 	} else if (packet->tcp != 0) {
 
 		if (packet->payload_packet_len > 4 && memcmp(packet->payload, "GET /", 5) == 0) {
-			ndpi_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct, flow);
 			if (packet->parsed_lines == 8
 				&& (packet->line[0].ptr != NULL && packet->line[0].len >= 30
 					&& (memcmp(&packet->payload[5], "notice/login_big", 16) == 0
@@ -69,7 +68,7 @@ void ndpi_search_crossfire_tcp_udp(struct ndpi_detection_module_struct
 						|| memcmp(packet->host_line.ptr, "www.crossfire", 13) == 0))
 				) {
 				NDPI_LOG(NDPI_PROTOCOL_CROSSFIRE, ndpi_struct, NDPI_LOG_DEBUG, "Crossfire: found HTTP request.\n");
-				ndpi_int_crossfire_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
+				ndpi_int_crossfire_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 				return;
 			}
 		}

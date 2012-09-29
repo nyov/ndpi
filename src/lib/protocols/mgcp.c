@@ -26,9 +26,9 @@
 #ifdef NDPI_PROTOCOL_MGCP
 
 static void ndpi_int_mgcp_add_connection(struct ndpi_detection_module_struct
-										   *ndpi_struct)
+										   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_MGCP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MGCP, NDPI_REAL_PROTOCOL);
 }
 
 
@@ -39,17 +39,17 @@ static void ndpi_int_mgcp_add_connection(struct ndpi_detection_module_struct
 __forceinline static
 #endif
 	 void ndpi_search_mgcp_connection(struct ndpi_detection_module_struct
-												 *ndpi_struct)
+												 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
 
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	/* information about MGCP taken from http://en.wikipedia.org/wiki/MGCP */
 
-	u16 pos = 4;
+	u_int16_t pos = 4;
 
 	if (packet->payload_packet_len < 8) {
 		goto mgcp_excluded;
@@ -57,7 +57,7 @@ __forceinline static
 
 	/* packet must end with 0x0d0a or with 0x0a */
 	if (packet->payload[packet->payload_packet_len - 1] != 0x0a
-		&& get_u16(packet->payload, packet->payload_packet_len - 2) != htons(0x0d0a)) {
+		&& get_u_int16_t(packet->payload, packet->payload_packet_len - 2) != htons(0x0d0a)) {
 		goto mgcp_excluded;
 	}
 
@@ -79,7 +79,7 @@ __forceinline static
 	while ((pos + 5) < packet->payload_packet_len) {
 		if (memcmp(&packet->payload[pos], "MGCP ", 5) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_MGCP, ndpi_struct, NDPI_LOG_DEBUG, "MGCP match.\n");
-			ndpi_int_mgcp_add_connection(ndpi_struct);
+			ndpi_int_mgcp_add_connection(ndpi_struct, flow);
 			return;
 		}
 		pos++;
@@ -91,10 +91,10 @@ __forceinline static
 }
 
 
-void ndpi_search_mgcp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_mgcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
 
-	ndpi_search_mgcp_connection(ndpi_struct);
+	ndpi_search_mgcp_connection(ndpi_struct, flow);
 
 }
 #endif

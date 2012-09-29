@@ -27,9 +27,9 @@
 #define RTP_MAX_OUT_OF_ORDER 11
 
 static void ndpi_int_rtp_add_connection(struct ndpi_detection_module_struct
-										  *ndpi_struct)
+										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_RTP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_RTP, NDPI_REAL_PROTOCOL);
 }
 
 /*
@@ -54,7 +54,7 @@ static void ndpi_int_rtp_add_connection(struct ndpi_detection_module_struct
 __forceinline static
 #endif
 	 void init_seq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
-							u8 direction, u16 seq, u8 include_current_packet)
+							u_int8_t direction, u_int16_t seq, u_int8_t include_current_packet)
 {
 	flow->rtp_seqnum[direction] = seq;
 	NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "rtp_seqnum[%u] = %u\n", direction, seq);
@@ -67,10 +67,10 @@ __forceinline static
 #else
 __forceinline static
 #endif
-	 u16 update_seq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
-							 u8 direction, u16 seq)
+	 u_int16_t update_seq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
+							 u_int8_t direction, u_int16_t seq)
 {
-	u16 delta = seq - flow->rtp_seqnum[direction];
+	u_int16_t delta = seq - flow->rtp_seqnum[direction];
 
 
 	if (delta < RTP_MAX_OUT_OF_ORDER) {	/* in order, with permissible gap */
@@ -87,16 +87,17 @@ __forceinline static
 
 
 static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
-							  const u8 * payload, const u16 payload_len)
+			    struct ndpi_flow_struct *flow,
+			    const u_int8_t * payload, const u_int16_t payload_len)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
-	u8 stage;
-	u16 seqnum = ntohs(get_u16(payload, 2));
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
+	u_int8_t stage;
+	u_int16_t seqnum = ntohs(get_u_int16_t(payload, 2));
 
 	NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "search rtp.\n");
 
-	if (payload_len == 4 && get_u32(packet->payload, 0) == 0 && flow->packet_counter < 8) {
+	if (payload_len == 4 && get_u_int32_t(packet->payload, 0) == 0 && flow->packet_counter < 8) {
 		NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "need next packet, maybe ClearSea out calls.\n");
 		return;
 	}
@@ -124,7 +125,7 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 		goto exclude_rtp;
 	}
 
-	if (payload_len == 12 && get_u32(payload, 0) == 0 && get_u32(payload, 4) == 0 && get_u32(payload, 8) == 0) {
+	if (payload_len == 12 && get_u_int32_t(payload, 0) == 0 && get_u_int32_t(payload, 4) == 0 && get_u_int32_t(payload, 8) == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "skipping packet with len = 12 and only 0-bytes.\n");
 		return;
 	}
@@ -153,7 +154,7 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 	if (stage > 0) {
 		NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct,
 				NDPI_LOG_DEBUG, "stage = %u.\n", packet->packet_direction == 0 ? flow->rtp_stage1 : flow->rtp_stage2);
-		if (flow->rtp_ssid[packet->packet_direction] != get_u32(payload, 8)) {
+		if (flow->rtp_ssid[packet->packet_direction] != get_u_int32_t(payload, 8)) {
 			NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "ssid has changed, goto exclude rtp.\n");
 			goto exclude_rtp;
 		}
@@ -161,11 +162,11 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 		if (seqnum == flow->rtp_seqnum[packet->packet_direction]) {
 			NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "maybe \"retransmission\", need next packet.\n");
 			return;
-		} else if ((u16) (seqnum - flow->rtp_seqnum[packet->packet_direction]) < RTP_MAX_OUT_OF_ORDER) {
+		} else if ((u_int16_t) (seqnum - flow->rtp_seqnum[packet->packet_direction]) < RTP_MAX_OUT_OF_ORDER) {
 			NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG,
 					"new packet has larger sequence number (within valid range)\n");
 			update_seq(ndpi_struct, flow, packet->packet_direction, seqnum);
-		} else if ((u16) (flow->rtp_seqnum[packet->packet_direction] - seqnum) < RTP_MAX_OUT_OF_ORDER) {
+		} else if ((u_int16_t) (flow->rtp_seqnum[packet->packet_direction] - seqnum) < RTP_MAX_OUT_OF_ORDER) {
 			NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG,
 					"new packet has smaller sequence number (within valid range)\n");
 			init_seq(ndpi_struct, flow, packet->packet_direction, seqnum, 1);
@@ -178,7 +179,7 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 		NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct,
 				NDPI_LOG_DEBUG, "rtp_ssid[%u] = %u.\n", packet->packet_direction,
 				flow->rtp_ssid[packet->packet_direction]);
-		flow->rtp_ssid[packet->packet_direction] = get_u32(payload, 8);
+		flow->rtp_ssid[packet->packet_direction] = get_u_int32_t(payload, 8);
 		if (flow->packet_counter < 3) {
 			NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "packet_counter < 3, need next packet.\n");
 		}
@@ -192,7 +193,7 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 
 	if (stage == 3) {
 		NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "add connection I.\n");
-		ndpi_int_rtp_add_connection(ndpi_struct);
+		ndpi_int_rtp_add_connection(ndpi_struct, flow);
 	} else {
 		packet->packet_direction == 0 ? flow->rtp_stage1++ : flow->rtp_stage2++;
 		NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "stage[%u]++; need next packet.\n",
@@ -213,17 +214,17 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 }
 
 
-void ndpi_search_rtp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_rtp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 
 	if (packet->udp) {
-		ndpi_rtp_search(ndpi_struct, packet->payload, packet->payload_packet_len);
+		ndpi_rtp_search(ndpi_struct, flow, packet->payload, packet->payload_packet_len);
 	} else if (packet->tcp) {
 
 		/* skip special packets seen at yahoo traces */
-		if (packet->payload_packet_len >= 20 && ntohs(get_u16(packet->payload, 2)) + 20 == packet->payload_packet_len &&
+		if (packet->payload_packet_len >= 20 && ntohs(get_u_int16_t(packet->payload, 2)) + 20 == packet->payload_packet_len &&
 			packet->payload[0] == 0x90 && packet->payload[1] >= 0x01 && packet->payload[1] <= 0x07) {
 			if (flow->packet_counter == 2)
 				flow->l4.tcp.rtp_special_packets_seen = 1;
@@ -244,24 +245,24 @@ void ndpi_search_rtp(struct ndpi_detection_module_struct *ndpi_struct)
 
 			/* RTP may be encapsulated in TCP packets */
 
-			if (packet->payload_packet_len >= 2 && ntohs(get_u16(packet->payload, 0)) + 2 == packet->payload_packet_len) {
+			if (packet->payload_packet_len >= 2 && ntohs(get_u_int16_t(packet->payload, 0)) + 2 == packet->payload_packet_len) {
 
 				/* TODO there could be several RTP packets in a single TCP packet so maybe the detection could be
 				 * improved by checking only the RTP packet of given length */
 
-				ndpi_rtp_search(ndpi_struct, packet->payload + 2, packet->payload_packet_len - 2);
+				ndpi_rtp_search(ndpi_struct, flow, packet->payload + 2, packet->payload_packet_len - 2);
 
 				return;
 			}
 		}
 		if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN && flow->l4.tcp.rtp_special_packets_seen == 1) {
 
-			if (packet->payload_packet_len >= 4 && ntohl(get_u32(packet->payload, 0)) + 4 == packet->payload_packet_len) {
+			if (packet->payload_packet_len >= 4 && ntohl(get_u_int32_t(packet->payload, 0)) + 4 == packet->payload_packet_len) {
 
 				/* TODO there could be several RTP packets in a single TCP packet so maybe the detection could be
 				 * improved by checking only the RTP packet of given length */
 
-				ndpi_rtp_search(ndpi_struct, packet->payload + 4, packet->payload_packet_len - 4);
+				ndpi_rtp_search(ndpi_struct, flow, packet->payload + 4, packet->payload_packet_len - 4);
 
 				return;
 			}

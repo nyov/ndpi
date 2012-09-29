@@ -24,12 +24,12 @@
 
 /* ************************************ */
 
-static void ntop_check_citrix(struct ndpi_detection_module_struct *ndpi_struct)
+static void ntop_check_citrix(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-  struct ndpi_flow_struct *flow = ndpi_struct->flow;
-  const u8 *packet_payload = packet->payload;
-  u32 payload_len = packet->payload_packet_len;
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
+  const u_int8_t *packet_payload = packet->payload;
+  u_int32_t payload_len = packet->payload_packet_len;
 
 #if 0
   printf("[len=%u][%02X %02X %02X %02X]\n", payload_len,
@@ -39,7 +39,7 @@ static void ntop_check_citrix(struct ndpi_detection_module_struct *ndpi_struct)
 	 packet->payload[3] & 0xFF);
 #endif
 
-  if(ndpi_struct->packet.tcp != NULL) {
+  if(packet->tcp != NULL) {
     flow->l4.tcp.citrix_packet_id++;
     
     if((flow->l4.tcp.citrix_packet_id == 3)
@@ -52,7 +52,7 @@ static void ntop_check_citrix(struct ndpi_detection_module_struct *ndpi_struct)
 	
 	if(memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0) {
 	  NDPI_LOG(NTOP_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
-	  ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
+	  ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
 	}
 
 	return;
@@ -62,7 +62,7 @@ static void ntop_check_citrix(struct ndpi_detection_module_struct *ndpi_struct)
 	if((memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0)
 	   || (ntop_strnstr(packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
 	  NDPI_LOG(NTOP_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
-	  ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
+	  ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
 	}
 
 	return;	
@@ -77,15 +77,15 @@ static void ntop_check_citrix(struct ndpi_detection_module_struct *ndpi_struct)
   }
 }
 
-void ntop_search_citrix(struct ndpi_detection_module_struct *ndpi_struct)
+void ntop_search_citrix(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_packet_struct *packet = &flow->packet;
 
   NDPI_LOG(NTOP_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "citrix detection...\n");
 
   /* skip marked packets */
   if(packet->detected_protocol_stack[0] != NTOP_PROTOCOL_CITRIX)
-    ntop_check_citrix(ndpi_struct);
+    ntop_check_citrix(ndpi_struct, flow);
 }
 
 #endif

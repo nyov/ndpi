@@ -35,14 +35,14 @@ extern "C" {
 //  #define NDPI_ENABLE_DEBUG_MESSAGES
 
 #define NDPI_DETECTION_SUPPORT_IPV6
-#define NDPI_PROTOCOL_HISTORY_SIZE 3
+#define NDPI_PROTOCOL_HISTORY_SIZE            3 
 
 #define NDPI_PROTOCOL_UNKNOWN                 0
 #define NDPI_PROTOCOL_FTP                     1
 #define NDPI_PROTOCOL_MAIL_POP                2
 #define NDPI_PROTOCOL_MAIL_SMTP               3
 #define NDPI_PROTOCOL_MAIL_IMAP               4
-#define NDPI_PROTOCOL_DNS              		5
+#define NDPI_PROTOCOL_DNS              	      5
 #define NDPI_PROTOCOL_IPP						6
 #define NDPI_PROTOCOL_HTTP					7
 #define NDPI_PROTOCOL_MDNS					8

@@ -25,23 +25,23 @@
 #ifdef NDPI_PROTOCOL_TDS
 
 static void ndpi_int_tds_add_connection(struct ndpi_detection_module_struct
-										  *ndpi_struct)
+										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_TDS, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TDS, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
-						   *ndpi_struct)
+						   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 8
 		&& packet->payload_packet_len < 512
 		&& packet->payload[1] < 0x02
-		&& ntohs(get_u16(packet->payload, 2)) == packet->payload_packet_len && get_u16(packet->payload, 4) == 0x0000) {
+		&& ntohs(get_u_int16_t(packet->payload, 2)) == packet->payload_packet_len && get_u_int16_t(packet->payload, 4) == 0x0000) {
 
 		if (flow->l4.tcp.tds_stage == 0) {
 			if (packet->payload[0] != 0x02 && packet->payload[0] != 0x07 && packet->payload[0] != 0x12) {
@@ -69,7 +69,7 @@ void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
 			case 0x12:
 				if (packet->payload[0] == 0x12) {
 					NDPI_LOG(NDPI_PROTOCOL_TDS, ndpi_struct, NDPI_LOG_DEBUG, "TDS detected\n");
-					ndpi_int_tds_add_connection(ndpi_struct);
+					ndpi_int_tds_add_connection(ndpi_struct, flow);
 					return;
 				} else {
 					goto exclude_tds;

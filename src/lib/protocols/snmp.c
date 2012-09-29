@@ -25,15 +25,15 @@
 #ifdef NDPI_PROTOCOL_SNMP
 
 static void ndpi_int_snmp_add_connection(struct ndpi_detection_module_struct
-										   *ndpi_struct)
+										   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_SNMP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SNMP, NDPI_REAL_PROTOCOL);
 }
 
-void ndpi_search_snmp(struct ndpi_detection_module_struct *ndpi_struct)
+void ndpi_search_snmp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
-	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_packet_struct *packet = &flow->packet;
+	
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -54,7 +54,7 @@ void ndpi_search_snmp(struct ndpi_detection_module_struct *ndpi_struct)
 			offset = 2;
 		}
 
-		if (get_u16(packet->payload, offset) != htons(0x0201)) {
+		if (get_u_int16_t(packet->payload, offset) != htons(0x0201)) {
 			NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG, "SNMP excluded, 0x0201 pattern not found\n");
 			goto excl;
 		}
@@ -67,22 +67,22 @@ void ndpi_search_snmp(struct ndpi_detection_module_struct *ndpi_struct)
 		if (flow->l4.udp.snmp_stage == 0) {
 			if (packet->udp->dest == htons(161) || packet->udp->dest == htons(162)) {
 				NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG, "SNMP detected due to port.\n");
-				ndpi_int_snmp_add_connection(ndpi_struct);
+				ndpi_int_snmp_add_connection(ndpi_struct, flow);
 				return;
 			}
 			NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG, "SNMP stage 0.\n");
 			if (packet->payload[offset + 2] == 3) {
-				flow->l4.udp.snmp_msg_id = ntohs(get_u32(packet->payload, offset + 8));
+				flow->l4.udp.snmp_msg_id = ntohs(get_u_int32_t(packet->payload, offset + 8));
 			} else if (packet->payload[offset + 2] == 0) {
-				flow->l4.udp.snmp_msg_id = get_u8(packet->payload, offset + 15);
+				flow->l4.udp.snmp_msg_id = get_u_int8_t(packet->payload, offset + 15);
 			} else {
-				flow->l4.udp.snmp_msg_id = ntohs(get_u16(packet->payload, offset + 15));
+				flow->l4.udp.snmp_msg_id = ntohs(get_u_int16_t(packet->payload, offset + 15));
 			}
 			flow->l4.udp.snmp_stage = 1 + packet->packet_direction;
 			return;
 		} else if (flow->l4.udp.snmp_stage == 1 + packet->packet_direction) {
 			if (packet->payload[offset + 2] == 0) {
-				if (flow->l4.udp.snmp_msg_id != get_u8(packet->payload, offset + 15) - 1) {
+				if (flow->l4.udp.snmp_msg_id != get_u_int8_t(packet->payload, offset + 15) - 1) {
 					NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG,
 							"SNMP v1 excluded, message ID doesn't match\n");
 					goto excl;
@@ -91,26 +91,26 @@ void ndpi_search_snmp(struct ndpi_detection_module_struct *ndpi_struct)
 		} else if (flow->l4.udp.snmp_stage == 2 - packet->packet_direction) {
 			NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG, "SNMP stage 1-2.\n");
 			if (packet->payload[offset + 2] == 3) {
-				if (flow->l4.udp.snmp_msg_id != ntohs(get_u32(packet->payload, offset + 8))) {
+				if (flow->l4.udp.snmp_msg_id != ntohs(get_u_int32_t(packet->payload, offset + 8))) {
 					NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG,
 							"SNMP v3 excluded, message ID doesn't match\n");
 					goto excl;
 				}
 			} else if (packet->payload[offset + 2] == 0) {
-				if (flow->l4.udp.snmp_msg_id != get_u8(packet->payload, offset + 15)) {
+				if (flow->l4.udp.snmp_msg_id != get_u_int8_t(packet->payload, offset + 15)) {
 					NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG,
 							"SNMP v1 excluded, message ID doesn't match\n");
 					goto excl;
 				}
 			} else {
-				if (flow->l4.udp.snmp_msg_id != ntohs(get_u16(packet->payload, offset + 15))) {
+				if (flow->l4.udp.snmp_msg_id != ntohs(get_u_int16_t(packet->payload, offset + 15))) {
 					NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG,
 							"SNMP v2 excluded, message ID doesn't match\n");
 					goto excl;
 				}
 			}
 			NDPI_LOG(NDPI_PROTOCOL_SNMP, ndpi_struct, NDPI_LOG_DEBUG, "SNMP detected.\n");
-			ndpi_int_snmp_add_connection(ndpi_struct);
+			ndpi_int_snmp_add_connection(ndpi_struct, flow);
 			return;
 		}
 	} else {

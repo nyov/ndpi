@@ -226,7 +226,7 @@ order to use an ANSI C compiler:
 
 and if that doesn't work, install pre-built binaries of GCC for HP-UX.
 
-   On OSF/1 a.k.a. Tru64, some versions of the default C compiler cannot
+   On OSF/1 a.k.a. Tru_int64_t, some versions of the default C compiler cannot
 parse its `<wchar.h>' header file.  The option `-nodtk' can be used as
 a workaround.  If GNU CC is not installed, it is therefore recommended
 to try
