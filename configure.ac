@@ -1,5 +1,5 @@
-AC_INIT([nDPI], [1.3.0])
-AC_CONFIG_SRCDIR([src/lib/ipq_protocols.h])
+AC_INIT([nDPI], [1.4.0])
+AC_CONFIG_SRCDIR([src/lib/ndpi_protocols.h])
 
 AM_INIT_AUTOMAKE([-Wall])
 AC_CONFIG_MACRO_DIR([m4])

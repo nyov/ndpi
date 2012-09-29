@@ -10,9 +10,9 @@ noinst_HEADERS = ndpi_main.h \
 			linux_compat.h
 
 
-# this will create a library 1.3.0
+# this will create a library 1.4.0
 LIB_AC=1
-LIB_REV=3
+LIB_REV=4
 LIB_ANC=0
 
 # ntop
