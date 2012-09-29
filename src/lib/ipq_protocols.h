@@ -21,8 +21,8 @@
  */
 
 
-#ifndef __IPOQUE_PROTOCOLS_INCLUDE_FILE__
-#define __IPOQUE_PROTOCOLS_INCLUDE_FILE__
+#ifndef __NDPI_PROTOCOLS_INCLUDE_FILE__
+#define __NDPI_PROTOCOLS_INCLUDE_FILE__
 #include "ipq_main.h"
 /* the get_uXX will return raw network packet bytes !! */
 #define get_u8(X,O)  (*(u8 *)(((u8 *)X) + O))
@@ -74,309 +74,309 @@
 
 /* define memory callback function */
 #define ipq_mem_cmp memcmp
-void ipoque_search_bittorrent(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_bittorrent(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 /* edonkey entry function*/
-void ipoque_search_edonkey(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_edonkey(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
 /* fasttrack entry function*/
-void ipoque_search_fasttrack_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_fasttrack_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* gnutella entry function*/
-void ipoque_search_gnutella(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ndpi_search_gnutella(struct ndpi_detection_module_struct
+							*ndpi_struct);
 
 /* winmx entry function*/
-void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct
-							 *ipoque_struct);
+void ndpi_search_winmx_tcp(struct ndpi_detection_module_struct
+							 *ndpi_struct);
 
 /* directconnect entry function*/
-void ipoque_search_directconnect(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_directconnect(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* applejuice entry function*/
-void ipoque_search_applejuice_tcp(struct ipoque_detection_module_struct
-								  *ipoque_struct);
+void ndpi_search_applejuice_tcp(struct ndpi_detection_module_struct
+								  *ndpi_struct);
 
 /* i23v5 entry function */
-void ipoque_search_i23v5(struct ipoque_detection_module_struct
-						 *ipoque_struct);
+void ndpi_search_i23v5(struct ndpi_detection_module_struct
+						 *ndpi_struct);
 
-void ipoque_search_socrates(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ndpi_search_socrates(struct ndpi_detection_module_struct
+							*ndpi_struct);
 
 /* soulseek entry function*/
-void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
-								*ipoque_struct);
+void ndpi_search_soulseek_tcp(struct ndpi_detection_module_struct
+								*ndpi_struct);
 /* msn entry function*/
-void ipoque_search_msn(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_msn(struct ndpi_detection_module_struct *ndpi_struct);
 
 /* yahoo entry function*/
-void ipoque_search_yahoo(struct ipoque_detection_module_struct
-						 *ipoque_struct);
+void ndpi_search_yahoo(struct ndpi_detection_module_struct
+						 *ndpi_struct);
 
 /* oscar entry function*/
-void ipoque_search_oscar(struct ipoque_detection_module_struct
-						 *ipoque_struct);
+void ndpi_search_oscar(struct ndpi_detection_module_struct
+						 *ndpi_struct);
 
 /* jabber entry function*/
-void ipoque_search_jabber_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 /* irc entry function*/
-void ipoque_search_irc_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_irc_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
 /* sip entry, used for tcp and udp !!! */
-void ipoque_search_sip(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_sip(struct ndpi_detection_module_struct *ndpi_struct);
 
 
 /* DirectDownloadLink entry */
-void ipoque_search_direct_download_link_tcp(struct
-											ipoque_detection_module_struct
-											*ipoque_struct);
+void ndpi_search_direct_download_link_tcp(struct
+											ndpi_detection_module_struct
+											*ndpi_struct);
 
 /* Mail POP entry */
-void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
-								*ipoque_struct);
+void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
+								*ndpi_struct);
 
 /* IMAP entry */
-void ipoque_search_mail_imap_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* Mail SMTP entry */
-void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_mail_smtp_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* HTTP entry */
-void ipoque_search_http_tcp(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ndpi_search_http_tcp(struct ndpi_detection_module_struct
+							*ndpi_struct);
 
 /* FTP entry */
-void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_ftp_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
 /* USENET entry */
-void ipoque_search_usenet_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 
 /* DNS entry */
-void ipoque_search_dns(struct ipoque_detection_module_struct
-					   *ipoque_struct);
+void ndpi_search_dns(struct ndpi_detection_module_struct
+					   *ndpi_struct);
 
 /* RTSP entry */
-void ipoque_search_rtsp_tcp_udp(struct ipoque_detection_module_struct
-								*ipoque_struct);
+void ndpi_search_rtsp_tcp_udp(struct ndpi_detection_module_struct
+								*ndpi_struct);
 
 /* filetopia entry */
-void ipoque_search_filetopia_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* manolito entry */
-void ipoque_search_manolito_tcp_udp(struct ipoque_detection_module_struct
-									*ipoque_struct);
+void ndpi_search_manolito_tcp_udp(struct ndpi_detection_module_struct
+									*ndpi_struct);
 
 /* imesh entry */
-void ipoque_search_imesh_tcp_udp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* SSL entry */
-void ipoque_search_ssl_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
 /* flash entry */
-void ipoque_search_flash(struct ipoque_detection_module_struct
-						 *ipoque_struct);
+void ndpi_search_flash(struct ndpi_detection_module_struct
+						 *ndpi_struct);
 
 /* mms entry */
-void ipoque_search_mms_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_mms_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
 /* icecast entry */
-void ipoque_search_icecast_tcp(struct ipoque_detection_module_struct
-							   *ipoque_struct);
+void ndpi_search_icecast_tcp(struct ndpi_detection_module_struct
+							   *ndpi_struct);
 
 /* shoutcast entry */
-void ipoque_search_shoutcast_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
+void ndpi_search_shoutcast_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
 
 /* veohtv entry */
-void ipoque_search_veohtv_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_veohtv_tcp(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 /* openft entry */
-void ipoque_search_openft_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_openft_tcp(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 /* stun entry */
-void ipoque_search_stun(struct ipoque_detection_module_struct
-						*ipoque_struct);
+void ndpi_search_stun(struct ndpi_detection_module_struct
+						*ndpi_struct);
 /* Pando entry */
-void ipoque_search_pando_tcp_udp(struct ipoque_detection_module_struct
-								 *ipoque_struct);
-void ipoque_search_tvants_udp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_pando_tcp_udp(struct ndpi_detection_module_struct
+								 *ndpi_struct);
+void ndpi_search_tvants_udp(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 
-void ipoque_search_sopcast(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_sopcast(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_tvuplayer(struct ipoque_detection_module_struct
-							 *ipoque_struct);
+void ndpi_search_tvuplayer(struct ndpi_detection_module_struct
+							 *ndpi_struct);
 
-void ipoque_search_ppstream(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ndpi_search_ppstream(struct ndpi_detection_module_struct
+							*ndpi_struct);
 
-void ipoque_search_pplive_tcp_udp(struct ipoque_detection_module_struct
-								  *ipoque_struct);
+void ndpi_search_pplive_tcp_udp(struct ndpi_detection_module_struct
+								  *ndpi_struct);
 
-void ipoque_search_iax(struct ipoque_detection_module_struct *ipoque_struct);
-void ipoque_search_mgcp(struct ipoque_detection_module_struct
-						*ipoque_struct);
+void ndpi_search_iax(struct ndpi_detection_module_struct *ndpi_struct);
+void ndpi_search_mgcp(struct ndpi_detection_module_struct
+						*ndpi_struct);
 
-void ipoque_search_gadugadu(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ndpi_search_gadugadu(struct ndpi_detection_module_struct
+							*ndpi_struct);
 
-void ipoque_search_zattoo(struct ipoque_detection_module_struct
-						  *ipoque_struct);
-void ipoque_search_qq(struct ipoque_detection_module_struct *ipoque_struct);
-void ipoque_search_feidian(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_zattoo(struct ndpi_detection_module_struct
+						  *ndpi_struct);
+void ndpi_search_qq(struct ndpi_detection_module_struct *ndpi_struct);
+void ndpi_search_feidian(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_ssh_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_popo_tcp_udp(struct ipoque_detection_module_struct
-								*ipoque_struct);
+void ndpi_search_popo_tcp_udp(struct ndpi_detection_module_struct
+								*ndpi_struct);
 
-void ipoque_search_thunder(struct ipoque_detection_module_struct
-						   *ipoque_struct);
-void ipoque_search_activesync(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_thunder(struct ndpi_detection_module_struct
+						   *ndpi_struct);
+void ndpi_search_activesync(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_in_non_tcp_udp(struct ipoque_detection_module_struct
-								  *ipoque_struct);
+void ndpi_search_in_non_tcp_udp(struct ndpi_detection_module_struct
+								  *ndpi_struct);
 
-void ipoque_search_vnc_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_vnc_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_dhcp_udp(struct ipoque_detection_module_struct
-							*ipoque_struct);
+void ndpi_search_dhcp_udp(struct ndpi_detection_module_struct
+							*ndpi_struct);
 
-void ipoque_search_steam(struct ipoque_detection_module_struct
-						 *ipoque_struct);
+void ndpi_search_steam(struct ndpi_detection_module_struct
+						 *ndpi_struct);
 
-void ipoque_search_halflife2(struct ipoque_detection_module_struct
-							 *ipoque_struct);
+void ndpi_search_halflife2(struct ndpi_detection_module_struct
+							 *ndpi_struct);
 
-void ipoque_search_xbox(struct ipoque_detection_module_struct
-						*ipoque_struct);
+void ndpi_search_xbox(struct ndpi_detection_module_struct
+						*ndpi_struct);
 
-void ipoque_search_smb_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_smb_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_telnet_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_telnet_tcp(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 
-void ipoque_search_ntp_udp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_ntp_udp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_nfs(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_nfs(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_rtp(struct ipoque_detection_module_struct
-					   *ipoque_struct);
-void ipoque_search_ssdp(struct ipoque_detection_module_struct
-						*ipoque_struct);
+void ndpi_search_rtp(struct ndpi_detection_module_struct
+					   *ndpi_struct);
+void ndpi_search_ssdp(struct ndpi_detection_module_struct
+						*ndpi_struct);
 
-void ipoque_search_worldofwarcraft(struct ipoque_detection_module_struct
-								   *ipoque_struct);
-void ipoque_search_postgres_tcp(struct ipoque_detection_module_struct
-								*ipoque_struct);
+void ndpi_search_worldofwarcraft(struct ndpi_detection_module_struct
+								   *ndpi_struct);
+void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct
+								*ndpi_struct);
 
-void ipoque_search_mysql_tcp(struct ipoque_detection_module_struct
-							 *ipoque_struct);
+void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct
+							 *ndpi_struct);
 
-void ipoque_search_bgp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_bgp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_quake(struct ipoque_detection_module_struct
-						 *ipoque_struct);
+void ndpi_search_quake(struct ndpi_detection_module_struct
+						 *ndpi_struct);
 
-void ipoque_search_battlefield(struct ipoque_detection_module_struct
-							   *ipoque_struct);
+void ndpi_search_battlefield(struct ndpi_detection_module_struct
+							   *ndpi_struct);
 
-void ipoque_search_secondlife(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_secondlife(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 
-void ipoque_search_pcanywhere(struct ipoque_detection_module_struct
-							  *ipoque_struct);
+void ndpi_search_pcanywhere(struct ndpi_detection_module_struct
+							  *ndpi_struct);
 
-void ipoque_search_rdp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_rdp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_snmp(struct ipoque_detection_module_struct
-						*ipoque_struct);
+void ndpi_search_snmp(struct ndpi_detection_module_struct
+						*ndpi_struct);
 
-void ipoque_search_kontiki(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_kontiki(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_syslog(struct ipoque_detection_module_struct
-						  *ipoque_struct);
+void ndpi_search_syslog(struct ndpi_detection_module_struct
+						  *ndpi_struct);
 
-void ipoque_search_tds_tcp(struct ipoque_detection_module_struct
-						   *ipoque_struct);
+void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
+						   *ndpi_struct);
 
-void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_netbios(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_mdns(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_mdns(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_ipp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_ipp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_ldap(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_ldap(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_warcraft3(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_warcraft3(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_kerberos(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_kerberos(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_xdmcp(struct ipoque_detection_module_struct
-						 *ipoque_struct);
-void ipoque_search_tftp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_xdmcp(struct ndpi_detection_module_struct
+						 *ndpi_struct);
+void ndpi_search_tftp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_mssql(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_mssql(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_pptp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_pptp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_stealthnet(struct ipoque_detection_module_struct *ipoque_struct);
-void ipoque_search_dhcpv6_udp(struct ipoque_detection_module_struct *ipoque_struct);
-void ipoque_search_meebo(struct ipoque_detection_module_struct *ipoque_struct);
-void ipoque_search_afp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_stealthnet(struct ndpi_detection_module_struct *ndpi_struct);
+void ndpi_search_dhcpv6_udp(struct ndpi_detection_module_struct *ndpi_struct);
+void ndpi_search_meebo(struct ndpi_detection_module_struct *ndpi_struct);
+void ndpi_search_afp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_aimini(struct ipoque_detection_module_struct *ipoque_struct);
-void ipoque_search_florensia(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_aimini(struct ndpi_detection_module_struct *ndpi_struct);
+void ndpi_search_florensia(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_maplestory(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_maplestory(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_dofus(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_world_of_kung_fu(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_world_of_kung_fu(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_fiesta(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_fiesta(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_crossfire_tcp_udp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_crossfire_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_guildwars_tcp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_guildwars_tcp(struct ndpi_detection_module_struct *ndpi_struct);
 
-void ipoque_search_armagetron_udp(struct ipoque_detection_module_struct *ipoque_struct);
+void ndpi_search_armagetron_udp(struct ndpi_detection_module_struct *ndpi_struct);
 
 
 #ifdef HAVE_NTOP
-void ntop_search_dropbox(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_skype(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_citrix(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_dcerpc(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_netflow(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_sflow(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_radius(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_wsus(struct ipoque_detection_module_struct *ipoque_struct);
-void ntop_search_teamview(struct ipoque_detection_module_struct *ipoque_struct);
+void ntop_search_dropbox(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_skype(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_citrix(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_netflow(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_sflow(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_radius(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_wsus(struct ndpi_detection_module_struct *ndpi_struct);
+void ntop_search_teamview(struct ndpi_detection_module_struct *ndpi_struct);
 
 #endif
 
 
 
-#endif							/* __IPOQUE_PROTOCOLS_INCLUDE_FILE__ */
+#endif							/* __NDPI_PROTOCOLS_INCLUDE_FILE__ */

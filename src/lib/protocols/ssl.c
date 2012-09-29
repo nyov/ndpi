@@ -23,17 +23,17 @@
 
 #include "ipq_utils.h"
 
-#ifdef IPOQUE_PROTOCOL_SSL
+#ifdef NDPI_PROTOCOL_SSL
 
-#define IPOQUE_MAX_SSL_REQUEST_SIZE 10000
+#define NDPI_MAX_SSL_REQUEST_SIZE 10000
 
-static void ipoque_int_ssl_add_connection(struct ipoque_detection_module_struct
-					  *ipoque_struct, u32 protocol)
+static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct
+					  *ndpi_struct, u32 protocol)
 {
-  if (protocol != IPOQUE_PROTOCOL_SSL) {
-    ipoque_int_add_connection(ipoque_struct, protocol, IPOQUE_CORRELATED_PROTOCOL);
+  if (protocol != NDPI_PROTOCOL_SSL) {
+    ndpi_int_add_connection(ndpi_struct, protocol, NDPI_CORRELATED_PROTOCOL);
   } else {
-    ipoque_int_add_connection(ipoque_struct, protocol, IPOQUE_REAL_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, protocol, NDPI_REAL_PROTOCOL);
   }
 }
 
@@ -55,8 +55,8 @@ static void stripCertificateTrailer(char *buffer, int buffer_len) {
   }
 }
 
-int getSSLcertificate(struct ipoque_detection_module_struct *ipoque_struct, char *buffer, int buffer_len) {
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, char *buffer, int buffer_len) {
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
   /* Nothing matched so far: let's decode the certificate with some heuristics */
   if(packet->payload[0] == 0x16 /* Handshake */) {
@@ -171,17 +171,17 @@ int getSSLcertificate(struct ipoque_detection_module_struct *ipoque_struct, char
   return(0); /* Not found */
 }
 
-int sslDetectProtocolFromCertificate(struct ipoque_detection_module_struct *ipoque_struct) {
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_struct) {
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
-  if((packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN)
-     || (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL)) {
+  if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
+     || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
     char certificate[64];
-    int rc = getSSLcertificate(ipoque_struct, certificate, sizeof(certificate));
+    int rc = getSSLcertificate(ndpi_struct, certificate, sizeof(certificate));
 
     if(rc > 0) {
       /* printf("***** [SSL] %s\n", certificate); */
-      if(matchStringProtocol(ipoque_struct, certificate, strlen(certificate)) != -1)
+      if(matchStringProtocol(ndpi_struct, certificate, strlen(certificate)) != -1)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
   }
@@ -192,29 +192,29 @@ int sslDetectProtocolFromCertificate(struct ipoque_detection_module_struct *ipoq
 #endif
 
 static void ssl_mark_and_payload_search_for_other_protocols(struct
-							    ipoque_detection_module_struct
-							    *ipoque_struct)
+							    ndpi_detection_module_struct
+							    *ndpi_struct)
 {
-#if defined(IPOQUE_PROTOCOL_SOFTETHER) || defined(IPOQUE_PROTOCOL_MEEBO)|| defined(IPOQUE_PROTOCOL_TOR) || defined(IPOQUE_PROTOCOL_VPN_X) || defined(IPOQUE_PROTOCOL_UNENCRYPED_JABBER) || defined (IPOQUE_PROTOCOL_OOVOO) || defined (IPOQUE_PROTOCOL_ISKOOT) || defined (IPOQUE_PROTOCOL_OSCAR) || defined (IPOQUE_PROTOCOL_ITUNES) || defined (IPOQUE_PROTOCOL_GMAIL)
+#if defined(NDPI_PROTOCOL_SOFTETHER) || defined(NDPI_PROTOCOL_MEEBO)|| defined(NDPI_PROTOCOL_TOR) || defined(NDPI_PROTOCOL_VPN_X) || defined(NDPI_PROTOCOL_UNENCRYPED_JABBER) || defined (NDPI_PROTOCOL_OOVOO) || defined (NDPI_PROTOCOL_ISKOOT) || defined (NDPI_PROTOCOL_OSCAR) || defined (NDPI_PROTOCOL_ITUNES) || defined (NDPI_PROTOCOL_GMAIL)
 
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-#ifdef IPOQUE_PROTOCOL_ISKOOT
-  struct ipoque_flow_struct *flow = ipoque_struct->flow;
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+#ifdef NDPI_PROTOCOL_ISKOOT
+  struct ndpi_flow_struct *flow = ndpi_struct->flow;
 #endif
-  //      struct ipoque_id_struct         *src=ipoque_struct->src;
-  //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+  //      struct ndpi_id_struct         *src=ndpi_struct->src;
+  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
   u32 a;
   u32 end;
-#if defined(IPOQUE_PROTOCOL_UNENCRYPED_JABBER)
-  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_UNENCRYPED_JABBER) != 0)
+#if defined(NDPI_PROTOCOL_UNENCRYPED_JABBER)
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_UNENCRYPED_JABBER) != 0)
     goto check_for_ssl_payload;
 #endif
-#if defined(IPOQUE_PROTOCOL_OSCAR)
-  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_OSCAR) != 0)
+#if defined(NDPI_PROTOCOL_OSCAR)
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_OSCAR) != 0)
     goto check_for_ssl_payload;
 #endif
-#if defined(IPOQUE_PROTOCOL_GADUGADU)
-  if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_GADUGADU) != 0)
+#if defined(NDPI_PROTOCOL_GADUGADU)
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_GADUGADU) != 0)
     goto check_for_ssl_payload;
 #endif
   goto no_check_for_ssl_payload;
@@ -222,19 +222,19 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
  check_for_ssl_payload:
   end = packet->payload_packet_len - 20;
   for (a = 5; a < end; a++) {
-#ifdef IPOQUE_PROTOCOL_UNENCRYPED_JABBER
+#ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
     if (packet->payload[a] == 't') {
       if (memcmp(&packet->payload[a], "talk.google.com", 15) == 0) {
-	IPQ_LOG(IPOQUE_PROTOCOL_UNENCRYPED_JABBER, ipoque_struct, IPQ_LOG_DEBUG, "ssl jabber packet match\n");
-	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK
-	    (ipoque_struct->detection_bitmask, IPOQUE_PROTOCOL_UNENCRYPED_JABBER) != 0) {
-	  ipoque_int_ssl_add_connection(ipoque_struct, IPOQUE_PROTOCOL_UNENCRYPED_JABBER);
+	NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "ssl jabber packet match\n");
+	if (NDPI_COMPARE_PROTOCOL_TO_BITMASK
+	    (ndpi_struct->detection_bitmask, NDPI_PROTOCOL_UNENCRYPED_JABBER) != 0) {
+	  ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_UNENCRYPED_JABBER);
 	  return;
 	}
       }
     }
 #endif
-#ifdef IPOQUE_PROTOCOL_OSCAR
+#ifdef NDPI_PROTOCOL_OSCAR
     if (packet->payload[a] == 'A' || packet->payload[a] == 'k' || packet->payload[a] == 'c'
 	|| packet->payload[a] == 'h') {
       if (((a + 19) < packet->payload_packet_len && memcmp(&packet->payload[a], "America Online Inc.", 19) == 0)
@@ -248,15 +248,15 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 	      && memcmp(&packet->payload[a], "http://ocsp.web.aol.com/ocsp", 28) == 0)
 	  || ((a + 32) < packet->payload_packet_len
 	      && memcmp(&packet->payload[a], "http://pki-info.aol.com/AOLMSPKI", 32) == 0)) {
-	IPQ_LOG(IPOQUE_PROTOCOL_OSCAR, ipoque_struct, IPQ_LOG_DEBUG, "OSCAR SERVER SSL DETECTED\n");
+	NDPI_LOG(NDPI_PROTOCOL_OSCAR, ndpi_struct, NDPI_LOG_DEBUG, "OSCAR SERVER SSL DETECTED\n");
 
-	if (ipoque_struct->dst != NULL && packet->payload_packet_len > 75) {
-	  memcpy(ipoque_struct->dst->oscar_ssl_session_id, &packet->payload[44], 32);
-	  ipoque_struct->dst->oscar_ssl_session_id[32] = '\0';
-	  ipoque_struct->dst->oscar_last_safe_access_time = packet->tick_timestamp;
+	if (ndpi_struct->dst != NULL && packet->payload_packet_len > 75) {
+	  memcpy(ndpi_struct->dst->oscar_ssl_session_id, &packet->payload[44], 32);
+	  ndpi_struct->dst->oscar_ssl_session_id[32] = '\0';
+	  ndpi_struct->dst->oscar_last_safe_access_time = packet->tick_timestamp;
 	}
 
-	ipoque_int_ssl_add_connection(ipoque_struct, IPOQUE_PROTOCOL_OSCAR);
+	ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_OSCAR);
 	return;
       }
     }
@@ -265,8 +265,8 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
       if ((a + 21) < packet->payload_packet_len &&
 	  (memcmp(&packet->payload[a], "my.screenname.aol.com", 21) == 0
 	   || memcmp(&packet->payload[a], "sns-static.aolcdn.com", 21) == 0)) {
-	IPQ_LOG(IPOQUE_PROTOCOL_OSCAR, ipoque_struct, IPQ_LOG_DEBUG, "OSCAR SERVER SSL DETECTED\n");
-	ipoque_int_ssl_add_connection(ipoque_struct, IPOQUE_PROTOCOL_OSCAR);
+	NDPI_LOG(NDPI_PROTOCOL_OSCAR, ndpi_struct, NDPI_LOG_DEBUG, "OSCAR SERVER SSL DETECTED\n");
+	ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_OSCAR);
 	return;
       }
     }
@@ -277,13 +277,13 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
   }
  no_check_for_ssl_payload:
 #endif
-  IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "found ssl connection.\n");
+  NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
 
 #ifdef HAVE_NTOP
-  sslDetectProtocolFromCertificate(ipoque_struct);
+  sslDetectProtocolFromCertificate(ndpi_struct);
 
-  if((packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN)
-     || (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL)) {
+  if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
+     || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
      /*
        Citrix GotoMeeting (AS16815, AS21866)
        216.115.208.0/20
@@ -298,7 +298,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
        || ((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        ) {
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_CITRIX_ONLINE, IPOQUE_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_CITRIX_ONLINE, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -308,7 +308,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_APPLE, IPOQUE_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_APPLE, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -318,7 +318,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x4272A000 /* 66.114.160.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) ==0x4272A000 /* 66.114.160.0 */)) {
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_WEBEX, IPOQUE_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_WEBEX, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -328,35 +328,35 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000 /* 66.114.160.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 66.114.160.0 */)) {
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_GOOGLE, IPOQUE_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
       return;
     }
   }
 #endif
 
-  ipoque_int_ssl_add_connection(ipoque_struct, IPOQUE_PROTOCOL_SSL);
+  ndpi_int_ssl_add_connection(ndpi_struct, NDPI_PROTOCOL_SSL);
 }
 
 
-static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *ipoque_struct)
+static u8 ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi_struct)
 {
 
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-  //  struct ipoque_flow_struct *flow = ipoque_struct->flow;
-  //      struct ipoque_id_struct         *src=ipoque_struct->src;
-  //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  //  struct ndpi_flow_struct *flow = ndpi_struct->flow;
+  //      struct ndpi_id_struct         *src=ndpi_struct->src;
+  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 
   if (packet->payload_packet_len >= 5 && packet->payload[0] == 0x16 && packet->payload[1] == 0x03
       && (packet->payload[2] == 0x00 || packet->payload[2] == 0x01 || packet->payload[2] == 0x02)) {
     u32 temp;
-    IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "search sslv3\n");
+    NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "search sslv3\n");
     // SSLv3 Record
     if (packet->payload_packet_len >= 1300) {
       return 1;
     }
     temp = ntohs(get_u16(packet->payload, 3)) + 5;
-    IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "temp = %u.\n", temp);
+    NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "temp = %u.\n", temp);
     if (packet->payload_packet_len == temp
 	|| (temp < packet->payload_packet_len && packet->payload_packet_len > 500)) {
       return 1;
@@ -366,16 +366,16 @@ static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *
       /* the server hello may be split into small packets */
       u32 cert_start;
 
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
 	      "maybe SSLv3 server hello split into smaller packets\n");
 
       /* lets hope at least the server hello and the start of the certificate block are in the first packet */
       cert_start = ntohs(get_u16(packet->payload, 7)) + 5 + 4;
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "suspected start of certificate: %u\n",
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "suspected start of certificate: %u\n",
 	      cert_start);
 
       if (cert_start < packet->payload_packet_len && packet->payload[cert_start] == 0x0b) {
-	IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+	NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
 		"found 0x0b at suspected start of certificate block\n");
 	return 2;
       }
@@ -386,16 +386,16 @@ static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *
        * so temp contains only the length for the first ServerHello block */
       u32 cert_start;
 
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
 	      "maybe SSLv3 server hello split into smaller packets but with seperate record for the certificate\n");
 
       /* lets hope at least the server hello record and the start of the certificate record are in the first packet */
       cert_start = ntohs(get_u16(packet->payload, 7)) + 5 + 5 + 4;
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "suspected start of certificate: %u\n",
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "suspected start of certificate: %u\n",
 	      cert_start);
 
       if (cert_start < packet->payload_packet_len && packet->payload[cert_start] == 0x0b) {
-	IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+	NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
 		"found 0x0b at suspected start of certificate block\n");
 	return 2;
       }
@@ -405,33 +405,33 @@ static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *
     if (packet->payload_packet_len >= temp + 5 && (packet->payload[temp] == 0x14 || packet->payload[temp] == 0x16)
 	&& packet->payload[temp + 1] == 0x03) {
       u32 temp2 = ntohs(get_u16(packet->payload, temp + 3)) + 5;
-      if (temp + temp2 > IPOQUE_MAX_SSL_REQUEST_SIZE) {
+      if (temp + temp2 > NDPI_MAX_SSL_REQUEST_SIZE) {
 	return 1;
       }
       temp += temp2;
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "temp = %u.\n", temp);
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "temp = %u.\n", temp);
       if (packet->payload_packet_len == temp) {
 	return 1;
       }
       if (packet->payload_packet_len >= temp + 5 &&
 	  packet->payload[temp] == 0x16 && packet->payload[temp + 1] == 0x03) {
 	temp2 = ntohs(get_u16(packet->payload, temp + 3)) + 5;
-	if (temp + temp2 > IPOQUE_MAX_SSL_REQUEST_SIZE) {
+	if (temp + temp2 > NDPI_MAX_SSL_REQUEST_SIZE) {
 	  return 1;
 	}
 	temp += temp2;
-	IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "temp = %u.\n", temp);
+	NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "temp = %u.\n", temp);
 	if (packet->payload_packet_len == temp) {
 	  return 1;
 	}
 	if (packet->payload_packet_len >= temp + 5 &&
 	    packet->payload[temp] == 0x16 && packet->payload[temp + 1] == 0x03) {
 	  temp2 = ntohs(get_u16(packet->payload, temp + 3)) + 5;
-	  if (temp + temp2 > IPOQUE_MAX_SSL_REQUEST_SIZE) {
+	  if (temp + temp2 > NDPI_MAX_SSL_REQUEST_SIZE) {
 	    return 1;
 	  }
 	  temp += temp2;
-	  IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "temp = %u.\n", temp);
+	  NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "temp = %u.\n", temp);
 	  if (temp == packet->payload_packet_len) {
 	    return 1;
 	  }
@@ -447,24 +447,24 @@ static u8 ipoque_search_sslv3_direction1(struct ipoque_detection_module_struct *
 
 }
 
-void ipoque_search_ssl_tcp(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 {
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-  struct ipoque_flow_struct *flow = ipoque_struct->flow;
-  //      struct ipoque_id_struct         *src=ipoque_struct->src;
-  //      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_flow_struct *flow = ndpi_struct->flow;
+  //      struct ndpi_id_struct         *src=ndpi_struct->src;
+  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
   u8 ret;
 
-  if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL) {
+  if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
     if (flow->l4.tcp.ssl_stage == 3 && packet->payload_packet_len > 20 && flow->packet_counter < 5) {
       /* this should only happen, when we detected SSL with a packet that had parts of the certificate in subsequent packets
        * so go on checking for certificate patterns for a couple more packets
        */
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
 	      "ssl flow but check another packet for patterns\n");
-      ssl_mark_and_payload_search_for_other_protocols(ipoque_struct);
-      if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL) {
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
+      if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
 	/* still ssl so check another packet */
 	return;
       } else {
@@ -475,7 +475,7 @@ void ipoque_search_ssl_tcp(struct ipoque_detection_module_struct *ipoque_struct)
     return;
   }
 
-  IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "search ssl\n");
+  NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "search ssl\n");
 
 #ifdef HAVE_NTOP
   {
@@ -484,23 +484,23 @@ void ipoque_search_ssl_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 
     if((packet->payload_packet_len > 5)
        && (memcmp(packet->payload, whatsapp_pattern, sizeof(whatsapp_pattern)) == 0)) {
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_WHATSAPP, IPOQUE_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_WHATSAPP, NDPI_REAL_PROTOCOL);
       return;
     } else {
       /* No whatsapp, let's try SSL */
-      if(sslDetectProtocolFromCertificate(ipoque_struct) > 0)
+      if(sslDetectProtocolFromCertificate(ndpi_struct) > 0)
 	return;
     }
   }
 #endif
 
   if (packet->payload_packet_len > 40 && flow->l4.tcp.ssl_stage == 0) {
-    IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "first ssl packet\n");
+    NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "first ssl packet\n");
     // SSLv2 Record
     if (packet->payload[2] == 0x01 && packet->payload[3] == 0x03
 	&& (packet->payload[4] == 0x00 || packet->payload[4] == 0x01 || packet->payload[4] == 0x02)
 	&& (packet->payload_packet_len - packet->payload[1] == 2)) {
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "sslv2 len match\n");
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv2 len match\n");
       flow->l4.tcp.ssl_stage = 1 + packet->packet_direction;
       return;
     }
@@ -509,7 +509,7 @@ void ipoque_search_ssl_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 	&& (packet->payload[2] == 0x00 || packet->payload[2] == 0x01 || packet->payload[2] == 0x02)
 	&& (packet->payload_packet_len - ntohs(get_u16(packet->payload, 3)) == 5)) {
       // SSLv3 Record
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "sslv3 len match\n");
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv3 len match\n");
       flow->l4.tcp.ssl_stage = 1 + packet->packet_direction;
       return;
     }
@@ -522,39 +522,39 @@ void ipoque_search_ssl_tcp(struct ipoque_detection_module_struct *ipoque_struct)
   }
 
   if (packet->payload_packet_len > 40 && flow->l4.tcp.ssl_stage == 2 - packet->packet_direction) {
-    IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "second ssl packet\n");
+    NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "second ssl packet\n");
     // SSLv2 Record
     if (packet->payload[2] == 0x01 && packet->payload[3] == 0x03
 	&& (packet->payload[4] == 0x00 || packet->payload[4] == 0x01 || packet->payload[4] == 0x02)
 	&& (packet->payload_packet_len - 2) >= packet->payload[1]) {
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "sslv2 server len match\n");
-      ssl_mark_and_payload_search_for_other_protocols(ipoque_struct);
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv2 server len match\n");
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
       return;
     }
 
-    ret = ipoque_search_sslv3_direction1(ipoque_struct);
+    ret = ndpi_search_sslv3_direction1(ndpi_struct);
     if (ret == 1) {
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "sslv3 server len match\n");
-      ssl_mark_and_payload_search_for_other_protocols(ipoque_struct);
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "sslv3 server len match\n");
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
       return;
     } else if (ret == 2) {
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG,
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG,
 	      "sslv3 server len match with split packet -> check some more packets for SSL patterns\n");
-      ssl_mark_and_payload_search_for_other_protocols(ipoque_struct);
-      if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SSL) {
+      ssl_mark_and_payload_search_for_other_protocols(ndpi_struct);
+      if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
 	flow->l4.tcp.ssl_stage = 3;
       }
       return;
     }
 
     if (packet->payload_packet_len > 40 && flow->packet_direction_counter[packet->packet_direction] < 5) {
-      IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "need next packet\n");
+      NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "need next packet\n");
       return;
     }
   }
 
-  IPQ_LOG(IPOQUE_PROTOCOL_SSL, ipoque_struct, IPQ_LOG_DEBUG, "exclude ssl\n");
-  IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SSL);
+  NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "exclude ssl\n");
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SSL);
   return;
 }
 #endif

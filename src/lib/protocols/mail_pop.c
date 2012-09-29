@@ -23,7 +23,7 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_MAIL_POP
+#ifdef NDPI_PROTOCOL_MAIL_POP
 
 #define POP_BIT_AUTH		0x0001
 #define POP_BIT_APOP		0x0002
@@ -38,20 +38,20 @@
 #define POP_BIT_STLS		0x0400
 
 
-static void ipoque_int_mail_pop_add_connection(struct ipoque_detection_module_struct
-											   *ipoque_struct)
+static void ndpi_int_mail_pop_add_connection(struct ndpi_detection_module_struct
+											   *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_MAIL_POP, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_MAIL_POP, NDPI_REAL_PROTOCOL);
 }
 
 
-static int ipoque_int_mail_pop_check_for_client_commands(struct ipoque_detection_module_struct
-														 *ipoque_struct)
+static int ndpi_int_mail_pop_check_for_client_commands(struct ndpi_detection_module_struct
+														 *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//  struct ipoque_id_struct         *src=ipoque_struct->src;
-//  struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//  struct ndpi_id_struct         *src=ndpi_struct->src;
+//  struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 4) {
 		if ((packet->payload[0] == 'A' || packet->payload[0] == 'a')
@@ -127,13 +127,13 @@ static int ipoque_int_mail_pop_check_for_client_commands(struct ipoque_detection
 
 
 
-void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
-								*ipoque_struct)
+void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
+								*ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//  struct ipoque_id_struct         *src=ipoque_struct->src;
-//  struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//  struct ndpi_id_struct         *src=ndpi_struct->src;
+//  struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	u8 a = 0;
 	u8 bit_count = 0;
@@ -146,7 +146,7 @@ void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
 	dport = ntohs(packet->tcp->dest);
 
 
-	IPQ_LOG(IPOQUE_PROTOCOL_MAIL_POP, ipoque_struct, IPQ_LOG_DEBUG, "search mail_pop\n");
+	NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "search mail_pop\n");
 
 
 
@@ -159,7 +159,7 @@ void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
 				&& (packet->payload[3] == 'R' || packet->payload[3] == 'r')))) {
 		// +OK or -ERR seen
 		flow->l4.tcp.mail_pop_stage += 1;
-	} else if (!ipoque_int_mail_pop_check_for_client_commands(ipoque_struct)) {
+	} else if (!ndpi_int_mail_pop_check_for_client_commands(ndpi_struct)) {
 		goto maybe_split_pop;
 	}
 
@@ -172,13 +172,13 @@ void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
 			}
 		}
 
-		IPQ_LOG(IPOQUE_PROTOCOL_MAIL_POP, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
 				"mail_pop +OK/-ERR responses: %u, unique commands: %u\n", flow->l4.tcp.mail_pop_stage, bit_count);
 
 		if ((bit_count + flow->l4.tcp.mail_pop_stage) >= 3) {
 			if (flow->l4.tcp.mail_pop_stage > 0) {
-				IPQ_LOG(IPOQUE_PROTOCOL_MAIL_POP, ipoque_struct, IPQ_LOG_DEBUG, "mail_pop identified\n");
-				ipoque_int_mail_pop_add_connection(ipoque_struct);
+				NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "mail_pop identified\n");
+				ndpi_int_mail_pop_add_connection(ndpi_struct);
 				return;
 			} else {
 				return;
@@ -189,7 +189,7 @@ void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
 
 	} else {
 		// first part of a split packet
-		IPQ_LOG(IPOQUE_PROTOCOL_MAIL_POP, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
 				"mail_pop command without line ending -> skip\n");
 		return;
 	}
@@ -200,12 +200,12 @@ void ipoque_search_mail_pop_tcp(struct ipoque_detection_module_struct
 	if (((packet->payload_packet_len > 2 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a)
 		 || flow->l4.tcp.pop_command_bitmask != 0 || flow->l4.tcp.mail_pop_stage != 0) && flow->packet_counter < 12) {
 		// maybe part of a split pop packet
-		IPQ_LOG(IPOQUE_PROTOCOL_MAIL_POP, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe part of split mail_pop packet -> skip\n");
 		return;
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_MAIL_POP, ipoque_struct, IPQ_LOG_DEBUG, "exclude mail_pop\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_MAIL_POP);
+	NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "exclude mail_pop\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MAIL_POP);
 }
 #endif

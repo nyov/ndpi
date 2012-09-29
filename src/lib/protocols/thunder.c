@@ -22,16 +22,16 @@
 
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_THUNDER
+#ifdef NDPI_PROTOCOL_THUNDER
 
-static void ipoque_int_thunder_add_connection(struct ipoque_detection_module_struct
-											  *ipoque_struct, ipoque_protocol_type_t protocol_type)
+static void ndpi_int_thunder_add_connection(struct ndpi_detection_module_struct
+											  *ndpi_struct, ndpi_protocol_type_t protocol_type)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_THUNDER, protocol_type);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_THUNDER, protocol_type);
 
 	if (src != NULL) {
 		src->thunder_ts = packet->tick_timestamp;
@@ -48,32 +48,32 @@ static void ipoque_int_thunder_add_connection(struct ipoque_detection_module_str
 #else
 __forceinline static
 #endif
-	 void ipoque_int_search_thunder_udp(struct ipoque_detection_module_struct
-												 *ipoque_struct)
+	 void ndpi_int_search_thunder_udp(struct ndpi_detection_module_struct
+												 *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 8 && packet->payload[0] >= 0x30
 		&& packet->payload[0] < 0x40 && packet->payload[1] == 0 && packet->payload[2] == 0 && packet->payload[3] == 0) {
 		if (flow->thunder_stage == 3) {
-			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG, "THUNDER udp detected\n");
-			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "THUNDER udp detected\n");
+			ndpi_int_thunder_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
 		flow->thunder_stage++;
-		IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder udp packet detected, stage increased to %u\n", flow->thunder_stage);
 		return;
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+	NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 			"excluding thunder udp at stage %u\n", flow->thunder_stage);
 
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_THUNDER);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_THUNDER);
 }
 
 	
@@ -82,33 +82,33 @@ __forceinline static
 #else
 __forceinline static
 #endif
-	 void ipoque_int_search_thunder_tcp(struct ipoque_detection_module_struct
-												 *ipoque_struct)
+	 void ndpi_int_search_thunder_tcp(struct ndpi_detection_module_struct
+												 *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 8 && packet->payload[0] >= 0x30
 		&& packet->payload[0] < 0x40 && packet->payload[1] == 0 && packet->payload[2] == 0 && packet->payload[3] == 0) {
 		if (flow->thunder_stage == 3) {
-			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG, "THUNDER tcp detected\n");
-			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "THUNDER tcp detected\n");
+			ndpi_int_thunder_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
 		flow->thunder_stage++;
-		IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder tcp packet detected, stage increased to %u\n", flow->thunder_stage);
 		return;
 	}
 
 	if (flow->thunder_stage == 0 && packet->payload_packet_len > 17
 		&& ipq_mem_cmp(packet->payload, "POST / HTTP/1.1\r\n", 17) == 0) {
-		ipq_parse_packet_line_info(ipoque_struct);
+		ipq_parse_packet_line_info(ndpi_struct);
 
-		IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder http POST packet detected, parsed packet lines: %u, empty line set %u (at: %u)\n",
 				packet->parsed_lines, packet->empty_line_position_set, packet->empty_line_position);
 
@@ -122,16 +122,16 @@ __forceinline static
 			&& packet->payload[packet->empty_line_position + 3] == 0x00
 			&& packet->payload[packet->empty_line_position + 4] == 0x00
 			&& packet->payload[packet->empty_line_position + 5] == 0x00) {
-			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"maybe thunder http POST packet application does match\n");
-			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+			ndpi_int_thunder_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 			return;
 		}
 	}
-	IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+	NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 			"excluding thunder tcp at stage %u\n", flow->thunder_stage);
 
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_THUNDER);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_THUNDER);
 }
 
 	
@@ -140,23 +140,23 @@ __forceinline static
 #else
 __forceinline static
 #endif
-	 void ipoque_int_search_thunder_http(struct ipoque_detection_module_struct
-												  *ipoque_struct)
+	 void ndpi_int_search_thunder_http(struct ndpi_detection_module_struct
+												  *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
 
-	if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_THUNDER) {
-		if (src != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
-							(packet->tick_timestamp - src->thunder_ts) < ipoque_struct->thunder_timeout)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_THUNDER) {
+		if (src != NULL && ((NDPI_TIMESTAMP_COUNTER_SIZE)
+							(packet->tick_timestamp - src->thunder_ts) < ndpi_struct->thunder_timeout)) {
+			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"thunder : save src connection packet detected\n");
 			src->thunder_ts = packet->tick_timestamp;
-		} else if (dst != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
-								   (packet->tick_timestamp - dst->thunder_ts) < ipoque_struct->thunder_timeout)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+		} else if (dst != NULL && ((NDPI_TIMESTAMP_COUNTER_SIZE)
+								   (packet->tick_timestamp - dst->thunder_ts) < ndpi_struct->thunder_timeout)) {
+			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"thunder : save dst connection packet detected\n");
 			dst->thunder_ts = packet->tick_timestamp;
 		}
@@ -164,9 +164,9 @@ __forceinline static
 	}
 
 	if (packet->payload_packet_len > 5
-		&& memcmp(packet->payload, "GET /", 5) == 0 && IPQ_SRC_OR_DST_HAS_PROTOCOL(src, dst, IPOQUE_PROTOCOL_THUNDER)) {
-		IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG, "HTTP packet detected.\n");
-		ipq_parse_packet_line_info(ipoque_struct);
+		&& memcmp(packet->payload, "GET /", 5) == 0 && NDPI_SRC_OR_DST_HAS_PROTOCOL(src, dst, NDPI_PROTOCOL_THUNDER)) {
+		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "HTTP packet detected.\n");
+		ipq_parse_packet_line_info(ndpi_struct);
 
 		if (packet->parsed_lines > 7
 			&& packet->parsed_lines < 11
@@ -184,25 +184,25 @@ __forceinline static
 			&& packet->user_agent_line.len > 49
 			&& ipq_mem_cmp(packet->user_agent_line.ptr,
 						   "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)", 50) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_THUNDER, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"Thunder HTTP download detected, adding flow.\n");
-			ipoque_int_thunder_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+			ndpi_int_thunder_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 		}
 	}
 }
 
-void ipoque_search_thunder(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_thunder(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	//struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	//struct ipoque_id_struct *src = ipoque_struct->src;
-	//struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	//struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	//struct ndpi_id_struct *src = ndpi_struct->src;
+	//struct ndpi_id_struct *dst = ndpi_struct->dst;
 
 	if (packet->tcp != NULL) {
-		ipoque_int_search_thunder_http(ipoque_struct);
-		ipoque_int_search_thunder_tcp(ipoque_struct);
+		ndpi_int_search_thunder_http(ndpi_struct);
+		ndpi_int_search_thunder_tcp(ndpi_struct);
 	} else if (packet->udp != NULL) {
-		ipoque_int_search_thunder_udp(ipoque_struct);
+		ndpi_int_search_thunder_udp(ndpi_struct);
 	}
 }
 

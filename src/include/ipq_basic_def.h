@@ -21,12 +21,12 @@
  */
 
 
-#ifndef __IPOQUE_API_INCLUDE_FILE__
-#error CANNOT INCLUDE THIS .H FILE, INCLUDE IPQ_API.H
+#ifndef __NDPI_API_INCLUDE_FILE__
+#error CANNOT INCLUDE THIS .H FILE, INCLUDE NDPI_API.H
 #endif
 
-#ifndef __IPQ_BASIC_DEF_H__
-#define __IPQ_BASIC_DEF_H__
+#ifndef __NDPI_BASIC_DEF_H__
+#define __NDPI_BASIC_DEF_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -52,7 +52,7 @@ extern "C" {
 
 
 /* generic timestamp counter size */
-#define IPOQUE_TIMESTAMP_COUNTER_SIZE		u32
+#define NDPI_TIMESTAMP_COUNTER_SIZE		u32
 #ifdef __cplusplus
 }
 #endif

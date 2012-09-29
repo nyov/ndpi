@@ -23,17 +23,17 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_SOULSEEK
+#ifdef NDPI_PROTOCOL_SOULSEEK
 
-static void ipoque_int_soulseek_add_connection(struct ipoque_detection_module_struct
-											   *ipoque_struct)
+static void ndpi_int_soulseek_add_connection(struct ndpi_detection_module_struct
+											   *ndpi_struct)
 {
 
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_SOULSEEK, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_SOULSEEK, NDPI_REAL_PROTOCOL);
 
 	if (src != NULL) {
 		src->soulseek_last_safe_access_time = packet->tick_timestamp;
@@ -45,28 +45,28 @@ static void ipoque_int_soulseek_add_connection(struct ipoque_detection_module_st
 	return;
 }
 
-void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
-								*ipoque_struct)
+void ndpi_search_soulseek_tcp(struct ndpi_detection_module_struct
+								*ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
-	IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "Soulseek: search soulseec tcp \n");
+	NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "Soulseek: search soulseec tcp \n");
 
 
-	if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_SOULSEEK) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "packet marked as Soulseek\n");
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SOULSEEK) {
+		NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "packet marked as Soulseek\n");
 		if (src != NULL)
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG,
 					"  SRC bitmask: %u, packet tick %llu , last safe access timestamp: %llu\n",
-					IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, IPOQUE_PROTOCOL_SOULSEEK)
+					NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_PROTOCOL_SOULSEEK)
 					!= 0 ? 1 : 0, (u64) packet->tick_timestamp, (u64) src->soulseek_last_safe_access_time);
 		if (dst != NULL)
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG,
 					"  DST bitmask: %u, packet tick %llu , last safe ts: %llu\n",
-					IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, IPOQUE_PROTOCOL_SOULSEEK)
+					NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, NDPI_PROTOCOL_SOULSEEK)
 					!= 0 ? 1 : 0, (u64) packet->tick_timestamp, (u64) dst->soulseek_last_safe_access_time);
 
 		if (packet->payload_packet_len == 431) {
@@ -85,20 +85,20 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 			}
 		}
 
-		if (src != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+		if (src != NULL && ((NDPI_TIMESTAMP_COUNTER_SIZE)
 							(packet->tick_timestamp -
 							 src->soulseek_last_safe_access_time) <
-							ipoque_struct->soulseek_connection_ip_tick_timeout)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG,
+							ndpi_struct->soulseek_connection_ip_tick_timeout)) {
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG,
 					"Soulseek: SRC update last safe access time and SKIP_FOR_TIME \n");
 			src->soulseek_last_safe_access_time = packet->tick_timestamp;
 		}
 
-		if (dst != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+		if (dst != NULL && ((NDPI_TIMESTAMP_COUNTER_SIZE)
 							(packet->tick_timestamp -
 							 dst->soulseek_last_safe_access_time) <
-							ipoque_struct->soulseek_connection_ip_tick_timeout)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG,
+							ndpi_struct->soulseek_connection_ip_tick_timeout)) {
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG,
 					"Soulseek: DST update last safe access time and SKIP_FOR_TIME \n");
 			dst->soulseek_last_safe_access_time = packet->tick_timestamp;
 		}
@@ -106,14 +106,14 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 
 
 	if (dst != NULL && dst->soulseek_listen_port != 0 && dst->soulseek_listen_port == ntohs(packet->tcp->dest)
-		&& ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
+		&& ((NDPI_TIMESTAMP_COUNTER_SIZE)
 			(packet->tick_timestamp - dst->soulseek_last_safe_access_time) <
-			ipoque_struct->soulseek_connection_ip_tick_timeout)) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG,
+			ndpi_struct->soulseek_connection_ip_tick_timeout)) {
+		NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG,
 				"Soulseek: Plain detection on Port : %u packet_tick_timestamp: %u soulseeek_last_safe_access_time: %u soulseek_connection_ip_ticktimeout: %u\n",
 				dst->soulseek_listen_port, packet->tick_timestamp,
-				dst->soulseek_last_safe_access_time, ipoque_struct->soulseek_connection_ip_tick_timeout);
-		ipoque_int_soulseek_add_connection(ipoque_struct);
+				dst->soulseek_last_safe_access_time, ndpi_struct->soulseek_connection_ip_tick_timeout);
+		ndpi_int_soulseek_add_connection(ndpi_struct);
 		return;
 	}
 
@@ -145,9 +145,9 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 					{
 						index += get_l32(packet->payload, index + 4) + 8;	// enf of "hash value"
 						if (index == get_l32(packet->payload, 0)) {
-							IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK,
-									ipoque_struct, IPQ_LOG_DEBUG, "Soulseek Login Detected\n");
-							ipoque_int_soulseek_add_connection(ipoque_struct);
+							NDPI_LOG(NDPI_PROTOCOL_SOULSEEK,
+									ndpi_struct, NDPI_LOG_DEBUG, "Soulseek Login Detected\n");
+							ndpi_int_soulseek_add_connection(ndpi_struct);
 							return;
 						}
 					}
@@ -161,7 +161,7 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 
 			if (msgcode == 0x7d) {
 				flow->l4.tcp.soulseek_stage = 1 + packet->packet_direction;
-				IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "Soulseek Messages Search\n");
+				NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "Soulseek Messages Search\n");
 				return;
 			} else if (msgcode == 0x02 && packet->payload_packet_len == 12) {
 				const u32 soulseek_listen_port = get_l32(packet->payload, 8);
@@ -171,9 +171,9 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 
 					if (packet->tcp != NULL && src->soulseek_listen_port == 0) {
 						src->soulseek_listen_port = soulseek_listen_port;
-						IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct,
-								IPQ_LOG_DEBUG, "\n Listen Port Saved : %u", src->soulseek_listen_port);
-						ipoque_int_soulseek_add_connection(ipoque_struct);
+						NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct,
+								NDPI_LOG_DEBUG, "\n Listen Port Saved : %u", src->soulseek_listen_port);
+						ndpi_int_soulseek_add_connection(ndpi_struct);
 						return;
 					}
 				}
@@ -188,18 +188,18 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 					&& namelen <= packet->payload_packet_len
 					&& (4 + 1 + 4 + namelen + 4 + 1 + 4) ==
 					packet->payload_packet_len && (type == 'F' || type == 'P' || type == 'D')) {
-					IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "soulseek detected\n");
-					ipoque_int_soulseek_add_connection(ipoque_struct);
+					NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "soulseek detected\n");
+					ndpi_int_soulseek_add_connection(ndpi_struct);
 					return;
 				}
-				IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "1\n");
+				NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "1\n");
 			}
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "3\n");
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "3\n");
 			//Peer Message : Pierce Firewall
 			if (packet->payload_packet_len == 9 && get_l32(packet->payload, 0) == 5
 				&& packet->payload[4] <= 0x10 && get_u32(packet->payload, 5) != 0x00000000) {
 				flow->l4.tcp.soulseek_stage = 1 + packet->packet_direction;
-				IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_TRACE, "Soulseek Size 9 Pierce Firewall\n");
+				NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_TRACE, "Soulseek Size 9 Pierce Firewall\n");
 				return;
 			}
 
@@ -213,9 +213,9 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 				const u32 typelen = get_l32(packet->payload, 4 + 1 + 4 + usrlen);
 				const u8 type = packet->payload[4 + 1 + 4 + usrlen + 4];
 				if (typelen == 1 && (type == 'F' || type == 'P' || type == 'D')) {
-					IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct,
-							IPQ_LOG_DEBUG, "soulseek detected Pattern command(D|P|F).\n");
-					ipoque_int_soulseek_add_connection(ipoque_struct);
+					NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct,
+							NDPI_LOG_DEBUG, "soulseek detected Pattern command(D|P|F).\n");
+					ndpi_int_soulseek_add_connection(ndpi_struct);
 					return;
 				}
 			}
@@ -225,8 +225,8 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 		if (packet->payload_packet_len > 8) {
 			if ((packet->payload[0] || packet->payload[1]) && get_l32(packet->payload, 4) == 9) {
 				/* 9 is search result */
-				IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "soulseek detected Second Pkt\n");
-				ipoque_int_soulseek_add_connection(ipoque_struct);
+				NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "soulseek detected Second Pkt\n");
+				ndpi_int_soulseek_add_connection(ndpi_struct);
 				return;
 			}
 			if (get_l32(packet->payload, 0) == packet->payload_packet_len - 4) {
@@ -235,9 +235,9 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 				{
 					const u32 usrlen = get_l32(packet->payload, 8);
 					if (usrlen <= packet->payload_packet_len && 4 + 4 + 4 + usrlen == packet->payload_packet_len) {
-						IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct,
-								IPQ_LOG_DEBUG, "Soulseek Request Get Peer Address Detected\n");
-						ipoque_int_soulseek_add_connection(ipoque_struct);
+						NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct,
+								NDPI_LOG_DEBUG, "Soulseek Request Get Peer Address Detected\n");
+						ndpi_int_soulseek_add_connection(ndpi_struct);
 						return;
 					}
 				}
@@ -245,15 +245,15 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 		}
 
 		if (packet->payload_packet_len == 8 && get_l32(packet->payload, 4) == 0x00000004) {
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "soulseek detected\n");
-			ipoque_int_soulseek_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "soulseek detected\n");
+			ndpi_int_soulseek_add_connection(ndpi_struct);
 			return;
 		}
 
 		if (packet->payload_packet_len == 4
 			&& get_u16(packet->payload, 2) == 0x00 && get_u16(packet->payload, 0) != 0x00) {
-			IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "soulseek detected\n");
-			ipoque_int_soulseek_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "soulseek detected\n");
+			ndpi_int_soulseek_add_connection(ndpi_struct);
 			return;
 		} else if (packet->payload_packet_len == 4) {
 			flow->l4.tcp.soulseek_stage = 3;
@@ -262,22 +262,22 @@ void ipoque_search_soulseek_tcp(struct ipoque_detection_module_struct
 	} else if (flow->l4.tcp.soulseek_stage == 1 + packet->packet_direction) {
 		if (packet->payload_packet_len > 8) {
 			if (packet->payload[4] == 0x03 && get_l32(packet->payload, 5) == 0x00000031) {
-				IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct,
-						IPQ_LOG_DEBUG, "soulseek detected Second Pkt with SIGNATURE :: 0x0331000000 \n");
-				ipoque_int_soulseek_add_connection(ipoque_struct);
+				NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct,
+						NDPI_LOG_DEBUG, "soulseek detected Second Pkt with SIGNATURE :: 0x0331000000 \n");
+				ndpi_int_soulseek_add_connection(ndpi_struct);
 				return;
 			}
 		}
 	}
 	if (flow->l4.tcp.soulseek_stage == 3 && packet->payload_packet_len == 8 && !get_u32(packet->payload, 4)) {
 
-		IPQ_LOG(IPOQUE_PROTOCOL_SOULSEEK, ipoque_struct, IPQ_LOG_DEBUG, "soulseek detected bcz of 8B  pkt\n");
-		ipoque_int_soulseek_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOULSEEK, ndpi_struct, NDPI_LOG_DEBUG, "soulseek detected bcz of 8B  pkt\n");
+		ndpi_int_soulseek_add_connection(ndpi_struct);
 		return;
 	}
 	if (flow->l4.tcp.soulseek_stage && flow->packet_counter < 11) {
 	} else {
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SOULSEEK);
+		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SOULSEEK);
 	}
 }
 

@@ -23,21 +23,21 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_NETBIOS
+#ifdef NDPI_PROTOCOL_NETBIOS
 
-static void ipoque_int_netbios_add_connection(struct ipoque_detection_module_struct
-											  *ipoque_struct)
+static void ndpi_int_netbios_add_connection(struct ndpi_detection_module_struct
+											  *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_NETBIOS, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_NETBIOS, NDPI_REAL_PROTOCOL);
 }
 
 
-void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_netbios(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 
 	u16 dport;
@@ -45,13 +45,13 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 	if (packet->udp != NULL) {
 		dport = ntohs(packet->udp->dest);
 
-		IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "netbios udp start\n");
+		NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG, "netbios udp start\n");
 
 		/*check standard NETBIOS over udp to port 137 */
 		if ((dport == 137 || 0) && packet->payload_packet_len >= 50) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-					IPQ_LOG_DEBUG, "found netbios port 137 and payload_packet_len 50\n");
+			NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+					NDPI_LOG_DEBUG, "found netbios port 137 and payload_packet_len 50\n");
 
 
 			if (ntohs(get_u16(packet->payload, 2)) == 0 &&
@@ -59,10 +59,10 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 0 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 0) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG, "found netbios with questions = 1 and answers = 0, authority = 0  \n");
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG, "found netbios with questions = 1 and answers = 0, authority = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (packet->payload[2] == 0x80 &&
@@ -70,10 +70,10 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 0 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 1) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG, "found netbios with questions = 1 and answers, authority, additional = 0  \n");
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG, "found netbios with questions = 1 and answers, authority, additional = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (ntohs(get_u16(packet->payload, 2)) == 0x4000 &&
@@ -81,10 +81,10 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 0 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 1) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG, "found netbios with questions = 1 and answers = 0, authority = 0  \n");
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG, "found netbios with questions = 1 and answers = 0, authority = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (ntohs(get_u16(packet->payload, 2)) == 0x8400 &&
@@ -92,11 +92,11 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 1 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 0) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG,
 						"found netbios with flag 8400 questions = 0 and answers = 1, authority, additional = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (ntohs(get_u16(packet->payload, 2)) == 0x8500 &&
@@ -104,11 +104,11 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 1 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 0) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG,
 						"found netbios with flag 8500 questions = 0 and answers = 1, authority, additional = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (ntohs(get_u16(packet->payload, 2)) == 0x2910 &&
@@ -116,11 +116,11 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 0 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 1) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG,
 						"found netbios with flag 2910, questions = 1 and answers, authority=0, additional = 1  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (ntohs(get_u16(packet->payload, 2)) == 0xAD86 &&
@@ -128,11 +128,11 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 1 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 0) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG,
 						"found netbios with flag ad86 questions = 0 and answers = 1, authority, additional = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 			if (ntohs(get_u16(packet->payload, 2)) == 0x0110 &&
@@ -140,17 +140,17 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 				ntohs(get_u16(packet->payload, 6)) == 0 &&
 				ntohs(get_u16(packet->payload, 8)) == 0 && ntohs(get_u16(packet->payload, 10)) == 0) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG,
 						"found netbios with flag 0110 questions = 1 and answers = 0, authority, additional = 0  \n");
 
-				ipoque_int_netbios_add_connection(ipoque_struct);
+				ndpi_int_netbios_add_connection(ndpi_struct);
 				return;
 			}
 
 			if ((ntohs(get_u16(packet->payload, 2)) & 0xf800) == 0) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "possible netbios name query request\n");
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG, "possible netbios name query request\n");
 
 				if (get_u16(packet->payload, 4) == htons(1) &&
 					get_u16(packet->payload, 6) == 0 &&
@@ -159,12 +159,12 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 					/* name is encoded as described in rfc883 */
 					u8 name_length = packet->payload[12];
 
-					IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+					NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 							"possible netbios name query request, one question\n");
 
 					if (packet->payload_packet_len == 12 + 1 + name_length + 1 + 2 + 2) {
 
-						IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+						NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 								"possible netbios name query request, length matches\n");
 
 						/* null terminated? */
@@ -172,16 +172,16 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 							get_u16(packet->payload, 12 + name_length + 2) == htons(0x0020) &&
 							get_u16(packet->payload, 12 + name_length + 4) == htons(0x0001)) {
 
-							IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+							NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 									"found netbios name query request\n");
-							ipoque_int_netbios_add_connection(ipoque_struct);
+							ndpi_int_netbios_add_connection(ndpi_struct);
 							return;
 						}
 					}
 				}
 			} else if ((ntohs(get_u16(packet->payload, 2)) & 0xf800) == 0x8000) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 						"possible netbios name query response\n");
 
 				if (get_u16(packet->payload, 4) == 0 &&
@@ -191,12 +191,12 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 					/* name is encoded as described in rfc883 */
 					u8 name_length = packet->payload[12];
 
-					IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+					NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 							"possible netbios positive name query response, one answer\n");
 
 					if (packet->payload_packet_len >= 12 + 1 + name_length + 1 + 2 + 2) {
 
-						IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+						NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 								"possible netbios name query response, length matches\n");
 
 						/* null terminated? */
@@ -204,9 +204,9 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 							get_u16(packet->payload, 12 + name_length + 2) == htons(0x0020) &&
 							get_u16(packet->payload, 12 + name_length + 4) == htons(0x0001)) {
 
-							IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+							NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 									"found netbios name query response\n");
-							ipoque_int_netbios_add_connection(ipoque_struct);
+							ndpi_int_netbios_add_connection(ndpi_struct);
 							return;
 						}
 					}
@@ -217,12 +217,12 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 					/* name is encoded as described in rfc883 */
 					u8 name_length = packet->payload[12];
 
-					IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+					NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 							"possible netbios negative name query response, one answer\n");
 
 					if (packet->payload_packet_len >= 12 + 1 + name_length + 1 + 2 + 2) {
 
-						IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+						NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 								"possible netbios name query response, length matches\n");
 
 						/* null terminated? */
@@ -230,9 +230,9 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 							get_u16(packet->payload, 12 + name_length + 2) == htons(0x000A) &&
 							get_u16(packet->payload, 12 + name_length + 4) == htons(0x0001)) {
 
-							IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+							NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 									"found netbios name query response\n");
-							ipoque_int_netbios_add_connection(ipoque_struct);
+							ndpi_int_netbios_add_connection(ndpi_struct);
 							return;
 						}
 					}
@@ -243,12 +243,12 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 					/* name is encoded as described in rfc883 */
 					u8 name_length = packet->payload[12];
 
-					IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+					NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 							"possible netbios redirect name query response, one answer\n");
 
 					if (packet->payload_packet_len >= 12 + 1 + name_length + 1 + 2 + 2) {
 
-						IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+						NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 								"possible netbios name query response, length matches\n");
 
 						/* null terminated? */
@@ -256,9 +256,9 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 							get_u16(packet->payload, 12 + name_length + 2) == htons(0x0002) &&
 							get_u16(packet->payload, 12 + name_length + 4) == htons(0x0001)) {
 
-							IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG,
+							NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG,
 									"found netbios name query response\n");
-							ipoque_int_netbios_add_connection(ipoque_struct);
+							ndpi_int_netbios_add_connection(ndpi_struct);
 							return;
 						}
 					}
@@ -278,23 +278,23 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 			packet->payload_packet_len >= 14 &&
 			ntohs(get_u16(packet->payload, 10)) == packet->payload_packet_len - 14) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-					IPQ_LOG_DEBUG, "found netbios port 138 and payload length >= 112 \n");
+			NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+					NDPI_LOG_DEBUG, "found netbios port 138 and payload length >= 112 \n");
 
 
 			if (packet->payload[0] >= 0x11 && packet->payload[0] <= 0x16) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG, "found netbios with MSG-type 0x11,0x12,0x13,0x14,0x15 or 0x16\n");
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG, "found netbios with MSG-type 0x11,0x12,0x13,0x14,0x15 or 0x16\n");
 
 
 
 
 				if (ntohl(get_u32(packet->payload, 4)) == ntohl(packet->iph->saddr)) {
-					IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-							IPQ_LOG_DEBUG, "found netbios with checked ip-address.\n");
+					NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+							NDPI_LOG_DEBUG, "found netbios with checked ip-address.\n");
 
-					ipoque_int_netbios_add_connection(ipoque_struct);
+					ndpi_int_netbios_add_connection(ndpi_struct);
 					return;
 				}
 			}
@@ -304,24 +304,24 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 	if (packet->tcp != NULL) {
 		dport = ntohs(packet->tcp->dest);
 
-		IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "netbios tcp start\n");
+		NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG, "netbios tcp start\n");
 
 		/* destination port must be 139 */
 		if (dport == 139) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "found netbios with destination port 139\n");
+			NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG, "found netbios with destination port 139\n");
 
 			/* payload_packet_len must be 72 */
 			if (packet->payload_packet_len == 72) {
-				IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-						IPQ_LOG_DEBUG, "found netbios with payload_packen_len = 72. \n");
+				NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+						NDPI_LOG_DEBUG, "found netbios with payload_packen_len = 72. \n");
 
 				if (packet->payload[0] == 0x81 && packet->payload[1] == 0 && ntohs(get_u16(packet->payload, 2)) == 68) {
-					IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct,
-							IPQ_LOG_DEBUG,
+					NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct,
+							NDPI_LOG_DEBUG,
 							"found netbios with session request = 81, flags=0 and length od following bytes = 68. \n");
 
-					ipoque_int_netbios_add_connection(ipoque_struct);
+					ndpi_int_netbios_add_connection(ndpi_struct);
 					return;
 				}
 			}
@@ -329,8 +329,8 @@ void ipoque_search_netbios(struct ipoque_detection_module_struct *ipoque_struct)
 
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_NETBIOS, ipoque_struct, IPQ_LOG_DEBUG, "exclude netbios\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_NETBIOS);
+	NDPI_LOG(NDPI_PROTOCOL_NETBIOS, ndpi_struct, NDPI_LOG_DEBUG, "exclude netbios\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_NETBIOS);
 
 }
 #endif

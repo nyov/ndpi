@@ -23,27 +23,27 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_FASTTRACK
+#ifdef NDPI_PROTOCOL_FASTTRACK
 
 
 
-static void ipoque_int_fasttrack_add_connection(struct ipoque_detection_module_struct
-												*ipoque_struct)
+static void ndpi_int_fasttrack_add_connection(struct ndpi_detection_module_struct
+												*ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FASTTRACK, IPOQUE_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_FASTTRACK, NDPI_CORRELATED_PROTOCOL);
 }
 
 
-void ipoque_search_fasttrack_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct)
+void ndpi_search_fasttrack_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 6 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "detected 0d0a at the end of the packet.\n");
+		NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected 0d0a at the end of the packet.\n");
 
 		if (memcmp(packet->payload, "GIVE ", 5) == 0 && packet->payload_packet_len >= 8) {
 			u16 i;
@@ -54,21 +54,21 @@ void ipoque_search_fasttrack_tcp(struct ipoque_detection_module_struct
 				}
 			}
 
-			IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "FASTTRACK GIVE DETECTED\n");
-			ipoque_int_fasttrack_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "FASTTRACK GIVE DETECTED\n");
+			ndpi_int_fasttrack_add_connection(ndpi_struct);
 			return;
 		}
 
 		if (packet->payload_packet_len > 50 && memcmp(packet->payload, "GET /", 5) == 0) {
 			u8 a = 0;
-			IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "detected GET /. \n");
-			ipq_parse_packet_line_info(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected GET /. \n");
+			ipq_parse_packet_line_info(ndpi_struct);
 			for (a = 0; a < packet->parsed_lines; a++) {
 				if ((packet->line[a].len > 17 && memcmp(packet->line[a].ptr, "X-Kazaa-Username: ", 18) == 0)
 					|| (packet->line[a].len > 23 && memcmp(packet->line[a].ptr, "User-Agent: PeerEnabler/", 24) == 0)) {
-					IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE,
+					NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE,
 							"detected X-Kazaa-Username: || User-Agent: PeerEnabler/\n");
-					ipoque_int_fasttrack_add_connection(ipoque_struct);
+					ndpi_int_fasttrack_add_connection(ndpi_struct);
 					return;
 				}
 			}
@@ -76,7 +76,7 @@ void ipoque_search_fasttrack_tcp(struct ipoque_detection_module_struct
 	}
 
   exclude_fasttrack:
-	IPQ_LOG(IPOQUE_PROTOCOL_FASTTRACK, ipoque_struct, IPQ_LOG_TRACE, "fasttrack/kazaa excluded.\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_FASTTRACK);
+	NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "fasttrack/kazaa excluded.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FASTTRACK);
 }
 #endif

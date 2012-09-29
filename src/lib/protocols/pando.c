@@ -23,12 +23,12 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_PANDO
+#ifdef NDPI_PROTOCOL_PANDO
 
-static void ipoque_int_pando_add_connection(struct ipoque_detection_module_struct
-											*ipoque_struct)
+static void ndpi_int_pando_add_connection(struct ndpi_detection_module_struct
+											*ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_PANDO, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_PANDO, NDPI_REAL_PROTOCOL);
 }
 
 	
@@ -37,17 +37,17 @@ static void ipoque_int_pando_add_connection(struct ipoque_detection_module_struc
 #else
 __forceinline static
 #endif
-	 u8 search_pando(struct ipoque_detection_module_struct *ipoque_struct)
+	 u8 search_pando(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-//      struct ipoque_flow_struct       *flow=ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+//      struct ndpi_flow_struct       *flow=ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->tcp != NULL) {
 
 		if (packet->payload_packet_len == 63 && memcmp(&packet->payload[1], "Pando protocol", 14) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_PANDO, ipoque_struct, IPQ_LOG_DEBUG, "Pando download detected\n");
+			NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "Pando download detected\n");
 			goto end_pando_found;
 		}
 
@@ -60,11 +60,11 @@ __forceinline static
 			&& packet->payload[3] == 0x09 && packet->payload[4] == 0x00 && packet->payload[5] == 0x00) {
 			// bypass the detection because one packet has at a specific place the word Pando in it
 			if (packet->payload_packet_len == 87 && memcmp(&packet->payload[25], "Pando protocol", 14) == 0) {
-				IPQ_LOG(IPOQUE_PROTOCOL_PANDO, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG,
 						"Pando UDP packet detected --> Pando in payload\n");
 				goto end_pando_found;
 			} else if (packet->payload_packet_len == 92 && memcmp(&packet->payload[72], "Pando", 5) == 0) {
-				IPQ_LOG(IPOQUE_PROTOCOL_PANDO, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG,
 						"Pando UDP packet detected --> Pando in payload\n");
 				goto end_pando_found;
 			}
@@ -75,7 +75,7 @@ __forceinline static
 	goto end_pando_nothing_found;
 
   end_pando_found:
-	ipoque_int_pando_add_connection(ipoque_struct);
+	ndpi_int_pando_add_connection(ndpi_struct);
 	return 1;
 
   end_pando_maybe_found:
@@ -85,18 +85,18 @@ __forceinline static
 	return 0;
 }
 
-void ipoque_search_pando_tcp_udp(struct ipoque_detection_module_struct
-								 *ipoque_struct)
+void ndpi_search_pando_tcp_udp(struct ndpi_detection_module_struct
+								 *ndpi_struct)
 {
-//      struct ipoque_packet_struct     *packet=&ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+//      struct ndpi_packet_struct     *packet=&ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	if (search_pando(ipoque_struct) != 0)
+	if (search_pando(ndpi_struct) != 0)
 		return;
 
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_PANDO);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_PANDO);
 
 }
 #endif

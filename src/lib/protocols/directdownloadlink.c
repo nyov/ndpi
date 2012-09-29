@@ -22,23 +22,23 @@
 
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK
+#ifdef NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK
 
 
-#ifdef IPOQUE_DEBUG_DIRECT_DOWNLOAD_LINK
-//#define IPOQUE_DEBUG_DIRECT_DOWNLOAD_LINK_NOTHING_FOUND
-//#define IPOQUE_DEBUG_DIRECT_DOWNLOAD_LINK_PACKET_TOO_SMALL
-#define IPOQUE_DEBUG_DIRECT_DOWNLOAD_LINK_IP
+#ifdef NDPI_DEBUG_DIRECT_DOWNLOAD_LINK
+//#define NDPI_DEBUG_DIRECT_DOWNLOAD_LINK_NOTHING_FOUND
+//#define NDPI_DEBUG_DIRECT_DOWNLOAD_LINK_PACKET_TOO_SMALL
+#define NDPI_DEBUG_DIRECT_DOWNLOAD_LINK_IP
 #endif
 
-static void ipoque_int_direct_download_link_add_connection(struct
-														   ipoque_detection_module_struct
-														   *ipoque_struct)
+static void ndpi_int_direct_download_link_add_connection(struct
+														   ndpi_detection_module_struct
+														   *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, IPOQUE_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, NDPI_CORRELATED_PROTOCOL);
 
 	flow->l4.tcp.ddlink_server_direction = packet->packet_direction;
 }
@@ -49,19 +49,19 @@ static void ipoque_int_direct_download_link_add_connection(struct
   return 0 if nothing has been detected
   return 1 if it is a megaupload packet
 */
-u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct);
-u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
+u8 search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct);
+u8 search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	u16 filename_start = 0;
 	u8 i = 1;
 	u16 host_line_len_without_port;
 
 	if (packet->payload_packet_len < 100) {
-		IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: Packet too small.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: Packet too small.\n");
 		goto end_ddl_nothing_found;
 	}
 
@@ -69,27 +69,27 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 
 	if (memcmp(packet->payload, "POST ", 5) == 0) {
 		filename_start = 5;		// POST
-		IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: POST FOUND\n");
+		NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: POST FOUND\n");
 	} else if (memcmp(packet->payload, "GET ", 4) == 0) {
 		filename_start = 4;		// GET
-		IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: GET FOUND\n");
+		NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: GET FOUND\n");
 	} else {
 		goto end_ddl_nothing_found;
 	}
 	// parse packet
-	ipq_parse_packet_line_info(ipoque_struct);
+	ipq_parse_packet_line_info(ndpi_struct);
 
 	if (packet->host_line.ptr == NULL) {
-		IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: NO HOST FOUND\n");
+		NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: NO HOST FOUND\n");
 		goto end_ddl_nothing_found;
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: Host: found\n");
+	NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: Host: found\n");
 
 	if (packet->line[0].len < 9 + filename_start
 		|| memcmp(&packet->line[0].ptr[packet->line[0].len - 9], " HTTP/1.", 8) != 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct,
-				IPQ_LOG_DEBUG, "DDL: PACKET NOT HTTP CONFORM.\nXXX%.*sXXX\n",
+		NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct,
+				NDPI_LOG_DEBUG, "DDL: PACKET NOT HTTP CONFORM.\nXXX%.*sXXX\n",
 				8, &packet->line[0].ptr[packet->line[0].len - 9]);
 		goto end_ddl_nothing_found;
 	}
@@ -101,11 +101,11 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 		i = 2;
 		while (host_line_len_without_port >= i && packet->host_line.ptr[host_line_len_without_port - i] >= '0'
 			   && packet->host_line.ptr[host_line_len_without_port - i] <= '9') {
-			IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: number found\n");
+			NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: number found\n");
 			i++;
 		}
 		if (host_line_len_without_port >= i && packet->host_line.ptr[host_line_len_without_port - i] == ':') {
-			IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: ':' found\n");
+			NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: ':' found\n");
 			host_line_len_without_port = host_line_len_without_port - i;
 		}
 	}
@@ -695,45 +695,45 @@ u8 search_ddl_domains(struct ipoque_detection_module_struct *ipoque_struct)
 	 */
 
   end_ddl_nothing_found:
-	IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG,
+	NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG,
 			"Nothing Found\n%.*s\n", packet->payload_packet_len, packet->payload);
 	return 0;
 
   end_ddl_found:
-	IPQ_LOG(IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK, ipoque_struct, IPQ_LOG_DEBUG, "DDL: DIRECT DOWNLOAD LINK FOUND\n");
-	ipoque_int_direct_download_link_add_connection(ipoque_struct);
+	NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: DIRECT DOWNLOAD LINK FOUND\n");
+	ndpi_int_direct_download_link_add_connection(ndpi_struct);
 	return 1;
 }
 
 
-void ipoque_search_direct_download_link_tcp(struct
-											ipoque_detection_module_struct
-											*ipoque_struct)
+void ndpi_search_direct_download_link_tcp(struct
+											ndpi_detection_module_struct
+											*ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 #if 0
-	if (ipoque_struct->direct_download_link_counter_callback != NULL) {
-		if (packet->detected_protocol == IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
+	if (ndpi_struct->direct_download_link_counter_callback != NULL) {
+		if (packet->detected_protocol == NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
 			/* skip packets not requests from the client to the server */
 			if (packet->packet_direction == flow->l4.tcp.ddlink_server_direction) {
-				search_ddl_domains(ipoque_struct);	// do the detection again in order to get the URL in keep alive streams
+				search_ddl_domains(ndpi_struct);	// do the detection again in order to get the URL in keep alive streams
 			} else {
 				// just count the packet
-				ipoque_struct->direct_download_link_counter_callback(flow->hash_id_number, packet->l3_packet_len);
+				ndpi_struct->direct_download_link_counter_callback(flow->hash_id_number, packet->l3_packet_len);
 			}
 		}
 		return;
 	}
 #endif
 	// do not detect again if it is already ddl
-	if (packet->detected_protocol_stack[0] != IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
-		if (search_ddl_domains(ipoque_struct) != 0) {
+	if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
+		if (search_ddl_domains(ndpi_struct) != 0) {
 			return;
 		}
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_DIRECT_DOWNLOAD_LINK);
+		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK);
 	}
 
 }

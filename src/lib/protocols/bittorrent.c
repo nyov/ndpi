@@ -22,26 +22,26 @@
 
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_BITTORRENT
-#define IPOQUE_PROTOCOL_UNSAFE_DETECTION 	0
-#define IPOQUE_PROTOCOL_SAFE_DETECTION 		1
+#ifdef NDPI_PROTOCOL_BITTORRENT
+#define NDPI_PROTOCOL_UNSAFE_DETECTION 	0
+#define NDPI_PROTOCOL_SAFE_DETECTION 		1
 
-#define IPOQUE_PROTOCOL_PLAIN_DETECTION 	0
-#define IPOQUE_PROTOCOL_WEBSEED_DETECTION 	2
-static void ipoque_add_connection_as_bittorrent(struct ipoque_detection_module_struct
-						*ipoque_struct, const u8 save_detection, const u8 encrypted_connection,
-						ipoque_protocol_type_t protocol_type)
+#define NDPI_PROTOCOL_PLAIN_DETECTION 	0
+#define NDPI_PROTOCOL_WEBSEED_DETECTION 	2
+static void ndpi_add_connection_as_bittorrent(struct ndpi_detection_module_struct
+						*ndpi_struct, const u8 save_detection, const u8 encrypted_connection,
+						ndpi_protocol_type_t protocol_type)
 {
-  ipoque_int_change_protocol(ipoque_struct, IPOQUE_PROTOCOL_BITTORRENT, protocol_type);
+  ndpi_int_change_protocol(ndpi_struct, NDPI_PROTOCOL_BITTORRENT, protocol_type);
 }
 
-static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_struct
-						*ipoque_struct)
+static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struct
+						*ndpi_struct)
 {
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-  struct ipoque_flow_struct *flow = ipoque_struct->flow;
-  //  struct ipoque_id_struct *src = ipoque_struct->src;
-  //  struct ipoque_id_struct *dst = ipoque_struct->dst;
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_flow_struct *flow = ndpi_struct->flow;
+  //  struct ndpi_id_struct *src = ndpi_struct->src;
+  //  struct ndpi_id_struct *dst = ndpi_struct->dst;
 
   u16 a = 0;
 
@@ -53,11 +53,11 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
   if (flow->packet_counter == 2 && packet->payload_packet_len > 20) {
 
     if (memcmp(&packet->payload[0], "BitTorrent protocol", 19) == 0) {
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT,
-			 ipoque_struct, IPQ_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					  IPOQUE_REAL_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
+			 ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					  NDPI_REAL_PROTOCOL);
       return 1;
     }
   }
@@ -67,22 +67,22 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
     /* test for match 0x13+"BitTorrent protocol" */
     if (packet->payload[0] == 0x13) {
       if (memcmp(&packet->payload[1], "BitTorrent protocol", 19) == 0) {
-	IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT,
-			   ipoque_struct, IPQ_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
-	ipoque_add_connection_as_bittorrent(ipoque_struct,
-					    IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					    IPOQUE_REAL_PROTOCOL);
+	NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
+			   ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
+	ndpi_add_connection_as_bittorrent(ndpi_struct,
+					    NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					    NDPI_REAL_PROTOCOL);
 	return 1;
       }
     }
   }
 
   if (packet->payload_packet_len > 23 && memcmp(packet->payload, "GET /webseed?info_hash=", 23) == 0) {
-    IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-		       IPQ_LOG_TRACE, "BT: plain webseed BitTorrent protocol detected\n");
-    ipoque_add_connection_as_bittorrent(ipoque_struct,
-					IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_WEBSEED_DETECTION,
-					IPOQUE_CORRELATED_PROTOCOL);
+    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+		       NDPI_LOG_TRACE, "BT: plain webseed BitTorrent protocol detected\n");
+    ndpi_add_connection_as_bittorrent(ndpi_struct,
+					NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_WEBSEED_DETECTION,
+					NDPI_CORRELATED_PROTOCOL);
     return 1;
   }
   /* seen Azureus as server for webseed, possibly other servers existing, to implement */
@@ -90,11 +90,11 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
   /* no asymmetric detection possible for answer of pattern "GET /data?fid=". */
   if (packet->payload_packet_len > 60
       && memcmp(packet->payload, "GET /data?fid=", 14) == 0 && memcmp(&packet->payload[54], "&size=", 6) == 0) {
-    IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-		       IPQ_LOG_TRACE, "BT: plain Bitcomet persistent seed protocol detected\n");
-    ipoque_add_connection_as_bittorrent(ipoque_struct,
-					IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_WEBSEED_DETECTION,
-					IPOQUE_CORRELATED_PROTOCOL);
+    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+		       NDPI_LOG_TRACE, "BT: plain Bitcomet persistent seed protocol detected\n");
+    ndpi_add_connection_as_bittorrent(ndpi_struct,
+					NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_WEBSEED_DETECTION,
+					NDPI_CORRELATED_PROTOCOL);
     return 1;
   }
 
@@ -107,17 +107,17 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 
 
     /* parse complete get packet here into line structure elements */
-    ipq_parse_packet_line_info(ipoque_struct);
+    ipq_parse_packet_line_info(ndpi_struct);
     /* answer to this pattern is HTTP....Server: hypertracker */
     if (packet->user_agent_line.ptr != NULL
 	&& ((packet->user_agent_line.len > 8 && memcmp(packet->user_agent_line.ptr, "Azureus ", 8) == 0)
 	    || (packet->user_agent_line.len >= 10 && memcmp(packet->user_agent_line.ptr, "BitTorrent", 10) == 0)
 	    || (packet->user_agent_line.len >= 11 && memcmp(packet->user_agent_line.ptr, "BTWebClient", 11) == 0))) {
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-			 IPQ_LOG_TRACE, "Azureus /Bittorrent user agent line detected\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_WEBSEED_DETECTION,
-					  IPOQUE_CORRELATED_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+			 NDPI_LOG_TRACE, "Azureus /Bittorrent user agent line detected\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_WEBSEED_DETECTION,
+					  NDPI_CORRELATED_PROTOCOL);
       return 1;
     }
 
@@ -125,11 +125,11 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 	&& (packet->user_agent_line.len >= 9 && memcmp(packet->user_agent_line.ptr, "Shareaza ", 9) == 0)
 	&& (packet->parsed_lines > 8 && packet->line[8].ptr != 0
 	    && packet->line[8].len >= 9 && memcmp(packet->line[8].ptr, "X-Queue: ", 9) == 0)) {
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-			 IPQ_LOG_TRACE, "Bittorrent Shareaza detected.\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_WEBSEED_DETECTION,
-					  IPOQUE_CORRELATED_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+			 NDPI_LOG_TRACE, "Bittorrent Shareaza detected.\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_WEBSEED_DETECTION,
+					  NDPI_CORRELATED_PROTOCOL);
       return 1;
     }
 
@@ -161,10 +161,10 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 	&& packet->line[8].ptr != NULL
 	&& packet->line[8].len > 22 && ipq_mem_cmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0) {
 
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct, IPQ_LOG_TRACE, "Bitcomet LTS detected\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_UNSAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					  IPOQUE_CORRELATED_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "Bitcomet LTS detected\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_UNSAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					  NDPI_CORRELATED_PROTOCOL);
       return 1;
 
     }
@@ -188,10 +188,10 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 	&& packet->line[6].ptr != NULL
 	&& packet->line[6].len > 21 && ipq_mem_cmp(packet->line[6].ptr, "Connection: Keep-Alive", 22) == 0) {
 
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct, IPQ_LOG_TRACE, "FlashGet detected\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_UNSAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					  IPOQUE_CORRELATED_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "FlashGet detected\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_UNSAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					  NDPI_CORRELATED_PROTOCOL);
       return 1;
 
     }
@@ -210,10 +210,10 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 	&& packet->line[5].ptr != NULL
 	&& packet->line[5].len > 21 && ipq_mem_cmp(packet->line[5].ptr, "Connection: Keep-Alive", 22) == 0) {
 
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct, IPQ_LOG_TRACE, "FlashGet detected\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_UNSAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					  IPOQUE_CORRELATED_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "FlashGet detected\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_UNSAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					  NDPI_CORRELATED_PROTOCOL);
       return 1;
 
     }
@@ -230,8 +230,8 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
       ptr++;
     }
 
-    IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-		       IPQ_LOG_TRACE, " BT stat: tracker info hash found\n");
+    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+		       NDPI_LOG_TRACE, " BT stat: tracker info hash found\n");
 
     /* len is > 50, so save operation here */
     len -= 10;
@@ -280,11 +280,11 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
       }
     }
 
-    IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-		       IPQ_LOG_TRACE, " BT stat: tracker info hash parsed\n");
-    ipoque_add_connection_as_bittorrent(ipoque_struct,
-					IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					IPOQUE_CORRELATED_PROTOCOL);
+    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+		       NDPI_LOG_TRACE, " BT stat: tracker info hash parsed\n");
+    ndpi_add_connection_as_bittorrent(ndpi_struct,
+					NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					NDPI_CORRELATED_PROTOCOL);
     return 1;
   }
 
@@ -310,11 +310,11 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
     /* did not see this pattern anywhere */
     if ((memcmp(&packet->payload[0], pattern_20_bytes, 20) == 0)
 	&& (memcmp(&packet->payload[52], pattern_12_bytes, 12) == 0)) {
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct,
-			 IPQ_LOG_TRACE, "BT: Warez - Plain BitTorrent protocol detected\n");
-      ipoque_add_connection_as_bittorrent(ipoque_struct,
-					  IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-					  IPOQUE_REAL_PROTOCOL);
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct,
+			 NDPI_LOG_TRACE, "BT: Warez - Plain BitTorrent protocol detected\n");
+      ndpi_add_connection_as_bittorrent(ndpi_struct,
+					  NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+					  NDPI_REAL_PROTOCOL);
       return 1;
     }
   }
@@ -322,16 +322,16 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
   else if (packet->payload_packet_len > 50) {
     if (memcmp(packet->payload, "GET", 3) == 0) {
 
-      ipq_parse_packet_line_info(ipoque_struct);
+      ipq_parse_packet_line_info(ndpi_struct);
       /* haven't fount this pattern anywhere */
       if (packet->host_line.ptr != NULL
 	  && packet->host_line.len >= 9 && memcmp(packet->host_line.ptr, "ip2p.com:", 9) == 0) {
-	IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT,
-			   ipoque_struct, IPQ_LOG_TRACE,
+	NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
+			   ndpi_struct, NDPI_LOG_TRACE,
 			   "BT: Warez - Plain BitTorrent protocol detected due to Host: ip2p.com: pattern\n");
-	ipoque_add_connection_as_bittorrent(ipoque_struct,
-					    IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_WEBSEED_DETECTION,
-					    IPOQUE_CORRELATED_PROTOCOL);
+	ndpi_add_connection_as_bittorrent(ndpi_struct,
+					    NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_WEBSEED_DETECTION,
+					    NDPI_CORRELATED_PROTOCOL);
 	return 1;
       }
     }
@@ -341,12 +341,12 @@ static u8 ipoque_int_search_bittorrent_tcp_zero(struct ipoque_detection_module_s
 
 
 /*Search for BitTorrent commands*/
-static void ipoque_int_search_bittorrent_tcp(struct ipoque_detection_module_struct
-					     *ipoque_struct)
+static void ndpi_int_search_bittorrent_tcp(struct ndpi_detection_module_struct
+					     *ndpi_struct)
 {
 
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-  struct ipoque_flow_struct *flow = ipoque_struct->flow;
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_flow_struct *flow = ndpi_struct->flow;
   if (packet->payload_packet_len == 0) {
     return;
   }
@@ -354,32 +354,32 @@ static void ipoque_int_search_bittorrent_tcp(struct ipoque_detection_module_stru
   if (flow->bittorrent_stage == 0 && packet->payload_packet_len != 0) {
     /* exclude stage 0 detection from next run */
     flow->bittorrent_stage = 1;
-    if (ipoque_int_search_bittorrent_tcp_zero(ipoque_struct) != 0) {
-      IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct, IPQ_LOG_DEBUG,
+    if (ndpi_int_search_bittorrent_tcp_zero(ndpi_struct) != 0) {
+      NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_DEBUG,
 			 "stage 0 has detected something, returning\n");
       return;
     }
 
-    IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT, ipoque_struct, IPQ_LOG_DEBUG,
+    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_DEBUG,
 		       "stage 0 has no direct detection, fall through\n");
   }
   return;
 }
 
-void ipoque_search_bittorrent(struct ipoque_detection_module_struct
-			      *ipoque_struct)
+void ndpi_search_bittorrent(struct ndpi_detection_module_struct
+			      *ndpi_struct)
 {
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-  if (packet->detected_protocol_stack[0] != IPOQUE_PROTOCOL_BITTORRENT) {
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_BITTORRENT) {
     /* check for tcp retransmission here */
 
     if ((packet->tcp != NULL)
 	&& (packet->tcp_retransmission == 0 || packet->num_retried_bytes)) {
-      ipoque_int_search_bittorrent_tcp(ipoque_struct);
+      ndpi_int_search_bittorrent_tcp(ndpi_struct);
     }
 #ifdef HAVE_NTOP
     else if(packet->udp != NULL) {
-      struct ipoque_flow_struct *flow = ipoque_struct->flow;
+      struct ndpi_flow_struct *flow = ndpi_struct->flow;
 
       flow->bittorrent_stage++;
 
@@ -391,11 +391,11 @@ void ipoque_search_bittorrent(struct ipoque_detection_module_struct
 	     || ntop_strnstr(packet->payload, ":find_node1:", packet->payload_packet_len)
 	     || ntop_strnstr(packet->payload, "d1:ad2:id20:", packet->payload_packet_len)) {
 	  bittorrent_found:
-	    IPQ_LOG_BITTORRENT(IPOQUE_PROTOCOL_BITTORRENT,
-			       ipoque_struct, IPQ_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
-	    ipoque_add_connection_as_bittorrent(ipoque_struct,
-						IPOQUE_PROTOCOL_SAFE_DETECTION, IPOQUE_PROTOCOL_PLAIN_DETECTION,
-						IPOQUE_REAL_PROTOCOL);
+	    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
+			       ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
+	    ndpi_add_connection_as_bittorrent(ndpi_struct,
+						NDPI_PROTOCOL_SAFE_DETECTION, NDPI_PROTOCOL_PLAIN_DETECTION,
+						NDPI_REAL_PROTOCOL);
 	    return;
 	  } else if((begin = memchr(packet->payload, 'B',  packet->payload_packet_len-19)) != NULL) {
 	    u_long offset = (u_long)begin - (u_long)packet->payload;
@@ -411,7 +411,7 @@ void ipoque_search_bittorrent(struct ipoque_detection_module_struct
 	return;
       }
 
-      IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_BITTORRENT);
+      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_BITTORRENT);
     }
 #endif
     

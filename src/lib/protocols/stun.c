@@ -22,22 +22,22 @@
 
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_STUN
+#ifdef NDPI_PROTOCOL_STUN
 
 
-static void ipoque_int_stun_add_connection(struct ipoque_detection_module_struct *ipoque_struct)
+static void ndpi_int_stun_add_connection(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_STUN, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_STUN, NDPI_REAL_PROTOCOL);
 }
 
 
 
 typedef enum {
-	IPOQUE_IS_STUN,
-	IPOQUE_IS_NOT_STUN
-} ipoque_int_stun_result_t;
+	NDPI_IS_STUN,
+	NDPI_IS_NOT_STUN
+} ndpi_int_stun_result_t;
 
-static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_module_struct *ipoque_struct,
+static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_struct *ndpi_struct,
 													  const u8 * payload, const u16 payload_length)
 {
 	u16 a;
@@ -65,11 +65,11 @@ static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_mo
 		u8 mod;
 		u8 old = 1;
 		u8 padding = 0;
-		IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "len and type match.\n");
+		NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "len and type match.\n");
 
 		if (payload_length == 20) {
-			IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "found stun.\n");
-			return IPOQUE_IS_STUN;
+			NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
+			return NDPI_IS_STUN;
 		}
 
 		a = 20;
@@ -89,7 +89,7 @@ static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_mo
 						 || payload[a + 1] == 0x2a || payload[a + 1] == 0x29 || payload[a + 1] == 0x50
 						 || payload[a + 1] == 0x54 || payload[a + 1] == 0x55)))) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "attribute match.\n");
+				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "attribute match.\n");
 
 				a += ((payload[a + 2] << 8) + payload[a + 3] + 4);
 				mod = a % 4;
@@ -97,8 +97,8 @@ static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_mo
 					padding = 4 - mod;
 				}
 				if (a == payload_length || (padding && (a + padding) == payload_length)) {
-					IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "found stun.\n");
-					return IPOQUE_IS_STUN;
+					NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
+					return NDPI_IS_STUN;
 				}
 
 			} else if (payload_length >= a + padding + 4
@@ -117,7 +117,7 @@ static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_mo
 								|| payload[a + 1 + padding] == 0x29 || payload[a + 1 + padding] == 0x50
 								|| payload[a + 1 + padding] == 0x54 || payload[a + 1 + padding] == 0x55)))) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "New STUN - attribute match.\n");
+				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "New STUN - attribute match.\n");
 
 				old = 0;
 				a += ((payload[a + 2 + padding] << 8) + payload[a + 3 + padding] + 4);
@@ -127,8 +127,8 @@ static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_mo
 					a += 4 - mod;
 				}
 				if (a == payload_length) {
-					IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "found stun.\n");
-					return IPOQUE_IS_STUN;
+					NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
+					return NDPI_IS_STUN;
 				}
 			} else {
 				break;
@@ -136,15 +136,15 @@ static ipoque_int_stun_result_t ipoque_int_check_stun(struct ipoque_detection_mo
 		}
 	}
 
-	return IPOQUE_IS_NOT_STUN;
+	return NDPI_IS_NOT_STUN;
 }
 
-void ipoque_search_stun(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 
-	IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "search stun.\n");
+	NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "search stun.\n");
 
 
 	if (packet->tcp) {
@@ -157,22 +157,22 @@ void ipoque_search_stun(struct ipoque_detection_module_struct *ipoque_struct)
 			/* TODO there could be several STUN packets in a single TCP packet so maybe the detection could be
 			 * improved by checking only the STUN packet of given length */
 
-			if (ipoque_int_check_stun(ipoque_struct, packet->payload + 2, packet->payload_packet_len - 2) ==
-				IPOQUE_IS_STUN) {
-				IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "found TCP stun.\n");
-				ipoque_int_stun_add_connection(ipoque_struct);
+			if (ndpi_int_check_stun(ndpi_struct, packet->payload + 2, packet->payload_packet_len - 2) ==
+				NDPI_IS_STUN) {
+				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found TCP stun.\n");
+				ndpi_int_stun_add_connection(ndpi_struct);
 				return;
 			}
 		}
 	}
-	if (ipoque_int_check_stun(ipoque_struct, packet->payload, packet->payload_packet_len) == IPOQUE_IS_STUN) {
-		IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "found UDP stun.\n");
-		ipoque_int_stun_add_connection(ipoque_struct);
+	if (ndpi_int_check_stun(ndpi_struct, packet->payload, packet->payload_packet_len) == NDPI_IS_STUN) {
+		NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found UDP stun.\n");
+		ndpi_int_stun_add_connection(ndpi_struct);
 		return;
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_STUN, ipoque_struct, IPQ_LOG_DEBUG, "exclude stun.\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_STUN);
+	NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "exclude stun.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_STUN);
 }
 
 #endif

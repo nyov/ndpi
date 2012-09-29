@@ -24,31 +24,31 @@
 
 /* include files */
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_FIESTA
+#ifdef NDPI_PROTOCOL_FIESTA
 
 
-static void ipoque_int_fiesta_add_connection(struct ipoque_detection_module_struct
-											 *ipoque_struct)
+static void ndpi_int_fiesta_add_connection(struct ndpi_detection_module_struct
+											 *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FIESTA, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_FIESTA, NDPI_REAL_PROTOCOL);
 }
 
-void ipoque_search_fiesta(struct ipoque_detection_module_struct
-						  *ipoque_struct)
+void ndpi_search_fiesta(struct ndpi_detection_module_struct
+						  *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	IPQ_LOG(IPOQUE_PROTOCOL_FIESTA, ipoque_struct, IPQ_LOG_DEBUG, "search fiesta.\n");
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "search fiesta.\n");
 
 	if (flow->l4.tcp.fiesta_stage == 0 && packet->payload_packet_len == 5
 		&& get_u16(packet->payload, 0) == ntohs(0x0407)
 		&& (packet->payload[2] == 0x08)
 		&& (packet->payload[4] == 0x00 || packet->payload[4] == 0x01)) {
 
-		IPQ_LOG(IPOQUE_PROTOCOL_FIESTA, ipoque_struct, IPQ_LOG_DEBUG, "maybe fiesta symmetric, first packet.\n");
+		NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "maybe fiesta symmetric, first packet.\n");
 		flow->l4.tcp.fiesta_stage = 1 + packet->packet_direction;
 		goto maybe_fiesta;
 	}
@@ -56,7 +56,7 @@ void ipoque_search_fiesta(struct ipoque_detection_module_struct
 		&& ((packet->payload_packet_len > 1 && packet->payload_packet_len - 1 == packet->payload[0])
 			|| (packet->payload_packet_len > 3 && packet->payload[0] == 0
 				&& get_l16(packet->payload, 1) == packet->payload_packet_len - 3))) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FIESTA, ipoque_struct, IPQ_LOG_DEBUG, "Maybe fiesta.\n");
+		NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "Maybe fiesta.\n");
 		goto maybe_fiesta;
 	}
 	if (flow->l4.tcp.fiesta_stage == (1 + packet->packet_direction)) {
@@ -81,17 +81,17 @@ void ipoque_search_fiesta(struct ipoque_detection_module_struct
 		}
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_FIESTA, ipoque_struct, IPQ_LOG_DEBUG, "exclude fiesta.\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_FIESTA);
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "exclude fiesta.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FIESTA);
 	return;
 
   maybe_fiesta:
-	IPQ_LOG(IPOQUE_PROTOCOL_FIESTA, ipoque_struct, IPQ_LOG_DEBUG, "Stage is set to %d.\n", flow->l4.tcp.fiesta_stage);
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "Stage is set to %d.\n", flow->l4.tcp.fiesta_stage);
 	return;
 
   add_fiesta:
-	IPQ_LOG(IPOQUE_PROTOCOL_FIESTA, ipoque_struct, IPQ_LOG_DEBUG, "detected fiesta.\n");
-	ipoque_int_fiesta_add_connection(ipoque_struct);
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "detected fiesta.\n");
+	ndpi_int_fiesta_add_connection(ndpi_struct);
 	return;
 }
 #endif

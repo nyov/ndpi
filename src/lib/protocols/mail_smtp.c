@@ -23,7 +23,7 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_MAIL_SMTP
+#ifdef NDPI_PROTOCOL_MAIL_SMTP
 
 #define SMTP_BIT_220		0x01
 #define SMTP_BIT_250		0x02
@@ -40,22 +40,22 @@
 #define SMTP_BIT_RSET		0x1000
 #define SMTP_BIT_TlRM		0x2000
 
-static void ipoque_int_mail_smtp_add_connection(struct ipoque_detection_module_struct
-												*ipoque_struct)
+static void ndpi_int_mail_smtp_add_connection(struct ndpi_detection_module_struct
+												*ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_MAIL_SMTP, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_MAIL_SMTP, NDPI_REAL_PROTOCOL);
 }
 
-void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
-								 *ipoque_struct)
+void ndpi_search_mail_smtp_tcp(struct ndpi_detection_module_struct
+								 *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//  struct ipoque_id_struct         *src=ipoque_struct->src;
-//  struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//  struct ndpi_id_struct         *src=ndpi_struct->src;
+//  struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 
-	IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "search mail_smtp.\n");
+	NDPI_LOG(NDPI_PROTOCOL_MAIL_SMTP, ndpi_struct, NDPI_LOG_DEBUG, "search mail_smtp.\n");
 
 
 	if (packet->payload_packet_len > 2 && ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
@@ -63,7 +63,7 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 		u8 a;
 		u8 bit_count = 0;
 
-		IPQ_PARSE_PACKET_LINE_INFO(ipoque_struct, packet);
+		NDPI_PARSE_PACKET_LINE_INFO(ndpi_struct, packet);
 		for (a = 0; a < packet->parsed_lines; a++) {
 
 			// expected server responses
@@ -151,12 +151,12 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 				bit_count += (flow->l4.tcp.smtp_command_bitmask >> a) & 0x01;
 			}
 		}
-		IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "seen smtp commands and responses: %u.\n",
+		NDPI_LOG(NDPI_PROTOCOL_MAIL_SMTP, ndpi_struct, NDPI_LOG_DEBUG, "seen smtp commands and responses: %u.\n",
 				bit_count);
 
 		if (bit_count >= 3) {
-			IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "mail smtp identified\n");
-			ipoque_int_mail_smtp_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_MAIL_SMTP, ndpi_struct, NDPI_LOG_DEBUG, "mail smtp identified\n");
+			ndpi_int_mail_smtp_add_connection(ndpi_struct);
 			return;
 		}
 		if (bit_count >= 1 && flow->packet_counter < 12) {
@@ -168,12 +168,12 @@ void ipoque_search_mail_smtp_tcp(struct ipoque_detection_module_struct
 		packet->payload_packet_len >= 4 &&
 		(ntohs(get_u16(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a
 		 || memcmp(packet->payload, "220", 3) == 0 || memcmp(packet->payload, "EHLO", 4) == 0)) {
-		IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "maybe SMTP, need next packet.\n");
+		NDPI_LOG(NDPI_PROTOCOL_MAIL_SMTP, ndpi_struct, NDPI_LOG_DEBUG, "maybe SMTP, need next packet.\n");
 		return;
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_MAIL_SMTP, ipoque_struct, IPQ_LOG_DEBUG, "exclude smtp\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_MAIL_SMTP);
+	NDPI_LOG(NDPI_PROTOCOL_MAIL_SMTP, ndpi_struct, NDPI_LOG_DEBUG, "exclude smtp\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MAIL_SMTP);
 
 }
 #endif

@@ -21,8 +21,8 @@
  */
 
 
-#ifndef __IPOQUE_LINUX_COMPAT_H__
-#define __IPOQUE_LINUX_COMPAT_H__
+#ifndef __NDPI_LINUX_COMPAT_H__
+#define __NDPI_LINUX_COMPAT_H__
 
 #if defined(BYTE_ORDER) && !defined(__BYTE_ORDER)
 # define __BYTE_ORDER BYTE_ORDER

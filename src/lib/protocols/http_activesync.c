@@ -23,31 +23,31 @@
 
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC
-static void ipoque_int_activesync_add_connection(struct ipoque_detection_module_struct
-												 *ipoque_struct)
+#ifdef NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC
+static void ndpi_int_activesync_add_connection(struct ndpi_detection_module_struct
+												 *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, IPOQUE_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, NDPI_CORRELATED_PROTOCOL);
 }
 
-void ipoque_search_activesync(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_activesync(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 	if (packet->tcp != NULL) {
 
 		if (packet->payload_packet_len > 150
 			&& ((memcmp(packet->payload, "OPTIONS /Microsoft-Server-ActiveSync?", 37) == 0)
 				|| (memcmp(packet->payload, "POST /Microsoft-Server-ActiveSync?", 34) == 0))) {
-			ipoque_int_activesync_add_connection(ipoque_struct);
-			IPQ_LOG(IPOQUE_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, ipoque_struct, IPQ_LOG_DEBUG,
+			ndpi_int_activesync_add_connection(ndpi_struct);
+			NDPI_LOG(NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, ndpi_struct, NDPI_LOG_DEBUG,
 					" flow marked as ActiveSync \n");
 			return;
 		}
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, ipoque_struct, IPQ_LOG_DEBUG, "exclude activesync\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC);
+	NDPI_LOG(NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, ndpi_struct, NDPI_LOG_DEBUG, "exclude activesync\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC);
 
 }
 #endif

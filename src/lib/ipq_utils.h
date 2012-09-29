@@ -22,8 +22,8 @@
 
 
 
-#ifndef _IPQ_UTILS_H_
-#define _IPQ_UTILS_H_
+#ifndef _NDPI_UTILS_H_
+#define _NDPI_UTILS_H_
 
 #include "ipq_protocols.h"
 
@@ -33,12 +33,12 @@
  *
  * use it instead of strlen to avoid runtime calculations
  */
-#define IPQ_STATICSTRING_LEN( s ) ( sizeof( s ) - 1 )
+#define NDPI_STATICSTRING_LEN( s ) ( sizeof( s ) - 1 )
 
 
 
 /** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
-#define IPOQUE_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
+#define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
   ((((u64 *)(x))[0]) < (((u64 *)(y))[0]) || ( (((u64 *)(x))[0]) == (((u64 *)(y))[0]) && (((u64 *)(x))[1]) < (((u64 *)(y))[1])) )
 
 
@@ -48,5 +48,5 @@
 extern char* ntop_strnstr(const char *s, const char *find, size_t slen);
 #endif
 
-#endif							/* _IPQ_UTILS_H_ */
+#endif							/* _NDPI_UTILS_H_ */
 

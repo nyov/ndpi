@@ -23,13 +23,13 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_SOPCAST
+#ifdef NDPI_PROTOCOL_SOPCAST
 
 
-static void ipoque_int_sopcast_add_connection(struct ipoque_detection_module_struct
-											  *ipoque_struct)
+static void ndpi_int_sopcast_add_connection(struct ndpi_detection_module_struct
+											  *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_SOPCAST, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_SOPCAST, NDPI_REAL_PROTOCOL);
 }
 
 /**
@@ -44,7 +44,7 @@ static void ipoque_int_sopcast_add_connection(struct ipoque_detection_module_str
 #else
 __forceinline static
 #endif
-	 u8 ipoque_int_is_sopcast_tcp(const u8 * payload, const u16 payload_len)
+	 u8 ndpi_int_is_sopcast_tcp(const u8 * payload, const u16 payload_len)
 {
 	if (payload_len != 54)
 		return 0;
@@ -92,36 +92,36 @@ __forceinline static
 	return 1;
 }
 
-static void ipoque_search_sopcast_tcp(struct ipoque_detection_module_struct
-									  *ipoque_struct)
+static void ndpi_search_sopcast_tcp(struct ndpi_detection_module_struct
+									  *ndpi_struct)
 {
 
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 	if (flow->packet_counter == 1 && packet->payload_packet_len == 54 && get_u16(packet->payload, 0) == ntohs(0x0036)) {
-		if (ipoque_int_is_sopcast_tcp(packet->payload, packet->payload_packet_len)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast TCP \n");
-			ipoque_int_sopcast_add_connection(ipoque_struct);
+		if (ndpi_int_is_sopcast_tcp(packet->payload, packet->payload_packet_len)) {
+			NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast TCP \n");
+			ndpi_int_sopcast_add_connection(ndpi_struct);
 			return;
 		}
 	}
 
-	IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "exclude sopcast TCP.  \n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SOPCAST);
+	NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "exclude sopcast TCP.  \n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SOPCAST);
 
 
 }
 
-static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
-									  *ipoque_struct)
+static void ndpi_search_sopcast_udp(struct ndpi_detection_module_struct
+									  *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "search sopcast.  \n");
+	NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "search sopcast.  \n");
 
 
 	if (packet->payload_packet_len == 52 && packet->payload[0] == 0xff
@@ -129,8 +129,8 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[8] == 0x02 && packet->payload[9] == 0xff
 		&& packet->payload[10] == 0x00 && packet->payload[11] == 0x2c
 		&& packet->payload[12] == 0x00 && packet->payload[13] == 0x00 && packet->payload[14] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if I.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if I.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 	if ((packet->payload_packet_len == 80 || packet->payload_packet_len == 28 || packet->payload_packet_len == 94)
@@ -138,8 +138,8 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[8] == 0x01 && packet->payload[9] == 0xff
 		&& packet->payload[10] == 0x00 && packet->payload[11] == 0x14
 		&& packet->payload[12] == 0x00 && packet->payload[13] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if II.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if II.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 	/* this case has been seen once. Please revome this comment, if you see it another time */
@@ -148,8 +148,8 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[8] == 0x03 && packet->payload[9] == 0xff
 		&& packet->payload[10] == 0x00 && packet->payload[11] == 0x34
 		&& packet->payload[12] == 0x00 && packet->payload[13] == 0x00 && packet->payload[14] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if III.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if III.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 	if (packet->payload_packet_len == 42 && packet->payload[0] == 0x00
@@ -158,8 +158,8 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[8] == 0x06
 		&& packet->payload[9] == 0x01 && packet->payload[10] == 0x00
 		&& packet->payload[11] == 0x22 && packet->payload[12] == 0x00 && packet->payload[13] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if IV.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if IV.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 	if (packet->payload_packet_len == 28 && packet->payload[0] == 0x00
@@ -168,8 +168,8 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[8] == 0x01
 		&& packet->payload[9] == 0x01 && packet->payload[10] == 0x00
 		&& packet->payload[11] == 0x14 && packet->payload[12] == 0x00 && packet->payload[13] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if V.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if V.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 	/* this case has been seen once. Please revome this comment, if you see it another time */
@@ -179,8 +179,8 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[8] == 0x06
 		&& packet->payload[9] == 0x01 && packet->payload[10] == 0x01
 		&& packet->payload[11] == 0x16 && packet->payload[12] == 0x00 && packet->payload[13] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if VI.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if VI.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 	if (packet->payload_packet_len == 76 && packet->payload[0] == 0xff
@@ -189,29 +189,29 @@ static void ipoque_search_sopcast_udp(struct ipoque_detection_module_struct
 		&& packet->payload[10] == 0x00 && packet->payload[11] == 0x44
 		&& packet->payload[16] == 0x01 && packet->payload[15] == 0x01
 		&& packet->payload[12] == 0x00 && packet->payload[13] == 0x00 && packet->payload[14] == 0x00) {
-		IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "found sopcast with if VII.  \n");
-		ipoque_int_sopcast_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "found sopcast with if VII.  \n");
+		ndpi_int_sopcast_add_connection(ndpi_struct);
 		return;
 	}
 
 	/* Attention please: no asymmetric detection necessary. This detection works asymmetrically as well. */
 
-	IPQ_LOG(IPOQUE_PROTOCOL_SOPCAST, ipoque_struct, IPQ_LOG_DEBUG, "exclude sopcast.  \n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_SOPCAST);
+	NDPI_LOG(NDPI_PROTOCOL_SOPCAST, ndpi_struct, NDPI_LOG_DEBUG, "exclude sopcast.  \n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SOPCAST);
 
 
 
 }
 
-void ipoque_search_sopcast(struct ipoque_detection_module_struct
-						   *ipoque_struct)
+void ndpi_search_sopcast(struct ndpi_detection_module_struct
+						   *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
 	if (packet->udp != NULL)
-		ipoque_search_sopcast_udp(ipoque_struct);
+		ndpi_search_sopcast_udp(ndpi_struct);
 	if (packet->tcp != NULL)
-		ipoque_search_sopcast_tcp(ipoque_struct);
+		ndpi_search_sopcast_tcp(ndpi_struct);
 
 }
 #endif

@@ -24,14 +24,14 @@
 #include "ipq_protocols.h"
 #include "ipq_utils.h"
 
-#ifdef IPOQUE_PROTOCOL_FTP
+#ifdef NDPI_PROTOCOL_FTP
 
 
-static void ipoque_int_ftp_add_connection(struct ipoque_detection_module_struct
-										  *ipoque_struct)
+static void ndpi_int_ftp_add_connection(struct ndpi_detection_module_struct
+										  *ndpi_struct)
 {
 
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_FTP, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_FTP, NDPI_REAL_PROTOCOL);
 }
 
 /**
@@ -46,7 +46,7 @@ static void ipoque_int_ftp_add_connection(struct ipoque_detection_module_struct
 #else
 __forceinline static
 #endif
-	 u8 ipoque_int_check_possible_ftp_command(const struct ipoque_packet_struct *packet)
+	 u8 ndpi_int_check_possible_ftp_command(const struct ndpi_packet_struct *packet)
 {
 	if (packet->payload_packet_len < 3)
 		return 0;
@@ -83,7 +83,7 @@ __forceinline static
 #else
 __forceinline static
 #endif
-	 u8 ipoque_int_check_possible_ftp_reply(const struct ipoque_packet_struct *packet)
+	 u8 ndpi_int_check_possible_ftp_reply(const struct ndpi_packet_struct *packet)
 {
 	if (packet->payload_packet_len < 5)
 		return 0;
@@ -111,7 +111,7 @@ __forceinline static
 #else
 __forceinline static
 #endif
-	 u8 ipoque_int_check_possible_ftp_continuation_reply(const struct ipoque_packet_struct *packet)
+	 u8 ndpi_int_check_possible_ftp_continuation_reply(const struct ndpi_packet_struct *packet)
 {
 	u16 i;
 
@@ -144,15 +144,15 @@ enum {
   return 1 if a pop packet
 */
 
-static u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct)
+static u8 search_ftp(struct ndpi_detection_module_struct *ndpi_struct)
 {
 
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 	u8 current_ftp_code = 0;
 
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 
 	/* initiate client direction flag */
@@ -173,48 +173,48 @@ static u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct)
 	}
 
 	if (packet->packet_direction == flow->l4.tcp.ftp_client_direction) {
-		if (packet->payload_packet_len > IPQ_STATICSTRING_LEN("USER ") &&
-			(memcmp(packet->payload, "USER ", IPQ_STATICSTRING_LEN("USER ")) == 0 ||
-			 memcmp(packet->payload, "user ", IPQ_STATICSTRING_LEN("user ")) == 0)) {
+		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("USER ") &&
+			(memcmp(packet->payload, "USER ", NDPI_STATICSTRING_LEN("USER ")) == 0 ||
+			 memcmp(packet->payload, "user ", NDPI_STATICSTRING_LEN("user ")) == 0)) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP: found USER command\n");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP: found USER command\n");
 			flow->l4.tcp.ftp_codes_seen |= FTP_USER_CMD;
 			current_ftp_code = FTP_USER_CMD;
-		} else if (packet->payload_packet_len >= IPQ_STATICSTRING_LEN("FEAT") &&
-				   (memcmp(packet->payload, "FEAT", IPQ_STATICSTRING_LEN("FEAT")) == 0 ||
-					memcmp(packet->payload, "feat", IPQ_STATICSTRING_LEN("feat")) == 0)) {
+		} else if (packet->payload_packet_len >= NDPI_STATICSTRING_LEN("FEAT") &&
+				   (memcmp(packet->payload, "FEAT", NDPI_STATICSTRING_LEN("FEAT")) == 0 ||
+					memcmp(packet->payload, "feat", NDPI_STATICSTRING_LEN("feat")) == 0)) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP: found FEAT command\n");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP: found FEAT command\n");
 			flow->l4.tcp.ftp_codes_seen |= FTP_FEAT_CMD;
 			current_ftp_code = FTP_FEAT_CMD;
-		} else if (!ipoque_int_check_possible_ftp_command(packet)) {
+		} else if (!ndpi_int_check_possible_ftp_command(packet)) {
 			return 0;
 		}
 	} else {
-		if (packet->payload_packet_len > IPQ_STATICSTRING_LEN("220 ") &&
-			(memcmp(packet->payload, "220 ", IPQ_STATICSTRING_LEN("220 ")) == 0 ||
-			 memcmp(packet->payload, "220-", IPQ_STATICSTRING_LEN("220-")) == 0)) {
+		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("220 ") &&
+			(memcmp(packet->payload, "220 ", NDPI_STATICSTRING_LEN("220 ")) == 0 ||
+			 memcmp(packet->payload, "220-", NDPI_STATICSTRING_LEN("220-")) == 0)) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP: found 220 reply code\n");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP: found 220 reply code\n");
 			flow->l4.tcp.ftp_codes_seen |= FTP_220_CODE;
 			current_ftp_code = FTP_220_CODE;
-		} else if (packet->payload_packet_len > IPQ_STATICSTRING_LEN("331 ") &&
-				   (memcmp(packet->payload, "331 ", IPQ_STATICSTRING_LEN("331 ")) == 0 ||
-					memcmp(packet->payload, "331-", IPQ_STATICSTRING_LEN("331-")) == 0)) {
+		} else if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("331 ") &&
+				   (memcmp(packet->payload, "331 ", NDPI_STATICSTRING_LEN("331 ")) == 0 ||
+					memcmp(packet->payload, "331-", NDPI_STATICSTRING_LEN("331-")) == 0)) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP: found 331 reply code\n");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP: found 331 reply code\n");
 			flow->l4.tcp.ftp_codes_seen |= FTP_331_CODE;
 			current_ftp_code = FTP_331_CODE;
-		} else if (packet->payload_packet_len > IPQ_STATICSTRING_LEN("211 ") &&
-				   (memcmp(packet->payload, "211 ", IPQ_STATICSTRING_LEN("211 ")) == 0 ||
-					memcmp(packet->payload, "211-", IPQ_STATICSTRING_LEN("211-")) == 0)) {
+		} else if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("211 ") &&
+				   (memcmp(packet->payload, "211 ", NDPI_STATICSTRING_LEN("211 ")) == 0 ||
+					memcmp(packet->payload, "211-", NDPI_STATICSTRING_LEN("211-")) == 0)) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP: found 211reply code\n");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP: found 211reply code\n");
 			flow->l4.tcp.ftp_codes_seen |= FTP_211_CODE;
 			current_ftp_code = FTP_211_CODE;
-		} else if (!ipoque_int_check_possible_ftp_reply(packet)) {
+		} else if (!ndpi_int_check_possible_ftp_reply(packet)) {
 			if ((flow->l4.tcp.ftp_codes_seen & FTP_CODES) == 0 ||
-				(!ipoque_int_check_possible_ftp_continuation_reply(packet))) {
+				(!ndpi_int_check_possible_ftp_continuation_reply(packet))) {
 				return 0;
 			}
 		}
@@ -222,8 +222,8 @@ static u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct)
 
 	if ((flow->l4.tcp.ftp_codes_seen & FTP_COMMANDS) != 0 && (flow->l4.tcp.ftp_codes_seen & FTP_CODES) != 0) {
 
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP detected\n");
-		ipoque_int_ftp_add_connection(ipoque_struct);
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP detected\n");
+		ndpi_int_ftp_add_connection(ndpi_struct);
 		return 1;
 	}
 
@@ -259,11 +259,11 @@ static u8 search_ftp(struct ipoque_detection_module_struct *ipoque_struct)
 }
 
 
-static void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoque_struct)
+static void search_passive_ftp_mode(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
-	struct ipoque_id_struct *src = ipoque_struct->src;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
+	struct ndpi_id_struct *src = ndpi_struct->src;
 	u16 plen;
 	u8 i;
 	u32 ftp_ip;
@@ -271,21 +271,21 @@ static void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoqu
 
 // TODO check if normal passive mode also needs adaption for ipv6
 	if (packet->payload_packet_len > 3 && ipq_mem_cmp(packet->payload, "227 ", 4) == 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP passive mode initial string\n");
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP passive mode initial string\n");
 
 		plen = 4;				//=4 for "227 "
 		while (1) {
 			if (plen >= packet->payload_packet_len) {
-				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
 						"plen >= packet->payload_packet_len, return\n");
 				return;
 			}
 			if (packet->payload[plen] == '(') {
-				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "found (. break.\n");
+				NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "found (. break.\n");
 				break;
 			}
 /*			if (!isalnum(packet->payload[plen])) {
-				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "no alpha numeric symbol --> break.\n");
+				NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "no alpha numeric symbol --> break.\n");
 				return;
 			}*/
 			plen++;
@@ -303,18 +303,18 @@ static void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoqu
 				(ftp_ip << 8) +
 				ipq_bytestream_to_number(&packet->payload[plen], packet->payload_packet_len - plen, &plen);
 			if (oldplen == plen || plen >= packet->payload_packet_len) {
-				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP passive mode %u value parse failed\n",
+				NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP passive mode %u value parse failed\n",
 						i);
 				return;
 			}
 			if (packet->payload[plen] != ',') {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
 						"FTP passive mode %u value parse failed, char ',' is missing\n", i);
 				return;
 			}
 			plen++;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
 					"FTP passive mode %u value parsed, ip is now: %u\n", i, ftp_ip);
 
 		}
@@ -322,17 +322,17 @@ static void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoqu
 			dst->ftp_ip.ipv4 = htonl(ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
-					ipq_get_ip_string(ipoque_struct, &dst->ftp_ip));
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
+					ipq_get_ip_string(ndpi_struct, &dst->ftp_ip));
 		}
 		if (src != NULL) {
 			src->ftp_ip.ipv4 = packet->iph->daddr;
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
-					ipq_get_ip_string(ipoque_struct, &src->ftp_ip));
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
+					ipq_get_ip_string(ndpi_struct, &src->ftp_ip));
 		}
 		return;
 	}
@@ -342,28 +342,28 @@ static void search_passive_ftp_mode(struct ipoque_detection_module_struct *ipoqu
 			ipq_packet_src_ip_get(packet, &dst->ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
-					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ipoque_struct, &dst->ftp_ip));
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
+					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ndpi_struct, &dst->ftp_ip));
 		}
 		if (src != NULL) {
 			ipq_packet_dst_ip_get(packet, &src->ftp_ip);
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
-					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ipoque_struct, &src->ftp_ip));
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
+					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ndpi_struct, &src->ftp_ip));
 		}
 		return;
 	}
 }
 
 
-static void search_active_ftp_mode(struct ipoque_detection_module_struct *ipoque_struct)
+static void search_active_ftp_mode(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 5
 		&& (ipq_mem_cmp(packet->payload, "PORT ", 5) == 0 || ipq_mem_cmp(packet->payload, "EPRT ", 5) == 0)) {
@@ -373,14 +373,14 @@ static void search_active_ftp_mode(struct ipoque_detection_module_struct *ipoque
 			ipq_packet_dst_ip_get(packet, &src->ftp_ip);
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
 					packet->payload);
 		}
 		if (dst != NULL) {
 			ipq_packet_src_ip_get(packet, &dst->ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
 					packet->payload);
 		}
 	}
@@ -388,49 +388,49 @@ static void search_active_ftp_mode(struct ipoque_detection_module_struct *ipoque
 }
 
 
-void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_ftp_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 {
 
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
 
 
 	if (src != NULL && ipq_packet_dst_ip_eql(packet, &src->ftp_ip)
 		&& packet->tcp->syn != 0 && packet->tcp->ack == 0
-		&& packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN
-		&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask,
-											  IPOQUE_PROTOCOL_FTP) != 0 && src->ftp_timer_set != 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "possible ftp data, src!= 0.\n");
+		&& packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN
+		&& NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask,
+											  NDPI_PROTOCOL_FTP) != 0 && src->ftp_timer_set != 0) {
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "possible ftp data, src!= 0.\n");
 
-		if (((IPOQUE_TIMESTAMP_COUNTER_SIZE)
-			 (packet->tick_timestamp - src->ftp_timer)) >= ipoque_struct->ftp_connection_timeout) {
+		if (((NDPI_TIMESTAMP_COUNTER_SIZE)
+			 (packet->tick_timestamp - src->ftp_timer)) >= ndpi_struct->ftp_connection_timeout) {
 			src->ftp_timer_set = 0;
 		} else if (ntohs(packet->tcp->dest) > 1024
 				   && (ntohs(packet->tcp->source) > 1024 || ntohs(packet->tcp->source) == 20)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "detected FTP data stream.\n");
-			ipoque_int_ftp_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "detected FTP data stream.\n");
+			ndpi_int_ftp_add_connection(ndpi_struct);
 			return;
 		}
 	}
 
 	if (dst != NULL && ipq_packet_src_ip_eql(packet, &dst->ftp_ip)
 		&& packet->tcp->syn != 0 && packet->tcp->ack == 0
-		&& packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN
-		&& IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask,
-											  IPOQUE_PROTOCOL_FTP) != 0 && dst->ftp_timer_set != 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "possible ftp data; dst!= 0.\n");
+		&& packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN
+		&& NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask,
+											  NDPI_PROTOCOL_FTP) != 0 && dst->ftp_timer_set != 0) {
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "possible ftp data; dst!= 0.\n");
 
-		if (((IPOQUE_TIMESTAMP_COUNTER_SIZE)
-			 (packet->tick_timestamp - dst->ftp_timer)) >= ipoque_struct->ftp_connection_timeout) {
+		if (((NDPI_TIMESTAMP_COUNTER_SIZE)
+			 (packet->tick_timestamp - dst->ftp_timer)) >= ndpi_struct->ftp_connection_timeout) {
 			dst->ftp_timer_set = 0;
 
 		} else if (ntohs(packet->tcp->dest) > 1024
 				   && (ntohs(packet->tcp->source) > 1024 || ntohs(packet->tcp->source) == 20)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "detected FTP data stream.\n");
-			ipoque_int_ftp_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "detected FTP data stream.\n");
+			ndpi_int_ftp_add_connection(ndpi_struct);
 			return;
 		}
 	}
@@ -439,30 +439,30 @@ void ipoque_search_ftp_tcp(struct ipoque_detection_module_struct *ipoque_struct)
 
 	/* skip packets without payload */
 	if (packet->payload_packet_len == 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
 				"FTP test skip because of data connection or zero byte packet_payload.\n");
 		return;
 	}
 	/* skip excluded connections */
 
 	// we test for FTP connection and search for passive mode
-	if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_FTP) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG,
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_FTP) {
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
 				"detected ftp command mode. going to test data mode.\n");
-		search_passive_ftp_mode(ipoque_struct);
+		search_passive_ftp_mode(ndpi_struct);
 
-		search_active_ftp_mode(ipoque_struct);
+		search_active_ftp_mode(ndpi_struct);
 		return;
 	}
 
 
-	if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_UNKNOWN && search_ftp(ipoque_struct) != 0) {
-		IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "unknown. need next packet.\n");
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN && search_ftp(ndpi_struct) != 0) {
+		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "unknown. need next packet.\n");
 
 		return;
 	}
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_FTP);
-	IPQ_LOG(IPOQUE_PROTOCOL_FTP, ipoque_struct, IPQ_LOG_DEBUG, "exclude ftp.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FTP);
+	NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "exclude ftp.\n");
 
 }
 

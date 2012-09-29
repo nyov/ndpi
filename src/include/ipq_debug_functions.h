@@ -21,20 +21,20 @@
  */
 
 
-#ifndef __IPOQUE_API_INCLUDE_FILE__
-#error CANNOT INCLUDE THIS .H FILE, INCLUDE IPQ_API.H
+#ifndef __NDPI_API_INCLUDE_FILE__
+#error CANNOT INCLUDE THIS .H FILE, INCLUDE NDPI_API.H
 #endif
 
-#ifndef __IPQ_DEBUG_FUNCTIONS_H__
-#define __IPQ_DEBUG_FUNCTIONS_H__
+#ifndef __NDPI_DEBUG_FUNCTIONS_H__
+#define __NDPI_DEBUG_FUNCTIONS_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
-	void ipoque_debug_get_last_log_function_line(struct
-												 ipoque_detection_module_struct
-												 *ipoque_struct, const char **file, const char **func, u32 * line);
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+	void ndpi_debug_get_last_log_function_line(struct
+												 ndpi_detection_module_struct
+												 *ndpi_struct, const char **file, const char **func, u32 * line);
 #endif
 #ifdef __cplusplus
 }

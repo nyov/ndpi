@@ -23,37 +23,37 @@
 
 #ifdef NTOP_PROTOCOL_TEAMVIEWER
 
-static void ntop_int_teamview_add_connection(struct ipoque_detection_module_struct
-                                             *ipoque_struct)
+static void ntop_int_teamview_add_connection(struct ndpi_detection_module_struct
+                                             *ndpi_struct)
 {
-    ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_TEAMVIEWER, IPOQUE_REAL_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_TEAMVIEWER, NDPI_REAL_PROTOCOL);
 }
 
 
-void ntop_search_teamview(struct ipoque_detection_module_struct *ipoque_struct)
+void ntop_search_teamview(struct ndpi_detection_module_struct *ndpi_struct)
 {
-    struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-    struct ipoque_flow_struct *flow = ipoque_struct->flow;
+    struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+    struct ndpi_flow_struct *flow = ndpi_struct->flow;
     
-    if (ipoque_struct->packet.udp != NULL) {
+    if (ndpi_struct->packet.udp != NULL) {
          if (packet->payload_packet_len > 13) {
              if (packet->payload[0] == 0x00 && packet->payload[11] == 0x17 && packet->payload[12] == 0x24) { /* byte 0 is a counter/seq number, and at the start is 0 */
                 flow->l4.udp.teamviewer_stage++;
                 if (flow->l4.udp.teamviewer_stage == 4 || 
                     packet->udp->dest == ntohs(5938) || packet->udp->source == ntohs(5938)) {
-                    ntop_int_teamview_add_connection(ipoque_struct);
+                    ntop_int_teamview_add_connection(ndpi_struct);
                 }
                 return;
             }
         }
     }
-    else if(ipoque_struct->packet.tcp != NULL) {
+    else if(ndpi_struct->packet.tcp != NULL) {
         if (packet->payload_packet_len > 2) {
             if (packet->payload[0] == 0x17 && packet->payload[1] == 0x24) {
                 flow->l4.udp.teamviewer_stage++;
                 if (flow->l4.udp.teamviewer_stage == 4 || 
                     packet->tcp->dest == ntohs(5938) || packet->tcp->source == ntohs(5938)) {
-                    ntop_int_teamview_add_connection(ipoque_struct);
+                    ntop_int_teamview_add_connection(ndpi_struct);
                 }
                 return;
             }
@@ -61,13 +61,13 @@ void ntop_search_teamview(struct ipoque_detection_module_struct *ipoque_struct)
                 if (packet->payload[0] == 0x11 && packet->payload[1] == 0x30) {
                     flow->l4.udp.teamviewer_stage++;
                     if (flow->l4.udp.teamviewer_stage == 4)
-                        ntop_int_teamview_add_connection(ipoque_struct);
+                        ntop_int_teamview_add_connection(ndpi_struct);
                 }
                 return;
             }
         }
     }
     
-    IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_TEAMVIEWER);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_TEAMVIEWER);
 }
 #endif

@@ -22,14 +22,14 @@
 
 #ifdef NTOP_PROTOCOL_NETFLOW
 
-static void ntop_check_netflow(struct ipoque_detection_module_struct *ipoque_struct)
+static void ntop_check_netflow(struct ndpi_detection_module_struct *ndpi_struct)
 {
-  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-  struct ipoque_flow_struct *flow = ipoque_struct->flow;
+  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+  struct ndpi_flow_struct *flow = ndpi_struct->flow;
   const u8 *packet_payload = packet->payload;
   u32 payload_len = packet->payload_packet_len;
   
-  if((ipoque_struct->packet.udp != NULL)
+  if((ndpi_struct->packet.udp != NULL)
      && (payload_len >= 24)      
      && (packet->payload[0] == 0)
      && ((packet->payload[1] == 5)
@@ -43,17 +43,17 @@ static void ntop_check_netflow(struct ipoque_detection_module_struct *ipoque_str
     when = ntohl(*_when);
 
     if((when >= 946684800 /* 1/1/2000 */) && (when <= time(NULL))) {
-      IPQ_LOG(NTOP_PROTOCOL_NETFLOW, ipoque_struct, IPQ_LOG_DEBUG, "Found netflow.\n");
-      ipoque_int_add_connection(ipoque_struct, NTOP_PROTOCOL_NETFLOW, IPOQUE_REAL_PROTOCOL);
+      NDPI_LOG(NTOP_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
+      ndpi_int_add_connection(ndpi_struct, NTOP_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
       return;
     }
   }
 }
 
-void ntop_search_netflow(struct ipoque_detection_module_struct *ipoque_struct)
+void ntop_search_netflow(struct ndpi_detection_module_struct *ndpi_struct)
 {
-  IPQ_LOG(NTOP_PROTOCOL_NETFLOW, ipoque_struct, IPQ_LOG_DEBUG, "netflow detection...\n");
-  ntop_check_netflow(ipoque_struct);
+  NDPI_LOG(NTOP_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
+  ntop_check_netflow(ndpi_struct);
 }
 
 #endif

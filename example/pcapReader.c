@@ -49,28 +49,28 @@ static pcap_t *_pcap_handle = NULL;
 static int _pcap_datalink_type = 0;
 
 // detection
-static struct ipoque_detection_module_struct *ipoque_struct = NULL;
+static struct ndpi_detection_module_struct *ndpi_struct = NULL;
 static u32 detection_tick_resolution = 1000;
-static char *prot_long_str[] = { IPOQUE_PROTOCOL_LONG_STRING };
+static char *prot_long_str[] = { NDPI_PROTOCOL_LONG_STRING };
 
-#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
-static char *prot_short_str[] = { IPOQUE_PROTOCOL_SHORT_STRING };
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+static char *prot_short_str[] = { NDPI_PROTOCOL_SHORT_STRING };
 
-static IPOQUE_PROTOCOL_BITMASK debug_messages_bitmask;
+static NDPI_PROTOCOL_BITMASK debug_messages_bitmask;
 #endif
 
 // results
 static u64 raw_packet_count = 0;
 static u64 ip_packet_count = 0;
 static u64 total_bytes = 0;
-static u64 protocol_counter[IPOQUE_MAX_SUPPORTED_PROTOCOLS + 1];
-static u64 protocol_counter_bytes[IPOQUE_MAX_SUPPORTED_PROTOCOLS + 1];
+static u64 protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
+static u64 protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 
 
 // id tracking
 typedef struct osdpi_id {
 	u8 ip[4];
-	struct ipoque_id_struct *ipoque_id;
+	struct ndpi_id_struct *ndpi_id;
 } osdpi_id_t;
 
 static u32 size_id_struct = 0;
@@ -86,7 +86,7 @@ typedef struct osdpi_flow {
 	u16 lower_port;
 	u16 upper_port;
 	u8 protocol;
-	struct ipoque_flow_struct *ipoque_flow;
+	struct ndpi_flow_struct *ndpi_flow;
 
 	// result only, not used for flow identification
 	u32 detected_protocol;
@@ -97,32 +97,32 @@ static u32 size_flow_struct = 0;
 static struct osdpi_flow *osdpi_flows;
 static u32 osdpi_flow_count = 0;
 
-#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
-static int string_to_detection_bitmask(char *str, IPOQUE_PROTOCOL_BITMASK * dbm)
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+static int string_to_detection_bitmask(char *str, NDPI_PROTOCOL_BITMASK * dbm)
 {
 	u32 a;
 	u32 oldptr = 0;
 	u32 ptr = 0;
-	IPOQUE_BITMASK_RESET(*dbm);
+	NDPI_BITMASK_RESET(*dbm);
 
 	printf("Protocol parameter given: %s\n", str);
 
 	if (strcmp(str, "all") == 0) {
 		printf("Protocol parameter all parsed\n");
-		IPOQUE_BITMASK_SET_ALL(*dbm);
-		printf("Bitmask is: " IPOQUE_BITMASK_DEBUG_OUTPUT_BITMASK_STRING " \n",
-			   IPOQUE_BITMASK_DEBUG_OUTPUT_BITMASK_VALUE(*dbm));
+		NDPI_BITMASK_SET_ALL(*dbm);
+		printf("Bitmask is: " NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_STRING " \n",
+			   NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_VALUE(*dbm));
 		return 0;
 	}
 	// parse bitmask
 	while (1) {
 		if (str[ptr] == 0 || str[ptr] == ' ') {
 			printf("Protocol parameter: parsed: %.*s,\n", ptr - oldptr, &str[oldptr]);
-			for (a = 1; a <= IPOQUE_MAX_SUPPORTED_PROTOCOLS; a++) {
+			for (a = 1; a <= NDPI_MAX_SUPPORTED_PROTOCOLS; a++) {
 
 				if (strlen(prot_short_str[a]) == (ptr - oldptr) &&
 					(memcmp(&str[oldptr], prot_short_str[a], ptr - oldptr) == 0)) {
-					IPOQUE_ADD_PROTOCOL_TO_BITMASK(*dbm, a);
+					NDPI_ADD_PROTOCOL_TO_BITMASK(*dbm, a);
 					printf("Protocol parameter detected as protocol %s\n", prot_long_str[a]);
 				}
 			}
@@ -140,8 +140,8 @@ static void parseOptions(int argc, char **argv)
 {
 	int opt;
 
-#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
-	IPOQUE_BITMASK_SET_ALL(debug_messages_bitmask);
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+	NDPI_BITMASK_SET_ALL(debug_messages_bitmask);
 #endif
 
 	while ((opt = getopt(argc, argv, "f:e:")) != EOF) {
@@ -150,15 +150,15 @@ static void parseOptions(int argc, char **argv)
 			_pcap_file = optarg;
 			break;
 		case 'e':
-#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
 			// set debug logging bitmask to all protocols
 			if (string_to_detection_bitmask(optarg, &debug_messages_bitmask) != 0) {
 				printf("ERROR option -e needs a valid list of protocols");
 				exit(-1);
 			}
 
-			printf("debug messages Bitmask is: " IPOQUE_BITMASK_DEBUG_OUTPUT_BITMASK_STRING "\n",
-				   IPOQUE_BITMASK_DEBUG_OUTPUT_BITMASK_VALUE(debug_messages_bitmask));
+			printf("debug messages Bitmask is: " NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_STRING "\n",
+				   NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_VALUE(debug_messages_bitmask));
 
 #else
 			printf("ERROR: option -e : DEBUG MESSAGES DEACTIVATED\n");
@@ -177,8 +177,8 @@ static void parseOptions(int argc, char **argv)
 
 static void debug_printf(u32 protocol, void *id_struct, ipq_log_level_t log_level, const char *format, ...)
 {
-#ifdef IPOQUE_ENABLE_DEBUG_MESSAGES
-	if (IPOQUE_COMPARE_PROTOCOL_TO_BITMASK(debug_messages_bitmask, protocol) != 0) {
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+	if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(debug_messages_bitmask, protocol) != 0) {
 		const char *protocol_string;
 		const char *file;
 		const char *func;
@@ -188,7 +188,7 @@ static void debug_printf(u32 protocol, void *id_struct, ipq_log_level_t log_leve
 
 		protocol_string = prot_short_str[protocol];
 
-		ipoque_debug_get_last_log_function_line(ipoque_struct, &file, &func, &line);
+		ndpi_debug_get_last_log_function_line(ndpi_struct, &file, &func, &line);
 
 		printf("\nDEBUG: %s:%s:%u Prot: %s, level: %u packet: %llu :", file, func, line, protocol_string,
 			   log_level, raw_packet_count);
@@ -213,19 +213,19 @@ static void *get_id(const u8 * ip)
 	u32 i;
 	for (i = 0; i < osdpi_id_count; i++) {
 		if (memcmp(osdpi_ids[i].ip, ip, sizeof(u8) * 4) == 0) {
-			return osdpi_ids[i].ipoque_id;
+			return osdpi_ids[i].ndpi_id;
 		}
 	}
 	if (osdpi_id_count == MAX_OSDPI_IDS) {
 		printf("ERROR: maximum unique id count (%u) has been exceeded\n", MAX_OSDPI_IDS);
 		exit(-1);
 	} else {
-		struct ipoque_id_struct *ipoque_id;
+		struct ndpi_id_struct *ndpi_id;
 		memcpy(osdpi_ids[osdpi_id_count].ip, ip, sizeof(u8) * 4);
-		ipoque_id = osdpi_ids[osdpi_id_count].ipoque_id;
+		ndpi_id = osdpi_ids[osdpi_id_count].ndpi_id;
 
 		osdpi_id_count += 1;
-		return ipoque_id;
+		return ndpi_id;
 	}
 }
 
@@ -312,21 +312,21 @@ static struct osdpi_flow *get_osdpi_flow(const struct iphdr *iph, u16 ipsize)
 static void setupDetection(void)
 {
 	u32 i;
-	IPOQUE_PROTOCOL_BITMASK all;
+	NDPI_PROTOCOL_BITMASK all;
 
 	// init global detection structure
-	ipoque_struct = ipoque_init_detection_module(detection_tick_resolution, malloc_wrapper, debug_printf);
-	if (ipoque_struct == NULL) {
+	ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, debug_printf);
+	if (ndpi_struct == NULL) {
 		printf("ERROR: global structure initialization failed\n");
 		exit(-1);
 	}
 	// enable all protocols
-	IPOQUE_BITMASK_SET_ALL(all);
-	ipoque_set_protocol_detection_bitmask2(ipoque_struct, &all);
+	NDPI_BITMASK_SET_ALL(all);
+	ndpi_set_protocol_detection_bitmask2(ndpi_struct, &all);
 
 	// allocate memory for id and flow tracking
-	size_id_struct = ipoque_detection_get_sizeof_ipoque_id_struct();
-	size_flow_struct = ipoque_detection_get_sizeof_ipoque_flow_struct();
+	size_id_struct = ndpi_detection_get_sizeof_ndpi_id_struct();
+	size_flow_struct = ndpi_detection_get_sizeof_ndpi_flow_struct();
 
 	osdpi_ids = malloc(MAX_OSDPI_IDS * sizeof(struct osdpi_id));
 	if (osdpi_ids == NULL) {
@@ -335,9 +335,9 @@ static void setupDetection(void)
 	}
 	for (i = 0; i < MAX_OSDPI_IDS; i++) {
 		memset(&osdpi_ids[i], 0, sizeof(struct osdpi_id));
-		osdpi_ids[i].ipoque_id = calloc(1, size_id_struct);
-		if (osdpi_ids[i].ipoque_id == NULL) {
-			printf("ERROR: malloc for ipoque_id_struct failed\n");
+		osdpi_ids[i].ndpi_id = calloc(1, size_id_struct);
+		if (osdpi_ids[i].ndpi_id == NULL) {
+			printf("ERROR: malloc for ndpi_id_struct failed\n");
 			exit(-1);
 		}
 	}
@@ -349,40 +349,40 @@ static void setupDetection(void)
 	}
 	for (i = 0; i < MAX_OSDPI_FLOWS; i++) {
 		memset(&osdpi_flows[i], 0, sizeof(struct osdpi_flow));
-		osdpi_flows[i].ipoque_flow = calloc(1, size_flow_struct);
-		if (osdpi_flows[i].ipoque_flow == NULL) {
-			printf("ERROR: malloc for ipoque_flow_struct failed\n");
+		osdpi_flows[i].ndpi_flow = calloc(1, size_flow_struct);
+		if (osdpi_flows[i].ndpi_flow == NULL) {
+			printf("ERROR: malloc for ndpi_flow_struct failed\n");
 			exit(-1);
 		}
 	}
 
 	// clear memory for results
-	memset(protocol_counter, 0, (IPOQUE_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u64));
-	memset(protocol_counter_bytes, 0, (IPOQUE_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u64));
+	memset(protocol_counter, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u64));
+	memset(protocol_counter_bytes, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u64));
 }
 
 static void terminateDetection(void)
 {
 	u32 i;
 
-	ipoque_exit_detection_module(ipoque_struct, free_wrapper);
+	ndpi_exit_detection_module(ndpi_struct, free_wrapper);
 
 	for (i = 0; i < MAX_OSDPI_IDS; i++) {
-		free(osdpi_ids[i].ipoque_id);
+		free(osdpi_ids[i].ndpi_id);
 	}
 	free(osdpi_ids);
 	for (i = 0; i < MAX_OSDPI_FLOWS; i++) {
-		free(osdpi_flows[i].ipoque_flow);
+		free(osdpi_flows[i].ndpi_flow);
 	}
 	free(osdpi_flows);
 }
 
 static unsigned int packet_processing(const uint64_t time, const struct iphdr *iph, uint16_t ipsize, uint16_t rawsize)
 {
-	struct ipoque_id_struct *src = NULL;
-	struct ipoque_id_struct *dst = NULL;
+	struct ndpi_id_struct *src = NULL;
+	struct ndpi_id_struct *dst = NULL;
 	struct osdpi_flow *flow = NULL;
-	struct ipoque_flow_struct *ipq_flow = NULL;
+	struct ndpi_flow_struct *ipq_flow = NULL;
 	u32 protocol = 0;
 
 
@@ -391,13 +391,13 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 
 	flow = get_osdpi_flow(iph, ipsize);
 	if (flow != NULL) {
-		ipq_flow = flow->ipoque_flow;
+		ipq_flow = flow->ndpi_flow;
 	}
 
 	ip_packet_count++;
 	total_bytes += rawsize;
 
-#ifndef IPOQUE_ENABLE_DEBUG_MESSAGES
+#ifndef NDPI_ENABLE_DEBUG_MESSAGES
 	if (ip_packet_count % 499 == 0) {
 		printf("\rip packets scanned: \x1b[33m%-10llu\x1b[0m ip bytes scanned: \x1b[34m%-10llu\x1b[0m",
 			   ip_packet_count, total_bytes);
@@ -408,7 +408,7 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 	if ((iph->frag_off & htons(0x1FFF)) == 0) {
 
 		// here the actual detection is performed
-		protocol = ipoque_detection_process_packet(ipoque_struct, ipq_flow, (uint8_t *) iph, ipsize, time, src, dst);
+		protocol = ndpi_detection_process_packet(ndpi_struct, ipq_flow, (uint8_t *) iph, ipsize, time, src, dst);
 
 	} else {
 		static u8 frag_warning_used = 0;
@@ -442,7 +442,7 @@ static void printResults(void)
 	printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
 
 	printf("\n\ndetected protocols:\n");
-	for (i = 0; i <= IPOQUE_MAX_SUPPORTED_PROTOCOLS; i++) {
+	for (i = 0; i <= NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
 		u32 protocol_flows = 0;
 		u32 j;
 

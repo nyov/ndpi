@@ -22,14 +22,14 @@
 
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_TELNET
+#ifdef NDPI_PROTOCOL_TELNET
 
 
 
-static void ipoque_int_telnet_add_connection(struct ipoque_detection_module_struct
-											 *ipoque_struct)
+static void ndpi_int_telnet_add_connection(struct ndpi_detection_module_struct
+											 *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_TELNET, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_TELNET, NDPI_REAL_PROTOCOL);
 }
 
 	
@@ -38,9 +38,9 @@ static void ipoque_int_telnet_add_connection(struct ipoque_detection_module_stru
 #else
 __forceinline static
 #endif
-	 u8 search_iac(struct ipoque_detection_module_struct *ipoque_struct)
+	 u8 search_iac(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
 	u16 a;
 
@@ -71,33 +71,33 @@ __forceinline static
 }
 
 /* this detection also works asymmetrically */
-void ipoque_search_telnet_tcp(struct ipoque_detection_module_struct
-							  *ipoque_struct)
+void ndpi_search_telnet_tcp(struct ndpi_detection_module_struct
+							  *ndpi_struct)
 {
-//  struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+//  struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	IPQ_LOG(IPOQUE_PROTOCOL_TELNET, ipoque_struct, IPQ_LOG_DEBUG, "search telnet.\n");
+	NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "search telnet.\n");
 
-	if (search_iac(ipoque_struct) == 1) {
+	if (search_iac(ndpi_struct) == 1) {
 
 		if (flow->l4.tcp.telnet_stage == 2) {
-			IPQ_LOG(IPOQUE_PROTOCOL_TELNET, ipoque_struct, IPQ_LOG_DEBUG, "telnet identified.\n");
-			ipoque_int_telnet_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet identified.\n");
+			ndpi_int_telnet_add_connection(ndpi_struct);
 			return;
 		}
 		flow->l4.tcp.telnet_stage++;
-		IPQ_LOG(IPOQUE_PROTOCOL_TELNET, ipoque_struct, IPQ_LOG_DEBUG, "telnet stage %u.\n", flow->l4.tcp.telnet_stage);
+		NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet stage %u.\n", flow->l4.tcp.telnet_stage);
 		return;
 	}
 
 	if ((flow->packet_counter < 12 && flow->l4.tcp.telnet_stage > 0) || flow->packet_counter < 6) {
 		return;
 	} else {
-		IPQ_LOG(IPOQUE_PROTOCOL_TELNET, ipoque_struct, IPQ_LOG_DEBUG, "telnet excluded.\n");
-		IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_TELNET);
+		NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet excluded.\n");
+		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_TELNET);
 	}
 	return;
 }

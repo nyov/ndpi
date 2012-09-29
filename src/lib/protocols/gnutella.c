@@ -25,32 +25,32 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_GNUTELLA
+#ifdef NDPI_PROTOCOL_GNUTELLA
 
-static void ipoque_int_gnutella_add_connection(struct ipoque_detection_module_struct
-											   *ipoque_struct, ipoque_protocol_type_t protocol_type)
+static void ndpi_int_gnutella_add_connection(struct ndpi_detection_module_struct
+											   *ndpi_struct, ndpi_protocol_type_t protocol_type)
 {
 
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_GNUTELLA, protocol_type);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_GNUTELLA, protocol_type);
 
 	if (src != NULL) {
 		src->gnutella_ts = packet->tick_timestamp;
 		if (packet->udp != NULL) {
 			if (!src->detected_gnutella_udp_port1) {
 				src->detected_gnutella_udp_port1 = (packet->udp->source);
-				IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct,
-								 IPQ_LOG_DEBUG, "GNUTELLA UDP PORT1 DETECTED as %u\n",
+				NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct,
+								 NDPI_LOG_DEBUG, "GNUTELLA UDP PORT1 DETECTED as %u\n",
 								 src->detected_gnutella_udp_port1);
 
 			} else if ((ntohs(packet->udp->source) != src->detected_gnutella_udp_port1)
 					   && !src->detected_gnutella_udp_port2) {
 				src->detected_gnutella_udp_port2 = (packet->udp->source);
-				IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct,
-								 IPQ_LOG_DEBUG, "GNUTELLA UDP PORT2 DETECTED as %u\n",
+				NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct,
+								 NDPI_LOG_DEBUG, "GNUTELLA UDP PORT2 DETECTED as %u\n",
 								 src->detected_gnutella_udp_port2);
 
 			}
@@ -61,31 +61,31 @@ static void ipoque_int_gnutella_add_connection(struct ipoque_detection_module_st
 	}
 }
 
-void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_gnutella(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-	struct ipoque_id_struct *src = ipoque_struct->src;
-	struct ipoque_id_struct *dst = ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+	struct ndpi_id_struct *src = ndpi_struct->src;
+	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
 	u16 c;
-	if (packet->detected_protocol_stack[0] == IPOQUE_PROTOCOL_GNUTELLA) {
-		if (src != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
-							(packet->tick_timestamp - src->gnutella_ts) < ipoque_struct->gnutella_timeout)) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct,
-							 IPQ_LOG_DEBUG, "gnutella : save src connection packet detected\n");
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_GNUTELLA) {
+		if (src != NULL && ((NDPI_TIMESTAMP_COUNTER_SIZE)
+							(packet->tick_timestamp - src->gnutella_ts) < ndpi_struct->gnutella_timeout)) {
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct,
+							 NDPI_LOG_DEBUG, "gnutella : save src connection packet detected\n");
 			src->gnutella_ts = packet->tick_timestamp;
-		} else if (dst != NULL && ((IPOQUE_TIMESTAMP_COUNTER_SIZE)
-								   (packet->tick_timestamp - dst->gnutella_ts) < ipoque_struct->gnutella_timeout)) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct,
-							 IPQ_LOG_DEBUG, "gnutella : save dst connection packet detected\n");
+		} else if (dst != NULL && ((NDPI_TIMESTAMP_COUNTER_SIZE)
+								   (packet->tick_timestamp - dst->gnutella_ts) < ndpi_struct->gnutella_timeout)) {
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct,
+							 NDPI_LOG_DEBUG, "gnutella : save dst connection packet detected\n");
 			dst->gnutella_ts = packet->tick_timestamp;
 		}
-		if (src != NULL && (packet->tick_timestamp - src->gnutella_ts) > ipoque_struct->gnutella_timeout) {
+		if (src != NULL && (packet->tick_timestamp - src->gnutella_ts) > ndpi_struct->gnutella_timeout) {
 			src->detected_gnutella_udp_port1 = 0;
 			src->detected_gnutella_udp_port2 = 0;
 		}
-		if (dst != NULL && (packet->tick_timestamp - dst->gnutella_ts) > ipoque_struct->gnutella_timeout) {
+		if (dst != NULL && (packet->tick_timestamp - dst->gnutella_ts) > ndpi_struct->gnutella_timeout) {
 			dst->detected_gnutella_udp_port1 = 0;
 			dst->detected_gnutella_udp_port2 = 0;
 		}
@@ -100,41 +100,41 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 	if (packet->tcp != NULL) {
 		/* this case works asymmetrically */
 		if (packet->payload_packet_len > 10 && memcmp(packet->payload, "GNUTELLA/", 9) == 0) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "GNUTELLA DETECTED\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "GNUTELLA DETECTED\n");
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		/* this case works asymmetrically */
 		if (packet->payload_packet_len > 17 && memcmp(packet->payload, "GNUTELLA CONNECT/", 17) == 0) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "GNUTELLA DETECTED\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "GNUTELLA DETECTED\n");
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
 		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET /get/", 9) == 0)
 												|| (memcmp(packet->payload, "GET /uri-res/", 13) == 0)
 			)) {
-			ipq_parse_packet_line_info(ipoque_struct);
+			ipq_parse_packet_line_info(ndpi_struct);
 			for (c = 0; c < packet->parsed_lines; c++) {
 				if ((packet->line[c].len > 19 && memcmp(packet->line[c].ptr, "User-Agent: Gnutella", 20) == 0)
 					|| (packet->line[c].len > 10 && memcmp(packet->line[c].ptr, "X-Gnutella-", 11) == 0)
 					|| (packet->line[c].len > 7 && memcmp(packet->line[c].ptr, "X-Queue:", 8) == 0)
 					|| (packet->line[c].len > 36 && memcmp(packet->line[c].ptr,
 														   "Content-Type: application/x-gnutella-", 37) == 0)) {
-					IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
-					ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+					NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
+					ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 					return;
 				}
 			}
 		}
 		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET / HTTP", 9) == 0))) {
-			ipq_parse_packet_line_info(ipoque_struct);
+			ipq_parse_packet_line_info(ndpi_struct);
 			if ((packet->user_agent_line.ptr != NULL && packet->user_agent_line.len > 15
 				 && memcmp(packet->user_agent_line.ptr, "BearShare Lite ", 15) == 0)
 				|| (packet->accept_line.ptr != NULL && packet->accept_line.len > 24
 					&& memcmp(packet->accept_line.ptr, "application n/x-gnutella", 24) == 0)) {
-				IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
-				ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+				NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG, "DETECTED GNUTELLA GET.\n");
+				ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 			}
 
 		}
@@ -149,9 +149,9 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 			}
 
 			if (c < (packet->payload_packet_len - 9) && memcmp(&packet->payload[c], "urn:sha1:", 9) == 0) {
-				IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE,
+				NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE,
 						"detected GET /get/ or GET /uri-res/.\n");
-				ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+				ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 			}
 
 		}
@@ -159,16 +159,16 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 		/* answer to this packet is HTTP/1.1 ..... Content-Type: application/x-gnutella-packets,
 		 * it is searched in the upper paragraph. */
 		if (packet->payload_packet_len > 30 && memcmp(packet->payload, "HEAD /gnutella/push-proxy?", 26) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "detected HEAD /gnutella/push-proxy?\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+			NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "detected HEAD /gnutella/push-proxy?\n");
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 			return;
 		}
 		/* haven't found any trace with this pattern */
 		if (packet->payload_packet_len == 46
 			&& memcmp(packet->payload, "\x50\x55\x53\x48\x20\x67\x75\x69\x64\x3a", 10) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE,
+			NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE,
 					"detected \x50\x55\x53\x48\x20\x67\x75\x69\x64\x3a\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		/* haven't found any trace with this pattern */
@@ -187,9 +187,9 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 								  44) == 0) || (end - c > 10 && memcmp(&packet->payload[c], "\r\nX-Queue:", 10) == 0)
 					|| (end - c > 13 && memcmp(&packet->payload[c], "\r\nX-Features:", 13) == 0)) {
 
-					IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA,
-									 ipoque_struct, IPQ_LOG_TRACE, "FOXY :: GNUTELLA GET 2 DETECTED\n");
-					ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+					NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA,
+									 ndpi_struct, NDPI_LOG_TRACE, "FOXY :: GNUTELLA GET 2 DETECTED\n");
+					ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 					return;
 				}
 
@@ -200,7 +200,7 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 		if (packet->payload_packet_len > 1 && packet->payload[packet->payload_packet_len - 1] == 0x0a
 			&& packet->payload[packet->payload_packet_len - 2] == 0x0a) {
 			if (packet->payload_packet_len > 3 && memcmp(packet->payload, "GIV", 3) == 0) {
-				IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "MORPHEUS GIV DETECTED\n");
+				NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "MORPHEUS GIV DETECTED\n");
 				/* Not Excludeing the flow now.. We shall Check the next Packet too for Gnutella Patterns */
 				return;
 			}
@@ -209,23 +209,23 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 		if (packet->payload_packet_len == 46 && get_u32(packet->payload, 0) == htonl(0x802c0103) &&
 			get_u32(packet->payload, 4) == htonl(0x01000300) && get_u32(packet->payload, 8) == htonl(0x00002000) &&
 			get_u16(packet->payload, 12) == htons(0x0034)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "detected gnutella len == 46.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "detected gnutella len == 46.\n");
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if (packet->payload_packet_len == 49 &&
 			memcmp(packet->payload, "\x80\x2f\x01\x03\x01\x00\x06\x00\x00\x00\x20\x00\x00\x34\x00\x00\xff\x4d\x6c",
 				   19) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "detected gnutella len == 49.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "detected gnutella len == 49.\n");
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if (packet->payload_packet_len == 89 && memcmp(&packet->payload[43], "\x20\x4d\x6c", 3) == 0 &&
 			memcmp(packet->payload, "\x16\x03\x01\x00\x54\x01\x00\x00\x50\x03\x01\x4d\x6c", 13) == 0 &&
 			memcmp(&packet->payload[76], "\x00\x02\x00\x34\x01\x00\x00\x05", 8) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE,
+			NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE,
 					"detected gnutella asymmetrically len == 388.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		} else if (packet->payload_packet_len == 82) {
 			if (get_u32(packet->payload, 0) == htonl(0x16030100)
@@ -233,17 +233,17 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 				&& get_u16(packet->payload, 8) == htons(0x4903)
 				&& get_u16(packet->payload, 76) == htons(0x0002)
 				&& get_u32(packet->payload, 78) == htonl(0x00340100)) {
-				IPQ_LOG(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_TRACE, "detected len == 82.\n");
-				ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+				NDPI_LOG(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_TRACE, "detected len == 82.\n");
+				ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 				return;
 			}
 		}
 	} else if (packet->udp != NULL) {
 		if (src != NULL && (packet->udp->source == src->detected_gnutella_udp_port1 ||
 							packet->udp->source == src->detected_gnutella_udp_port2) &&
-			(packet->tick_timestamp - src->gnutella_ts) < ipoque_struct->gnutella_timeout) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG, "port based detection\n\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_CORRELATED_PROTOCOL);
+			(packet->tick_timestamp - src->gnutella_ts) < ndpi_struct->gnutella_timeout) {
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG, "port based detection\n\n");
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 		}
 		/* observations:
 		 * all the following patterns send out many packets which are the only ones of their flows,
@@ -255,9 +255,9 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 			&& packet->payload[16] == 0x41 && packet->payload[17] == 0x01
 			&& packet->payload[18] == 0x00 && packet->payload[19] == 0x00
 			&& packet->payload[20] == 0x00 && packet->payload[21] == 0x00 && packet->payload[22] == 0x00) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 23.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 
 			return;
 		}
@@ -265,30 +265,30 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 			&& packet->payload[26] == 0x50 && packet->payload[27] == 0x40
 			&& packet->payload[28] == 0x83 && packet->payload[29] == 0x53
 			&& packet->payload[30] == 0x43 && packet->payload[31] == 0x50 && packet->payload[32] == 0x41) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 35.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if (packet->payload_packet_len == 32
 			&& (memcmp(&packet->payload[16], "\x31\x01\x00\x09\x00\x00\x00\x4c\x49\x4d\x45", 11) == 0)) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 32.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if (packet->payload_packet_len == 34 && (memcmp(&packet->payload[25], "SCP@", 4) == 0)
 			&& (memcmp(&packet->payload[30], "DNA@", 4) == 0)) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 34.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if ((packet->payload_packet_len == 73 || packet->payload_packet_len == 96)
 			&& memcmp(&packet->payload[32], "urn:sha1:", 9) == 0) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 73,96.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
@@ -306,25 +306,25 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 					&& (memcmp(&packet->payload[6], "\x01\x01\x5c\x1b\x50\x55\x53\x48\x48\x10", 10) == 0))
 				|| (packet->payload_packet_len > 200 && packet->payload_packet_len < 300 && packet->payload[3] == 0x03)
 				|| (packet->payload_packet_len > 300 && (packet->payload[3] == 0x01 || packet->payload[3] == 0x03))) {
-				IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 								 "detected gnutella udp, GND.\n");
-				ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+				ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 				return;
 			}
 		}
 
 		if ((packet->payload_packet_len == 32)
 			&& memcmp(&packet->payload[16], "\x31\x01\x00\x09\x00\x00\x00", 7) == 0) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 32 ii.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 		if ((packet->payload_packet_len == 23)
 			&& memcmp(&packet->payload[16], "\x00\x01\x00\x00\x00\x00\x00", 7) == 0) {
-			IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct, IPQ_LOG_DEBUG,
+			NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct, NDPI_LOG_DEBUG,
 							 "detected gnutella udp, len = 23 ii.\n");
-			ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+			ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		}
 	}
@@ -347,10 +347,10 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 				&& flow->l4.tcp.gnutella_msg_id[0] == packet->payload[0]
 				&& flow->l4.tcp.gnutella_msg_id[1] == packet->payload[2]
 				&& flow->l4.tcp.gnutella_msg_id[2] == packet->payload[4]
-				&& IPQ_SRC_OR_DST_HAS_PROTOCOL(src, dst, IPOQUE_PROTOCOL_GNUTELLA)) {
-				IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct,
-								 IPQ_LOG_TRACE, "GNUTELLA DETECTED due to message ID match (NEONet protocol)\n");
-				ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+				&& NDPI_SRC_OR_DST_HAS_PROTOCOL(src, dst, NDPI_PROTOCOL_GNUTELLA)) {
+				NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct,
+								 NDPI_LOG_TRACE, "GNUTELLA DETECTED due to message ID match (NEONet protocol)\n");
+				ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 				return;
 			}
 		} else if (flow->l4.tcp.gnutella_stage == 2 - packet->packet_direction) {
@@ -358,15 +358,15 @@ void ipoque_search_gnutella(struct ipoque_detection_module_struct *ipoque_struct
 				&& flow->l4.tcp.gnutella_msg_id[0] == packet->payload[0]
 				&& flow->l4.tcp.gnutella_msg_id[1] == packet->payload[2]
 				&& flow->l4.tcp.gnutella_msg_id[2] == packet->payload[4]
-				&& IPQ_SRC_OR_DST_HAS_PROTOCOL(src, dst, IPOQUE_PROTOCOL_GNUTELLA)) {
-				IPQ_LOG_GNUTELLA(IPOQUE_PROTOCOL_GNUTELLA, ipoque_struct,
-								 IPQ_LOG_TRACE, "GNUTELLA DETECTED due to message ID match (NEONet protocol)\n");
-				ipoque_int_gnutella_add_connection(ipoque_struct, IPOQUE_REAL_PROTOCOL);
+				&& NDPI_SRC_OR_DST_HAS_PROTOCOL(src, dst, NDPI_PROTOCOL_GNUTELLA)) {
+				NDPI_LOG_GNUTELLA(NDPI_PROTOCOL_GNUTELLA, ndpi_struct,
+								 NDPI_LOG_TRACE, "GNUTELLA DETECTED due to message ID match (NEONet protocol)\n");
+				ndpi_int_gnutella_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 				return;
 			}
 		}
 	}
 
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_GNUTELLA);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_GNUTELLA);
 }
 #endif

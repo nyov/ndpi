@@ -24,34 +24,34 @@
 #include "ipq_protocols.h"
 #include "ipq_utils.h"
 
-#ifdef IPOQUE_PROTOCOL_ICECAST
+#ifdef NDPI_PROTOCOL_ICECAST
 
-static void ipoque_int_icecast_add_connection(struct ipoque_detection_module_struct
-											  *ipoque_struct)
+static void ndpi_int_icecast_add_connection(struct ndpi_detection_module_struct
+											  *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_ICECAST, IPOQUE_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_ICECAST, NDPI_CORRELATED_PROTOCOL);
 }
 
-void ipoque_search_icecast_tcp(struct ipoque_detection_module_struct
-							   *ipoque_struct)
+void ndpi_search_icecast_tcp(struct ndpi_detection_module_struct
+							   *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 
 	u8 i;
 
-	IPQ_LOG(IPOQUE_PROTOCOL_ICECAST, ipoque_struct, IPQ_LOG_DEBUG, "search icecast.\n");
+	NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "search icecast.\n");
 
 	if ((packet->payload_packet_len < 500 &&
 		 packet->payload_packet_len >= 7 && ipq_mem_cmp(packet->payload, "SOURCE ", 7) == 0)
 		|| flow->l4.tcp.icecast_stage) {
-		ipq_parse_packet_line_info_unix(ipoque_struct);
-		IPQ_LOG(IPOQUE_PROTOCOL_ICECAST, ipoque_struct, IPQ_LOG_DEBUG, "Icecast lines=%d\n", packet->parsed_unix_lines);
+		ipq_parse_packet_line_info_unix(ndpi_struct);
+		NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast lines=%d\n", packet->parsed_unix_lines);
 		for (i = 0; i < packet->parsed_unix_lines; i++) {
 			if (packet->unix_line[i].ptr != NULL && packet->unix_line[i].len > 4
 				&& ipq_mem_cmp(packet->unix_line[i].ptr, "ice-", 4) == 0) {
-				IPQ_LOG(IPOQUE_PROTOCOL_ICECAST, ipoque_struct, IPQ_LOG_DEBUG, "Icecast detected.\n");
-				ipoque_int_icecast_add_connection(ipoque_struct);
+				NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast detected.\n");
+				ndpi_int_icecast_add_connection(ndpi_struct);
 				return;
 			}
 		}
@@ -61,8 +61,8 @@ void ipoque_search_icecast_tcp(struct ipoque_detection_module_struct
 			return;
 		}
 	}
-#ifdef IPOQUE_PROTOCOL_HTTP
-	if (IPQ_FLOW_PROTOCOL_EXCLUDED(ipoque_struct, flow, IPOQUE_PROTOCOL_HTTP)) {
+#ifdef NDPI_PROTOCOL_HTTP
+	if (NDPI_FLOW_PROTOCOL_EXCLUDED(ndpi_struct, flow, NDPI_PROTOCOL_HTTP)) {
 		goto icecast_exclude;
 	}
 #endif
@@ -75,21 +75,21 @@ void ipoque_search_icecast_tcp(struct ipoque_detection_module_struct
 		/* server answer, now test Server for Icecast */
 
 
-		ipq_parse_packet_line_info(ipoque_struct);
+		ipq_parse_packet_line_info(ndpi_struct);
 
-		if (packet->server_line.ptr != NULL && packet->server_line.len > IPQ_STATICSTRING_LEN("Icecast") &&
-			memcmp(packet->server_line.ptr, "Icecast", IPQ_STATICSTRING_LEN("Icecast")) == 0) {
-			IPQ_LOG(IPOQUE_PROTOCOL_ICECAST, ipoque_struct, IPQ_LOG_DEBUG, "Icecast detected.\n");
+		if (packet->server_line.ptr != NULL && packet->server_line.len > NDPI_STATICSTRING_LEN("Icecast") &&
+			memcmp(packet->server_line.ptr, "Icecast", NDPI_STATICSTRING_LEN("Icecast")) == 0) {
+			NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast detected.\n");
 			/* TODO maybe store the previous protocol type as subtype?
 			 *      e.g. ogg or mpeg
 			 */
-			ipoque_int_icecast_add_connection(ipoque_struct);
+			ndpi_int_icecast_add_connection(ndpi_struct);
 			return;
 		}
 	}
 
   icecast_exclude:
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_ICECAST);
-	IPQ_LOG(IPOQUE_PROTOCOL_ICECAST, ipoque_struct, IPQ_LOG_DEBUG, "Icecast excluded.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_ICECAST);
+	NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast excluded.\n");
 }
 #endif

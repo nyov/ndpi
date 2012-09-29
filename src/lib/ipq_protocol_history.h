@@ -22,38 +22,38 @@
 
 
 
-#ifndef IPQ_PROTOCOL_HISTORY_H
-#define IPQ_PROTOCOL_HISTORY_H
+#ifndef NDPI_PROTOCOL_HISTORY_H
+#define NDPI_PROTOCOL_HISTORY_H
 
 typedef enum {
-	IPOQUE_REAL_PROTOCOL = 0,
-	IPOQUE_CORRELATED_PROTOCOL = 1
-} ipoque_protocol_type_t;
+	NDPI_REAL_PROTOCOL = 0,
+	NDPI_CORRELATED_PROTOCOL = 1
+} ndpi_protocol_type_t;
 
 /* generic function for setting a protocol for a flow
  *
  * what it does is:
- * 1.call ipoque_int_change_protocol
+ * 1.call ndpi_int_change_protocol
  * 2.set protocol in detected bitmask for src and dst
  */
-void ipoque_int_add_connection(struct ipoque_detection_module_struct *ipoque_struct,
-							   u16 detected_protocol, ipoque_protocol_type_t protocol_type);
+void ndpi_int_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+							   u16 detected_protocol, ndpi_protocol_type_t protocol_type);
 
 /* generic function for changing the flow protocol
  *
  * what it does is:
  * 1.update the flow protocol stack with the new protocol
  */
-void ipoque_int_change_flow_protocol(struct ipoque_detection_module_struct *ipoque_struct,
-									 u16 detected_protocol, ipoque_protocol_type_t protocol_type);
+void ndpi_int_change_flow_protocol(struct ndpi_detection_module_struct *ndpi_struct,
+									 u16 detected_protocol, ndpi_protocol_type_t protocol_type);
 
 /* generic function for changing the packetprotocol
  *
  * what it does is:
  * 1.update the packet protocol stack with the new protocol
  */
-void ipoque_int_change_packet_protocol(struct ipoque_detection_module_struct *ipoque_struct,
-									   u16 detected_protocol, ipoque_protocol_type_t protocol_type);
+void ndpi_int_change_packet_protocol(struct ndpi_detection_module_struct *ndpi_struct,
+									   u16 detected_protocol, ndpi_protocol_type_t protocol_type);
 
 /* generic function for changing the protocol
  *
@@ -66,12 +66,12 @@ static inline
 #else
 __forceinline static
 #endif
-	void ipoque_int_change_protocol(struct ipoque_detection_module_struct
-																	  *ipoque_struct, u16 detected_protocol,
-																	  ipoque_protocol_type_t protocol_type)
+	void ndpi_int_change_protocol(struct ndpi_detection_module_struct
+																	  *ndpi_struct, u16 detected_protocol,
+																	  ndpi_protocol_type_t protocol_type)
 {
-	ipoque_int_change_flow_protocol(ipoque_struct, detected_protocol, protocol_type);
-	ipoque_int_change_packet_protocol(ipoque_struct, detected_protocol, protocol_type);
+	ndpi_int_change_flow_protocol(ndpi_struct, detected_protocol, protocol_type);
+	ndpi_int_change_packet_protocol(ndpi_struct, detected_protocol, protocol_type);
 }
 
 
@@ -81,14 +81,14 @@ static inline
 #else
 __forceinline static
 #endif
-	 void ipoque_int_reset_packet_protocol(struct ipoque_detection_module_struct
-																			*ipoque_struct)
+	 void ndpi_int_reset_packet_protocol(struct ndpi_detection_module_struct
+																			*ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
-	packet->detected_protocol_stack[0] = IPOQUE_PROTOCOL_UNKNOWN;
+	packet->detected_protocol_stack[0] = NDPI_PROTOCOL_UNKNOWN;
 
-#if IPOQUE_PROTOCOL_HISTORY_SIZE > 1
+#if NDPI_PROTOCOL_HISTORY_SIZE > 1
 	packet->protocol_stack_info.current_stack_size_minus_one = 0;
 	packet->protocol_stack_info.entry_is_real_protocol = 0;
 #endif
@@ -100,21 +100,21 @@ static inline
 #else
 __forceinline static
 #endif
-	 void ipoque_int_reset_protocol(struct ipoque_detection_module_struct
-																	 *ipoque_struct)
+	 void ndpi_int_reset_protocol(struct ndpi_detection_module_struct
+																	 *ndpi_struct)
 {
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
 
 	if (flow) {
-		flow->detected_protocol_stack[0] = IPOQUE_PROTOCOL_UNKNOWN;
+		flow->detected_protocol_stack[0] = NDPI_PROTOCOL_UNKNOWN;
 
-#if IPOQUE_PROTOCOL_HISTORY_SIZE > 1
+#if NDPI_PROTOCOL_HISTORY_SIZE > 1
 		flow->protocol_stack_info.current_stack_size_minus_one = 0;
 		flow->protocol_stack_info.entry_is_real_protocol = 0;
 #endif
 	}
 
-	ipoque_int_reset_packet_protocol(ipoque_struct);
+	ndpi_int_reset_packet_protocol(ndpi_struct);
 }
 
 #endif

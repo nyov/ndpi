@@ -25,22 +25,22 @@
 /* include files */
 
 #include "ipq_protocols.h"
-#ifdef IPOQUE_PROTOCOL_KERBEROS
+#ifdef NDPI_PROTOCOL_KERBEROS
 
-static void ipoque_int_kerberos_add_connection(struct ipoque_detection_module_struct
-											   *ipoque_struct)
+static void ndpi_int_kerberos_add_connection(struct ndpi_detection_module_struct
+											   *ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_KERBEROS, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_KERBEROS, NDPI_REAL_PROTOCOL);
 }
 
 
-void ipoque_search_kerberos(struct ipoque_detection_module_struct
-							*ipoque_struct)
+void ndpi_search_kerberos(struct ndpi_detection_module_struct
+							*ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 
 	/* I have observed 0a,0c,0d,0e at packet->payload[19/21], maybe there are other possibilities */
@@ -49,8 +49,8 @@ void ipoque_search_kerberos(struct ipoque_detection_module_struct
 			packet->payload[14] == 0x05 &&
 			(packet->payload[19] == 0x0a ||
 			 packet->payload[19] == 0x0c || packet->payload[19] == 0x0d || packet->payload[19] == 0x0e)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_KERBEROS, ipoque_struct, IPQ_LOG_DEBUG, "found KERBEROS\n");
-			ipoque_int_kerberos_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_KERBEROS, ndpi_struct, NDPI_LOG_DEBUG, "found KERBEROS\n");
+			ndpi_int_kerberos_add_connection(ndpi_struct);
 			return;
 
 		}
@@ -58,8 +58,8 @@ void ipoque_search_kerberos(struct ipoque_detection_module_struct
 			packet->payload[16] == 0x05 &&
 			(packet->payload[21] == 0x0a ||
 			 packet->payload[21] == 0x0c || packet->payload[21] == 0x0d || packet->payload[21] == 0x0e)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_KERBEROS, ipoque_struct, IPQ_LOG_DEBUG, "found KERBEROS\n");
-			ipoque_int_kerberos_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_KERBEROS, ndpi_struct, NDPI_LOG_DEBUG, "found KERBEROS\n");
+			ndpi_int_kerberos_add_connection(ndpi_struct);
 			return;
 
 		}
@@ -75,8 +75,8 @@ void ipoque_search_kerberos(struct ipoque_detection_module_struct
 
 
 
-	IPQ_LOG(IPOQUE_PROTOCOL_KERBEROS, ipoque_struct, IPQ_LOG_DEBUG, "no KERBEROS detected.\n");
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_KERBEROS);
+	NDPI_LOG(NDPI_PROTOCOL_KERBEROS, ndpi_struct, NDPI_LOG_DEBUG, "no KERBEROS detected.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_KERBEROS);
 }
 
 #endif

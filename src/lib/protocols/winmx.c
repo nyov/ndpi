@@ -23,25 +23,25 @@
 
 #include "ipq_protocols.h"
 
-#ifdef IPOQUE_PROTOCOL_WINMX
+#ifdef NDPI_PROTOCOL_WINMX
 
 
-static void ipoque_int_winmx_add_connection(struct ipoque_detection_module_struct
-											*ipoque_struct);
+static void ndpi_int_winmx_add_connection(struct ndpi_detection_module_struct
+											*ndpi_struct);
 
-static void ipoque_int_winmx_add_connection(struct ipoque_detection_module_struct
-											*ipoque_struct)
+static void ndpi_int_winmx_add_connection(struct ndpi_detection_module_struct
+											*ndpi_struct)
 {
-	ipoque_int_add_connection(ipoque_struct, IPOQUE_PROTOCOL_WINMX, IPOQUE_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, NDPI_PROTOCOL_WINMX, NDPI_REAL_PROTOCOL);
 }
 
 
-void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struct)
+void ndpi_search_winmx_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 {
-	struct ipoque_packet_struct *packet = &ipoque_struct->packet;
-	struct ipoque_flow_struct *flow = ipoque_struct->flow;
-//      struct ipoque_id_struct         *src=ipoque_struct->src;
-//      struct ipoque_id_struct         *dst=ipoque_struct->dst;
+	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
+	struct ndpi_flow_struct *flow = ndpi_struct->flow;
+//      struct ndpi_id_struct         *src=ndpi_struct->src;
+//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 
 	if (flow->l4.tcp.winmx_stage == 0) {
@@ -52,30 +52,30 @@ void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struc
 		if (((packet->payload_packet_len) == 4)
 			&& (memcmp(packet->payload, "SEND", 4) == 0)) {
 
-			IPQ_LOG(IPOQUE_PROTOCOL_WINMX, ipoque_struct, IPQ_LOG_DEBUG, "maybe WinMX Send\n");
+			NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "maybe WinMX Send\n");
 			flow->l4.tcp.winmx_stage = 1;
 			return;
 		}
 
 		if (((packet->payload_packet_len) == 3)
 			&& (memcmp(packet->payload, "GET", 3) == 0)) {
-			IPQ_LOG(IPOQUE_PROTOCOL_WINMX, ipoque_struct, IPQ_LOG_DEBUG, "found winmx by GET\n");
-			ipoque_int_winmx_add_connection(ipoque_struct);
+			NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "found winmx by GET\n");
+			ndpi_int_winmx_add_connection(ndpi_struct);
 			return;
 		}
 
 
 		if (packet->payload_packet_len == 149 && packet->payload[0] == '8') {
-			IPQ_LOG(IPOQUE_PROTOCOL_WINMX, ipoque_struct, IPQ_LOG_DEBUG, "maybe WinMX\n");
+			NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "maybe WinMX\n");
 			if (get_u32(packet->payload, 17) == 0
 				&& get_u32(packet->payload, 21) == 0
 				&& get_u32(packet->payload, 25) == 0
 				&& get_u16(packet->payload, 39) == 0 && get_u16(packet->payload, 135) == htons(0x7edf)
 				&& get_u16(packet->payload, 147) == htons(0xf792)) {
 
-				IPQ_LOG(IPOQUE_PROTOCOL_WINMX, ipoque_struct, IPQ_LOG_DEBUG,
+				NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG,
 						"found winmx by pattern in first packet\n");
-				ipoque_int_winmx_add_connection(ipoque_struct);
+				ndpi_int_winmx_add_connection(ndpi_struct);
 				return;
 			}
 		}
@@ -85,8 +85,8 @@ void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struc
 			u16 left = packet->payload_packet_len - 1;
 			while (left > 0) {
 				if (packet->payload[left] == ' ') {
-					IPQ_LOG(IPOQUE_PROTOCOL_WINMX, ipoque_struct, IPQ_LOG_DEBUG, "found winmx in second packet\n");
-					ipoque_int_winmx_add_connection(ipoque_struct);
+					NDPI_LOG(NDPI_PROTOCOL_WINMX, ndpi_struct, NDPI_LOG_DEBUG, "found winmx in second packet\n");
+					ndpi_int_winmx_add_connection(ndpi_struct);
 					return;
 				} else if (packet->payload[left] < '0' || packet->payload[left] > '9') {
 					break;
@@ -96,7 +96,7 @@ void ipoque_search_winmx_tcp(struct ipoque_detection_module_struct *ipoque_struc
 		}
 	}
 
-	IPOQUE_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, IPOQUE_PROTOCOL_WINMX);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_WINMX);
 }
 
 #endif

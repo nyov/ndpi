@@ -21,8 +21,8 @@
  */
 
 
-#ifndef __IPOQUE_API_INCLUDE_FILE__
-#define __IPOQUE_API_INCLUDE_FILE__
+#ifndef __NDPI_API_INCLUDE_FILE__
+#define __NDPI_API_INCLUDE_FILE__
 
 
 #if defined(HAVE_NTOP) && defined(WIN32)
@@ -50,4 +50,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif							/* __IPOQUE_API_INCLUDE_FILE__ */
+#endif							/* __NDPI_API_INCLUDE_FILE__ */
