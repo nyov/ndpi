@@ -38,7 +38,7 @@
 
 #include <pcap.h>
 
-#include "ipq_api.h"
+#include "ndpi_api.h"
 
 // cli options
 static char *_pcap_file = NULL;
@@ -175,7 +175,7 @@ static void parseOptions(int argc, char **argv)
 	}
 }
 
-static void debug_printf(u32 protocol, void *id_struct, ipq_log_level_t log_level, const char *format, ...)
+static void debug_printf(u32 protocol, void *id_struct, ndpi_log_level_t log_level, const char *format, ...)
 {
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
 	if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(debug_messages_bitmask, protocol) != 0) {
@@ -382,7 +382,7 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 	struct ndpi_id_struct *src = NULL;
 	struct ndpi_id_struct *dst = NULL;
 	struct osdpi_flow *flow = NULL;
-	struct ndpi_flow_struct *ipq_flow = NULL;
+	struct ndpi_flow_struct *ndpi_flow = NULL;
 	u32 protocol = 0;
 
 
@@ -391,7 +391,7 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 
 	flow = get_osdpi_flow(iph, ipsize);
 	if (flow != NULL) {
-		ipq_flow = flow->ndpi_flow;
+		ndpi_flow = flow->ndpi_flow;
 	}
 
 	ip_packet_count++;
@@ -408,7 +408,7 @@ static unsigned int packet_processing(const uint64_t time, const struct iphdr *i
 	if ((iph->frag_off & htons(0x1FFF)) == 0) {
 
 		// here the actual detection is performed
-		protocol = ndpi_detection_process_packet(ndpi_struct, ipq_flow, (uint8_t *) iph, ipsize, time, src, dst);
+		protocol = ndpi_detection_process_packet(ndpi_struct, ndpi_flow, (uint8_t *) iph, ipsize, time, src, dst);
 
 	} else {
 		static u8 frag_warning_used = 0;
