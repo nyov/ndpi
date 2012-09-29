@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_SIP
 static void ndpi_int_sip_add_connection(struct ndpi_detection_module_struct

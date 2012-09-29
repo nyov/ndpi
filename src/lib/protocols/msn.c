@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_MSN
 
@@ -155,7 +155,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 #endif
 			   memcmp(packet->payload, "GET ", NDPI_STATICSTRING_LEN("GET ")) == 0 ||
 			   memcmp(packet->payload, "POST ", NDPI_STATICSTRING_LEN("POST ")) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->user_agent_line.ptr != NULL &&
 				packet->user_agent_line.len > NDPI_STATICSTRING_LEN("Messenger/") &&
 				memcmp(packet->user_agent_line.ptr, "Messenger/", NDPI_STATICSTRING_LEN("Messenger/")) == 0) {
@@ -177,7 +177,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 #endif
 				   memcmp(packet->payload, "POST http://", 12) == 0) {
 				/* scan packet if not already done... */
-				ipq_parse_packet_line_info(ndpi_struct);
+				ndpi_parse_packet_line_info(ndpi_struct);
 
 				if (packet->content_line.ptr != NULL &&
 					((packet->content_line.len == NDPI_STATICSTRING_LEN("application/x-msn-messenger") &&
@@ -228,7 +228,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 			if (status) {
 				u16 a;
 
-				ipq_parse_packet_line_info(ndpi_struct);
+				ndpi_parse_packet_line_info(ndpi_struct);
 
 				if (packet->content_line.ptr != NULL
 					&&
@@ -281,7 +281,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 				   (memcmp(packet->payload, "HTTP/1.1 200 OK", 15) == 0)
 				) {
 
-				ipq_parse_packet_line_info(ndpi_struct);
+				ndpi_parse_packet_line_info(ndpi_struct);
 
 				if (packet->content_line.ptr != NULL &&
 					((packet->content_line.len == NDPI_STATICSTRING_LEN("application/x-msn-messenger") &&
@@ -326,11 +326,11 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 						break;
 					}
 					if (packet->payload[plen] < '0' || packet->payload[plen] > '9') {
-						goto ipq_msn_exclude;
+						goto ndpi_msn_exclude;
 					}
 					plen++;
 					if (plen >= endlen) {
-						goto ipq_msn_exclude;
+						goto ndpi_msn_exclude;
 					}
 				}
 
@@ -341,11 +341,11 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 					}
 					if (packet->payload_packet_len > plen + 1
 						&& (packet->payload[plen] < 20 || packet->payload[plen] > 128)) {
-						goto ipq_msn_exclude;
+						goto ndpi_msn_exclude;
 					}
 					plen++;
 					if (plen >= endlen) {
-						goto ipq_msn_exclude;
+						goto ndpi_msn_exclude;
 					}
 
 				}
@@ -373,7 +373,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 			   (memcmp(packet->payload, "HTTP/1.1 200 OK", 15) == 0)
 			) {
 
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 
 			if (packet->content_line.ptr != NULL &&
 				((packet->content_line.len == NDPI_STATICSTRING_LEN("application/x-msn-messenger") &&
@@ -491,7 +491,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 		   n port 443 flows exclude flow bitmask after first packet itself */
 	}
 	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "exclude msn.\n");
-  ipq_msn_exclude:
+  ndpi_msn_exclude:
 	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MSN);
 }
 

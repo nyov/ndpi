@@ -1,5 +1,5 @@
 /*
- * ipq_protocol_history.h
+ * ndpi_protocol_history.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection

@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_MDNS
 
@@ -123,7 +123,7 @@ void ndpi_search_mdns(struct ndpi_detection_module_struct *ndpi_struct)
 			}
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
 			if (packet->iphv6 != NULL) {
-				const u32 *daddr = packet->iphv6->daddr.ipq_v6_u.u6_addr32;
+				const u32 *daddr = packet->iphv6->daddr.ndpi_v6_u.u6_addr32;
 				if (daddr[0] == htonl(0xff020000) && daddr[1] == 0 && daddr[2] == 0 && daddr[3] == htonl(0xfb)) {
 
 					NDPI_LOG(NDPI_PROTOCOL_MDNS, ndpi_struct,

@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_FASTTRACK
 
@@ -62,7 +62,7 @@ void ndpi_search_fasttrack_tcp(struct ndpi_detection_module_struct
 		if (packet->payload_packet_len > 50 && memcmp(packet->payload, "GET /", 5) == 0) {
 			u8 a = 0;
 			NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected GET /. \n");
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			for (a = 0; a < packet->parsed_lines; a++) {
 				if ((packet->line[a].len > 17 && memcmp(packet->line[a].ptr, "X-Kazaa-Username: ", 18) == 0)
 					|| (packet->line[a].len > 23 && memcmp(packet->line[a].ptr, "User-Agent: PeerEnabler/", 24) == 0)) {

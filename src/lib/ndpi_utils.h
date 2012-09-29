@@ -1,5 +1,5 @@
 /*
- * ipq_basic_def.h
+ * ndpi_utils.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -21,39 +21,32 @@
  */
 
 
-#ifndef __NDPI_API_INCLUDE_FILE__
-#error CANNOT INCLUDE THIS .H FILE, INCLUDE NDPI_API.H
-#endif
 
-#ifndef __NDPI_BASIC_DEF_H__
-#define __NDPI_BASIC_DEF_H__
+#ifndef _NDPI_UTILS_H_
+#define _NDPI_UTILS_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "ndpi_protocols.h"
 
-/* define u64, u32, here
- * this is used for compatibility restrictions on different platforms
+
+/**
+ * macro for getting the string len of a static string
  *
+ * use it instead of strlen to avoid runtime calculations
  */
-
-#ifndef u64
-#define u64 	unsigned long long
-#endif
-#ifndef u32
-#define u32 	unsigned int
-#endif
-#ifndef u16
-#define u16 	unsigned short
-#endif
-#ifndef u8
-#define u8 	unsigned char
-#endif
+#define NDPI_STATICSTRING_LEN( s ) ( sizeof( s ) - 1 )
 
 
-/* generic timestamp counter size */
-#define NDPI_TIMESTAMP_COUNTER_SIZE		u32
-#ifdef __cplusplus
-}
+
+/** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
+#define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
+  ((((u64 *)(x))[0]) < (((u64 *)(y))[0]) || ( (((u64 *)(x))[0]) == (((u64 *)(y))[0]) && (((u64 *)(x))[1]) < (((u64 *)(y))[1])) )
+
+
+
+#ifdef HAVE_NTOP
+/* http.c */
+extern char* ntop_strnstr(const char *s, const char *find, size_t slen);
 #endif
-#endif
+
+#endif							/* _NDPI_UTILS_H_ */
+

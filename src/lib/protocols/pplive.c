@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_PPLIVE
 
@@ -227,7 +227,7 @@ void ndpi_search_pplive_tcp_udp(struct ndpi_detection_module_struct
 		}
 
 		if (packet->payload_packet_len > 4 && memcmp(packet->payload, "GET /", 5) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if ((packet->parsed_lines == 8 || packet->parsed_lines == 9)
 				&& packet->line[0].ptr != NULL && packet->line[0].len >= 8
 				&& memcmp(&packet->payload[packet->line[0].len - 8], "HTTP/1.", 7) == 0

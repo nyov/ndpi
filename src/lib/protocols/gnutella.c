@@ -23,7 +23,7 @@
 
 /* include files */
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_GNUTELLA
 
@@ -114,7 +114,7 @@ void ndpi_search_gnutella(struct ndpi_detection_module_struct *ndpi_struct)
 		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET /get/", 9) == 0)
 												|| (memcmp(packet->payload, "GET /uri-res/", 13) == 0)
 			)) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			for (c = 0; c < packet->parsed_lines; c++) {
 				if ((packet->line[c].len > 19 && memcmp(packet->line[c].ptr, "User-Agent: Gnutella", 20) == 0)
 					|| (packet->line[c].len > 10 && memcmp(packet->line[c].ptr, "X-Gnutella-", 11) == 0)
@@ -128,7 +128,7 @@ void ndpi_search_gnutella(struct ndpi_detection_module_struct *ndpi_struct)
 			}
 		}
 		if (packet->payload_packet_len > 50 && ((memcmp(packet->payload, "GET / HTTP", 9) == 0))) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if ((packet->user_agent_line.ptr != NULL && packet->user_agent_line.len > 15
 				 && memcmp(packet->user_agent_line.ptr, "BearShare Lite ", 15) == 0)
 				|| (packet->accept_line.ptr != NULL && packet->accept_line.len > 24

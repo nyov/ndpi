@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_NFS
 
 static void ndpi_int_nfs_add_connection(struct ndpi_detection_module_struct

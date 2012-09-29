@@ -1,5 +1,5 @@
 /*
- * ipq_protocols_osdpi.h
+ * ndpi_protocols_osdpi.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection

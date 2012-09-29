@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_BATTLEFIELD
 
 
@@ -99,14 +99,14 @@ void ndpi_search_battlefield(struct ndpi_detection_module_struct
 		}
 	}
 
-	if (packet->payload_packet_len == 18 && ipq_mem_cmp(&packet->payload[5], "battlefield2\x00", 13) == 0) {
+	if (packet->payload_packet_len == 18 && ndpi_mem_cmp(&packet->payload[5], "battlefield2\x00", 13) == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_BATTLEFIELD, ndpi_struct, NDPI_LOG_DEBUG, "Battlefield 2 hello packet detected.\n");
 		ndpi_int_battlefield_add_connection(ndpi_struct);
 		return;
 	} else if (packet->payload_packet_len > 10 &&
-			   (ipq_mem_cmp(packet->payload, "\x11\x20\x00\x01\x00\x00\x50\xb9\x10\x11", 10) == 0
-				|| ipq_mem_cmp(packet->payload, "\x11\x20\x00\x01\x00\x00\x30\xb9\x10\x11", 10) == 0
-				|| ipq_mem_cmp(packet->payload, "\x11\x20\x00\x01\x00\x00\xa0\x98\x00\x11", 10) == 0)) {
+			   (ndpi_mem_cmp(packet->payload, "\x11\x20\x00\x01\x00\x00\x50\xb9\x10\x11", 10) == 0
+				|| ndpi_mem_cmp(packet->payload, "\x11\x20\x00\x01\x00\x00\x30\xb9\x10\x11", 10) == 0
+				|| ndpi_mem_cmp(packet->payload, "\x11\x20\x00\x01\x00\x00\xa0\x98\x00\x11", 10) == 0)) {
 		NDPI_LOG(NDPI_PROTOCOL_BATTLEFIELD, ndpi_struct, NDPI_LOG_DEBUG, "Battlefield safe pattern detected.\n");
 		ndpi_int_battlefield_add_connection(ndpi_struct);
 		return;

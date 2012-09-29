@@ -1,5 +1,5 @@
 /*
- * ipq_main.h
+ * ndpi_main.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -61,7 +61,7 @@
 #include <netinet/in.h>
 #endif
 
-#include "../include/ipq_api.h"
+#include "../include/ndpi_api.h"
 #include "linux_compat.h"
 
 
@@ -79,8 +79,8 @@
 //#include <arpa/inet.h>
 
 
-#include "ipq_api.h"
-#include "ipq_structs.h"
+#include "ndpi_api.h"
+#include "ndpi_structs.h"
 
 #define NDPI_USE_ASYMMETRIC_DETECTION             0
 #define NDPI_SELECTION_BITMASK_PROTOCOL_SIZE			u32
@@ -241,13 +241,13 @@
 
 
 #endif							/* NDPI_ENABLE_DEBUG_MESSAGES */
-typedef struct ipq_call_function_struct {
+typedef struct ndpi_call_function_struct {
 	NDPI_PROTOCOL_BITMASK detection_bitmask;
 	NDPI_PROTOCOL_BITMASK excluded_protocol_bitmask;
-	NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ipq_selection_bitmask;
+	NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_bitmask;
 	void (*func) (struct ndpi_detection_module_struct *);
 	u8 detection_feature;
-} ipq_call_function_struct_t;
+} ndpi_call_function_struct_t;
 
 
 typedef struct ndpi_int_one_line_struct {
@@ -258,7 +258,7 @@ typedef struct ndpi_int_one_line_struct {
 typedef struct ndpi_packet_struct {
 	const struct iphdr *iph;
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
-	const struct ipq_ipv6hdr *iphv6;
+	const struct ndpi_ipv6hdr *iphv6;
 #endif
 	const struct tcphdr *tcp;
 	const struct udphdr *udp;
@@ -344,25 +344,25 @@ typedef struct ndpi_detection_module_struct {
 	struct ndpi_id_struct *src;
 	struct ndpi_id_struct *dst;
 	/* callback function buffer */
-	struct ipq_call_function_struct
+	struct ndpi_call_function_struct
 	 callback_buffer[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 	u32 callback_buffer_size;
 
-	struct ipq_call_function_struct
+	struct ndpi_call_function_struct
 	 callback_buffer_tcp_no_payload[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 	u32 callback_buffer_size_tcp_no_payload;
 
-	struct ipq_call_function_struct
+	struct ndpi_call_function_struct
 	 callback_buffer_tcp_payload[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 	u32 callback_buffer_size_tcp_payload;
 
 
-	struct ipq_call_function_struct
+	struct ndpi_call_function_struct
 	 callback_buffer_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 	u32 callback_buffer_size_udp;
 
 
-	struct ipq_call_function_struct
+	struct ndpi_call_function_struct
 	 callback_buffer_non_tcp_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 	u32 callback_buffer_size_non_tcp_udp;
 
@@ -415,7 +415,7 @@ typedef struct ndpi_detection_module_struct {
 #endif
 	u8 ip_version_limit;
 } ndpi_detection_module_struct_t;
-u32 ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
+u32 ndpi_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
 
 /* NTOP */
 #if !(defined(HAVE_NTOP) && defined(WIN32))
@@ -423,18 +423,18 @@ static inline
 #else
 __forceinline static
 #endif
-	u16 ntohs_ipq_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read)
+	u16 ntohs_ndpi_bytestream_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read)
 {
-	u16 val = ipq_bytestream_to_number(str, max_chars_to_read, bytes_read);
+	u16 val = ndpi_bytestream_to_number(str, max_chars_to_read, bytes_read);
 	return ntohs(val);
 }
 
-u64 ipq_bytestream_to_number64(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
+u64 ndpi_bytestream_to_number64(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
 
-u32 ipq_bytestream_dec_or_hex_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
-u64 ipq_bytestream_dec_or_hex_to_number64(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
+u32 ndpi_bytestream_dec_or_hex_to_number(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
+u64 ndpi_bytestream_dec_or_hex_to_number64(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
 
-u32 ipq_bytestream_to_ipv4(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
+u32 ndpi_bytestream_to_ipv4(const u8 * str, u16 max_chars_to_read, u16 * bytes_read);
 
 
 
@@ -442,10 +442,10 @@ u32 ipq_bytestream_to_ipv4(const u8 * str, u16 max_chars_to_read, u16 * bytes_re
  * this function will also set some well known line pointers like:
  *  - host, user agent, empty line,....
  */
-void ipq_parse_packet_line_info(struct ndpi_detection_module_struct
+void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct
 								*ndpi_struct);
 
-void ipq_parse_packet_line_info_unix(struct ndpi_detection_module_struct
+void ndpi_parse_packet_line_info_unix(struct ndpi_detection_module_struct
 									 *ndpi_struct);
 
 u16 ndpi_check_for_email_address(struct ndpi_detection_module_struct *ndpi_struct, u16 counter);
@@ -458,9 +458,9 @@ static inline
 #else
 __forceinline static
 #endif
-	void ipq_ip_clear(ipq_ip_addr_t * ip)
+	void ndpi_ip_clear(ndpi_ip_addr_t * ip)
 {
-	memset(ip, 0, sizeof(ipq_ip_addr_t));
+	memset(ip, 0, sizeof(ndpi_ip_addr_t));
 }
 
 /* NTOP */
@@ -469,9 +469,9 @@ static inline
 #else
 __forceinline static
 #endif
-	 int ipq_ip_is_set(const ipq_ip_addr_t * ip)
+	 int ndpi_ip_is_set(const ndpi_ip_addr_t * ip)
 {
-	return memcmp(ip, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", sizeof(ipq_ip_addr_t)) != 0;
+	return memcmp(ip, "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0", sizeof(ndpi_ip_addr_t)) != 0;
 }
 
 /* check if the source ip address in packet and ip are equal */
@@ -481,12 +481,12 @@ static inline
 #else
 __forceinline static
 #endif
-	int ipq_packet_src_ip_eql(const struct ndpi_packet_struct *packet, const ipq_ip_addr_t * ip)
+	int ndpi_packet_src_ip_eql(const struct ndpi_packet_struct *packet, const ndpi_ip_addr_t * ip)
 {
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
 	if (packet->iphv6 != NULL) {
-		if (packet->iphv6->saddr.ipq_v6_u.u6_addr64[0] == ip->ipv6.ipq_v6_u.u6_addr64[0] &&
-			packet->iphv6->saddr.ipq_v6_u.u6_addr64[1] == ip->ipv6.ipq_v6_u.u6_addr64[1]) {
+		if (packet->iphv6->saddr.ndpi_v6_u.u6_addr64[0] == ip->ipv6.ndpi_v6_u.u6_addr64[0] &&
+			packet->iphv6->saddr.ndpi_v6_u.u6_addr64[1] == ip->ipv6.ndpi_v6_u.u6_addr64[1]) {
 
 			return 1;
 		} else {
@@ -507,12 +507,12 @@ static inline
 #else
 __forceinline static
 #endif
-	int ipq_packet_dst_ip_eql(const struct ndpi_packet_struct *packet, const ipq_ip_addr_t * ip)
+	int ndpi_packet_dst_ip_eql(const struct ndpi_packet_struct *packet, const ndpi_ip_addr_t * ip)
 {
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
 	if (packet->iphv6 != NULL) {
-		if (packet->iphv6->daddr.ipq_v6_u.u6_addr64[0] == ip->ipv6.ipq_v6_u.u6_addr64[0] &&
-			packet->iphv6->daddr.ipq_v6_u.u6_addr64[1] == ip->ipv6.ipq_v6_u.u6_addr64[1]) {
+		if (packet->iphv6->daddr.ndpi_v6_u.u6_addr64[0] == ip->ipv6.ndpi_v6_u.u6_addr64[0] &&
+			packet->iphv6->daddr.ndpi_v6_u.u6_addr64[1] == ip->ipv6.ndpi_v6_u.u6_addr64[1]) {
 			return 1;
 		} else {
 			return 0;
@@ -532,13 +532,13 @@ static inline
 #else
 __forceinline static
 #endif
-	void ipq_packet_src_ip_get(const struct ndpi_packet_struct *packet, ipq_ip_addr_t * ip)
+	void ndpi_packet_src_ip_get(const struct ndpi_packet_struct *packet, ndpi_ip_addr_t * ip)
 {
-	ipq_ip_clear(ip);
+	ndpi_ip_clear(ip);
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
 	if (packet->iphv6 != NULL) {
-		ip->ipv6.ipq_v6_u.u6_addr64[0] = packet->iphv6->saddr.ipq_v6_u.u6_addr64[0];
-		ip->ipv6.ipq_v6_u.u6_addr64[1] = packet->iphv6->saddr.ipq_v6_u.u6_addr64[1];
+		ip->ipv6.ndpi_v6_u.u6_addr64[0] = packet->iphv6->saddr.ndpi_v6_u.u6_addr64[0];
+		ip->ipv6.ndpi_v6_u.u6_addr64[1] = packet->iphv6->saddr.ndpi_v6_u.u6_addr64[1];
 	} else
 #endif
 		ip->ipv4 = packet->iph->saddr;
@@ -551,13 +551,13 @@ static inline
 #else
 __forceinline static
 #endif
-	void ipq_packet_dst_ip_get(const struct ndpi_packet_struct *packet, ipq_ip_addr_t * ip)
+	void ndpi_packet_dst_ip_get(const struct ndpi_packet_struct *packet, ndpi_ip_addr_t * ip)
 {
-	ipq_ip_clear(ip);
+	ndpi_ip_clear(ip);
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
 	if (packet->iphv6 != NULL) {
-		ip->ipv6.ipq_v6_u.u6_addr64[0] = packet->iphv6->daddr.ipq_v6_u.u6_addr64[0];
-		ip->ipv6.ipq_v6_u.u6_addr64[1] = packet->iphv6->daddr.ipq_v6_u.u6_addr64[1];
+		ip->ipv6.ndpi_v6_u.u6_addr64[0] = packet->iphv6->daddr.ndpi_v6_u.u6_addr64[0];
+		ip->ipv6.ndpi_v6_u.u6_addr64[1] = packet->iphv6->daddr.ndpi_v6_u.u6_addr64[1];
 	} else
 #endif
 		ip->ipv4 = packet->iph->daddr;
@@ -572,14 +572,14 @@ static inline
 #else
 __forceinline static
 #endif
-	char *ipq_get_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
-										  const ipq_ip_addr_t * ip)
+	char *ndpi_get_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
+										  const ndpi_ip_addr_t * ip)
 {
 	const u8 *a = (const u8 *) &ip->ipv4;
 
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
-	if (ip->ipv6.ipq_v6_u.u6_addr32[1] != 0 || ip->ipv6.ipq_v6_u.u6_addr64[1] != 0) {
-		const u16 *b = ip->ipv6.ipq_v6_u.u6_addr16;
+	if (ip->ipv6.ndpi_v6_u.u6_addr32[1] != 0 || ip->ipv6.ndpi_v6_u.u6_addr64[1] != 0) {
+		const u16 *b = ip->ipv6.ndpi_v6_u.u6_addr16;
 		snprintf(ndpi_struct->ip_string, NDPI_IP_STRING_SIZE, "%x:%x:%x:%x:%x:%x:%x:%x",
 				 ntohs(b[0]), ntohs(b[1]), ntohs(b[2]), ntohs(b[3]),
 				 ntohs(b[4]), ntohs(b[5]), ntohs(b[6]), ntohs(b[7]));
@@ -597,12 +597,12 @@ static inline
 #else
 __forceinline static
 #endif
-	char *ipq_get_packet_src_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
+	char *ndpi_get_packet_src_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
 													 const struct ndpi_packet_struct *packet)
 {
-	ipq_ip_addr_t ip;
-	ipq_packet_src_ip_get(packet, &ip);
-	return ipq_get_ip_string(ndpi_struct, &ip);
+	ndpi_ip_addr_t ip;
+	ndpi_packet_src_ip_get(packet, &ip);
+	return ndpi_get_ip_string(ndpi_struct, &ip);
 }
 
 /* get the string representation of the destination ip address from packet */
@@ -611,16 +611,16 @@ static inline
 #else
 __forceinline static
 #endif
-	char *ipq_get_packet_dst_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
+	char *ndpi_get_packet_dst_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
 													 const struct ndpi_packet_struct *packet)
 {
-	ipq_ip_addr_t ip;
-	ipq_packet_dst_ip_get(packet, &ip);
-	return ipq_get_ip_string(ndpi_struct, &ip);
+	ndpi_ip_addr_t ip;
+	ndpi_packet_dst_ip_get(packet, &ip);
+	return ndpi_get_ip_string(ndpi_struct, &ip);
 }
 #endif							/* NDPI_ENABLE_DEBUG_MESSAGES */
 
 
-#include "ipq_protocol_history.h"
+#include "ndpi_protocol_history.h"
 
 #endif							/* __NDPI_MAIN_INCLUDE_FILE__ */

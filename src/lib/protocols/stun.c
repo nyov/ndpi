@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_STUN
 
 

@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_GADUGADU
 
@@ -116,7 +116,7 @@ static u8 check_for_http(struct ndpi_detection_module_struct *ndpi_struct)
 		NDPI_LOG(NDPI_PROTOCOL_GADUGADU, ndpi_struct, NDPI_LOG_DEBUG, "Gadu-Gadu: GET FOUND\n");
 		parse_gg_foneno(ndpi_struct);
 		// parse packet
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		if (packet->parsed_lines <= 1) {
 			return 0;
 		}
@@ -135,7 +135,7 @@ static u8 check_for_http(struct ndpi_detection_module_struct *ndpi_struct)
 		NDPI_LOG(NDPI_PROTOCOL_GADUGADU, ndpi_struct, NDPI_LOG_DEBUG, "Gadu-Gadu: GET FOUND\n");
 
 		// parse packet
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		if (packet->parsed_lines <= 1) {
 			return 0;
 		}
@@ -154,7 +154,7 @@ static u8 check_for_http(struct ndpi_detection_module_struct *ndpi_struct)
 		NDPI_LOG(NDPI_PROTOCOL_GADUGADU, ndpi_struct, NDPI_LOG_DEBUG, "Gadu-Gadu: GET FOUND\n");
 
 		// parse packet
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		if (packet->parsed_lines <= 1) {
 			return 0;
 		}
@@ -172,7 +172,7 @@ static u8 check_for_http(struct ndpi_detection_module_struct *ndpi_struct)
 	} else if ((memcmp(packet->payload, "GET /nowosci.xml", NDPI_STATICSTRING_LEN("GET /nowosci.xml")) == 0) ||
 			   (memcmp(packet->payload, "GET /gadu-gadu.xml", NDPI_STATICSTRING_LEN("GET /gadu-gadu.xml")) == 0) ||
 			   (memcmp(packet->payload, "POST /access_token", NDPI_STATICSTRING_LEN("POST /access_token")) == 0)) {
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		if (packet->user_agent_line.ptr == NULL) {
 			return 0;
 		}

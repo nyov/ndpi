@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 #ifdef NDPI_PROTOCOL_SECONDLIFE
 
 static void ndpi_int_secondlife_add_connection(struct ndpi_detection_module_struct
@@ -53,7 +53,7 @@ void ndpi_search_secondlife(struct ndpi_detection_module_struct
 		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("GET /")
 			&& memcmp(packet->payload, "GET /", NDPI_STATICSTRING_LEN("GET /")) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_SECONDLIFE, ndpi_struct, NDPI_LOG_DEBUG, "Second Life HTTP 'GET /'' found.\n");
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->user_agent_line.ptr != NULL
 				&& packet->user_agent_line.len >
 				NDPI_STATICSTRING_LEN

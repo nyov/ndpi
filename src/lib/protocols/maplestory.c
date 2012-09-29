@@ -22,7 +22,7 @@
 
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_MAPLESTORY
 
@@ -53,7 +53,7 @@ void ndpi_search_maplestory(struct ndpi_detection_module_struct *ndpi_struct)
 
 	if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("GET /maple")
 		&& memcmp(packet->payload, "GET /maple", NDPI_STATICSTRING_LEN("GET /maple")) == 0) {
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		/* Maplestory update */
 		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("GET /maple/patch")
 			&& packet->payload[NDPI_STATICSTRING_LEN("GET /maple")] == '/') {

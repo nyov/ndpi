@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_FTP
 
@@ -270,7 +270,7 @@ static void search_passive_ftp_mode(struct ndpi_detection_module_struct *ndpi_st
 
 
 // TODO check if normal passive mode also needs adaption for ipv6
-	if (packet->payload_packet_len > 3 && ipq_mem_cmp(packet->payload, "227 ", 4) == 0) {
+	if (packet->payload_packet_len > 3 && ndpi_mem_cmp(packet->payload, "227 ", 4) == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP passive mode initial string\n");
 
 		plen = 4;				//=4 for "227 "
@@ -301,7 +301,7 @@ static void search_passive_ftp_mode(struct ndpi_detection_module_struct *ndpi_st
 			u16 oldplen = plen;
 			ftp_ip =
 				(ftp_ip << 8) +
-				ipq_bytestream_to_number(&packet->payload[plen], packet->payload_packet_len - plen, &plen);
+				ndpi_bytestream_to_number(&packet->payload[plen], packet->payload_packet_len - plen, &plen);
 			if (oldplen == plen || plen >= packet->payload_packet_len) {
 				NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP passive mode %u value parse failed\n",
 						i);
@@ -324,7 +324,7 @@ static void search_passive_ftp_mode(struct ndpi_detection_module_struct *ndpi_st
 			dst->ftp_timer_set = 1;
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
-					ipq_get_ip_string(ndpi_struct, &dst->ftp_ip));
+					ndpi_get_ip_string(ndpi_struct, &dst->ftp_ip));
 		}
 		if (src != NULL) {
 			src->ftp_ip.ipv4 = packet->iph->daddr;
@@ -332,27 +332,27 @@ static void search_passive_ftp_mode(struct ndpi_detection_module_struct *ndpi_st
 			src->ftp_timer_set = 1;
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP PASSIVE MODE FOUND: use  Server %s\n",
-					ipq_get_ip_string(ndpi_struct, &src->ftp_ip));
+					ndpi_get_ip_string(ndpi_struct, &src->ftp_ip));
 		}
 		return;
 	}
 
-	if (packet->payload_packet_len > 34 && ipq_mem_cmp(packet->payload, "229 Entering Extended Passive Mode", 34) == 0) {
+	if (packet->payload_packet_len > 34 && ndpi_mem_cmp(packet->payload, "229 Entering Extended Passive Mode", 34) == 0) {
 		if (dst != NULL) {
-			ipq_packet_src_ip_get(packet, &dst->ftp_ip);
+			ndpi_packet_src_ip_get(packet, &dst->ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to dst");
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
-					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ndpi_struct, &dst->ftp_ip));
+					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ndpi_get_ip_string(ndpi_struct, &dst->ftp_ip));
 		}
 		if (src != NULL) {
-			ipq_packet_dst_ip_get(packet, &src->ftp_ip);
+			ndpi_packet_dst_ip_get(packet, &src->ftp_ip);
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "saved ftp_ip, ftp_timer, ftp_timer_set to src");
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG,
-					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ipq_get_ip_string(ndpi_struct, &src->ftp_ip));
+					"FTP Extended PASSIVE MODE FOUND: use Server %s\n", ndpi_get_ip_string(ndpi_struct, &src->ftp_ip));
 		}
 		return;
 	}
@@ -366,18 +366,18 @@ static void search_active_ftp_mode(struct ndpi_detection_module_struct *ndpi_str
 	struct ndpi_id_struct *dst = ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 5
-		&& (ipq_mem_cmp(packet->payload, "PORT ", 5) == 0 || ipq_mem_cmp(packet->payload, "EPRT ", 5) == 0)) {
+		&& (ndpi_mem_cmp(packet->payload, "PORT ", 5) == 0 || ndpi_mem_cmp(packet->payload, "EPRT ", 5) == 0)) {
 
 		//src->local_ftp_data_port = htons(data_port_number);
 		if (src != NULL) {
-			ipq_packet_dst_ip_get(packet, &src->ftp_ip);
+			ndpi_packet_dst_ip_get(packet, &src->ftp_ip);
 			src->ftp_timer = packet->tick_timestamp;
 			src->ftp_timer_set = 1;
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
 					packet->payload);
 		}
 		if (dst != NULL) {
-			ipq_packet_src_ip_get(packet, &dst->ftp_ip);
+			ndpi_packet_src_ip_get(packet, &dst->ftp_ip);
 			dst->ftp_timer = packet->tick_timestamp;
 			dst->ftp_timer_set = 1;
 			NDPI_LOG(NDPI_PROTOCOL_FTP, ndpi_struct, NDPI_LOG_DEBUG, "FTP ACTIVE MODE FOUND, command is %.*s\n", 4,
@@ -398,7 +398,7 @@ void ndpi_search_ftp_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 
 
 
-	if (src != NULL && ipq_packet_dst_ip_eql(packet, &src->ftp_ip)
+	if (src != NULL && ndpi_packet_dst_ip_eql(packet, &src->ftp_ip)
 		&& packet->tcp->syn != 0 && packet->tcp->ack == 0
 		&& packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN
 		&& NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask,
@@ -416,7 +416,7 @@ void ndpi_search_ftp_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 		}
 	}
 
-	if (dst != NULL && ipq_packet_src_ip_eql(packet, &dst->ftp_ip)
+	if (dst != NULL && ndpi_packet_src_ip_eql(packet, &dst->ftp_ip)
 		&& packet->tcp->syn != 0 && packet->tcp->ack == 0
 		&& packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN
 		&& NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask,

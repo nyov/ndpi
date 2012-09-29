@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_MEEBO
 
@@ -86,7 +86,7 @@ void ndpi_search_meebo(struct ndpi_detection_module_struct
 		) && flow->packet_counter == 1) {
 		u8 host_or_referer_match = 0;
 
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		if (packet->host_line.ptr != NULL
 			&& packet->host_line.len >= 9
 			&& memcmp(&packet->host_line.ptr[packet->host_line.len - 9], "meebo.com", 9) == 0) {

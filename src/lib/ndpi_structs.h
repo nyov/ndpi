@@ -1,5 +1,5 @@
 /*
- * ipq_structs.h
+ * ndpi_structs.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -28,21 +28,21 @@
 # define MAX_PACKET_COUNTER 65000
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
 
-struct ipq_ip6_addr {
+struct ndpi_ip6_addr {
 	union {
 		u8 u6_addr8[16];
 		u16 u6_addr16[8];
 		u32 u6_addr32[4];
 		u64 u6_addr64[2];
-	} ipq_v6_u;
+	} ndpi_v6_u;
 
-#define ipq_v6_addr			ipq_v6_u.u6_addr8
-#define ipq_v6_addr16		ipq_v6_u.u6_addr16
-#define ipq_v6_addr32		ipq_v6_u.u6_addr32
-#define ipq_v6_addr64		ipq_v6_u.u6_addr64
+#define ndpi_v6_addr			ndpi_v6_u.u6_addr8
+#define ndpi_v6_addr16		ndpi_v6_u.u6_addr16
+#define ndpi_v6_addr32		ndpi_v6_u.u6_addr32
+#define ndpi_v6_addr64		ndpi_v6_u.u6_addr64
 };
 
-struct ipq_ipv6hdr {
+struct ndpi_ipv6hdr {
 /* use userspace and kernelspace compatible compile parameters */
 #if defined(__LITTLE_ENDIAN_BITFIELD) || (defined( __LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN)
 	u8 priority:4, version:4;
@@ -58,17 +58,17 @@ struct ipq_ipv6hdr {
 	u8 nexthdr;
 	u8 hop_limit;
 
-	struct ipq_ip6_addr saddr;
-	struct ipq_ip6_addr daddr;
+	struct ndpi_ip6_addr saddr;
+	struct ndpi_ip6_addr daddr;
 };
 #endif							/* NDPI_DETECTION_SUPPORT_IPV6 */
 typedef union {
 	u32 ipv4;
 	u8 ipv4_u8[4];
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
-	struct ipq_ip6_addr ipv6;
+	struct ndpi_ip6_addr ipv6;
 #endif
-} ipq_ip_addr_t;
+} ndpi_ip_addr_t;
 typedef struct ndpi_id_struct {
 	/* detected_protocol_bitmask:
 	 * access this bitmask to find out whether an id has used skype or not
@@ -82,10 +82,10 @@ typedef struct ndpi_id_struct {
 	 */
 	NDPI_PROTOCOL_BITMASK detected_protocol_bitmask;
 #ifdef NDPI_PROTOCOL_FTP
-	ipq_ip_addr_t ftp_ip;
+	ndpi_ip_addr_t ftp_ip;
 #endif
 #ifdef NDPI_PROTOCOL_RTSP
-	ipq_ip_addr_t rtsp_ip_address;
+	ndpi_ip_addr_t rtsp_ip_address;
 #endif
 #ifdef NDPI_PROTOCOL_PPLIVE
 	NDPI_TIMESTAMP_COUNTER_SIZE pplive_last_packet_time;

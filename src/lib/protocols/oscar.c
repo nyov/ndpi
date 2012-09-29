@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_OSCAR
 

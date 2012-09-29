@@ -19,7 +19,7 @@
 
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NTOP_PROTOCOL_TEAMVIEWER
 

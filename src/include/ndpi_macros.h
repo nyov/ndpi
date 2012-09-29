@@ -1,5 +1,5 @@
 /*
- * ipq_macros.h
+ * ndpi_macros.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -185,7 +185,7 @@ extern "C" {
 
 #define NDPI_PARSE_PACKET_LINE_INFO(ndpi_struct,packet)                        \
                         if (packet->packet_lines_parsed_complete != 1) {        \
-                                ipq_parse_packet_line_info(ndpi_struct);      \
+                                ndpi_parse_packet_line_info(ndpi_struct);      \
                         }                                                       \
 
 #ifdef __cplusplus

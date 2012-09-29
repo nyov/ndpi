@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_APPLEJUICE
 
 
@@ -43,7 +43,7 @@ void ndpi_search_applejuice_tcp(struct ndpi_detection_module_struct
 
 	if ((packet->payload_packet_len > 7) && (packet->payload[6] == 0x0d)
 		&& (packet->payload[7] == 0x0a)
-		&& (ipq_mem_cmp(packet->payload, "ajprot", 6) == 0)) {
+		&& (ndpi_mem_cmp(packet->payload, "ajprot", 6) == 0)) {
 		NDPI_LOG(NDPI_PROTOCOL_APPLEJUICE, ndpi_struct, NDPI_LOG_DEBUG, "detected applejuice.\n");
 		ndpi_int_applejuice_add_connection(ndpi_struct);
 		return;

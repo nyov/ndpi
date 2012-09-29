@@ -1,5 +1,5 @@
 /*
- * ipq_protocols.h
+ * ndpi_protocols.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -23,7 +23,7 @@
 
 #ifndef __NDPI_PROTOCOLS_INCLUDE_FILE__
 #define __NDPI_PROTOCOLS_INCLUDE_FILE__
-#include "ipq_main.h"
+#include "ndpi_main.h"
 /* the get_uXX will return raw network packet bytes !! */
 #define get_u8(X,O)  (*(u8 *)(((u8 *)X) + O))
 #define get_u16(X,O)  (*(u16 *)(((u8 *)X) + O))
@@ -73,7 +73,7 @@
 
 
 /* define memory callback function */
-#define ipq_mem_cmp memcmp
+#define ndpi_mem_cmp memcmp
 void ndpi_search_bittorrent(struct ndpi_detection_module_struct
 							  *ndpi_struct);
 /* edonkey entry function*/

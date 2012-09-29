@@ -1,5 +1,5 @@
 /*
- * ipq_api.h
+ * ndpi_api.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -39,14 +39,14 @@
 extern "C" {
 #endif
 /* basic definitions (u64, u32, timestamp size,...) */
-#include "ipq_basic_def.h"
-#include "ipq_protocols_osdpi.h"
+#include "ndpi_basic_def.h"
+#include "ndpi_protocols_osdpi.h"
 /* macros for protocol / bitmask conversation if needed */
-#include "ipq_macros.h"
+#include "ndpi_macros.h"
 
-#include "ipq_public_functions.h"
+#include "ndpi_public_functions.h"
 
-#include "ipq_debug_functions.h"
+#include "ndpi_debug_functions.h"
 #ifdef __cplusplus
 }
 #endif

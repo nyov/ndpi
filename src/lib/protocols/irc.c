@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_IRC
 #define NDPI_IRC_FIND_LESS(time_err,less) {int t1 = 0;\
@@ -54,7 +54,7 @@ __forceinline static
 	return 0;
 }
 
-static u8 ipq_check_for_NOTICE_or_PRIVMSG(struct ndpi_detection_module_struct *ndpi_struct)
+static u8 ndpi_check_for_NOTICE_or_PRIVMSG(struct ndpi_detection_module_struct *ndpi_struct)
 {
 
 	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
@@ -79,7 +79,7 @@ static u8 ipq_check_for_NOTICE_or_PRIVMSG(struct ndpi_detection_module_struct *n
 
 }
 
-static u8 ipq_check_for_Nickname(struct ndpi_detection_module_struct *ndpi_struct)
+static u8 ndpi_check_for_Nickname(struct ndpi_detection_module_struct *ndpi_struct)
 {
 	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 	u16 i, packetl = packet->payload_packet_len;
@@ -101,7 +101,7 @@ static u8 ipq_check_for_Nickname(struct ndpi_detection_module_struct *ndpi_struc
 	return 0;
 }
 
-static u8 ipq_check_for_cmd(struct ndpi_detection_module_struct *ndpi_struct)
+static u8 ndpi_check_for_cmd(struct ndpi_detection_module_struct *ndpi_struct)
 {
 	struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 	u16 i;
@@ -121,7 +121,7 @@ static u8 ipq_check_for_cmd(struct ndpi_detection_module_struct *ndpi_struct)
 	return 0;
 }
 
-static u8 ipq_check_for_IRC_traces(const u8 * ptr, u16 len)
+static u8 ndpi_check_for_IRC_traces(const u8 * ptr, u16 len)
 {
 	u16 i;
 
@@ -487,7 +487,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 			if (memcmp(packet->payload, ":", 1) == 0) {
 				if (packet->payload[packet->payload_packet_len - 2] != 0x0d
 					&& packet->payload[packet->payload_packet_len - 1] == 0x0a) {
-					ipq_parse_packet_line_info_unix(ndpi_struct);
+					ndpi_parse_packet_line_info_unix(ndpi_struct);
 					packet->parsed_lines = packet->parsed_unix_lines;
 					for (i = 0; i < packet->parsed_lines; i++) {
 						packet->line[i] = packet->unix_line[i];
@@ -495,7 +495,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 						packet->line[i].len = packet->unix_line[i].len;
 					}
 				} else if (packet->payload[packet->payload_packet_len - 2] == 0x0d) {
-					ipq_parse_packet_line_info(ndpi_struct);
+					ndpi_parse_packet_line_info(ndpi_struct);
 				} else {
 					flow->l4.tcp.irc_3a_counter++;
 				}
@@ -518,7 +518,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 			if ((memcmp(packet->payload, "USER ", 5) == 0)
 				|| (memcmp(packet->payload, "NICK ", 5) == 0)
 				|| (memcmp(packet->payload, "PASS ", 5) == 0)
-				|| (memcmp(packet->payload, ":", 1) == 0 && ipq_check_for_NOTICE_or_PRIVMSG(ndpi_struct) != 0)
+				|| (memcmp(packet->payload, ":", 1) == 0 && ndpi_check_for_NOTICE_or_PRIVMSG(ndpi_struct) != 0)
 				|| (memcmp(packet->payload, "PONG ", 5) == 0)
 				|| (memcmp(packet->payload, "PING ", 5) == 0)
 				|| (memcmp(packet->payload, "JOIN ", 5) == 0)
@@ -543,7 +543,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 				/* irc packets can have either windows line breaks (0d0a) or unix line breaks (0a) */
 				if (packet->payload[packet->payload_packet_len - 2] == 0x0d
 					&& packet->payload[packet->payload_packet_len - 1] == 0x0a) {
-					ipq_parse_packet_line_info(ndpi_struct);
+					ndpi_parse_packet_line_info(ndpi_struct);
 					if (packet->parsed_lines > 1) {
 						NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE,
 								"packet contains more than one line");
@@ -560,7 +560,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 					}
 
 				} else if (packet->payload[packet->payload_packet_len - 1] == 0x0a) {
-					ipq_parse_packet_line_info_unix(ndpi_struct);
+					ndpi_parse_packet_line_info_unix(ndpi_struct);
 					if (packet->parsed_unix_lines > 1) {
 						NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE,
 								"packet contains more than one line");
@@ -590,17 +590,17 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 		&& (packet->payload_packet_len > 5)) {
 		//HTTP POST Method being employed
 		if (memcmp(packet->payload, "POST ", 5) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->parsed_lines) {
 				u16 http_header_len = (packet->line[packet->parsed_lines - 1].ptr - packet->payload) + 2;
 				if (packet->payload_packet_len > http_header_len) {
 					http_content_ptr_len = packet->payload_packet_len - http_header_len;
 				}
-				if ((ipq_check_for_IRC_traces(packet->line[0].ptr, packet->line[0].len))
+				if ((ndpi_check_for_IRC_traces(packet->line[0].ptr, packet->line[0].len))
 					|| ((packet->http_url_name.ptr)
-						&& (ipq_check_for_IRC_traces(packet->http_url_name.ptr, packet->http_url_name.len)))
+						&& (ndpi_check_for_IRC_traces(packet->http_url_name.ptr, packet->http_url_name.len)))
 					|| ((packet->referer_line.ptr)
-						&& (ipq_check_for_IRC_traces(packet->referer_line.ptr, packet->referer_line.len)))) {
+						&& (ndpi_check_for_IRC_traces(packet->referer_line.ptr, packet->referer_line.len)))) {
 					NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE,
 							"IRC detected from the Http URL/ Referer header ");
 					flow->l4.tcp.irc_stage = 1;
@@ -616,10 +616,10 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 	if ((flow->detected_protocol_stack[0] != NDPI_PROTOCOL_IRC) && (flow->l4.tcp.irc_stage == 1)) {
 		if ((((packet->payload_packet_len - http_content_ptr_len) > 10)
 			 && (memcmp(packet->payload + http_content_ptr_len, "interface=", 10) == 0)
-			 && (ipq_check_for_Nickname(ndpi_struct) != 0))
+			 && (ndpi_check_for_Nickname(ndpi_struct) != 0))
 			|| (((packet->payload_packet_len - http_content_ptr_len) > 5)
 				&& (memcmp(packet->payload + http_content_ptr_len, "item=", 5) == 0)
-				&& (ipq_check_for_cmd(ndpi_struct) != 0))) {
+				&& (ndpi_check_for_cmd(ndpi_struct) != 0))) {
 			NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE, "IRC Nickname, cmd,  one time");
 			ndpi_int_irc_add_connection(ndpi_struct);
 			return;
@@ -635,8 +635,8 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 		if (packet->payload[packet->payload_packet_len - 2] != 0x0d
 			&& packet->payload[packet->payload_packet_len - 1] == 0x0a) {
 			NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_DEBUG,
-					"ipq_parse_packet_line_info_unix(ndpi_struct);");
-			ipq_parse_packet_line_info_unix(ndpi_struct);
+					"ndpi_parse_packet_line_info_unix(ndpi_struct);");
+			ndpi_parse_packet_line_info_unix(ndpi_struct);
 			packet->parsed_lines = packet->parsed_unix_lines;
 			for (i = 0; i < packet->parsed_lines; i++) {
 				packet->line[i] = packet->unix_line[i];
@@ -644,7 +644,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 				packet->line[i].len = packet->unix_line[i].len;
 			}
 		} else if (packet->payload[packet->payload_packet_len - 2] == 0x0d) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 		} else {
 			return;
 		}
@@ -717,7 +717,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 										if (src != NULL) {
 											k = j;
 											port =
-												ntohs_ipq_bytestream_to_number
+												ntohs_ndpi_bytestream_to_number
 												(&packet->line[i].ptr[j], packet->payload_packet_len - j, &j);
 											NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE, "port %u.",
 													port);
@@ -758,7 +758,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 											}
 										}
 										if (dst != NULL) {
-											port = ntohs_ipq_bytestream_to_number
+											port = ntohs_ndpi_bytestream_to_number
 												(&packet->line[i].ptr[j], packet->payload_packet_len - j, &j);
 											NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE, "port %u.",
 													port);

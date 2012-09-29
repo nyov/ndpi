@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_MANOLITO
 
 static void ndpi_int_manolito_add_connection(struct
@@ -63,7 +63,7 @@ u8 search_manolito_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 	NDPI_LOG(NDPI_PROTOCOL_MANOLITO, ndpi_struct, NDPI_LOG_DEBUG, "MANOLITO TCP DETECTION\n");
 
 	if (flow->l4.tcp.manolito_stage == 0 && packet->payload_packet_len > 6) {
-		if (ipq_mem_cmp(packet->payload, "SIZ ", 4) != 0)
+		if (ndpi_mem_cmp(packet->payload, "SIZ ", 4) != 0)
 			goto end_manolito_nothing_found;
 
 		flow->l4.tcp.manolito_stage = 1 + packet->packet_direction;
@@ -72,14 +72,14 @@ u8 search_manolito_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 
 	} else if ((flow->l4.tcp.manolito_stage == 2 - packet->packet_direction)
 			   && packet->payload_packet_len > 4) {
-		if (ipq_mem_cmp(packet->payload, "STR ", 4) != 0)
+		if (ndpi_mem_cmp(packet->payload, "STR ", 4) != 0)
 			goto end_manolito_nothing_found;
 		NDPI_LOG(NDPI_PROTOCOL_MANOLITO, ndpi_struct, NDPI_LOG_DEBUG, "MANOLITO Stage 2.\n");
 		flow->l4.tcp.manolito_stage = 3 + packet->packet_direction;
 		goto end_manolito_maybe_hit;
 
 	} else if ((flow->l4.tcp.manolito_stage == 4 - packet->packet_direction) && packet->payload_packet_len > 5) {
-		if (ipq_mem_cmp(packet->payload, "MD5 ", 4) != 0)
+		if (ndpi_mem_cmp(packet->payload, "MD5 ", 4) != 0)
 			goto end_manolito_nothing_found;
 		NDPI_LOG(NDPI_PROTOCOL_MANOLITO, ndpi_struct, NDPI_LOG_DEBUG, "MANOLITO Stage 3.\n");
 		flow->l4.tcp.manolito_stage = 5 + packet->packet_direction;
@@ -87,7 +87,7 @@ u8 search_manolito_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 
 	} else if ((flow->l4.tcp.manolito_stage == 6 - packet->packet_direction) && packet->payload_packet_len == 4) {
 
-		if (ipq_mem_cmp(packet->payload, "GO!!", 4) != 0)
+		if (ndpi_mem_cmp(packet->payload, "GO!!", 4) != 0)
 			goto end_manolito_nothing_found;
 		NDPI_LOG(NDPI_PROTOCOL_MANOLITO, ndpi_struct, NDPI_LOG_DEBUG, "MANOLITO Stage 4.\n");
 		goto end_manolito_found;

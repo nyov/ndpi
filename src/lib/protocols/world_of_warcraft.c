@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 #ifdef NDPI_PROTOCOL_WORLDOFWARCRAFT
 
 
@@ -62,7 +62,7 @@ void ndpi_search_worldofwarcraft(struct ndpi_detection_module_struct
 			 memcmp(packet->payload, "POST /", NDPI_STATICSTRING_LEN("POST /")) == 0) ||
 			(packet->payload_packet_len > NDPI_STATICSTRING_LEN("GET /") &&
 			 memcmp(packet->payload, "GET /", NDPI_STATICSTRING_LEN("GET /")) == 0)) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->user_agent_line.ptr != NULL &&
 				packet->user_agent_line.len == NDPI_STATICSTRING_LEN("Blizzard Web Client") &&
 				memcmp(packet->user_agent_line.ptr, "Blizzard Web Client",
@@ -75,7 +75,7 @@ void ndpi_search_worldofwarcraft(struct ndpi_detection_module_struct
 		}
 		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("GET /")
 			&& memcmp(packet->payload, "GET /", NDPI_STATICSTRING_LEN("GET /")) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->user_agent_line.ptr != NULL && packet->host_line.ptr != NULL
 				&& packet->user_agent_line.len > NDPI_STATICSTRING_LEN("Blizzard Downloader")
 				&& packet->host_line.len > NDPI_STATICSTRING_LEN("worldofwarcraft.com")

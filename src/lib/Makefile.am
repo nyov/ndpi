@@ -2,11 +2,11 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 
 lib_LTLIBRARIES = libndpi.la
 
-noinst_HEADERS = ipq_main.h \
-			ipq_protocol_history.h \
-			ipq_protocols.h \
-			ipq_structs.h \
-			ipq_utils.h \
+noinst_HEADERS = ndpi_main.h \
+			ndpi_protocol_history.h \
+			ndpi_protocols.h \
+			ndpi_structs.h \
+			ndpi_utils.h \
 			linux_compat.h
 
 
@@ -20,7 +20,7 @@ AM_CFLAGS=-fPIC
 
 libndpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
-libndpi_la_SOURCES = ipq_main.c \
+libndpi_la_SOURCES = ndpi_main.c \
 			protocols/afp.c \
 			protocols/aimini.c \
 			protocols/applejuice.c \

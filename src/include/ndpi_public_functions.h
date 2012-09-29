@@ -1,5 +1,5 @@
 /*
- * ipq_public_functions.h
+ * ndpi_public_functions.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -102,10 +102,10 @@ extern "C" {
 		NDPI_LOG_ERROR,
 		NDPI_LOG_TRACE,
 		NDPI_LOG_DEBUG
-	} ipq_log_level_t;
+	} ndpi_log_level_t;
 
 	typedef void (*ndpi_debug_function_ptr) (u32 protocol,
-											   void *module_struct, ipq_log_level_t log_level, const char *format, ...);
+											   void *module_struct, ndpi_log_level_t log_level, const char *format, ...);
 
 	/**
 	 * This function returns the size of the flow struct

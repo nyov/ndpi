@@ -24,7 +24,7 @@
 
 /* include files */
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_LDAP
 
 static void ndpi_int_ldap_add_connection(struct ndpi_detection_module_struct

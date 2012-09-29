@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_USENET
 
@@ -57,8 +57,8 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 	   201    Service available, posting prohibited
 	 */
 	if (flow->l4.tcp.usenet_stage == 0 && packet->payload_packet_len > 10
-		&& ((ipq_mem_cmp(packet->payload, "200 ", 4) == 0)
-			|| (ipq_mem_cmp(packet->payload, "201 ", 4) == 0))) {
+		&& ((ndpi_mem_cmp(packet->payload, "200 ", 4) == 0)
+			|| (ndpi_mem_cmp(packet->payload, "201 ", 4) == 0))) {
 
 		NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found 200 or 201.\n");
 		flow->l4.tcp.usenet_stage = 1 + packet->packet_direction;
@@ -75,14 +75,14 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 	 */
 	// check for client username
 	if (flow->l4.tcp.usenet_stage == 2 - packet->packet_direction) {
-		if (packet->payload_packet_len > 20 && (ipq_mem_cmp(packet->payload, "AUTHINFO USER ", 14) == 0)) {
+		if (packet->payload_packet_len > 20 && (ndpi_mem_cmp(packet->payload, "AUTHINFO USER ", 14) == 0)) {
 			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: username found\n");
 			flow->l4.tcp.usenet_stage = 3 + packet->packet_direction;
 
 			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
 			ndpi_int_usenet_add_connection(ndpi_struct);
 			return;
-		} else if (packet->payload_packet_len == 13 && (ipq_mem_cmp(packet->payload, "MODE READER\r\n", 13) == 0)) {
+		} else if (packet->payload_packet_len == 13 && (ndpi_mem_cmp(packet->payload, "MODE READER\r\n", 13) == 0)) {
 			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG,
 					"USENET: no login necessary but we are a client.\n");
 

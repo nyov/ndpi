@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_AIMINI
 
@@ -240,7 +240,7 @@ void ndpi_search_aimini(struct ndpi_detection_module_struct *ndpi_struct)
 			(packet->payload_packet_len > NDPI_STATICSTRING_LEN("GET /play/?fid=") &&
 			 (memcmp(packet->payload, "GET /play/?fid=", NDPI_STATICSTRING_LEN("GET /play/?fid=")) == 0))) {
 			NDPI_LOG(NDPI_PROTOCOL_AIMINI, ndpi_struct, NDPI_LOG_DEBUG, "HTTP packet detected.\n");
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->host_line.ptr != NULL && packet->host_line.len > 11
 				&& (memcmp(&packet->host_line.ptr[packet->host_line.len - 11], ".aimini.net", 11) == 0)) {
 				NDPI_LOG(NDPI_PROTOCOL_AIMINI, ndpi_struct, NDPI_LOG_DEBUG, "AIMINI HTTP traffic detected.\n");
@@ -254,7 +254,7 @@ void ndpi_search_aimini(struct ndpi_detection_module_struct *ndpi_struct)
 						   NDPI_STATICSTRING_LEN("play/")) == 0 ||
 					memcmp(&packet->payload[NDPI_STATICSTRING_LEN("GET /")], "download/",
 						   NDPI_STATICSTRING_LEN("download/")) == 0) {
-					ipq_parse_packet_line_info(ndpi_struct);
+					ndpi_parse_packet_line_info(ndpi_struct);
 					if (is_special_aimini_host(packet->host_line) == 1) {
 						NDPI_LOG(NDPI_PROTOCOL_AIMINI, ndpi_struct, NDPI_LOG_DEBUG,
 								"AIMINI HTTP traffic detected.\n");
@@ -265,7 +265,7 @@ void ndpi_search_aimini(struct ndpi_detection_module_struct *ndpi_struct)
 			} else if (memcmp(packet->payload, "POST /", NDPI_STATICSTRING_LEN("POST /")) == 0) {
 				if (memcmp(&packet->payload[NDPI_STATICSTRING_LEN("POST /")], "upload/",
 						   NDPI_STATICSTRING_LEN("upload/")) == 0) {
-					ipq_parse_packet_line_info(ndpi_struct);
+					ndpi_parse_packet_line_info(ndpi_struct);
 					if (is_special_aimini_host(packet->host_line) == 1) {
 						NDPI_LOG(NDPI_PROTOCOL_AIMINI, ndpi_struct, NDPI_LOG_DEBUG,
 								"AIMINI HTTP traffic detected.\n");

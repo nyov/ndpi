@@ -23,7 +23,7 @@
 
 
 /* include files */
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_CROSSFIRE
 
 
@@ -58,7 +58,7 @@ void ndpi_search_crossfire_tcp_udp(struct ndpi_detection_module_struct
 	} else if (packet->tcp != 0) {
 
 		if (packet->payload_packet_len > 4 && memcmp(packet->payload, "GET /", 5) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->parsed_lines == 8
 				&& (packet->line[0].ptr != NULL && packet->line[0].len >= 30
 					&& (memcmp(&packet->payload[5], "notice/login_big", 16) == 0

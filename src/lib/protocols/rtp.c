@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 #ifdef NDPI_PROTOCOL_RTP
 
 #define RTP_MAX_OUT_OF_ORDER 11

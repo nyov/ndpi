@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_BITTORRENT
 #define NDPI_PROTOCOL_UNSAFE_DETECTION 	0
 #define NDPI_PROTOCOL_SAFE_DETECTION 		1
@@ -107,7 +107,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
 
 
     /* parse complete get packet here into line structure elements */
-    ipq_parse_packet_line_info(ndpi_struct);
+    ndpi_parse_packet_line_info(ndpi_struct);
     /* answer to this pattern is HTTP....Server: hypertracker */
     if (packet->user_agent_line.ptr != NULL
 	&& ((packet->user_agent_line.len > 8 && memcmp(packet->user_agent_line.ptr, "Azureus ", 8) == 0)
@@ -137,29 +137,29 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
     if ((packet->parsed_lines == 10 || (packet->parsed_lines == 11 && packet->line[11].len == 0))
 	&& packet->user_agent_line.ptr != NULL
 	&& packet->user_agent_line.len > 12
-	&& ipq_mem_cmp(packet->user_agent_line.ptr, "Mozilla/4.0 ",
+	&& ndpi_mem_cmp(packet->user_agent_line.ptr, "Mozilla/4.0 ",
 		       12) == 0
 	&& packet->host_line.ptr != NULL
 	&& packet->host_line.len >= 7
 	&& packet->line[2].ptr != NULL
 	&& packet->line[2].len > 14
-	&& ipq_mem_cmp(packet->line[2].ptr, "Keep-Alive: 300", 15) == 0
+	&& ndpi_mem_cmp(packet->line[2].ptr, "Keep-Alive: 300", 15) == 0
 	&& packet->line[3].ptr != NULL
 	&& packet->line[3].len > 21
-	&& ipq_mem_cmp(packet->line[3].ptr, "Connection: Keep-alive", 22) == 0
+	&& ndpi_mem_cmp(packet->line[3].ptr, "Connection: Keep-alive", 22) == 0
 	&& packet->line[4].ptr != NULL
 	&& packet->line[4].len > 10
-	&& (ipq_mem_cmp(packet->line[4].ptr, "Accpet: */*", 11) == 0
-	    || ipq_mem_cmp(packet->line[4].ptr, "Accept: */*", 11) == 0)
+	&& (ndpi_mem_cmp(packet->line[4].ptr, "Accpet: */*", 11) == 0
+	    || ndpi_mem_cmp(packet->line[4].ptr, "Accept: */*", 11) == 0)
 
 	&& packet->line[5].ptr != NULL
 	&& packet->line[5].len > 12
-	&& ipq_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
+	&& ndpi_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
 	&& packet->line[7].ptr != NULL
 	&& packet->line[7].len > 15
-	&& ipq_mem_cmp(packet->line[7].ptr, "Pragma: no-cache", 16) == 0
+	&& ndpi_mem_cmp(packet->line[7].ptr, "Pragma: no-cache", 16) == 0
 	&& packet->line[8].ptr != NULL
-	&& packet->line[8].len > 22 && ipq_mem_cmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0) {
+	&& packet->line[8].len > 22 && ndpi_mem_cmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0) {
 
       NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "Bitcomet LTS detected\n");
       ndpi_add_connection_as_bittorrent(ndpi_struct,
@@ -181,12 +181,12 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
 	&& packet->line[2].len == 11
 	&& memcmp(packet->line[2].ptr, "Accept: */*", 11) == 0
 	&& packet->line[3].ptr != NULL && packet->line[3].len >= (sizeof("Referer: ") - 1)
-	&& ipq_mem_cmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
+	&& ndpi_mem_cmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
 	&& packet->line[5].ptr != NULL
 	&& packet->line[5].len > 13
-	&& ipq_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
+	&& ndpi_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
 	&& packet->line[6].ptr != NULL
-	&& packet->line[6].len > 21 && ipq_mem_cmp(packet->line[6].ptr, "Connection: Keep-Alive", 22) == 0) {
+	&& packet->line[6].len > 21 && ndpi_mem_cmp(packet->line[6].ptr, "Connection: Keep-Alive", 22) == 0) {
 
       NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "FlashGet detected\n");
       ndpi_add_connection_as_bittorrent(ndpi_struct,
@@ -206,9 +206,9 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
 	&& packet->line[2].len == 11
 	&& memcmp(packet->line[2].ptr, "Accept: */*", 11) == 0
 	&& packet->line[3].ptr != NULL && packet->line[3].len >= (sizeof("Referer: ") - 1)
-	&& ipq_mem_cmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
+	&& ndpi_mem_cmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
 	&& packet->line[5].ptr != NULL
-	&& packet->line[5].len > 21 && ipq_mem_cmp(packet->line[5].ptr, "Connection: Keep-Alive", 22) == 0) {
+	&& packet->line[5].len > 21 && ndpi_mem_cmp(packet->line[5].ptr, "Connection: Keep-Alive", 22) == 0) {
 
       NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "FlashGet detected\n");
       ndpi_add_connection_as_bittorrent(ndpi_struct,
@@ -221,7 +221,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
     /* answer to this pattern is not possible to implement asymmetrically */
     while (1) {
       if (len < 50 || ptr[0] == 0x0d) {
-	goto ipq_end_bt_tracker_check;
+	goto ndpi_end_bt_tracker_check;
       }
       if (memcmp(ptr, "info_hash=", 10) == 0) {
 	break;
@@ -240,7 +240,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
     /* parse bt hash */
     for (a = 0; a < 20; a++) {
       if (len < 3) {
-	goto ipq_end_bt_tracker_check;
+	goto ndpi_end_bt_tracker_check;
       }
       if (*ptr == '%') {
 	u8 x1 = 0xFF;
@@ -268,7 +268,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
 	}
 
 	if (x1 == 0xFF || x2 == 0xFF) {
-	  goto ipq_end_bt_tracker_check;
+	  goto ndpi_end_bt_tracker_check;
 	}
 	ptr += 3;
 	len -= 3;
@@ -276,7 +276,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
 	ptr++;
 	len--;
       } else {
-	goto ipq_end_bt_tracker_check;
+	goto ndpi_end_bt_tracker_check;
       }
     }
 
@@ -288,7 +288,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
     return 1;
   }
 
- ipq_end_bt_tracker_check:
+ ndpi_end_bt_tracker_check:
 
   if (packet->payload_packet_len == 80) {
     /* Warez 80 Bytes Packet
@@ -322,7 +322,7 @@ static u8 ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struc
   else if (packet->payload_packet_len > 50) {
     if (memcmp(packet->payload, "GET", 3) == 0) {
 
-      ipq_parse_packet_line_info(ndpi_struct);
+      ndpi_parse_packet_line_info(ndpi_struct);
       /* haven't fount this pattern anywhere */
       if (packet->host_line.ptr != NULL
 	  && packet->host_line.len >= 9 && memcmp(packet->host_line.ptr, "ip2p.com:", 9) == 0) {

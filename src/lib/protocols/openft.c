@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_OPENFT
 
 static void ndpi_int_openft_add_connection(struct ndpi_detection_module_struct
@@ -40,9 +40,9 @@ void ndpi_search_openft_tcp(struct ndpi_detection_module_struct
 
 	if (packet->payload_packet_len > 5 && memcmp(packet->payload, "GET /", 5) == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_OPENFT, ndpi_struct, NDPI_LOG_DEBUG, "HTTP packet detected.\n");
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 		if (packet->parsed_lines >= 2
-			&& packet->line[1].len > 13 && ipq_mem_cmp(packet->line[1].ptr, "X-OpenftAlias:", 14) == 0) {
+			&& packet->line[1].len > 13 && ndpi_mem_cmp(packet->line[1].ptr, "X-OpenftAlias:", 14) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_OPENFT, ndpi_struct, NDPI_LOG_DEBUG, "OpenFT detected.\n");
 			ndpi_int_openft_add_connection(ndpi_struct);
 			return;

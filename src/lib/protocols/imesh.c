@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_IMESH
 
@@ -250,7 +250,7 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 		/* http login */
 		if (packet->payload_packet_len > NDPI_STATICSTRING_LEN("POST /registration") &&
 			memcmp(packet->payload, "POST /registration", NDPI_STATICSTRING_LEN("POST /registration")) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->parsed_lines > 6 &&
 				packet->host_line.ptr != NULL &&
 				packet->host_line.len == NDPI_STATICSTRING_LEN("login.bearshare.com") &&

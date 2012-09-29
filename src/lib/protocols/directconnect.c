@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_DIRECTCONNECT
 
 //#define NDPI_DEBUG_DIRECTCONNECT
@@ -55,7 +55,7 @@ static u16 parse_binf_message(struct ndpi_detection_module_struct
 		if ((i + 30) < payload_len) {
 			if (memcmp(&payload[i], "DCTM", 4) == 0) {
 				if (memcmp(&payload[i + 15], "ADCS", 4) == 0) {
-					ssl_port = ntohs_ipq_bytestream_to_number(&payload[i + 25], 5, &bytes_read);
+					ssl_port = ntohs_ndpi_bytestream_to_number(&payload[i + 25], 5, &bytes_read);
 					NDPI_LOG(NDPI_PROTOCOL_DIRECTCONNECT, ndpi_struct,
 							NDPI_LOG_DEBUG, "directconnect ssl port parsed %d", ssl_port);
 
@@ -145,13 +145,13 @@ static void ndpi_search_directconnect_tcp(struct ndpi_detection_module_struct
 			u16 bytes_read = 0;
 			if (dst != NULL) {
 				dst->detected_directconnect_ssl_port =
-					ntohs_ipq_bytestream_to_number(&packet->payload[25], 5, &bytes_read);
+					ntohs_ndpi_bytestream_to_number(&packet->payload[25], 5, &bytes_read);
 				NDPI_LOG(NDPI_PROTOCOL_DIRECTCONNECT, ndpi_struct,
 						NDPI_LOG_DEBUG, "directconnect ssl port parsed %d", ntohs(dst->detected_directconnect_ssl_port));
 			}
 			if (src != NULL) {
 				src->detected_directconnect_ssl_port =
-					ntohs_ipq_bytestream_to_number(&packet->payload[25], 5, &bytes_read);
+					ntohs_ndpi_bytestream_to_number(&packet->payload[25], 5, &bytes_read);
 				NDPI_LOG(NDPI_PROTOCOL_DIRECTCONNECT, ndpi_struct,
 						NDPI_LOG_DEBUG, "directconnect ssl port parsed %d", ntohs(src->detected_directconnect_ssl_port));
 			}

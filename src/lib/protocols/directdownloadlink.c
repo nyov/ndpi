@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK
 
 
@@ -77,7 +77,7 @@ u8 search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct)
 		goto end_ddl_nothing_found;
 	}
 	// parse packet
-	ipq_parse_packet_line_info(ndpi_struct);
+	ndpi_parse_packet_line_info(ndpi_struct);
 
 	if (packet->host_line.ptr == NULL) {
 		NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: NO HOST FOUND\n");

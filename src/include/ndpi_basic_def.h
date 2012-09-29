@@ -1,5 +1,5 @@
 /*
- * ipq_debug_functions.h
+ * ndpi_basic_def.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -25,17 +25,34 @@
 #error CANNOT INCLUDE THIS .H FILE, INCLUDE NDPI_API.H
 #endif
 
-#ifndef __NDPI_DEBUG_FUNCTIONS_H__
-#define __NDPI_DEBUG_FUNCTIONS_H__
+#ifndef __NDPI_BASIC_DEF_H__
+#define __NDPI_BASIC_DEF_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-	void ndpi_debug_get_last_log_function_line(struct
-												 ndpi_detection_module_struct
-												 *ndpi_struct, const char **file, const char **func, u32 * line);
+
+/* define u64, u32, here
+ * this is used for compatibility restrictions on different platforms
+ *
+ */
+
+#ifndef u64
+#define u64 	unsigned long long
 #endif
+#ifndef u32
+#define u32 	unsigned int
+#endif
+#ifndef u16
+#define u16 	unsigned short
+#endif
+#ifndef u8
+#define u8 	unsigned char
+#endif
+
+
+/* generic timestamp counter size */
+#define NDPI_TIMESTAMP_COUNTER_SIZE		u32
 #ifdef __cplusplus
 }
 #endif

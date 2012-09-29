@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_THUNDER
 
 static void ndpi_int_thunder_add_connection(struct ndpi_detection_module_struct
@@ -105,8 +105,8 @@ __forceinline static
 	}
 
 	if (flow->thunder_stage == 0 && packet->payload_packet_len > 17
-		&& ipq_mem_cmp(packet->payload, "POST / HTTP/1.1\r\n", 17) == 0) {
-		ipq_parse_packet_line_info(ndpi_struct);
+		&& ndpi_mem_cmp(packet->payload, "POST / HTTP/1.1\r\n", 17) == 0) {
+		ndpi_parse_packet_line_info(ndpi_struct);
 
 		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder http POST packet detected, parsed packet lines: %u, empty line set %u (at: %u)\n",
@@ -115,7 +115,7 @@ __forceinline static
 		if (packet->empty_line_position_set != 0 &&
 			packet->content_line.ptr != NULL &&
 			packet->content_line.len == 24 &&
-			ipq_mem_cmp(packet->content_line.ptr, "application/octet-stream",
+			ndpi_mem_cmp(packet->content_line.ptr, "application/octet-stream",
 						24) == 0 && packet->empty_line_position_set < (packet->payload_packet_len - 8)
 			&& packet->payload[packet->empty_line_position + 2] >= 0x30
 			&& packet->payload[packet->empty_line_position + 2] < 0x40
@@ -166,23 +166,23 @@ __forceinline static
 	if (packet->payload_packet_len > 5
 		&& memcmp(packet->payload, "GET /", 5) == 0 && NDPI_SRC_OR_DST_HAS_PROTOCOL(src, dst, NDPI_PROTOCOL_THUNDER)) {
 		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "HTTP packet detected.\n");
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 
 		if (packet->parsed_lines > 7
 			&& packet->parsed_lines < 11
 			&& packet->line[1].len > 10
-			&& ipq_mem_cmp(packet->line[1].ptr, "Accept: */*", 11) == 0
+			&& ndpi_mem_cmp(packet->line[1].ptr, "Accept: */*", 11) == 0
 			&& packet->line[2].len > 22
-			&& ipq_mem_cmp(packet->line[2].ptr, "Cache-Control: no-cache",
+			&& ndpi_mem_cmp(packet->line[2].ptr, "Cache-Control: no-cache",
 						   23) == 0 && packet->line[3].len > 16
-			&& ipq_mem_cmp(packet->line[3].ptr, "Connection: close", 17) == 0
+			&& ndpi_mem_cmp(packet->line[3].ptr, "Connection: close", 17) == 0
 			&& packet->line[4].len > 6
-			&& ipq_mem_cmp(packet->line[4].ptr, "Host: ", 6) == 0
+			&& ndpi_mem_cmp(packet->line[4].ptr, "Host: ", 6) == 0
 			&& packet->line[5].len > 15
-			&& ipq_mem_cmp(packet->line[5].ptr, "Pragma: no-cache", 16) == 0
+			&& ndpi_mem_cmp(packet->line[5].ptr, "Pragma: no-cache", 16) == 0
 			&& packet->user_agent_line.ptr != NULL
 			&& packet->user_agent_line.len > 49
-			&& ipq_mem_cmp(packet->user_agent_line.ptr,
+			&& ndpi_mem_cmp(packet->user_agent_line.ptr,
 						   "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)", 50) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"Thunder HTTP download detected, adding flow.\n");

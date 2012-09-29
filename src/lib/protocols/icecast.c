@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_ICECAST
 
@@ -43,13 +43,13 @@ void ndpi_search_icecast_tcp(struct ndpi_detection_module_struct
 	NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "search icecast.\n");
 
 	if ((packet->payload_packet_len < 500 &&
-		 packet->payload_packet_len >= 7 && ipq_mem_cmp(packet->payload, "SOURCE ", 7) == 0)
+		 packet->payload_packet_len >= 7 && ndpi_mem_cmp(packet->payload, "SOURCE ", 7) == 0)
 		|| flow->l4.tcp.icecast_stage) {
-		ipq_parse_packet_line_info_unix(ndpi_struct);
+		ndpi_parse_packet_line_info_unix(ndpi_struct);
 		NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast lines=%d\n", packet->parsed_unix_lines);
 		for (i = 0; i < packet->parsed_unix_lines; i++) {
 			if (packet->unix_line[i].ptr != NULL && packet->unix_line[i].len > 4
-				&& ipq_mem_cmp(packet->unix_line[i].ptr, "ice-", 4) == 0) {
+				&& ndpi_mem_cmp(packet->unix_line[i].ptr, "ice-", 4) == 0) {
 				NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast detected.\n");
 				ndpi_int_icecast_add_connection(ndpi_struct);
 				return;
@@ -75,7 +75,7 @@ void ndpi_search_icecast_tcp(struct ndpi_detection_module_struct
 		/* server answer, now test Server for Icecast */
 
 
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 
 		if (packet->server_line.ptr != NULL && packet->server_line.len > NDPI_STATICSTRING_LEN("Icecast") &&
 			memcmp(packet->server_line.ptr, "Icecast", NDPI_STATICSTRING_LEN("Icecast")) == 0) {

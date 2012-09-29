@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_RTSP
 #ifndef NDPI_PROTOCOL_RTP
@@ -79,13 +79,13 @@ void ndpi_search_rtsp_tcp_udp(struct ndpi_detection_module_struct
 
 			if (dst != NULL) {
 				NDPI_LOG(NDPI_PROTOCOL_RTSP, ndpi_struct, NDPI_LOG_DEBUG, "found dst.\n");
-				ipq_packet_src_ip_get(packet, &dst->rtsp_ip_address);
+				ndpi_packet_src_ip_get(packet, &dst->rtsp_ip_address);
 				dst->rtsp_timer = packet->tick_timestamp;
 				dst->rtsp_ts_set = 1;
 			}
 			if (src != NULL) {
 				NDPI_LOG(NDPI_PROTOCOL_RTSP, ndpi_struct, NDPI_LOG_DEBUG, "found src.\n");
-				ipq_packet_dst_ip_get(packet, &src->rtsp_ip_address);
+				ndpi_packet_dst_ip_get(packet, &src->rtsp_ip_address);
 				src->rtsp_timer = packet->tick_timestamp;
 				src->rtsp_ts_set = 1;
 			}

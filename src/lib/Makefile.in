@@ -75,7 +75,7 @@ am__uninstall_files_from_dir = { \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libndpi_la_LIBADD =
-am_libndpi_la_OBJECTS = ipq_main.lo afp.lo aimini.lo applejuice.lo \
+am_libndpi_la_OBJECTS = ndpi_main.lo afp.lo aimini.lo applejuice.lo \
 	armagetron.lo battlefield.lo bgp.lo bittorrent.lo crossfire.lo \
 	dhcp.lo dhcpv6.lo directconnect.lo directdownloadlink.lo \
 	dns.lo dofus.lo edonkey.lo fasttrack.lo feidian.lo fiesta.lo \
@@ -233,11 +233,11 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AM_CPPFLAGS = -I$(top_srcdir)/src/include/
 lib_LTLIBRARIES = libndpi.la
-noinst_HEADERS = ipq_main.h \
-			ipq_protocol_history.h \
-			ipq_protocols.h \
-			ipq_structs.h \
-			ipq_utils.h \
+noinst_HEADERS = ndpi_main.h \
+			ndpi_protocol_history.h \
+			ndpi_protocols.h \
+			ndpi_structs.h \
+			ndpi_utils.h \
 			linux_compat.h
 
 
@@ -249,7 +249,7 @@ LIB_ANC = 0
 # ntop
 AM_CFLAGS = -fPIC
 libndpi_la_LDFLAGS = -version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
-libndpi_la_SOURCES = ipq_main.c \
+libndpi_la_SOURCES = ndpi_main.c \
 			protocols/afp.c \
 			protocols/aimini.c \
 			protocols/applejuice.c \
@@ -469,7 +469,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/icecast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/imesh.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ipq_main.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ndpi_main.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/irc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/jabber.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kerberos.Plo@am__quote@

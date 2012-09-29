@@ -1,5 +1,5 @@
 /*
- * ipq_utils.h
+ * ndpi_debug_functions.h
  * Copyright (C) 2009-2011 by ipoque GmbH
  * 
  * This file is part of OpenDPI, an open source deep packet inspection
@@ -21,32 +21,22 @@
  */
 
 
-
-#ifndef _NDPI_UTILS_H_
-#define _NDPI_UTILS_H_
-
-#include "ipq_protocols.h"
-
-
-/**
- * macro for getting the string len of a static string
- *
- * use it instead of strlen to avoid runtime calculations
- */
-#define NDPI_STATICSTRING_LEN( s ) ( sizeof( s ) - 1 )
-
-
-
-/** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
-#define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
-  ((((u64 *)(x))[0]) < (((u64 *)(y))[0]) || ( (((u64 *)(x))[0]) == (((u64 *)(y))[0]) && (((u64 *)(x))[1]) < (((u64 *)(y))[1])) )
-
-
-
-#ifdef HAVE_NTOP
-/* http.c */
-extern char* ntop_strnstr(const char *s, const char *find, size_t slen);
+#ifndef __NDPI_API_INCLUDE_FILE__
+#error CANNOT INCLUDE THIS .H FILE, INCLUDE NDPI_API.H
 #endif
 
-#endif							/* _NDPI_UTILS_H_ */
+#ifndef __NDPI_DEBUG_FUNCTIONS_H__
+#define __NDPI_DEBUG_FUNCTIONS_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+	void ndpi_debug_get_last_log_function_line(struct
+												 ndpi_detection_module_struct
+												 *ndpi_struct, const char **file, const char **func, u32 * line);
+#endif
+#ifdef __cplusplus
+}
+#endif
+#endif

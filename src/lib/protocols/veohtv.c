@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 #ifdef NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV
 
 static void ndpi_int_veohtv_add_connection(struct ndpi_detection_module_struct
@@ -51,7 +51,7 @@ void ndpi_search_veohtv_tcp(struct ndpi_detection_module_struct
 			 packet->payload[NDPI_STATICSTRING_LEN("HTTP/1.1 ")] == '4' ||
 			 packet->payload[NDPI_STATICSTRING_LEN("HTTP/1.1 ")] == '5')) {
 #ifdef NDPI_PROTOCOL_FLASH
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_FLASH &&
 				packet->server_line.ptr != NULL &&
 				packet->server_line.len > NDPI_STATICSTRING_LEN("Veoh-") &&

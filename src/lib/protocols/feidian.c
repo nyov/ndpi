@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_FEIDIAN
 
@@ -51,7 +51,7 @@ void ndpi_search_feidian(struct ndpi_detection_module_struct *ndpi_struct)
 			ndpi_int_feidian_add_connection(ndpi_struct, NDPI_REAL_PROTOCOL);
 			return;
 		} else if (packet->payload_packet_len > 50 && memcmp(packet->payload, "GET /", 5) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (packet->host_line.ptr != NULL && packet->host_line.len == 18
 				&& memcmp(packet->host_line.ptr, "config.feidian.com", 18) == 0) {
 				ndpi_int_feidian_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);

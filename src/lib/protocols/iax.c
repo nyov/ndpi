@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_IAX
 
 #define NDPI_IAX_MAX_INFORMATION_ELEMENTS 15

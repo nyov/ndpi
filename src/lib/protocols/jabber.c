@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
 
@@ -43,8 +43,8 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 	if (packet->payload_packet_len > x + 18 && packet->payload_packet_len > x && packet->payload_packet_len > 18) {
 		const u16 lastlen = packet->payload_packet_len - 18;
 		for (x = 0; x < lastlen; x++) {
-			if (ipq_mem_cmp(&packet->payload[x], "=\"im.truphone.com\"", 18) == 0 ||
-				ipq_mem_cmp(&packet->payload[x], "='im.truphone.com'", 18) == 0) {
+			if (ndpi_mem_cmp(&packet->payload[x], "=\"im.truphone.com\"", 18) == 0 ||
+				ndpi_mem_cmp(&packet->payload[x], "='im.truphone.com'", 18) == 0) {
 				NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_TRACE, "changed to TRUPHONE.\n");
 
 				ndpi_int_jabber_add_connection(ndpi_struct, NDPI_PROTOCOL_TRUPHONE, NDPI_CORRELATED_PROTOCOL);
@@ -141,7 +141,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct
 			lastlen = packet->payload_packet_len - 11;
 			for (x = 10; x < lastlen; x++) {
 				if (packet->payload[x] == 'p') {
-					if (ipq_mem_cmp(&packet->payload[x], "port=", 5) == 0) {
+					if (ndpi_mem_cmp(&packet->payload[x], "port=", 5) == 0) {
 						NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "port=\n");
 						if (src != NULL) {
 							src->jabber_stun_or_ft_ts = packet->tick_timestamp;
@@ -151,7 +151,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct
 							dst->jabber_stun_or_ft_ts = packet->tick_timestamp;
 						}
 						x += 6;
-						j_port = ntohs_ipq_bytestream_to_number(&packet->payload[x], packet->payload_packet_len, &x);
+						j_port = ntohs_ndpi_bytestream_to_number(&packet->payload[x], packet->payload_packet_len, &x);
 						NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct,
 								NDPI_LOG_DEBUG, "JABBER port : %u\n", ntohs(j_port));
 						if (src != NULL) {
@@ -207,7 +207,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct
 			lastlen = packet->payload_packet_len - 10;
 			for (; x < lastlen; x++) {
 				if (packet->payload[x] == 'p') {
-					if (ipq_mem_cmp(&packet->payload[x], "port=", 5) == 0) {
+					if (ndpi_mem_cmp(&packet->payload[x], "port=", 5) == 0) {
 						NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "port=\n");
 						if (src != NULL) {
 							src->jabber_stun_or_ft_ts = packet->tick_timestamp;
@@ -218,7 +218,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct
 						}
 
 						x += 6;
-						j_port = ntohs_ipq_bytestream_to_number(&packet->payload[x], packet->payload_packet_len, &x);
+						j_port = ntohs_ndpi_bytestream_to_number(&packet->payload[x], packet->payload_packet_len, &x);
 						NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct,
 								NDPI_LOG_DEBUG, "JABBER port : %u\n", ntohs(j_port));
 
@@ -277,10 +277,10 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct
 		if (packet->payload_packet_len > 47) {
 			const u16 lastlen = packet->payload_packet_len - 47;
 			for (x = 0; x < lastlen; x++) {
-				if (ipq_mem_cmp
+				if (ndpi_mem_cmp
 					(&packet->payload[x],
 					 "xmlns:stream='http://etherx.jabber.org/streams'", 47) == 0
-					|| ipq_mem_cmp(&packet->payload[x], "xmlns:stream=\"http://etherx.jabber.org/streams\"", 47) == 0) {
+					|| ndpi_mem_cmp(&packet->payload[x], "xmlns:stream=\"http://etherx.jabber.org/streams\"", 47) == 0) {
 					NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_TRACE, "found JABBER.\n");
 					x += 47;
 

@@ -18,7 +18,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 
 #ifdef NTOP_PROTOCOL_SKYPE
 

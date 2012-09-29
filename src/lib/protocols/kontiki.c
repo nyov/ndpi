@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_KONTIKI
 
 static void ndpi_int_kontiki_add_connection(struct ndpi_detection_module_struct

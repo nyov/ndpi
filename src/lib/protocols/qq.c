@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_utils.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_QQ
 
@@ -569,14 +569,14 @@ __forceinline static
 
 
 	if (packet->payload_packet_len > 100
-		&& ((ipq_mem_cmp(packet->payload, "GET", 3) == 0) || (ipq_mem_cmp(packet->payload, "POST", 4) == 0))) {
+		&& ((ndpi_mem_cmp(packet->payload, "GET", 3) == 0) || (ndpi_mem_cmp(packet->payload, "POST", 4) == 0))) {
 		NDPI_LOG(NDPI_PROTOCOL_QQ, ndpi_struct, NDPI_LOG_DEBUG, "found GET or POST.\n");
 		if (memcmp(packet->payload, "GET /qqfile/qq", 14) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_QQ, ndpi_struct, NDPI_LOG_DEBUG, "found qq over tcp GET /qqfile/qq.\n");
 			ndpi_int_qq_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 			return;
 		}
-		ipq_parse_packet_line_info(ndpi_struct);
+		ndpi_parse_packet_line_info(ndpi_struct);
 
 		if (packet->user_agent_line.ptr != NULL
 			&& (packet->user_agent_line.len > 7 && memcmp(packet->user_agent_line.ptr, "QQClient", 8) == 0)) {

@@ -23,7 +23,7 @@
 
 
 /* include files */
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_WORLD_OF_KUNG_FU
 
 static void ndpi_int_world_of_kung_fu_add_connection(struct ndpi_detection_module_struct *ndpi_struct)

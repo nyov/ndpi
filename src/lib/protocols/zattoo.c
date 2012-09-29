@@ -21,8 +21,8 @@
  */
 
 
-#include "ipq_protocols.h"
-#include "ipq_utils.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_ZATTOO
 
@@ -102,9 +102,9 @@ void ndpi_search_zattoo(struct ndpi_detection_module_struct *ndpi_struct)
 		if (packet->payload_packet_len > 50
 			&& (memcmp(packet->payload, "POST /channelserver/player/channel/update HTTP/1.1", 50) == 0
 				|| memcmp(packet->payload, "GET /epg/query", 14) == 0)) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			for (i = 0; i < packet->parsed_lines; i++) {
-				if (packet->line[i].len >= 18 && (ipq_mem_cmp(packet->line[i].ptr, "User-Agent: Zattoo", 18) == 0)) {
+				if (packet->line[i].len >= 18 && (ndpi_mem_cmp(packet->line[i].ptr, "User-Agent: Zattoo", 18) == 0)) {
 					NDPI_LOG(NDPI_PROTOCOL_ZATTOO, ndpi_struct,
 							NDPI_LOG_DEBUG,
 							"add connection over tcp with pattern POST /channelserver/player/channel/update HTTP/1.1\n");
@@ -117,19 +117,19 @@ void ndpi_search_zattoo(struct ndpi_detection_module_struct *ndpi_struct)
 					   || memcmp(packet->payload, "POST /", NDPI_STATICSTRING_LEN("POST /")) == 0)) {
 			/* TODO to avoid searching currently only a specific length and offset is used
 			 * that might be changed later */
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			if (ndpi_int_zattoo_user_agent_set(ndpi_struct)) {
 				ndpi_int_zattoo_add_connection(ndpi_struct, NDPI_CORRELATED_PROTOCOL);
 				return;
 			}
 		} else if (packet->payload_packet_len > 50 && memcmp(packet->payload, "POST http://", 12) == 0) {
-			ipq_parse_packet_line_info(ndpi_struct);
+			ndpi_parse_packet_line_info(ndpi_struct);
 			// test for unique character of the zattoo header
 			if (packet->parsed_lines == 4 && packet->host_line.ptr != NULL) {
 				u32 ip;
 				u16 bytes_read = 0;
 
-				ip = ipq_bytestream_to_ipv4(&packet->payload[12], packet->payload_packet_len, &bytes_read);
+				ip = ndpi_bytestream_to_ipv4(&packet->payload[12], packet->payload_packet_len, &bytes_read);
 
 				// and now test the firt 5 bytes of the payload for zattoo pattern
 				if (ip == packet->iph->daddr

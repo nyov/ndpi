@@ -21,7 +21,7 @@
  */
 
 
-#include "ipq_protocols.h"
+#include "ndpi_protocols.h"
 
 #ifdef NDPI_PROTOCOL_HTTP
 
@@ -237,40 +237,40 @@ static void windowsmedia_parse_packet_contentline(struct ndpi_detection_module_s
 {
   struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
-  if (packet->content_line.len >= 14 && ipq_mem_cmp(packet->content_line.ptr, "video/x-ms-", 11) == 0) {
-    if (ipq_mem_cmp(&packet->content_line.ptr[11], "wmv", 3) == 0) {
+  if (packet->content_line.len >= 14 && ndpi_mem_cmp(packet->content_line.ptr, "video/x-ms-", 11) == 0) {
+    if (ndpi_mem_cmp(&packet->content_line.ptr[11], "wmv", 3) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	      "WINDOWSMEDIA: Content-Type: video/x-ms-wmv found.\n");
       ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_WINDOWSMEDIA);
       return;
     }
-    if (ipq_mem_cmp(&packet->content_line.ptr[11], "asf", 3) == 0) {
+    if (ndpi_mem_cmp(&packet->content_line.ptr[11], "asf", 3) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	      "WINDOWSMEDIA: Content-Type: video/x-ms-asf found.\n");
       ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_WINDOWSMEDIA);
       return;
     }
-    if (ipq_mem_cmp(&packet->content_line.ptr[11], "asx", 3) == 0) {
+    if (ndpi_mem_cmp(&packet->content_line.ptr[11], "asx", 3) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	      "WINDOWSMEDIA: Content-Type: video/x-ms-asx found.\n");
       ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_WINDOWSMEDIA);
       return;
     }
   }
-  if (packet->content_line.len >= 24 && ipq_mem_cmp(packet->content_line.ptr, "video/x-msvideo", 15) == 0) {
+  if (packet->content_line.len >= 24 && ndpi_mem_cmp(packet->content_line.ptr, "video/x-msvideo", 15) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	    "WINDOWSMEDIA: Content-Type: video/x-msvideo found.\n");
     ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_WINDOWSMEDIA);
     return;
   }
-  if (packet->content_line.len >= 24 && ipq_mem_cmp(packet->content_line.ptr, "audio/x-wav", 11) == 0) {
+  if (packet->content_line.len >= 24 && ndpi_mem_cmp(packet->content_line.ptr, "audio/x-wav", 11) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	    "WINDOWSMEDIA: Content-Type: audio/x-wav found.\n");
     ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_WINDOWSMEDIA);
     return;
   }
   if (packet->content_line.len >= 32
-      && ipq_mem_cmp(packet->content_line.ptr, "application/vnd.ms.wms-hdr.asfv1", 32) == 0) {
+      && ndpi_mem_cmp(packet->content_line.ptr, "application/vnd.ms.wms-hdr.asfv1", 32) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	    "WINDOWSMEDIA: Content-Type: application/vnd.ms.wms-hdr.asfv1 found.\n");
     ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_WINDOWSMEDIA);
@@ -295,7 +295,7 @@ static void mms_parse_packet_contentline(struct ndpi_detection_module_struct
 {
   struct ndpi_packet_struct *packet = &ndpi_struct->packet;
 
-  if (packet->content_line.len >= 24 && ipq_mem_cmp(packet->content_line.ptr, "application/x-mms-framed", 24) == 0) {
+  if (packet->content_line.len >= 24 && ndpi_mem_cmp(packet->content_line.ptr, "application/x-mms-framed", 24) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_MMS, ndpi_struct, NDPI_LOG_DEBUG,
 	    "MMS: Content-Type: application/x-mms-framed found\n");
     ndpi_int_http_add_connection(ndpi_struct, NDPI_PROTOCOL_MMS);
@@ -824,7 +824,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct)
 	return;
       }
       // parse packet
-      ipq_parse_packet_line_info(ndpi_struct);
+      ndpi_parse_packet_line_info(ndpi_struct);
 
       if (packet->parsed_lines <= 1) {
 	/* parse one more packet .. */
@@ -862,7 +862,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct)
       /* SECOND PAYLOAD TRAFFIC FROM CLIENT, FIRST PACKET MIGHT HAVE BEEN HTTP... */
       /* UNKNOWN TRAFFIC, HERE FOR HTTP again.. */
       // parse packet
-      ipq_parse_packet_line_info(ndpi_struct);
+      ndpi_parse_packet_line_info(ndpi_struct);
 
       if (packet->parsed_lines <= 1) {
 
@@ -902,7 +902,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct)
     if (flow->l4.tcp.http_stage == 0 || flow->l4.tcp.http_stage == 3) {
       NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP RUN MAYBE NEXT GET/POST...\n");
       // parse packet
-      ipq_parse_packet_line_info(ndpi_struct);
+      ndpi_parse_packet_line_info(ndpi_struct);
       /* check for url here */
       filename_start = http_request_url_offset(ndpi_struct);
       if (filename_start != 0 && packet->parsed_lines > 1 && packet->line[0].len >= (9 + filename_start)
@@ -931,7 +931,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct)
       flow->l4.tcp.http_stage = 1;
     } else if (flow->l4.tcp.http_stage == 1) {
       // parse packet and maybe find a packet info with host ptr,...
-      ipq_parse_packet_line_info(ndpi_struct);
+      ndpi_parse_packet_line_info(ndpi_struct);
       check_content_type_and_change_protocol(ndpi_struct);
       NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP RUN second packet scanned\n");
       /* HTTP found, look for host... */
@@ -944,7 +944,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct)
   /* server response */
   if (flow->l4.tcp.http_stage > 0) {
     /* first packet from server direction, might have a content line */
-    ipq_parse_packet_line_info(ndpi_struct);
+    ndpi_parse_packet_line_info(ndpi_struct);
     check_content_type_and_change_protocol(ndpi_struct);
 
 
