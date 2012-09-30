@@ -145,8 +145,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_XBOX) != 0)
     goto hack_do_http_detection;
 #endif
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE) != 0)
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WINDOWS_UPDATE) != 0)
     goto hack_do_http_detection;
 #endif
 #ifdef NDPI_PROTOCOL_QQ
@@ -205,8 +205,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct
 #ifdef NDPI_PROTOCOL_XBOX
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_XBOX);
 #endif
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE);
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_WINDOWS_UPDATE);
 #endif
 #ifdef NDPI_PROTOCOL_QQ
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_QQ);
@@ -380,8 +380,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct
 #ifdef NDPI_PROTOCOL_XBOX
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_XBOX);
 #endif
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE);
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_WINDOWS_UPDATE);
 #endif
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_GNUTELLA);
 
@@ -932,15 +932,15 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_TEAMVIEWER
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_TEAMVIEWER) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_teamview;
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TEAMVIEWER) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_teamview;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_TEAMVIEWER);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_TEAMVIEWER);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_TEAMVIEWER);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_TEAMVIEWER);
     a++;
   }
 #endif
@@ -1652,93 +1652,93 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct
 #endif
 
 
-#ifdef NTOP_PROTOCOL_DROPBOX
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_DROPBOX) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_dropbox;
+#ifdef NDPI_PROTOCOL_DROPBOX
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DROPBOX) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_dropbox;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_DROPBOX);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_DROPBOX);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_DROPBOX);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_DROPBOX);
     a++;
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_SKYPE
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_SKYPE) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_skype;
+#ifdef NDPI_PROTOCOL_SKYPE
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SKYPE) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_skype;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_SKYPE);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_SKYPE);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_SKYPE);
     a++;
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_RADIUS
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_RADIUS) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_radius;
+#ifdef NDPI_PROTOCOL_RADIUS
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RADIUS) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_radius;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_RADIUS);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_RADIUS);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_RADIUS);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_RADIUS);
     a++;
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_CITRIX
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_CITRIX) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_citrix;
+#ifdef NDPI_PROTOCOL_CITRIX
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_CITRIX) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_citrix;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_CITRIX);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_CITRIX);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_CITRIX);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_CITRIX);
     a++;
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_DCERPC
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_DCERPC) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_dcerpc;
+#ifdef NDPI_PROTOCOL_DCERPC
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DCERPC) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_dcerpc;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_DCERPC);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_DCERPC);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_DCERPC);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_DCERPC);
     a++;
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_NETFLOW
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_NETFLOW) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_netflow;
+#ifdef NDPI_PROTOCOL_NETFLOW
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_NETFLOW) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_netflow;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_NETFLOW);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_NETFLOW);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_NETFLOW);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_NETFLOW);
     a++;
   }
 #endif
 
-#ifdef NTOP_PROTOCOL_SFLOW
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NTOP_PROTOCOL_SFLOW) != 0) {
-    ndpi_struct->callback_buffer[a].func = ntop_search_sflow;
+#ifdef NDPI_PROTOCOL_SFLOW
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SFLOW) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_sflow;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NTOP_PROTOCOL_SFLOW);
-    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NTOP_PROTOCOL_SFLOW);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_SFLOW);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_SFLOW);
     a++;
   }
 #endif
@@ -1951,7 +1951,7 @@ static u_int8_t ndpi_detection_get_l4_internal(struct ndpi_detection_module_stru
   return 0;
 }
 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 #define ATTRIBUTE_ALWAYS_INLINE static inline
 #else
 __forceinline static
@@ -2087,7 +2087,7 @@ static int ndpi_init_packet_header(struct ndpi_detection_module_struct *ndpi_str
 }
 
 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -2302,10 +2302,8 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 				    detection_bitmask) != 0) {
 	  ndpi_struct->callback_buffer_tcp_payload[a].func(ndpi_struct, flow);
 
-#ifdef HAVE_NTOP
 	  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	    break; /* Stop after detecting the first protocol */
-#endif
 	}
       }
     } else {				/* no payload */
@@ -2320,10 +2318,8 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 				    detection_bitmask) != 0) {
 	  ndpi_struct->callback_buffer_tcp_no_payload[a].func(ndpi_struct, flow);
 
-#ifdef HAVE_NTOP
 	  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	    break; /* Stop after detecting the first protocol */
-#endif
 	}
       }
     }
@@ -2337,10 +2333,8 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 				  detection_bitmask) != 0) {
 	ndpi_struct->callback_buffer_udp[a].func(ndpi_struct, flow);
 
-#ifdef HAVE_NTOP
 	if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	  break; /* Stop after detecting the first protocol */
-#endif
       }
     }
   } else {
@@ -2358,10 +2352,8 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
 	ndpi_struct->callback_buffer_non_tcp_udp[a].func(ndpi_struct, flow);
 
-#ifdef HAVE_NTOP
 	if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	  break; /* Stop after detecting the first protocol */
-#endif
       }
     }
   }
@@ -3482,23 +3474,21 @@ u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_ch
 }
 
 
-#ifdef HAVE_NTOP
-
 static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
   return(((match_port == sport) || (match_port == dport)) ? 1 : 0);
 }
 
 /* ****************************************************** */
 
-unsigned int ntop_find_port_based_protocol(u_int8_t proto,
+unsigned int ndpi_find_port_based_protocol(u_int8_t proto,
 					   u_int32_t shost, u_int16_t sport,
 					   u_int32_t dhost, u_int16_t dport) {
   /* Skyfile (host 193.252.234.246 or host 10.10.102.80) */
   if((shost == 0xC1FCEAF6) || (dhost == 0xC1FCEAF6)
      || (shost == 0x0A0A6650) || (dhost == 0x0A0A6650)) {
-    if((sport == 4708) || (dport == 4708)) return(NTOP_PROTOCOL_SKYFILE_PREPAID);
-    else if((sport == 4709) || (dport == 4709)) return(NTOP_PROTOCOL_SKYFILE_RUDICS);
-    else if((sport == 4710) || (dport == 4710)) return(NTOP_PROTOCOL_SKYFILE_POSTPAID);
+    if((sport == 4708) || (dport == 4708)) return(NDPI_PROTOCOL_SKYFILE_PREPAID);
+    else if((sport == 4709) || (dport == 4709)) return(NDPI_PROTOCOL_SKYFILE_RUDICS);
+    else if((sport == 4710) || (dport == 4710)) return(NDPI_PROTOCOL_SKYFILE_POSTPAID);
   }
 
   return(NDPI_PROTOCOL_UNKNOWN);
@@ -3506,10 +3496,10 @@ unsigned int ntop_find_port_based_protocol(u_int8_t proto,
 
 /* ****************************************************** */
 
-unsigned int ntop_guess_undetected_protocol(u_int8_t proto,
+unsigned int ndpi_guess_undetected_protocol(u_int8_t proto,
 					    u_int32_t shost, u_int16_t sport,
 					    u_int32_t dhost, u_int16_t dport) {
-  //   printf("ntop_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
+  //   printf("ndpi_guess_undetected_protocol (proto=%d, %d -> %d)\n", proto, sport, dport);
 
   if(proto == IPPROTO_UDP) {
     if(is_port(sport, dport, 67) || is_port(sport, dport, 68))          return(NDPI_PROTOCOL_DHCP);
@@ -3525,16 +3515,15 @@ unsigned int ntop_guess_undetected_protocol(u_int8_t proto,
     else if(is_port(sport, dport, 80))  return(NDPI_PROTOCOL_HTTP);
     else if(is_port(sport, dport, 3000))  return(NDPI_PROTOCOL_HTTP); /* ntop */
     else if(is_port(sport, dport, 3001))  return(NDPI_PROTOCOL_SSL);  /* ntop */
-    else if(is_port(sport, dport, 8080) || is_port(sport, dport, 3128)) return(NTOP_PROTOCOL_HTTP_PROXY);
+    else if(is_port(sport, dport, 8080) || is_port(sport, dport, 3128)) return(NDPI_PROTOCOL_HTTP_PROXY);
     else if(is_port(sport, dport, 389)) return(NDPI_PROTOCOL_LDAP);
     else if(is_port(sport, dport, 143) || is_port(sport, dport, 993)) return(NDPI_PROTOCOL_MAIL_IMAP);
     else if(is_port(sport, dport, 25)  || is_port(sport, dport, 465)) return(NDPI_PROTOCOL_MAIL_SMTP);
-    else if(is_port(sport, dport, 135))  return(NTOP_PROTOCOL_DCERPC);
-    else if(is_port(sport, dport, 1494) || is_port(sport, dport, 2598)) return(NTOP_PROTOCOL_CITRIX); /* http://support.citrix.com/article/CTX104147 */
+    else if(is_port(sport, dport, 135))  return(NDPI_PROTOCOL_DCERPC);
+    else if(is_port(sport, dport, 1494) || is_port(sport, dport, 2598)) return(NDPI_PROTOCOL_CITRIX); /* http://support.citrix.com/article/CTX104147 */
     else if(is_port(sport, dport, 389))  return(NDPI_PROTOCOL_LDAP);
   }
 
   return(NDPI_PROTOCOL_UNKNOWN);
 }
 
-#endif

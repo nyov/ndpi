@@ -312,7 +312,7 @@ static void xbox_parse_packet_useragentline(struct ndpi_detection_module_struct
 }
 #endif
 
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
 
 static void windows_update_packet_useragentline(struct ndpi_detection_module_struct						
 						*ndpi_struct, struct ndpi_flow_struct *flow)
@@ -320,8 +320,8 @@ static void windows_update_packet_useragentline(struct ndpi_detection_module_str
   struct ndpi_packet_struct *packet = &flow->packet;
 
   if(packet->user_agent_line.len >= 20 && memcmp(packet->user_agent_line.ptr, "Windows-Update-Agent", 20) == 0) {
-    NDPI_LOG(NTOP_PROTOCOL_WINDOWS_UPDATE, ndpi_struct, NDPI_LOG_DEBUG, "WSUS: User Agent: Windows-Update-Agent\n");
-    ndpi_int_http_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_WINDOWS_UPDATE);
+    NDPI_LOG(NDPI_PROTOCOL_WINDOWS_UPDATE, ndpi_struct, NDPI_LOG_DEBUG, "WSUS: User Agent: Windows-Update-Agent\n");
+    ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWS_UPDATE);
   }
 }
 #endif
@@ -392,13 +392,13 @@ static void avi_check_http_payload(struct ndpi_detection_module_struct *ndpi_str
 }
 #endif
 
-#ifdef NTOP_PROTOCOL_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
 static void teamviewer_check_http_payload(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
     struct ndpi_packet_struct *packet = &flow->packet;
     const u_int8_t *pos;
     
-    NDPI_LOG(NTOP_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_DEBUG, "called teamviewer_check_http_payload: %u %u %u\n", 
+    NDPI_LOG(NDPI_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_DEBUG, "called teamviewer_check_http_payload: %u %u %u\n", 
             packet->empty_line_position_set, flow->l4.tcp.http_empty_line_seen, packet->empty_line_position);
 
     if (packet->empty_line_position_set == 0 || (packet->empty_line_position + 5) > (packet->payload_packet_len))
@@ -407,8 +407,8 @@ static void teamviewer_check_http_payload(struct ndpi_detection_module_struct *n
     pos = &packet->payload[packet->empty_line_position] + 2;
 
     if (pos[0] == 0x17 && pos[1] == 0x24) {
-        NDPI_LOG(NTOP_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_DEBUG, "TeamViewer content in http detected\n");
-        ndpi_int_http_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_TEAMVIEWER);
+        NDPI_LOG(NDPI_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_DEBUG, "TeamViewer content in http detected\n");
+        ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TEAMVIEWER);
     }
 }
 #endif
@@ -454,13 +454,11 @@ static void rtsp_parse_packet_acceptline(struct ndpi_detection_module_struct
 }
 #endif
 
-#ifdef HAVE_NTOP
-
 /*
  * Find the first occurrence of find in s, where the search is limited to the
  * first slen characters of s.
  */
-char* ntop_strnstr(const char *s, const char *find, size_t slen) {
+char* ndpi_strnstr(const char *s, const char *find, size_t slen) {
   char c, sc;
   size_t len;
 
@@ -480,28 +478,28 @@ char* ntop_strnstr(const char *s, const char *find, size_t slen) {
 }
 
 
-static ntop_protocol_match host_match[] = {
-  { ".twitter.com",      NTOP_PROTOCOL_TWITTER },
-  { ".netflix.com",      NTOP_PROTOCOL_NETFLIX },
-  { ".twttr.com",        NTOP_PROTOCOL_TWITTER },
-  { ".facebook.com",     NTOP_PROTOCOL_FACEBOOK },
-  { ".fbcdn.net",        NTOP_PROTOCOL_FACEBOOK },
-  { ".dropbox.com",      NTOP_PROTOCOL_DROPBOX },
-  { ".gmail.",           NTOP_PROTOCOL_GMAIL },
-  { "maps.google.com",   NTOP_PROTOCOL_GOOGLE_MAPS },
-  { "maps.gstatic.com",  NTOP_PROTOCOL_GOOGLE_MAPS },
-  { ".gstatic.com",      NTOP_PROTOCOL_GOOGLE },
-  { ".google.com",       NTOP_PROTOCOL_GOOGLE },
-  { ".youtube.",         NTOP_PROTOCOL_YOUTUBE },
-  { "itunes.apple.com",  NTOP_PROTOCOL_APPLE_ITUNES },
-  { ".apple.com",        NTOP_PROTOCOL_APPLE },
-  { ".mzstatic.com",     NTOP_PROTOCOL_APPLE },
-  { ".facebook.com",     NTOP_PROTOCOL_FACEBOOK },
-  { ".icloud.com",       NTOP_PROTOCOL_APPLE_ICLOUD },
-  { ".viber.com",        NTOP_PROTOCOL_VIBER },
-  { ".last.fm",          NTOP_PROTOCOL_LASTFM },
-  { ".grooveshark.com",  NTOP_PROTOCOL_GROOVESHARK },
-  { ".tuenti.com",       NTOP_PROTOCOL_TUENTI },
+static ndpi_protocol_match host_match[] = {
+  { ".twitter.com",      NDPI_PROTOCOL_TWITTER },
+  { ".netflix.com",      NDPI_PROTOCOL_NETFLIX },
+  { ".twttr.com",        NDPI_PROTOCOL_TWITTER },
+  { ".facebook.com",     NDPI_PROTOCOL_FACEBOOK },
+  { ".fbcdn.net",        NDPI_PROTOCOL_FACEBOOK },
+  { ".dropbox.com",      NDPI_PROTOCOL_DROPBOX },
+  { ".gmail.",           NDPI_PROTOCOL_GMAIL },
+  { "maps.google.com",   NDPI_PROTOCOL_GOOGLE_MAPS },
+  { "maps.gstatic.com",  NDPI_PROTOCOL_GOOGLE_MAPS },
+  { ".gstatic.com",      NDPI_PROTOCOL_GOOGLE },
+  { ".google.com",       NDPI_PROTOCOL_GOOGLE },
+  { ".youtube.",         NDPI_PROTOCOL_YOUTUBE },
+  { "itunes.apple.com",  NDPI_PROTOCOL_APPLE_ITUNES },
+  { ".apple.com",        NDPI_PROTOCOL_APPLE },
+  { ".mzstatic.com",     NDPI_PROTOCOL_APPLE },
+  { ".facebook.com",     NDPI_PROTOCOL_FACEBOOK },
+  { ".icloud.com",       NDPI_PROTOCOL_APPLE_ICLOUD },
+  { ".viber.com",        NDPI_PROTOCOL_VIBER },
+  { ".last.fm",          NDPI_PROTOCOL_LASTFM },
+  { ".grooveshark.com",  NDPI_PROTOCOL_GROOVESHARK },
+  { ".tuenti.com",       NDPI_PROTOCOL_TUENTI },
   { NULL, 0 }
 };
 
@@ -511,7 +509,7 @@ int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct
   struct ndpi_packet_struct *packet = &flow->packet;
 
   while(host_match[i].string_to_match != NULL) {
-    if(ntop_strnstr(string_to_match, 
+    if(ndpi_strnstr(string_to_match, 
 		    host_match[i].string_to_match, 
 		    string_to_match_len) != NULL) {
       packet->detected_protocol_stack[0] = host_match[i].protocol_id;
@@ -539,7 +537,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)) {
-      packet->detected_protocol_stack[0] = NTOP_PROTOCOL_TWITTER;
+      packet->detected_protocol_stack[0] = NDPI_PROTOCOL_TWITTER;
       return;
     }
 
@@ -551,7 +549,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFFE000 /* 255.255.224.0 */) == 0x4535E000 /* 69.53.224.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFE000 /* 255.255.224.0 */) == 0x4535E000 /* 69.53.224.0 */)) {
-      packet->detected_protocol_stack[0] = NTOP_PROTOCOL_NETFLIX;
+      packet->detected_protocol_stack[0] = NDPI_PROTOCOL_NETFLIX;
       return;
     }
   }
@@ -563,7 +561,6 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
 		      (char*)packet->host_line.ptr, 
 		      packet->host_line.len);
 }
-#endif
 
 static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct
 						   *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -626,8 +623,8 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_XBOX) != 0)
       xbox_parse_packet_useragentline(ndpi_struct, flow);
 #endif
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE    
-    if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE) != 0)
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE    
+    if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_WINDOWS_UPDATE) != 0)
       windows_update_packet_useragentline(ndpi_struct, flow);
 #endif
 #ifdef NDPI_PROTOCOL_WINDOWSMEDIA
@@ -646,9 +643,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     }
 #endif
 
-#ifdef HAVE_NTOP
     parseHttpSubprotocol(ndpi_struct, flow);
-#endif
   }
 
   /* check for accept line */
@@ -688,7 +683,7 @@ static void check_http_payload(struct ndpi_detection_module_struct *ndpi_struct,
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_AVI) != 0)
     avi_check_http_payload(ndpi_struct, flow);
 #endif
-#ifdef NTOP_PROTOCOL_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
   teamviewer_check_http_payload(ndpi_struct, flow);
 #endif
 
@@ -741,8 +736,8 @@ static u_int16_t http_request_url_offset(struct ndpi_detection_module_struct *nd
 static void http_bitmask_exclude(struct ndpi_flow_struct *flow)
 {
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_HTTP);
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_WINDOWS_UPDATE);
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_WINDOWS_UPDATE);
 #endif
 #ifdef NDPI_PROTOCOL_MPEG
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MPEG);
@@ -840,7 +835,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
 
 	NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "http structure detected, adding\n");
 
-	ndpi_int_http_add_connection(ndpi_struct, flow, (filename_start == 8) ? NTOP_PROTOCOL_HTTP_CONNECT : NDPI_PROTOCOL_HTTP);
+	ndpi_int_http_add_connection(ndpi_struct, flow, (filename_start == 8) ? NDPI_PROTOCOL_HTTP_CONNECT : NDPI_PROTOCOL_HTTP);
 	check_content_type_and_change_protocol(ndpi_struct, flow);
 	/* HTTP found, look for host... */
 	if (packet->host_line.ptr != NULL) {

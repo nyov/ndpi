@@ -157,47 +157,44 @@ extern "C" {
 #define NDPI_PROTOCOL_WORLD_OF_KUNG_FU		        117
 #define NDPI_PROTOCOL_MEEBO					118
 
-#ifdef HAVE_NTOP
-
 typedef struct {
   char *string_to_match;
   int protocol_id;
-} ntop_protocol_match;
+} ndpi_protocol_match;
 
-#define NTOP_PROTOCOL_FACEBOOK				        119
-#define NTOP_PROTOCOL_TWITTER				        120
-#define NTOP_PROTOCOL_DROPBOX				        121
-#define NTOP_PROTOCOL_GMAIL				        122
-#define NTOP_PROTOCOL_GOOGLE_MAPS			        123
-#define NTOP_PROTOCOL_YOUTUBE				        124
-#define NTOP_PROTOCOL_SKYPE				        125
-#define NTOP_PROTOCOL_GOOGLE				        126
-#define NTOP_PROTOCOL_DCERPC				        127
-#define NTOP_PROTOCOL_NETFLOW				        128
-#define NTOP_PROTOCOL_SFLOW				        129
-#define NTOP_PROTOCOL_HTTP_CONNECT				130
-#define NTOP_PROTOCOL_HTTP_PROXY				131
-#define NTOP_PROTOCOL_CITRIX				        132
-#define NTOP_PROTOCOL_NETFLIX				        133
-#define NTOP_PROTOCOL_LASTFM                                    134
-#define NTOP_PROTOCOL_GROOVESHARK                               135
-#define NTOP_PROTOCOL_SKYFILE_PREPAID                           136
-#define NTOP_PROTOCOL_SKYFILE_RUDICS                            137
-#define NTOP_PROTOCOL_SKYFILE_POSTPAID                          138
-#define NTOP_PROTOCOL_CITRIX_ONLINE                             139
-#define NTOP_PROTOCOL_APPLE                                     140
-#define NTOP_PROTOCOL_WEBEX                                     141
-#define NTOP_PROTOCOL_WHATSAPP                                  142
-#define NTOP_PROTOCOL_APPLE_ICLOUD                              143
-#define NTOP_PROTOCOL_VIBER                                     144
-#define NTOP_PROTOCOL_APPLE_ITUNES                              145
-#define NTOP_PROTOCOL_RADIUS                                    146
-#define NTOP_PROTOCOL_WINDOWS_UPDATE                            147 /* Thierry Laurion */
-#define NTOP_PROTOCOL_TEAMVIEWER                                148 /* xplico.org */
-#define NTOP_PROTOCOL_TUENTI					149
+#define NDPI_PROTOCOL_FACEBOOK				        119
+#define NDPI_PROTOCOL_TWITTER				        120
+#define NDPI_PROTOCOL_DROPBOX				        121
+#define NDPI_PROTOCOL_GMAIL				        122
+#define NDPI_PROTOCOL_GOOGLE_MAPS			        123
+#define NDPI_PROTOCOL_YOUTUBE				        124
+#define NDPI_PROTOCOL_SKYPE				        125
+#define NDPI_PROTOCOL_GOOGLE				        126
+#define NDPI_PROTOCOL_DCERPC				        127
+#define NDPI_PROTOCOL_NETFLOW				        128
+#define NDPI_PROTOCOL_SFLOW				        129
+#define NDPI_PROTOCOL_HTTP_CONNECT				130
+#define NDPI_PROTOCOL_HTTP_PROXY				131
+#define NDPI_PROTOCOL_CITRIX				        132
+#define NDPI_PROTOCOL_NETFLIX				        133
+#define NDPI_PROTOCOL_LASTFM                                    134
+#define NDPI_PROTOCOL_GROOVESHARK                               135
+#define NDPI_PROTOCOL_SKYFILE_PREPAID                           136
+#define NDPI_PROTOCOL_SKYFILE_RUDICS                            137
+#define NDPI_PROTOCOL_SKYFILE_POSTPAID                          138
+#define NDPI_PROTOCOL_CITRIX_ONLINE                             139
+#define NDPI_PROTOCOL_APPLE                                     140
+#define NDPI_PROTOCOL_WEBEX                                     141
+#define NDPI_PROTOCOL_WHATSAPP                                  142
+#define NDPI_PROTOCOL_APPLE_ICLOUD                              143
+#define NDPI_PROTOCOL_VIBER                                     144
+#define NDPI_PROTOCOL_APPLE_ITUNES                              145
+#define NDPI_PROTOCOL_RADIUS                                    146
+#define NDPI_PROTOCOL_WINDOWS_UPDATE                            147 /* Thierry Laurion */
+#define NDPI_PROTOCOL_TEAMVIEWER                                148 /* xplico.org */
+#define NDPI_PROTOCOL_TUENTI					149
 
 /* NOTE: REMEMBER TO UPDATE NDPI_PROTOCOL_LONG_STRING / NDPI_PROTOCOL_SHORT_STRING */
-#endif
 
 #define NDPI_LAST_IMPLEMENTED_PROTOCOL                        149
 

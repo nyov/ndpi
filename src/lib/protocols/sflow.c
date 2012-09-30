@@ -20,9 +20,9 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NTOP_PROTOCOL_SFLOW
+#ifdef NDPI_PROTOCOL_SFLOW
 
-static void ntop_check_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+static void ndpi_check_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
   
@@ -34,16 +34,16 @@ static void ntop_check_sflow(struct ndpi_detection_module_struct *ndpi_struct, s
      /* Version */
      && (packet->payload[0] == 0) && (packet->payload[1] == 0) && (packet->payload[2] == 0)
      && ((packet->payload[3] == 2) || (packet->payload[3] == 5))) {
-    NDPI_LOG(NTOP_PROTOCOL_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found sflow.\n");
-    ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_SFLOW, NDPI_REAL_PROTOCOL);
+    NDPI_LOG(NDPI_PROTOCOL_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found sflow.\n");
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SFLOW, NDPI_REAL_PROTOCOL);
     return;
   }
 }
 
-void ntop_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+void ndpi_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  NDPI_LOG(NTOP_PROTOCOL_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "sflow detection...\n");
-  ntop_check_sflow(ndpi_struct, flow);
+  NDPI_LOG(NDPI_PROTOCOL_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "sflow detection...\n");
+  ndpi_check_sflow(ndpi_struct, flow);
 }
 
 #endif

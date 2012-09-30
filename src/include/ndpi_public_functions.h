@@ -223,13 +223,11 @@ extern "C" {
   u_int8_t ndpi_detection_flow_protocol_history_contains_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 								  struct ndpi_flow_struct *flow,
 								  u_int16_t protocol_id);
-#ifdef HAVE_NTOP
-  unsigned int ntop_find_port_based_protocol(u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);  
-  unsigned int ntop_guess_undetected_protocol(u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);
-  char* ntop_strnstr(const char *s, const char *find, size_t slen);
+  unsigned int ndpi_find_port_based_protocol(u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);  
+  unsigned int ndpi_guess_undetected_protocol(u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);
+  char* ndpi_strnstr(const char *s, const char *find, size_t slen);
   int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, 
 			  char *string_to_match, u_int string_to_match_len);
-#endif
 
 #ifdef __cplusplus
 }

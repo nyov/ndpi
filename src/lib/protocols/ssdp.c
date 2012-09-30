@@ -52,14 +52,12 @@ void ndpi_search_ssdp(struct ndpi_detection_module_struct *ndpi_struct, struct n
 				return;
 			}
 
-#ifdef HAVE_NTOP
 #define SSDP_HTTP "HTTP/1.1 200 OK\r\n"
 			if(memcmp(packet->payload, SSDP_HTTP, strlen(SSDP_HTTP)) == 0) {
 			  NDPI_LOG(NDPI_PROTOCOL_SSDP, ndpi_struct, NDPI_LOG_DEBUG, "found ssdp.\n");
 			  ndpi_int_ssdp_add_connection(ndpi_struct, flow);
 			  return;
 			}
-#endif
 		}
 	}
 

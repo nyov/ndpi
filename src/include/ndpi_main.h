@@ -24,10 +24,6 @@
 #ifndef __NDPI_MAIN_INCLUDE_FILE__
 #define __NDPI_MAIN_INCLUDE_FILE__
 
-#ifndef HAVE_NTOP 
-#define HAVE_NTOP 1
-#endif
-
 #ifndef OPENDPI_NETFILTER_MODULE
 #include <stdint.h>
 #include <stdio.h>
@@ -35,7 +31,7 @@
 #include <string.h>
 #endif
 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 #if 1 && !defined __APPLE__ && !defined __FreeBSD__
 
 #ifndef OPENDPI_NETFILTER_MODULE
@@ -50,7 +46,7 @@
 
 /* default includes */
 
-#if defined(__APPLE__) || (defined(HAVE_NTOP) && defined(WIN32)) || defined(__FreeBSD__)
+#if defined(__APPLE__) || defined(WIN32) || defined(__FreeBSD__)
 #ifndef WIN32
 #include <sys/param.h>
 #include <limits.h>

@@ -165,7 +165,7 @@
   }
 #else							/* NDPI_ENABLE_DEBUG_MESSAGES */
 
-#if defined(HAVE_NTOP) && defined(WIN32)
+#if defined(WIN32)
 #define NDPI_LOG_BITTORRENT(...) {}
 #define NDPI_LOG_GNUTELLA(...) {}
 #define NDPI_LOG_EDONKEY(...) {}
@@ -176,7 +176,17 @@
 #define NDPI_LOG_EDONKEY(proto, mod, log_level, args...) {}
 #define NDPI_LOG(proto, mod, log_level, args...) {}
 #endif
-
 #endif							/* NDPI_ENABLE_DEBUG_MESSAGES */
+
+/**
+ * macro for getting the string len of a static string
+ *
+ * use it instead of strlen to avoid runtime calculations
+ */
+#define NDPI_STATICSTRING_LEN( s ) ( sizeof( s ) - 1 )
+
+/** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
+#define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
+  ((((u_int64_t *)(x))[0]) < (((u_int64_t *)(y))[0]) || ( (((u_int64_t *)(x))[0]) == (((u_int64_t *)(y))[0]) && (((u_int64_t *)(x))[1]) < (((u_int64_t *)(y))[1])) )
 
 #endif /* __NDPI_DEFINE_INCLUDE_FILE__ */

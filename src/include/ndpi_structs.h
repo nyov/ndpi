@@ -350,20 +350,20 @@ struct ndpi_flow_tcp_struct {
   u_int32_t mail_imap_stage:3;
 #endif
 
-#ifdef NTOP_PROTOCOL_SKYPE
+#ifdef NDPI_PROTOCOL_SKYPE
   u_int8_t skype_packet_id;
 #endif
 
-#ifdef NTOP_PROTOCOL_CITRIX
+#ifdef NDPI_PROTOCOL_CITRIX
   u_int8_t citrix_packet_id;
 #endif
 
-#ifdef NTOP_PROTOCOL_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
 } 
 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
   __attribute__ ((__packed__))
 #endif
   ;
@@ -399,18 +399,18 @@ struct ndpi_flow_udp_struct {
 #ifdef NDPI_PROTOCOL_XBOX
   u_int32_t xbox_stage:1;
 #endif
-#ifdef NTOP_PROTOCOL_WINDOWS_UPDATE
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
   u_int32_t wsus_stage:1;
 #endif
-#ifdef NTOP_PROTOCOL_SKYPE
+#ifdef NDPI_PROTOCOL_SKYPE
   u_int8_t skype_packet_id;
 #endif
-#ifdef NTOP_PROTOCOL_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
 }
 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
   __attribute__ ((__packed__))
 #endif
   ;
@@ -448,7 +448,7 @@ typedef struct ndpi_packet_struct {
     u_int8_t entry_is_real_protocol:5;
     u_int8_t current_stack_size_minus_one:3;
   } 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
     __attribute__ ((__packed__))
 #endif
     protocol_stack_info;
@@ -590,7 +590,7 @@ typedef struct ndpi_flow_struct {
     u_int8_t current_stack_size_minus_one:3;
   } 
     
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
     __attribute__ ((__packed__))
 #endif
     protocol_stack_info;

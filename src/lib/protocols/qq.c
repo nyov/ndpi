@@ -77,7 +77,7 @@ static const u_int16_t ndpi_valid_qq_versions[] = {
  * it can handle tcp and udp packets
  */
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -168,7 +168,7 @@ u_int8_t ndpi_is_valid_qq_packet(const struct ndpi_packet_struct *packet)
  * it can handle tcp and udp packets
  */
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -424,7 +424,7 @@ static void ndpi_search_qq_udp(struct ndpi_detection_module_struct *ndpi_struct,
 
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static

@@ -43,7 +43,7 @@ static void ndpi_int_thunder_add_connection(struct ndpi_detection_module_struct 
 
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
  static inline
 #else
 __forceinline static
@@ -77,7 +77,7 @@ __forceinline static
 }
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
  static inline
 #else
 __forceinline static
@@ -135,7 +135,7 @@ __forceinline static
 }
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
  static inline
 #else
 __forceinline static

@@ -48,7 +48,7 @@ static void ndpi_int_rtp_add_connection(struct ndpi_detection_module_struct
  *   0, if it it regarded as belonging to the previous reporting interval
  */
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
  static inline
 #else
 __forceinline static
@@ -62,7 +62,7 @@ __forceinline static
 
 /* returns difference between old and new highest sequence number */
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
  static inline
 #else
 __forceinline static

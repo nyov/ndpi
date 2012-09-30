@@ -36,7 +36,7 @@ static void ndpi_int_sip_add_connection(struct ndpi_detection_module_struct *ndp
 
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -69,7 +69,6 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 #endif
       {
 
-#if defined(HAVE_NTOP)
 	if ((memcmp(packet_payload, "NOTIFY ", 7) == 0 || memcmp(packet_payload, "notify ", 7) == 0)
 	    && (memcmp(&packet_payload[7], "SIP:", 4) == 0 || memcmp(&packet_payload[7], "sip:", 4) == 0)) {
 
@@ -77,7 +76,6 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
-#endif
 
 	if ((memcmp(packet_payload, "REGISTER ", 9) == 0 || memcmp(packet_payload, "register ", 9) == 0)
 	    && (memcmp(&packet_payload[9], "SIP:", 4) == 0 || memcmp(&packet_payload[9], "sip:", 4) == 0)) {
@@ -102,7 +100,6 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	  return;
 	}
 
-#if defined(HAVE_NTOP) 
 	/* Courtesy of Miguel Quesada <mquesadab@gmail.com> */
 	if ((memcmp(packet_payload, "OPTIONS ", 8) == 0
 	     || memcmp(packet_payload, "options ", 8) == 0)
@@ -112,7 +109,6 @@ void ndpi_search_sip_handshake(struct ndpi_detection_module_struct
 	  ndpi_int_sip_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
-#endif
       }
 
   /* add bitmask for tcp only, some stupid udp programs

@@ -21,16 +21,16 @@
 
 #include "ndpi_protocols.h"
 
-#ifdef NTOP_PROTOCOL_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
 
-static void ntop_int_teamview_add_connection(struct ndpi_detection_module_struct
+static void ndpi_int_teamview_add_connection(struct ndpi_detection_module_struct
                                              *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-    ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_TEAMVIEWER, NDPI_REAL_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TEAMVIEWER, NDPI_REAL_PROTOCOL);
 }
 
 
-void ntop_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
     struct ndpi_packet_struct *packet = &flow->packet;
     
@@ -41,7 +41,7 @@ void ntop_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
                 flow->l4.udp.teamviewer_stage++;
                 if (flow->l4.udp.teamviewer_stage == 4 || 
                     packet->udp->dest == ntohs(5938) || packet->udp->source == ntohs(5938)) {
-                    ntop_int_teamview_add_connection(ndpi_struct, flow);
+                    ndpi_int_teamview_add_connection(ndpi_struct, flow);
                 }
                 return;
             }
@@ -53,7 +53,7 @@ void ntop_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
                 flow->l4.udp.teamviewer_stage++;
                 if (flow->l4.udp.teamviewer_stage == 4 || 
                     packet->tcp->dest == ntohs(5938) || packet->tcp->source == ntohs(5938)) {
-                    ntop_int_teamview_add_connection(ndpi_struct, flow);
+                    ndpi_int_teamview_add_connection(ndpi_struct, flow);
                 }
                 return;
             }
@@ -61,13 +61,13 @@ void ntop_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
                 if (packet->payload[0] == 0x11 && packet->payload[1] == 0x30) {
                     flow->l4.udp.teamviewer_stage++;
                     if (flow->l4.udp.teamviewer_stage == 4)
-                        ntop_int_teamview_add_connection(ndpi_struct, flow);
+                        ndpi_int_teamview_add_connection(ndpi_struct, flow);
                 }
                 return;
             }
         }
     }
     
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_TEAMVIEWER);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_TEAMVIEWER);
 }
 #endif

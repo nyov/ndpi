@@ -60,7 +60,7 @@ static void ndpi_int_yahoo_add_connection(struct ndpi_detection_module_struct *n
 
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -379,7 +379,7 @@ static void ndpi_search_yahoo_tcp(struct ndpi_detection_module_struct *ndpi_stru
 }
 
 	
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static

@@ -20,18 +20,18 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NTOP_PROTOCOL_DROPBOX
-static void ntop_int_dropbox_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
+#ifdef NDPI_PROTOCOL_DROPBOX
+static void ndpi_int_dropbox_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					    struct ndpi_flow_struct *flow,
 					    u_int8_t due_to_correlation)
 {
   ndpi_int_add_connection(ndpi_struct, flow,
-			  NTOP_PROTOCOL_DROPBOX,
+			  NDPI_PROTOCOL_DROPBOX,
 			  due_to_correlation ? NDPI_CORRELATED_PROTOCOL : NDPI_REAL_PROTOCOL);
 }
 
 
-static void ntop_check_dropbox(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+static void ndpi_check_dropbox(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;  
   const u_int8_t *packet_payload = packet->payload;
@@ -44,28 +44,28 @@ static void ntop_check_dropbox(struct ndpi_detection_module_struct *ndpi_struct,
        && (packet->udp->dest == dropbox_port)) {
       if(payload_len > 2) {
 	if(strncmp(packet->payload, "{\"", 2) == 0) {
-	  NDPI_LOG(NTOP_PROTOCOL_DROPBOX, ndpi_struct, NDPI_LOG_DEBUG, "Found dropbox.\n");
-	  ntop_int_dropbox_add_connection(ndpi_struct, flow, 0);
+	  NDPI_LOG(NDPI_PROTOCOL_DROPBOX, ndpi_struct, NDPI_LOG_DEBUG, "Found dropbox.\n");
+	  ndpi_int_dropbox_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
       }
     }
   }
   
-  NDPI_LOG(NTOP_PROTOCOL_DROPBOX, ndpi_struct, NDPI_LOG_DEBUG, "exclude dropbox.\n");
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_DROPBOX);
+  NDPI_LOG(NDPI_PROTOCOL_DROPBOX, ndpi_struct, NDPI_LOG_DEBUG, "exclude dropbox.\n");
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DROPBOX);
 }
 
-void ntop_search_dropbox(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+void ndpi_search_dropbox(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NTOP_PROTOCOL_DROPBOX, ndpi_struct, NDPI_LOG_DEBUG, "dropbox detection...\n");
+  NDPI_LOG(NDPI_PROTOCOL_DROPBOX, ndpi_struct, NDPI_LOG_DEBUG, "dropbox detection...\n");
 
   /* skip marked packets */
-  if (packet->detected_protocol_stack[0] != NTOP_PROTOCOL_DROPBOX) {
+  if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_DROPBOX) {
     if (packet->tcp_retransmission == 0) {
-      ntop_check_dropbox(ndpi_struct, flow);
+      ndpi_check_dropbox(ndpi_struct, flow);
     }
   }
 }

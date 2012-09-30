@@ -20,9 +20,9 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NTOP_PROTOCOL_NETFLOW
+#ifdef NDPI_PROTOCOL_NETFLOW
 
-static void ntop_check_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
   
@@ -43,17 +43,17 @@ static void ntop_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
     when = ntohl(*_when);
 
     if((when >= 946684800 /* 1/1/2000 */) && (when <= time(NULL))) {
-      NDPI_LOG(NTOP_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
+      NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
       return;
     }
   }
 }
 
-void ntop_search_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+void ndpi_search_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  NDPI_LOG(NTOP_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
-  ntop_check_netflow(ndpi_struct, flow);
+  NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
+  ndpi_check_netflow(ndpi_struct, flow);
 }
 
 #endif

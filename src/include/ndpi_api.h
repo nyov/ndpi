@@ -25,14 +25,14 @@
 #define __NDPI_API_INCLUDE_FILE__
 
 
-#if defined(HAVE_NTOP) && defined(WIN32)
+#if defined(WIN32)
 #include <winsock2.h>
 /* Windows is little endian */ 
 #define __LITTLE_ENDIAN 1234
 #define __BIG_ENDIAN    4321
 #define __BYTE_ORDER __LITTLE_ENDIAN
 #define __FLOAT_WORD_ORDER __BYTE_ORDER
-#endif /*  defined(HAVE_NTOP) && defined(WIN32) */
+#endif /*  defined(WIN32) */
 
 
 #ifdef __cplusplus

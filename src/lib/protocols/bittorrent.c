@@ -375,19 +375,16 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	&& (packet->tcp_retransmission == 0 || packet->num_retried_bytes)) {
       ndpi_int_search_bittorrent_tcp(ndpi_struct, flow);
     }
-#ifdef HAVE_NTOP
     else if(packet->udp != NULL) {
-      
-
       flow->bittorrent_stage++;
 
       if(flow->bittorrent_stage < 10) {
 	if(packet->payload_packet_len > 19 /* min size */) {
 	  char *begin;
 	
-	  if(ntop_strnstr(packet->payload, ":target20:", packet->payload_packet_len)
-	     || ntop_strnstr(packet->payload, ":find_node1:", packet->payload_packet_len)
-	     || ntop_strnstr(packet->payload, "d1:ad2:id20:", packet->payload_packet_len)) {
+	  if(ndpi_strnstr(packet->payload, ":target20:", packet->payload_packet_len)
+	     || ndpi_strnstr(packet->payload, ":find_node1:", packet->payload_packet_len)
+	     || ndpi_strnstr(packet->payload, "d1:ad2:id20:", packet->payload_packet_len)) {
 	  bittorrent_found:
 	    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
 			       ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
@@ -411,9 +408,6 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 
       NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_BITTORRENT);
     }
-#endif
-    
-
   }
 }
 #endif

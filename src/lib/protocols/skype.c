@@ -20,7 +20,7 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NTOP_PROTOCOL_SKYPE
+#ifdef NDPI_PROTOCOL_SKYPE
 
 static u_int is_private_addr(u_int32_t addr) {
   addr = ntohl(addr);
@@ -35,7 +35,7 @@ static u_int is_private_addr(u_int32_t addr) {
     return(0);
 }
 
-static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
   
@@ -59,14 +59,14 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	 || ((payload_len >= 16) 
 	     && (packet->payload[0] != 0x30) /* Avoid invalid SNMP detection */
 	     && (packet->payload[2] == 0x02))) {
-	NDPI_LOG(NTOP_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);	
+	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);	
       }
       
       return;
     }
 
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SKYPE);
     return;
   } else if(packet->tcp != NULL) {
     flow->l4.tcp.skype_packet_id++;
@@ -79,27 +79,27 @@ static void ntop_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	      && flow->l4.tcp.seen_syn_ack
 	      && flow->l4.tcp.seen_ack) {
       if((payload_len == 8) || (payload_len == 3)) {
-	NDPI_LOG(NTOP_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
       }
 
       /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */
     } else
-      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NTOP_PROTOCOL_SKYPE);
+      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SKYPE);
 
     return;
   }
 }
 
-void ntop_search_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+void ndpi_search_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NTOP_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "skype detection...\n");
+  NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "skype detection...\n");
 
   /* skip marked packets */
-  if(packet->detected_protocol_stack[0] != NTOP_PROTOCOL_SKYPE)
-    ntop_check_skype(ndpi_struct, flow);
+  if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_SKYPE)
+    ndpi_check_skype(ndpi_struct, flow);
 }
 
 #endif

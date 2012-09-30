@@ -33,7 +33,7 @@ static void ndpi_add_connection_as_edonkey(struct ndpi_detection_module_struct *
 	ndpi_int_change_protocol(ndpi_struct, flow, NDPI_PROTOCOL_EDONKEY, NDPI_REAL_PROTOCOL);
 }
 
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
  static inline
 #else
 __forceinline static

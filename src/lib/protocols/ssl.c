@@ -37,7 +37,6 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
   }
 }
 
-#ifdef HAVE_NTOP
 #ifndef WIN32
 inline int min(int a, int b) { return(a < b ? a : b); }
 #endif
@@ -190,8 +189,6 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
   return(0);
 }
 
-#endif
-
 static void ssl_mark_and_payload_search_for_other_protocols(struct
 							    ndpi_detection_module_struct
 							    *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -280,7 +277,6 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 #endif
   NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
 
-#ifdef HAVE_NTOP
   sslDetectProtocolFromCertificate(ndpi_struct, flow);
 
   if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
@@ -299,7 +295,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
        || ((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        ) {
-      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_CITRIX_ONLINE, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_CITRIX_ONLINE, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -309,7 +305,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
-      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_APPLE, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_APPLE, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -319,7 +315,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x4272A000 /* 66.114.160.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) ==0x4272A000 /* 66.114.160.0 */)) {
-      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_WEBEX, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WEBEX, NDPI_REAL_PROTOCOL);
       return;
     }
 
@@ -329,11 +325,10 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     */
     if(((ntohl(packet->iph->saddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000 /* 66.114.160.0 */)
        || ((ntohl(packet->iph->daddr) & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 66.114.160.0 */)) {
-      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
       return;
     }
   }
-#endif
 
   ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
 }
@@ -478,14 +473,13 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 
   NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "search ssl\n");
 
-#ifdef HAVE_NTOP
   {
     /* Check if this is whatsapp first (this proto runs over port 443) */
     char whatsapp_pattern[] = { 0x57, 0x41, 0x01, 0x01, 0x00 };
 
     if((packet->payload_packet_len > 5)
        && (memcmp(packet->payload, whatsapp_pattern, sizeof(whatsapp_pattern)) == 0)) {
-      ndpi_int_add_connection(ndpi_struct, flow, NTOP_PROTOCOL_WHATSAPP, NDPI_REAL_PROTOCOL);
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WHATSAPP, NDPI_REAL_PROTOCOL);
       return;
     } else {
       /* No whatsapp, let's try SSL */
@@ -493,7 +487,6 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 	return;
     }
   }
-#endif
 
   if (packet->payload_packet_len > 40 && flow->l4.tcp.ssl_stage == 0) {
     NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "first ssl packet\n");

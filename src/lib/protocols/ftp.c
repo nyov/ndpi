@@ -39,7 +39,7 @@ static void ndpi_int_ftp_add_connection(struct ndpi_detection_module_struct *ndp
  *
  * this functions is not used to accept, just to not reject
  */
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -76,7 +76,7 @@ u_int8_t ndpi_int_check_possible_ftp_command(const struct ndpi_packet_struct *pa
 /**
  * ftp replies are are 3-digit number followed by space or hyphen
  */
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static
@@ -104,7 +104,7 @@ u_int8_t ndpi_int_check_possible_ftp_reply(const struct ndpi_packet_struct *pack
  * there is no real indication whether it is a continuation message, we just
  * require that there are at least 5 ascii characters
  */
-#if !(defined(HAVE_NTOP) && defined(WIN32))
+#if !defined(WIN32)
 static inline
 #else
 __forceinline static

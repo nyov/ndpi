@@ -24,7 +24,7 @@
 #ifndef __NDPI_LINUX_COMPAT_H__
 #define __NDPI_LINUX_COMPAT_H__
 
-#if defined(HAVE_NTOP) && (defined(WIN32) /* || defined(__FreeBSD__) */)
+#if (defined(WIN32) /* || defined(__FreeBSD__) */)
 
 struct iphdr {
 #if defined(__LITTLE_ENDIAN__)

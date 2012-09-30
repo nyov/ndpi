@@ -27,26 +27,7 @@
 
 #include "ndpi_protocols.h"
 
-
-/**
- * macro for getting the string len of a static string
- *
- * use it instead of strlen to avoid runtime calculations
- */
-#define NDPI_STATICSTRING_LEN( s ) ( sizeof( s ) - 1 )
-
-
-
-/** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
-#define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
-  ((((u_int64_t *)(x))[0]) < (((u_int64_t *)(y))[0]) || ( (((u_int64_t *)(x))[0]) == (((u_int64_t *)(y))[0]) && (((u_int64_t *)(x))[1]) < (((u_int64_t *)(y))[1])) )
-
-
-
-#ifdef HAVE_NTOP
-/* http.c */
-extern char* ntop_strnstr(const char *s, const char *find, size_t slen);
-#endif
+extern char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
 #endif							/* _NDPI_UTILS_H_ */
 
