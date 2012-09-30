@@ -259,12 +259,12 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LTLIBRARIES = libndpi.la
-noinst_HEADERS = ndpi_main.h \
-			ndpi_protocol_history.h \
-			ndpi_protocols.h \
-			ndpi_structs.h \
-			ndpi_utils.h \
-			linux_compat.h
+noinst_HEADERS = ../include/ndpi_main.h \
+			../include/ndpi_protocol_history.h \
+			../include/ndpi_protocols.h \
+			../include/ndpi_structs.h \
+			../include/ndpi_utils.h \
+			../include/linux_compat.h
 
 
 # this will create a library 1.4.0

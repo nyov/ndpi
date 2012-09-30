@@ -3475,6 +3475,13 @@ char *ndpi_get_packet_dst_ip_string(struct ndpi_detection_module_struct *ndpi_st
 #endif							/* NDPI_ENABLE_DEBUG_MESSAGES */
 
 
+u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read)
+{
+  u_int16_t val = ndpi_bytestream_to_number(str, max_chars_to_read, bytes_read);
+  return ntohs(val);
+}
+
+
 #ifdef HAVE_NTOP
 
 static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {

@@ -24,37 +24,26 @@
 #ifndef __NDPI_LINUX_COMPAT_H__
 #define __NDPI_LINUX_COMPAT_H__
 
-#if defined(BYTE_ORDER) && !defined(__BYTE_ORDER)
-# define __BYTE_ORDER BYTE_ORDER
-#endif
-#if defined(LITTLE_ENDIAN) && !defined(__LITTLE_ENDIAN)
-# define __LITTLE_ENDIAN LITTLE_ENDIAN
-#endif
-#if defined(BIG_ENDIAN) && !defined(__BIG_ENDIAN)
-# define __BIG_ENDIAN BIG_ENDIAN
-#endif
+#if defined(HAVE_NTOP) && (defined(WIN32) /* || defined(__FreeBSD__) */)
 
 struct iphdr {
-#if BYTE_ORDER == LITTLE_ENDIAN
-  uint8_t ihl:4, version:4;
-#elif BYTE_ORDER == BIG_ENDIAN
-  uint8_t version:4, ihl:4;
+#if defined(__LITTLE_ENDIAN__)
+  u_int8_t ihl:4, version:4;
+#elif defined(__BIG_ENDIAN__)
+  u_int8_t version:4, ihl:4;
 #else
-# error "BYTE_ORDER must be defined"
+# error "Byte order must be defined"
 #endif
-  uint8_t tos;
-  uint16_t tot_len;
-  uint16_t id;
-  uint16_t frag_off;
-  uint8_t ttl;
-  uint8_t protocol;
-  uint16_t check;
-  uint32_t saddr;
-  uint32_t daddr;
+  u_int8_t tos;
+  u_int16_t tot_len;
+  u_int16_t id;
+  u_int16_t frag_off;
+  u_int8_t ttl;
+  u_int8_t protocol;
+  u_int16_t check;
+  u_int32_t saddr;
+  u_int32_t daddr;
 };
-
-
-#if defined(HAVE_NTOP) && (defined(WIN32) /* || defined(__FreeBSD__) */)
 
 typedef unsigned char  u_char;
 typedef unsigned short u_short;
@@ -104,49 +93,48 @@ struct ip6_ext
   u_int8_t  ip6e_len;		/* length in units of 8 octets.  */
 };
 
-#else
-#include <arpa/inet.h>
-#endif
-
 #define s6_addr16		__u6_addr.__u6_addr16
 #define s6_addr32		__u6_addr.__u6_addr32
 
 struct ip6_hdr {
   union {
     struct ip6_hdrctl {
-      uint32_t ip6_un1_flow;
-      uint16_t ip6_un1_plen;
-      uint8_t ip6_un1_nxt;
-      uint8_t ip6_un1_hlim;
+      u_int32_t ip6_un1_flow;
+      u_int16_t ip6_un1_plen;
+      u_int8_t ip6_un1_nxt;
+      u_int8_t ip6_un1_hlim;
     } ip6_un1;
-    uint8_t ip6_un2_vfc;
+    u_int8_t ip6_un2_vfc;
   } ip6_ctlun;
   struct in6_addr ip6_src;
   struct in6_addr ip6_dst;
 };
 
 struct tcphdr {
-  uint16_t source;
-  uint16_t dest;
-  uint32_t seq;
-  uint32_t ack_seq;
-#if BYTE_ORDER == LITTLE_ENDIAN
-  uint16_t res1:4, doff:4, fin:1, syn:1, rst:1, psh:1, ack:1, urg:1, ece:1, cwr:1;
-#elif BYTE_ORDER == BIG_ENDIAN
-  uint16_t doff:4, res1:4, cwr:1, ece:1, urg:1, ack:1, psh:1, rst:1, syn:1, fin:1;
+  u_int16_t source;
+  u_int16_t dest;
+  u_int32_t seq;
+  u_int32_t ack_seq;
+#if defined(__LITTLE_ENDIAN__)
+  u_int16_t res1:4, doff:4, fin:1, syn:1, rst:1, psh:1, ack:1, urg:1, ece:1, cwr:1;
+#elif defined(__BIG_ENDIAN__)
+  u_int16_t doff:4, res1:4, cwr:1, ece:1, urg:1, ack:1, psh:1, rst:1, syn:1, fin:1;
 #else
-# error "BYTE_ORDER must be defined"
+# error "Byte order must be defined"
 #endif  
-  uint16_t window;
-  uint16_t check;
-  uint16_t urg_ptr;
+  u_int16_t window;
+  u_int16_t check;
+  u_int16_t urg_ptr;
 };
 
 struct udphdr {
-  uint16_t source;
-  uint16_t dest;
-  uint16_t len;
-  uint16_t check;
+  u_int16_t source;
+  u_int16_t dest;
+  u_int16_t len;
+  u_int16_t check;
 };
+#else
+#include <arpa/inet.h>
+#endif
 
 #endif

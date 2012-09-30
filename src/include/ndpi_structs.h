@@ -28,6 +28,53 @@
 #include "linux_compat.h"
 #endif
 
+#include "ndpi_define.h"
+
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+struct ndpi_ip6_addr {
+  union {
+    u_int8_t u6_addr8[16];
+    u_int16_t u6_addr16[8];
+    u_int32_t u6_addr32[4];
+    u_int64_t u6_addr64[2];
+  } ndpi_v6_u;
+
+#define ndpi_v6_addr		ndpi_v6_u.u6_addr8
+#define ndpi_v6_addr16		ndpi_v6_u.u6_addr16
+#define ndpi_v6_addr32		ndpi_v6_u.u6_addr32
+#define ndpi_v6_addr64		ndpi_v6_u.u6_addr64
+};
+
+struct ndpi_ipv6hdr {
+  /* use userspace and kernelspace compatible compile parameters */
+#if defined(__LITTLE_ENDIAN__)
+  u_int8_t priority:4, version:4;
+#elif defined(__BIG_ENDIAN__)
+  u_int8_t version:4, priority:4;
+#else
+# error "Byte order must be defined"
+#endif
+
+  u_int8_t flow_lbl[3];
+
+  u_int16_t payload_len;
+  u_int8_t nexthdr;
+  u_int8_t hop_limit;
+
+  struct ndpi_ip6_addr saddr;
+  struct ndpi_ip6_addr daddr;
+};
+#endif							/* NDPI_DETECTION_SUPPORT_IPV6 */
+
+typedef union {
+  u_int32_t ipv4;
+  u_int8_t ipv4_u_int8_t[4];
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+  struct ndpi_ip6_addr ipv6;
+#endif
+} ndpi_ip_addr_t;
+
+
 # define MAX_PACKET_COUNTER 65000
 
 typedef struct ndpi_id_struct {
@@ -368,6 +415,169 @@ struct ndpi_flow_udp_struct {
 #endif
   ;
 
+typedef struct ndpi_int_one_line_struct {
+  const u_int8_t *ptr;
+  u_int16_t len;
+} ndpi_int_one_line_struct_t;
+
+typedef struct ndpi_packet_struct {
+  const struct iphdr *iph;
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+  const struct ndpi_ipv6hdr *iphv6;
+#endif
+  const struct tcphdr *tcp;
+  const struct udphdr *udp;
+  const u_int8_t *generic_l4_ptr;	/* is set only for non tcp-udp traffic */
+  const u_int8_t *payload;
+
+  u_int32_t tick_timestamp;
+
+  u_int16_t detected_protocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
+  u_int8_t detected_subprotocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
+
+  /* this is for simple read-only access to the real protocol 
+   * used for the main loop */
+  u_int16_t real_protocol_read_only;
+
+#if NDPI_PROTOCOL_HISTORY_SIZE > 1
+#  if NDPI_PROTOCOL_HISTORY_SIZE > 5
+#    error protocol stack size not supported
+#  endif
+
+  struct {
+    u_int8_t entry_is_real_protocol:5;
+    u_int8_t current_stack_size_minus_one:3;
+  } 
+#if !(defined(HAVE_NTOP) && defined(WIN32))
+    __attribute__ ((__packed__))
+#endif
+    protocol_stack_info;
+#endif
+
+  struct ndpi_int_one_line_struct line[NDPI_MAX_PARSE_LINES_PER_PACKET];
+  struct ndpi_int_one_line_struct unix_line[NDPI_MAX_PARSE_LINES_PER_PACKET];
+  struct ndpi_int_one_line_struct host_line;
+  struct ndpi_int_one_line_struct referer_line;
+  struct ndpi_int_one_line_struct content_line;
+  struct ndpi_int_one_line_struct accept_line;
+  struct ndpi_int_one_line_struct user_agent_line;
+  struct ndpi_int_one_line_struct http_url_name;
+  struct ndpi_int_one_line_struct http_encoding;
+  struct ndpi_int_one_line_struct http_transfer_encoding;
+  struct ndpi_int_one_line_struct http_contentlen;
+  struct ndpi_int_one_line_struct http_cookie;
+  struct ndpi_int_one_line_struct http_x_session_type;
+  struct ndpi_int_one_line_struct server_line;
+  struct ndpi_int_one_line_struct http_method;
+  struct ndpi_int_one_line_struct http_response;
+
+
+  u_int16_t l3_packet_len;
+  u_int16_t l4_packet_len;
+  u_int16_t payload_packet_len;
+  u_int16_t actual_payload_len;
+  u_int16_t num_retried_bytes;
+  u_int16_t parsed_lines;
+  u_int16_t parsed_unix_lines;
+  u_int16_t empty_line_position;
+  u_int8_t tcp_retransmission;
+  u_int8_t l4_protocol;
+
+  u_int8_t packet_lines_parsed_complete;
+  u_int8_t packet_unix_lines_parsed_complete;
+  u_int8_t empty_line_position_set;
+  u_int8_t packet_direction:1;
+} ndpi_packet_struct_t;
+
+struct ndpi_detection_module_struct;
+struct ndpi_flow_struct;
+
+typedef struct ndpi_call_function_struct {
+  NDPI_PROTOCOL_BITMASK detection_bitmask;
+  NDPI_PROTOCOL_BITMASK excluded_protocol_bitmask;
+  NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_bitmask;
+  void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow);
+  u_int8_t detection_feature;
+} ndpi_call_function_struct_t;
+
+typedef struct ndpi_detection_module_struct {
+  NDPI_PROTOCOL_BITMASK detection_bitmask;
+  NDPI_PROTOCOL_BITMASK generic_http_packet_bitmask;
+  
+  u_int32_t current_ts;
+  u_int32_t ticks_per_second;
+
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+  void *user_data;
+#endif
+  /* callback function buffer */
+  struct ndpi_call_function_struct callback_buffer[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
+  u_int32_t callback_buffer_size;
+
+  struct ndpi_call_function_struct callback_buffer_tcp_no_payload[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
+  u_int32_t callback_buffer_size_tcp_no_payload;
+
+  struct ndpi_call_function_struct callback_buffer_tcp_payload[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
+  u_int32_t callback_buffer_size_tcp_payload;
+
+
+  struct ndpi_call_function_struct callback_buffer_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
+  u_int32_t callback_buffer_size_udp;
+
+
+  struct ndpi_call_function_struct callback_buffer_non_tcp_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
+  u_int32_t callback_buffer_size_non_tcp_udp;
+
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+  /* debug callback, only set when debug is used */
+  ndpi_debug_function_ptr ndpi_debug_printf;
+  const char *ndpi_debug_print_file;
+  const char *ndpi_debug_print_function;
+  u_int32_t ndpi_debug_print_line;
+#endif
+  /* misc parameters */
+  u_int32_t tcp_max_retransmission_window_size;
+
+  u_int32_t edonkey_upper_ports_only:1;
+  u_int32_t edonkey_safe_mode:1;
+  u_int32_t directconnect_connection_ip_tick_timeout;
+
+  /*gadu gadu*/
+  u_int32_t gadugadu_peer_connection_timeout;
+  /* pplive params */
+  u_int32_t pplive_connection_timeout;
+  /* ftp parameters */
+  u_int32_t ftp_connection_timeout;
+  /* irc parameters */
+  u_int32_t irc_timeout;
+  /* gnutella parameters */
+  u_int32_t gnutella_timeout;
+  /* battlefield parameters */
+  u_int32_t battlefield_timeout;
+  /* thunder parameters */
+  u_int32_t thunder_timeout;
+  /* SoulSeek parameters */
+  u_int32_t soulseek_connection_ip_tick_timeout;
+  /* rtsp parameters */
+  u_int32_t rtsp_connection_timeout;
+  /* tvants parameters */
+  u_int32_t tvants_connection_timeout;
+  u_int32_t orb_rstp_ts_timeout;
+  /* yahoo */
+  //      u_int32_t yahoo_http_filetransfer_timeout;
+  u_int8_t yahoo_detect_http_connections;
+  u_int32_t yahoo_lan_video_timeout;
+  u_int32_t zattoo_connection_timeout;
+  u_int32_t jabber_stun_timeout;
+  u_int32_t jabber_file_transfer_timeout;
+  u_int32_t manolito_subscriber_timeout;
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+#define NDPI_IP_STRING_SIZE 40
+  char ip_string[NDPI_IP_STRING_SIZE];
+#endif
+  u_int8_t ip_version_limit;
+} ndpi_detection_module_struct_t;
+
 typedef struct ndpi_flow_struct {
   u_int16_t detected_protocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
 #if NDPI_PROTOCOL_HISTORY_SIZE > 1
@@ -482,4 +692,5 @@ typedef struct ndpi_flow_struct {
   struct ndpi_id_struct *src;
   struct ndpi_id_struct *dst;
 } ndpi_flow_struct_t;
+		     
 #endif							/* __NDPI_STRUCTS_INCLUDE_FILE__ */

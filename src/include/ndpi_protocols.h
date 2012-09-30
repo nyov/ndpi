@@ -33,28 +33,11 @@
 /* new definitions to get little endian from network bytes */
 #define get_ul8(X,O) get_u_int8_t(X,O)
 
-#ifndef OPENDPI_NETFILTER_MODULE
-# ifndef __BYTE_ORDER
-#  define __BYTE_ORDER BYTE_ORDER
-#  define __LITTLE_ENDIAN LITTLE_ENDIAN
-#  define __BIG_ENDIAN BIG_ENDIAN
-# endif
-#else
-# ifdef __BIG_ENDIAN
-#  define __BYTE_ORDER __BIG_ENDIAN
-# else
-#  define __BYTE_ORDER __LITTLE_ENDIAN
-# endif
-#endif
 
-
-#if defined( __LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN
-
+#if defined(__LITTLE_ENDIAN__)
 #define get_l16(X,O)  get_u_int16_t(X,O)
 #define get_l32(X,O)  get_u_int32_t(X,O)
-
-#elif defined( __BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN
-
+#elif defined(__BIG_ENDIAN__)
 /* convert the bytes from big to little endian */
 #ifndef OPENDPI_NETFILTER_MODULE
 # define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
