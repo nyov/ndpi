@@ -46,35 +46,20 @@
 
 /* default includes */
 
-#if defined(__APPLE__) || defined(WIN32) || defined(__FreeBSD__)
 #ifndef WIN32
 #include <sys/param.h>
 #include <limits.h>
-#endif
-
-#if defined(__FreeBSD__)
-#include <netinet/in.h>
 #endif
 
 #ifdef NDPI_BUILD
 #include "linux_compat.h"
 #endif
 
-#else							/* APPLE */
 #ifndef OPENDPI_NETFILTER_MODULE
-#  include <netinet/in.h>
-#endif
-
-/*
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-*/
-#endif
-
 #include <netinet/ip.h> 
 #include <netinet/tcp.h> 
 #include <netinet/udp.h> 
+#endif
 
 //#include <arpa/inet.h>
 

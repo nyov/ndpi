@@ -421,12 +421,12 @@ typedef struct ndpi_int_one_line_struct {
 } ndpi_int_one_line_struct_t;
 
 typedef struct ndpi_packet_struct {
-  const struct iphdr *iph;
+  const struct ndpi_iphdr *iph;
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
   const struct ndpi_ipv6hdr *iphv6;
 #endif
-  const struct tcphdr *tcp;
-  const struct udphdr *udp;
+  const struct ndpi_tcphdr *tcp;
+  const struct ndpi_udphdr *udp;
   const u_int8_t *generic_l4_ptr;	/* is set only for non tcp-udp traffic */
   const u_int8_t *payload;
 

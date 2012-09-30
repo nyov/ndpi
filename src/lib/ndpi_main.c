@@ -1859,7 +1859,7 @@ static int ndpi_handle_ipv6_extension_headers(struct ndpi_detection_module_struc
   return 0;
 }
 #endif							/* NDPI_DETECTION_SUPPORT_IPV6 */
-static u_int8_t ndpi_iph_is_valid_and_not_fragmented(const struct iphdr *iph, const u_int16_t ipsize)
+static u_int8_t ndpi_iph_is_valid_and_not_fragmented(const struct ndpi_iphdr *iph, const u_int16_t ipsize)
 {
 #ifdef REQUIRE_FULL_PACKETS
   if (ipsize < iph->ihl * 4 ||
@@ -1875,7 +1875,7 @@ static u_int8_t ndpi_detection_get_l4_internal(struct ndpi_detection_module_stru
 					       const u_int8_t * l3, u_int16_t l3_len, const u_int8_t ** l4_return, u_int16_t * l4_len_return,
 					       u_int8_t * l4_protocol_return, u_int32_t flags)
 {
-  const struct iphdr *iph = NULL;
+  const struct ndpi_iphdr *iph = NULL;
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
   const struct ndpi_ipv6hdr *iph_v6 = NULL;
 #endif
@@ -1883,10 +1883,10 @@ static u_int8_t ndpi_detection_get_l4_internal(struct ndpi_detection_module_stru
   const u_int8_t *l4ptr = NULL;
   u_int8_t l4protocol = 0;
 
-  if (l3 == NULL || l3_len < sizeof(struct iphdr))
+  if (l3 == NULL || l3_len < sizeof(struct ndpi_iphdr))
     return 1;
 
-  iph = (const struct iphdr *) l3;
+  iph = (const struct ndpi_iphdr *) l3;
 
   if (iph->version == 4 && iph->ihl >= 5) {
     NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_DEBUG, "ipv4 header\n");
@@ -1970,7 +1970,7 @@ static int ndpi_init_packet_header(struct ndpi_detection_module_struct *ndpi_str
 				   struct ndpi_flow_struct *flow,
 				   unsigned short packetlen)
 {
-  const struct iphdr *decaps_iph = NULL;
+  const struct ndpi_iphdr *decaps_iph = NULL;
   u_int16_t l3len;
   u_int16_t l4len;
   const u_int8_t *l4ptr;
@@ -2048,7 +2048,7 @@ static int ndpi_init_packet_header(struct ndpi_detection_module_struct *ndpi_str
   /* tcp / udp detection */
   if (l4protocol == 6 /* TCP */  &&flow->packet.l4_packet_len >= 20 /* min size of tcp */ ) {
     /* tcp */
-    flow->packet.tcp = (struct tcphdr *) l4ptr;
+    flow->packet.tcp = (struct ndpi_tcphdr *) l4ptr;
 
     if (flow->packet.l4_packet_len >=flow->packet.tcp->doff * 4) {
       flow->packet.payload_packet_len =
@@ -2077,7 +2077,7 @@ static int ndpi_init_packet_header(struct ndpi_detection_module_struct *ndpi_str
       flow->packet.tcp = NULL;
     }
   } else if (l4protocol == 17 /* udp */  &&flow->packet.l4_packet_len >= 8 /* size of udp */ ) {
-    flow->packet.udp = (struct udphdr *) l4ptr;
+    flow->packet.udp = (struct ndpi_udphdr *) l4ptr;
     flow->packet.payload_packet_len =flow->packet.l4_packet_len - 8;
     flow->packet.payload = ((u_int8_t *)flow->packet.udp) + 8;
   } else {
@@ -2097,12 +2097,12 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 {
   /* const for gcc code optimisation and cleaner code */
   struct ndpi_packet_struct *packet = &flow->packet;
-  const struct iphdr *iph = packet->iph;
+  const struct ndpi_iphdr *iph = packet->iph;
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
   const struct ndpi_ipv6hdr *iphv6 = packet->iphv6;
 #endif
-  const struct tcphdr *tcph = packet->tcp;
-  //const struct udphdr   *udph=flow->packet.udp;
+  const struct ndpi_tcphdr *tcph = packet->tcp;
+  //const struct ndpi_udphdr   *udph=flow->packet.udp;
 
   //struct ndpi_unique_flow_struct      unique_flow;
   //uint8_t                               new_connection;
@@ -2241,7 +2241,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   flow = flow;
 
   /* parse packet */
-  flow->packet.iph = (struct iphdr *) packet;
+  flow->packet.iph = (struct ndpi_iphdr *) packet;
   /* we are interested in ipv4 packet */
 
   if (ndpi_init_packet_header(ndpi_struct, flow, packetlen) != 0) {
@@ -2371,7 +2371,7 @@ static u_int8_t ndpi_detection_build_key_internal(struct ndpi_detection_module_s
 						  struct ndpi_unique_flow_ipv4_and_6_struct *key_return, u_int8_t * dir_return,
 						  u_int32_t flags)
 {
-  const struct iphdr *iph = NULL;
+  const struct ndpi_iphdr *iph = NULL;
   u_int8_t swapped = 0;
 
   if (key_return == NULL || l3 == NULL)
@@ -2380,7 +2380,7 @@ static u_int8_t ndpi_detection_build_key_internal(struct ndpi_detection_module_s
   if (l3_len < sizeof(*iph))
     return 1;
 
-  iph = (const struct iphdr *) l3;
+  iph = (const struct ndpi_iphdr *) l3;
 
   if (iph->version == 4 && ((iph->ihl * 4) > l3_len || l3_len < ntohs(iph->tot_len)
 			    || (iph->frag_off & htons(0x1FFF)) != 0)) {
@@ -2453,8 +2453,8 @@ static u_int8_t ndpi_detection_build_key_internal(struct ndpi_detection_module_s
   }
 
   /* tcp / udp detection */
-  if (key_return->protocol == 6 /* TCP */  && l4_len >= sizeof(struct tcphdr)) {
-    const struct tcphdr *tcph = (const struct tcphdr *) l4;
+  if (key_return->protocol == 6 /* TCP */  && l4_len >= sizeof(struct ndpi_tcphdr)) {
+    const struct ndpi_tcphdr *tcph = (const struct ndpi_tcphdr *) l4;
     if (swapped == 0) {
       key_return->lower_port = tcph->source;
       key_return->upper_port = tcph->dest;
@@ -2462,8 +2462,8 @@ static u_int8_t ndpi_detection_build_key_internal(struct ndpi_detection_module_s
       key_return->lower_port = tcph->dest;
       key_return->upper_port = tcph->source;
     }
-  } else if (key_return->protocol == 17 /* UDP */  && l4_len >= sizeof(struct udphdr)) {
-    const struct udphdr *udph = (struct udphdr *) l4;
+  } else if (key_return->protocol == 17 /* UDP */  && l4_len >= sizeof(struct ndpi_udphdr)) {
+    const struct ndpi_udphdr *udph = (struct ndpi_udphdr *) l4;
     if (swapped == 0) {
       key_return->lower_port = udph->source;
       key_return->upper_port = udph->dest;

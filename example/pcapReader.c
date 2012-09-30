@@ -229,12 +229,12 @@ static void *get_id(const u8 * ip)
 	}
 }
 
-static struct osdpi_flow *get_osdpi_flow(const struct iphdr *iph, u16 ipsize)
+static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u16 ipsize)
 {
 	u32 i;
 	u16 l4_packet_len;
-	struct tcphdr *tcph = NULL;
-	struct udphdr *udph = NULL;
+	struct ndpi_tcphdr *tcph = NULL;
+	struct ndpi_udphdr *udph = NULL;
 
 	u32 lower_ip;
 	u32 upper_ip;
@@ -260,7 +260,7 @@ static struct osdpi_flow *get_osdpi_flow(const struct iphdr *iph, u16 ipsize)
 
 	if (iph->protocol == 6 && l4_packet_len >= 20) {
 		// tcp
-		tcph = (struct tcphdr *) ((u8 *) iph + iph->ihl * 4);
+		tcph = (struct ndpi_tcphdr *) ((u8 *) iph + iph->ihl * 4);
 		if (iph->saddr < iph->daddr) {
 			lower_port = tcph->source;
 			upper_port = tcph->dest;
@@ -270,7 +270,7 @@ static struct osdpi_flow *get_osdpi_flow(const struct iphdr *iph, u16 ipsize)
 		}
 	} else if (iph->protocol == 17 && l4_packet_len >= 8) {
 		// udp
-		udph = (struct udphdr *) ((u8 *) iph + iph->ihl * 4);
+		udph = (struct ndpi_udphdr *) ((u8 *) iph + iph->ihl * 4);
 		if (iph->saddr < iph->daddr) {
 			lower_port = udph->source;
 			upper_port = udph->dest;
@@ -377,7 +377,7 @@ static void terminateDetection(void)
 	free(osdpi_flows);
 }
 
-static unsigned int packet_processing(const uint64_t time, const struct iphdr *iph, uint16_t ipsize, uint16_t rawsize)
+static unsigned int packet_processing(const uint64_t time, const struct ndpi_iphdr *iph, uint16_t ipsize, uint16_t rawsize)
 {
 	struct ndpi_id_struct *src = NULL;
 	struct ndpi_id_struct *dst = NULL;
@@ -484,7 +484,7 @@ static void closePcapFile(void)
 static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header, const u_char * packet)
 {
 	const struct ethhdr *ethernet = (struct ethhdr *) packet;
-	struct iphdr *iph = (struct iphdr *) &packet[sizeof(struct ethhdr)];
+	struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[sizeof(struct ethhdr)];
 	u64 time;
 	static u64 lasttime = 0;
 	u16 type;

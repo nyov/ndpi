@@ -24,9 +24,8 @@
 #ifndef __NDPI_LINUX_COMPAT_H__
 #define __NDPI_LINUX_COMPAT_H__
 
-#if (defined(WIN32) /* || defined(__FreeBSD__) */)
 
-struct iphdr {
+struct ndpi_iphdr {
 #if defined(__LITTLE_ENDIAN__)
   u_int8_t ihl:4, version:4;
 #elif defined(__BIG_ENDIAN__)
@@ -56,9 +55,10 @@ typedef uint   u_int32_t;
 #define _WS2TCPIP_H_ /* Avoid compilation problems */
 #define HAVE_SIN6_LEN
 
+
 /* IPv6 address */
 /* Already defined in WS2tcpip.h */
-struct win_in6_addr
+struct ndpi_win_in6_addr
 {
   union
   {
@@ -87,7 +87,7 @@ struct win_in6_addr
 #define in6_addr win_in6_addr
 
 /* Generic extension header.  */
-struct ip6_ext
+struct ndpi_ip6_ext
 {
   u_int8_t  ip6e_nxt;		/* next header.  */
   u_int8_t  ip6e_len;		/* length in units of 8 octets.  */
@@ -96,9 +96,17 @@ struct ip6_ext
 #define s6_addr16		__u6_addr.__u6_addr16
 #define s6_addr32		__u6_addr.__u6_addr32
 
-struct ip6_hdr {
+struct ndpi_in6_addr {
   union {
-    struct ip6_hdrctl {
+    u_int8_t   __u6_addr8[16];
+    u_int16_t  __u6_addr16[8];
+    u_int32_t  __u6_addr32[4];
+  } __u6_addr;                    /* 128-bit IP6 address */
+};
+
+struct ndpi_ip6_hdr {
+  union {
+    struct ndpi_ip6_hdrctl {
       u_int32_t ip6_un1_flow;
       u_int16_t ip6_un1_plen;
       u_int8_t ip6_un1_nxt;
@@ -106,11 +114,11 @@ struct ip6_hdr {
     } ip6_un1;
     u_int8_t ip6_un2_vfc;
   } ip6_ctlun;
-  struct in6_addr ip6_src;
-  struct in6_addr ip6_dst;
+  struct ndpi_in6_addr ip6_src;
+  struct ndpi_in6_addr ip6_dst;
 };
 
-struct tcphdr {
+struct ndpi_tcphdr {
   u_int16_t source;
   u_int16_t dest;
   u_int32_t seq;
@@ -127,7 +135,7 @@ struct tcphdr {
   u_int16_t urg_ptr;
 };
 
-struct udphdr {
+struct ndpi_udphdr {
   u_int16_t source;
   u_int16_t dest;
   u_int16_t len;
@@ -137,4 +145,4 @@ struct udphdr {
 #include <arpa/inet.h>
 #endif
 
-#endif
+
