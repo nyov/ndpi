@@ -55,6 +55,10 @@
 #include "linux_compat.h"
 #endif
 
+#if defined(__FreeBSD__)
+#include <netinet/in.h>
+#endif
+
 #ifndef OPENDPI_NETFILTER_MODULE
 #include <netinet/ip.h> 
 #include <netinet/tcp.h> 
