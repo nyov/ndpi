@@ -24,6 +24,7 @@
 #ifndef __NDPI_LINUX_COMPAT_H__
 #define __NDPI_LINUX_COMPAT_H__
 
+#include "ndpi_define.h"
 
 struct ndpi_iphdr {
 #if defined(__LITTLE_ENDIAN__)
