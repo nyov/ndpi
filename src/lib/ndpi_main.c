@@ -2238,7 +2238,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     return NDPI_PROTOCOL_UNKNOWN;
   }
   flow->packet.tick_timestamp = current_tick;
-  flow = flow;
 
   /* parse packet */
   flow->packet.iph = (struct ndpi_iphdr *) packet;
