@@ -42,7 +42,15 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
 
     when = ntohl(*_when);
 
-    if((when >= 946684800 /* 1/1/2000 */) && (when <= time(NULL))) {
+#ifndef OPENDPI_NETFILTER_MODULE
+    time_t now = time(NULL);
+#else
+    struct timeval now_tv;
+    do_gettimeofday(&now_tv);
+    time_t now = now_tv.tv_sec;
+#endif
+
+    if((when >= 946684800 /* 1/1/2000 */) && (when <= now)) {
       NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
       ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
       return;

@@ -38,7 +38,21 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
 }
 
 #ifndef WIN32
+#ifndef OPENDPI_NETFILTER_MODULE
 inline int min(int a, int b) { return(a < b ? a : b); }
+#endif
+#endif
+
+#ifdef OPENDPI_NETFILTER_MODULE
+/* Can't call libc functions from kernel space, define some stub instead */
+#define isalpha(ch) (((ch) >= 'a' && (ch) <= 'z') || ((ch) >= 'A' && (ch) <= 'Z'))
+#define isdigit(ch) ((ch) >= '0' && (ch) <= '9')
+#define isspace(ch) (((ch) >= '\t' && (ch) <= '\r') || ((ch) == ' '))
+#define isprint(ch) ((ch) >= 0x20 && (ch) <= 0x7e)
+#define ispunct(ch) (((ch) >= '!' && (ch) <= '/') || \
+                     ((ch) >= ':' && (ch) <= '@') || \
+                     ((ch) >= '[' && (ch) <= '`') || \
+                     ((ch) >= '{' && (ch) <= '~')) 
 #endif
 
 static void stripCertificateTrailer(char *buffer, int buffer_len) {
