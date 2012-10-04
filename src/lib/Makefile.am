@@ -16,7 +16,7 @@ LIB_ANC=0
 # ntop
 AM_CFLAGS=-fPIC
 
-libndpi_la_CPPFLAGS = -DNDPI_BUILD -I$(top_srcdir)/src/include/
+libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/include/
 libndpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
 libndpi_la_SOURCES = ndpi_main.c \

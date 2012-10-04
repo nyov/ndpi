@@ -39,7 +39,10 @@ subdir = src/lib
 DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/configure.ac
+am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -274,7 +277,7 @@ LIB_ANC = 0
 
 # ntop
 AM_CFLAGS = -fPIC
-libndpi_la_CPPFLAGS = -DNDPI_BUILD -I$(top_srcdir)/src/include/
+libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/include/
 libndpi_la_LDFLAGS = -version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 libndpi_la_SOURCES = ndpi_main.c \
 			protocols/afp.c \

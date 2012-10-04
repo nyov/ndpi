@@ -4257,7 +4257,7 @@ else
 	# Check to see if the nm accepts a BSD-compat flag.
 	# Adding the `sed 1q' prevents false positives on HP-UX, which says:
 	#   nm: unknown option "B" ignored
-	# Tru64's nm complains that /dev/null is an invalid object file
+	# Tru_int64_t's nm complains that /dev/null is an invalid object file
 	case `"$tmp_nm" -B /dev/null 2>&1 | sed '1q'` in
 	*/dev/null* | *'Invalid file or object type'*)
 	  lt_cv_path_NM="$tmp_nm -B"
@@ -4520,7 +4520,7 @@ else
 
   osf*)
     # Dr. Hans Ekkehard Plesser reports seeing a kernel panic running configure
-    # due to this test when exec_disable_arg_limit is 1 on Tru64. It is not
+    # due to this test when exec_disable_arg_limit is 1 on Tru_int64_t. It is not
     # nice to cause kernel panics so lets avoid the loop below.
     # First set a reasonable default.
     lt_cv_sys_max_cmd_len=16384
@@ -7698,6 +7698,10 @@ _lt_linker_boilerplate=`cat conftest.err`
 $RM -r conftest*
 
 
+## CAVEAT EMPTOR:
+## There is no encapsulation within the following macros, do not change
+## the running order or otherwise move them around unless you know exactly
+## what you are doing...
 if test -n "$compiler"; then
 
 lt_prog_compiler_no_builtin_flag=
