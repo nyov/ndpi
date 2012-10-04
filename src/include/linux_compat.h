@@ -26,6 +26,12 @@
 
 #include "ndpi_define.h"
 
+struct ndpi_ethhdr {
+  u_char h_dest[6];       /* destination eth addr */
+  u_char h_source[6];     /* source ether addr    */
+  u_int16_t h_proto;      /* packet type ID field */
+} __attribute__((packed));
+
 struct ndpi_iphdr {
 #if defined(__LITTLE_ENDIAN__)
   u_int8_t ihl:4, version:4;
