@@ -23,7 +23,11 @@
 
 #ifndef __NDPI_PROTOCOLS_INCLUDE_FILE__
 #define __NDPI_PROTOCOLS_INCLUDE_FILE__
+
+#define NDPI_BUILD
+
 #include "ndpi_main.h"
+
 /* the get_uXX will return raw network packet bytes !! */
 #define get_u_int8_t(X,O)  (*(u_int8_t *)(((u_int8_t *)X) + O))
 #define get_u_int16_t(X,O)  (*(u_int16_t *)(((u_int8_t *)X) + O))

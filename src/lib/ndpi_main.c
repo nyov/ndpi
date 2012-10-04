@@ -20,6 +20,7 @@
  *
  */
 
+#define NDPI_BUILD
 
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
@@ -2180,7 +2181,7 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 	  /* num_retried_bytes actual_payload_len hold info about the partial retry
 	     analyzer which require this info can make use of this info
 	     Other analyzer can use packet->payload_packet_len */
-	  packet->num_retried_bytes = flow->next_tcp_seq_nr[packet->packet_direction] - ntohl(tcph->seq);
+	  packet->num_retried_bytes = (u_int16_t)(flow->next_tcp_seq_nr[packet->packet_direction] - ntohl(tcph->seq));
 	  packet->actual_payload_len = packet->payload_packet_len - packet->num_retried_bytes;
 	  flow->next_tcp_seq_nr[packet->packet_direction] = ntohl(tcph->seq) + packet->payload_packet_len;
 	}
@@ -2671,8 +2672,7 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
 
   for (a = 0; a < end; a++) {
     if (get_u_int16_t(packet->payload, a) == ntohs(0x0d0a)) {
-      packet->line[packet->parsed_lines].len =
-	((unsigned long) &packet->payload[a]) - ((unsigned long) packet->line[packet->parsed_lines].ptr);
+      packet->line[packet->parsed_lines].len = (u_int16_t)(((unsigned long) &packet->payload[a]) - ((unsigned long) packet->line[packet->parsed_lines].ptr));
 
       if (packet->parsed_lines == 0 && packet->line[0].len >= NDPI_STATICSTRING_LEN("HTTP/1.1 200 ") &&
 	  memcmp(packet->line[0].ptr, "HTTP/1.", NDPI_STATICSTRING_LEN("HTTP/1.")) == 0 &&
@@ -2796,9 +2796,8 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
 
   if (packet->parsed_lines >= 1) {
     packet->line[packet->parsed_lines].len
-      =
-      ((unsigned long) &packet->payload[packet->payload_packet_len]) -
-      ((unsigned long) packet->line[packet->parsed_lines].ptr);
+      = (u_int16_t)(((unsigned long) &packet->payload[packet->payload_packet_len]) -
+      ((unsigned long) packet->line[packet->parsed_lines].ptr));
     packet->parsed_lines++;
   }
 }
@@ -2825,9 +2824,9 @@ void ndpi_parse_packet_line_info_unix(struct ndpi_detection_module_struct *ndpi_
 
   for (a = 0; a < end; a++) {
     if (packet->payload[a] == 0x0a) {
-      packet->unix_line[packet->parsed_unix_lines].len =
+      packet->unix_line[packet->parsed_unix_lines].len = (u_int16_t)(
 	((unsigned long) &packet->payload[a]) -
-	((unsigned long) packet->unix_line[packet->parsed_unix_lines].ptr);
+	((unsigned long) packet->unix_line[packet->parsed_unix_lines].ptr));
 
       if (packet->parsed_unix_lines >= (NDPI_MAX_PARSE_LINES_PER_PACKET - 1)) {
 	break;
@@ -2980,7 +2979,7 @@ void ndpi_int_change_flow_protocol(struct ndpi_detection_module_struct *ndpi_str
 #if NDPI_PROTOCOL_HISTORY_SIZE > 1
   u_int8_t a;
   u_int8_t stack_size;
-  u_int16_t new_is_real = 0;
+  u_int8_t new_is_real = 0;
   u_int16_t preserve_bitmask;
 #endif
 

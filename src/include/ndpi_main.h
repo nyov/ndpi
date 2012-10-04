@@ -52,6 +52,18 @@
 #endif
 
 #ifdef NDPI_BUILD
+#ifdef WIN32
+#define __attribute__(x)
+typedef char int8_t;
+typedef unsigned char u_int8_t;
+typedef unsigned char u_char;
+typedef __int16 int16_t;
+typedef unsigned __int16 u_int16_t;
+typedef __int32 int32_t;
+typedef unsigned __int32 u_int32_t;
+typedef unsigned __int64 u_int64_t;
+#endif
+
 #include "linux_compat.h"
 #endif
 
@@ -59,13 +71,15 @@
 #include <netinet/in.h>
 #endif
 
+#ifndef WIN32
 #ifndef OPENDPI_NETFILTER_MODULE
 #include <netinet/ip.h> 
 #include <netinet/tcp.h> 
 #include <netinet/udp.h> 
 #endif
+#endif
 
-//#include <arpa/inet.h>
+#include <time.h>
 
 #include "ndpi_define.h"
 #include "ndpi_macros.h"

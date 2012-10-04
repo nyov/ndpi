@@ -149,7 +149,9 @@ struct ndpi_udphdr {
   u_int16_t check;
 };
 #else
+#ifndef WIN32
 #include <arpa/inet.h>
+#endif
 #endif
 
 

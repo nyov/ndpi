@@ -20,7 +20,6 @@
  * 
  */
 
-
 #include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_EDONKEY
 /* debug defines */

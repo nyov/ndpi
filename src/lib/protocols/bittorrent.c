@@ -393,7 +393,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 						NDPI_REAL_PROTOCOL);
 	    return;
 	  } else if((begin = memchr(packet->payload, 'B',  packet->payload_packet_len-19)) != NULL) {
-	    u_long offset = (u_long)begin - (u_long)packet->payload;
+	    long offset = (u_long)begin - (u_long)packet->payload;
 	    
 	    if((packet->payload_packet_len-19) > offset) {
 	      if(memcmp(begin, "BitTorrent protocol", 19) == 0) {
