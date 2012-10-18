@@ -24,8 +24,6 @@
 #ifndef __NDPI_PROTOCOLS_INCLUDE_FILE__
 #define __NDPI_PROTOCOLS_INCLUDE_FILE__
 
-#define NDPI_BUILD
-
 #include "ndpi_main.h"
 
 /* the get_uXX will return raw network packet bytes !! */

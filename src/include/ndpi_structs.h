@@ -24,9 +24,7 @@
 #ifndef __NDPI_STRUCTS_INCLUDE_FILE__
 #define __NDPI_STRUCTS_INCLUDE_FILE__
 
-#ifdef NDPI_BUILD
 #include "linux_compat.h"
-#endif
 
 #include "ndpi_define.h"
 

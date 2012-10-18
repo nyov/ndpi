@@ -31,7 +31,7 @@
 #include <string.h>
 #endif
 
-#if !defined(WIN32)
+#ifndef WIN32
 #if 1 && !defined __APPLE__ && !defined __FreeBSD__
 
 #ifndef OPENDPI_NETFILTER_MODULE
@@ -41,17 +41,17 @@
 #  include <asm/byteorder.h>
 #endif
 
-#endif							/* not WIN32 && not APPLE) */
-#endif /* ntop */
+#endif
 
 /* default includes */
 
-#ifndef WIN32
+#ifndef OPENDPI_NETFILTER_MODULE
 #include <sys/param.h>
 #include <limits.h>
 #endif
 
-#ifdef NDPI_BUILD
+#endif
+
 #ifdef WIN32
 #define __attribute__(x)
 typedef char int8_t;
@@ -65,7 +65,6 @@ typedef unsigned __int64 u_int64_t;
 #endif
 
 #include "linux_compat.h"
-#endif
 
 #if defined(__FreeBSD__)
 #include <netinet/in.h>
@@ -73,18 +72,21 @@ typedef unsigned __int64 u_int64_t;
 
 #ifndef WIN32
 #ifndef OPENDPI_NETFILTER_MODULE
-#include <netinet/ip.h> 
-#include <netinet/tcp.h> 
-#include <netinet/udp.h> 
+#  include <netinet/ip.h>
+#  include <netinet/tcp.h>
+#  include <netinet/udp.h>
+#else
+#  include <linux/ip.h>
+#  include <linux/tcp.h>
+#  include <linux/udp.h>
 #endif
 #endif
-
-#include <time.h>
 
 #include "ndpi_define.h"
 #include "ndpi_macros.h"
 #include "ndpi_protocols_osdpi.h"
 
+u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 
 u_int32_t ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 u_int64_t ndpi_bytestream_to_number64(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);

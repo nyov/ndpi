@@ -20,8 +20,6 @@
  *
  */
 
-#define NDPI_BUILD
-
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"

@@ -26,11 +26,22 @@
 */
 
 #if !(defined(__LITTLE_ENDIAN__) || defined(__BIG_ENDIAN__))
+/* Kernel modules */
+#if defined(__LITTLE_ENDIAN)
+#define __LITTLE_ENDIAN__
+#endif
+#if defined(__BIG_ENDIAN)
+#define __BIG_ENDIAN__
+#endif
+/* Everything else */
+#if (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__))
 #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define __LITTLE_ENDIAN__
 #else
 #define __BIG_ENDIAN__
 #endif
+#endif
+
 #endif
 
 #define NDPI_USE_ASYMMETRIC_DETECTION             0

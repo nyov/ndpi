@@ -51,6 +51,9 @@ struct ndpi_iphdr {
   u_int32_t daddr;
 };
 
+
+#ifdef WIN32
+
 typedef unsigned char  u_char;
 typedef unsigned short u_short;
 typedef unsigned int   uint;
@@ -102,6 +105,13 @@ struct ndpi_ip6_ext
 
 #define s6_addr16		__u6_addr.__u6_addr16
 #define s6_addr32		__u6_addr.__u6_addr32
+#else
+#ifndef OPENDPI_NETFILTER_MODULE
+#include <arpa/inet.h>
+#endif
+#endif
+
+
 
 struct ndpi_in6_addr {
   union {
@@ -148,10 +158,5 @@ struct ndpi_udphdr {
   u_int16_t len;
   u_int16_t check;
 };
-#else
-#ifndef WIN32
-#include <arpa/inet.h>
-#endif
-#endif
 
-
+#endif
