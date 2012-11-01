@@ -1913,9 +1913,14 @@ static u_int8_t ndpi_detection_get_l4_internal(struct ndpi_detection_module_stru
 #endif
 
   if (iph != NULL && ndpi_iph_is_valid_and_not_fragmented(iph, l3_len)) {
+    u_int16_t len  = ntohs(iph->tot_len);
+    u_int16_t hlen = (iph->ihl * 4);
 
     l4ptr = (((const u_int8_t *) iph) + iph->ihl * 4);
-    l4len = ntohs(iph->tot_len) - (iph->ihl * 4);
+
+    if(len == 0) len = l3_len;
+
+    l4len = (len > hlen) ? (len - hlen) : 0;
     l4protocol = iph->protocol;
   }
 #ifdef NDPI_DETECTION_SUPPORT_IPV6

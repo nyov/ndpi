@@ -188,11 +188,13 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct n
 int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
 
+  if(!packet->iph /* IPv4 */) return;
+
   if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
      || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
     char certificate[64];
     int rc = getSSLcertificate(ndpi_struct, flow, certificate, sizeof(certificate));
-
+    
     if(rc > 0) {
       /* printf("***** [SSL] %s\n", certificate); */
       if(matchStringProtocol(ndpi_struct, flow, certificate, strlen(certificate)) != -1)
