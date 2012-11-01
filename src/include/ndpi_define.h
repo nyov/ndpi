@@ -25,6 +25,10 @@
   gcc -E -dM - < /dev/null |grep ENDIAN
 */
 
+#ifdef WIN32
+#define __LITTLE_ENDIAN__ 1
+#endif
+
 #if !(defined(__LITTLE_ENDIAN__) || defined(__BIG_ENDIAN__))
 /* Kernel modules */
 #if defined(__LITTLE_ENDIAN)
