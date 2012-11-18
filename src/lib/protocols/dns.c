@@ -23,13 +23,10 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
   NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "search DNS.\n");
   
   if (packet->udp != NULL) {
-    sport=ntohs(packet->udp->source);
-    dport = ntohs(packet->udp->dest);
+    sport = ntohs(packet->udp->source),  dport = ntohs(packet->udp->dest);
     NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over UDP.\n");
-  }
-  if (packet->tcp != NULL) {
-    sport=ntohs(packet->tcp->source);
-    dport = ntohs(packet->tcp->dest);
+  } else  if(packet->tcp != NULL) {
+    sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
     NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over tcp.\n");
   }
 
@@ -49,8 +46,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 
     if(is_query) {
       /* DNS Request */
-      if((header.num_queries > 0)
-	 && (header.num_queries <= NDPI_MAX_DNS_REQUESTS)
+      if((header.num_queries > 0) && (header.num_queries <= NDPI_MAX_DNS_REQUESTS)
 	 && (header.answer_rrs == 0)
 	 && (header.authority_rrs == 0)) {
 	/* This is a good query */
@@ -58,22 +54,22 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
       }
     } else {
       /* DNS Reply */
-      if((header.num_queries >= 0) /* Don't assume that num_queries must be zero */
-	 && ((header.answer_rrs > 0)
-	     || (header.authority_rrs > 0)
-	     || (header.additional_rrs > 0))
+      if((header.num_queries <= NDPI_MAX_DNS_REQUESTS) /* Don't assume that num_queries must be zero */
+	 && (((header.answer_rrs > 0) && (header.answer_rrs <= NDPI_MAX_DNS_REQUESTS))
+	     || ((header.authority_rrs > 0) && (header.authority_rrs <= NDPI_MAX_DNS_REQUESTS))
+	     || ((header.additional_rrs > 0) && (header.additional_rrs <= NDPI_MAX_DNS_REQUESTS)))
 	 ) {
-	/* This is a good query */
+	/* This is a good reply */
 	is_dns = 1;
       }
 
-      if((header.num_queries >= 0)
+      if((header.num_queries <= NDPI_MAX_DNS_REQUESTS)
 	 && ((header.answer_rrs == 0)
 	     || (header.authority_rrs == 0)
 	     || (header.additional_rrs == 0))
 	 && (ret_code != 0 /* 0 == OK */)
 	 ) {
-	/* This is a good query */
+	/* This is a good reply */
 	is_dns = 1;
       }
 
