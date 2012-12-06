@@ -15,5 +15,6 @@ AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 AC_CONFIG_FILES([Makefile
 		src/lib/Makefile
 		src/include/Makefile
+		libndpi.pc
 		])
 AC_OUTPUT

@@ -28,11 +28,15 @@
 #ifndef __NDPI_PUBLIC_FUNCTIONS_H__
 #define __NDPI_PUBLIC_FUNCTIONS_H__
 
-#include "ndpi_structs.h"
+//#include "ndpi_structs.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+  /* Forward */
+  struct ndpi_flow_struct;
+  struct ndpi_id_struct;
+
   /**
    * struct for a unique ipv4 flow address
    */
