@@ -201,7 +201,7 @@ typedef struct {
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 
-
+#if 0
 #define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP","Mail_POP","Mail_SMTP","Mail_IMAP","DNS","IPP","HTTP","MDNS","NTP",\
     "NETBIOS","NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","PostgreSQL","MySQL","TDS","DirectDownloadLink","I23V5", \
     "AppleJuice","DirectConnect","Socrates","WinMX","MANOLITO","PANDO","Filetopia","iMESH","Kontiki","OpenFT","Kazaa/Fasttrack", \
@@ -229,6 +229,7 @@ typedef struct {
     "http_connect","http_proxy","Citrix","Netflix","Last.fm","Grooveshark",\
     "Skyfile_pre", "Skyfile_ru","Skyfile_post","CitrixOnline","iMessage_Facetime","Webex","WhatsApp","iCloud","Viber","iTunes", \
     "Radius","WinUpdate","TeamViewer","tuenti"
+#endif
 
 #ifdef __cplusplus
 }

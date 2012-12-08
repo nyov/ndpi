@@ -59,8 +59,8 @@ extern "C" {
 /* this is a very very tricky macro *g*,
   * the compiler will remove all shifts here if the protocol is static...
  */
-#define NDPI_ADD_PROTOCOL_TO_BITMASK(bmask,value)         \
-  {(bmask).bitmask[(value) >> 6] |= (((u_int64_t)1)<<((value) & 0x3F));}    \
+#define NDPI_ADD_PROTOCOL_TO_BITMASK(bmask,value)	\
+  {(bmask).bitmask[(value) >> 6] |= (((u_int64_t)1)<<((value) & 0x3F));} \
 
 #define NDPI_DEL_PROTOCOL_FROM_BITMASK(bmask,value)               \
   {(bmask).bitmask[(value) >> 6] = (bmask).bitmask[(value) >> 6] & (~(((u_int64_t)1)<<((value) & 0x3F)));}  \

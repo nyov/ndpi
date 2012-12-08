@@ -498,6 +498,14 @@ typedef struct ndpi_call_function_struct {
   u_int8_t detection_feature;
 } ndpi_call_function_struct_t;
 
+#define MAX_DEFAULT_PORTS        3
+
+/* ntop extensions */
+typedef struct ndpi_proto_defaults {
+  char *protoName;
+  u_int16_t *tcpDefaultPorts, *udpDefaultPorts;
+} ndpi_proto_defaults_t;
+
 typedef struct ndpi_detection_module_struct {
   NDPI_PROTOCOL_BITMASK detection_bitmask;
   NDPI_PROTOCOL_BITMASK generic_http_packet_bitmask;
@@ -574,6 +582,9 @@ typedef struct ndpi_detection_module_struct {
   char ip_string[NDPI_IP_STRING_SIZE];
 #endif
   u_int8_t ip_version_limit;
+
+  /* ********************* */
+  ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS];
 } ndpi_detection_module_struct_t;
 
 typedef struct ndpi_flow_struct {

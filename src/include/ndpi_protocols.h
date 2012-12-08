@@ -55,8 +55,6 @@
 
 #endif							/* __BYTE_ORDER */
 
-
-
 /* define memory callback function */
 #define ndpi_mem_cmp memcmp
 void ndpi_search_bittorrent(struct ndpi_detection_module_struct
