@@ -94,7 +94,15 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 				*ndpi_struct, void (*ndpi_free) (void *ptr))
 {
-  if (ndpi_struct != NULL) {
+  if(ndpi_struct != NULL) {
+    int i;
+    
+    for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
+      if(ndpi_struct->proto_defaults[i].protoName)       free(ndpi_struct->proto_defaults[i].protoName);
+      if(ndpi_struct->proto_defaults[i].tcpDefaultPorts) free(ndpi_struct->proto_defaults[i].tcpDefaultPorts);
+      if(ndpi_struct->proto_defaults[i].udpDefaultPorts) free(ndpi_struct->proto_defaults[i].udpDefaultPorts);
+    }
+
     ndpi_free(ndpi_struct);
   }
 }
