@@ -193,44 +193,13 @@ typedef struct {
 #define NDPI_PROTOCOL_WINDOWS_UPDATE                            147 /* Thierry Laurion */
 #define NDPI_PROTOCOL_TEAMVIEWER                                148 /* xplico.org */
 #define NDPI_PROTOCOL_TUENTI					149
+#define NDPI_PROTOCOL_LOTUS_NOTES				150
+#define NDPI_PROTOCOL_SAP					151
 
 /* NOTE: REMEMBER TO UPDATE NDPI_PROTOCOL_LONG_STRING / NDPI_PROTOCOL_SHORT_STRING */
 
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                        149
-
-
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                        151
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
-
-#if 0
-#define NDPI_PROTOCOL_LONG_STRING "Unknown","FTP","Mail_POP","Mail_SMTP","Mail_IMAP","DNS","IPP","HTTP","MDNS","NTP",\
-    "NETBIOS","NFS","SSDP","BGP","SNMP","XDMCP","SMB","SYSLOG","DHCP","PostgreSQL","MySQL","TDS","DirectDownloadLink","I23V5", \
-    "AppleJuice","DirectConnect","Socrates","WinMX","MANOLITO","PANDO","Filetopia","iMESH","Kontiki","OpenFT","Kazaa/Fasttrack", \
-    "Gnutella","eDonkey","Bittorrent","OFF","AVI","Flash","OGG","MPEG","QuickTime","RealMedia","Windowsmedia","MMS","XBOX","QQ", \
-    "MOVE","RTSP","Feidian","Icecast","PPLive","PPStream","Zattoo","SHOUTCast","SopCast","TVAnts","TVUplayer","VeohTV",	\
-    "QQLive","Thunder/Webthunder","Soulseek","GaduGadu","IRC","Popo","Jabber","MSN","Oscar","Yahoo","Battlefield","Quake", \
-    "Second Life","Steam","Halflife2","World of Warcraft","Telnet","STUN","IPSEC","GRE","ICMP","IGMP","EGP","SCTP","OSPF", \
-    "IP in IP","RTP","RDP","VNC","PCAnywhere","SSL","SSH","USENET","MGCP","IAX","TFTP","AFP","StealthNet","Aimini","SIP","Truphone", \
-    "ICMPv6","DHCPv6","Armagetron","CrossFire","Dofus","Fiesta","Florensia","Guildwars","HTTP Application Activesync","Kerberos", \
-    "LDAP","MapleStory","msSQL","PPTP","WARCRAFT3","World of Kung Fu","MEEBO", \
-    "FaceBook","Twitter","DropBox","Gmail","Google Maps","YouTube","Skype","Google","DCE RPC","NetFlow_IPFIX","sFlow", \
-    "HTTP Connect","HTTP Proxy","Citrix","Netflix","Last.fm","Grooveshark", \
-    "Skyfile_prepaid","Skyfile_rudics","Skyfile_postpaid","CitrixOnline_GotoMeeting","Apple","Webex",\
-    "WhatsApp","Apple_iCloud","Viber","Apple_iTunes","Radius","WindowsUpdate","TeamViewer","Tuenti"
-#define NDPI_PROTOCOL_SHORT_STRING "ukn","ftp","pop","smtp","imap","dns","ipp","http","mdns","ntp","netbios","nfs","ssdp", \
-    "bgp","snmp","xdmcp","smb","syslog","dhcp","postgres","mysql","tds","ddl","i23v5","apple","directconnect","socrates","winmx", \
-    "manolito","pando","filetopia","iMESH","kontiki","openft","fasttrack","gnutella","edonkey","bittorrent","off","avi", \
-    "flash","ogg","mpeg","quicktime","realmedia","windowsmedia","mms","xbox","qq","move","rtsp","feidian","icecast","pplive", \
-    "ppstream","zattoo","shoutcast","sopcast","tvants","tvuplayer","veohtv","qqlive","thunder","soulseek","gadugadu","irc", \
-    "popo","jabber","msn","oscar","yahoo","battlefield","quake","secondlife","steam","hl2","worldofwarcraft","telnet","stun", \
-    "ipsec","gre","icmp","igmp","egp","sctp","ospf","ipip","rtp","rdp","vnc","pcanywhere","ssl","ssh","usenet","mgcp","iax", \
-    "tftp","afp","stealthnet","aimini","sip","truphone","icmpv6","dhcpv6","armagetron","crossfire","dofus","fiesta","florensia", \
-    "guildwars","httpactivesync","kerberos","ldap","maplestory","mssql","pptp","warcraft3","wokf","meebo",\
-    "facebook","twitter","dropbox","gmail","gmaps","youtube","skype","google","dcerpc","netflow","sflow", \
-    "http_connect","http_proxy","Citrix","Netflix","Last.fm","Grooveshark",\
-    "Skyfile_pre", "Skyfile_ru","Skyfile_post","CitrixOnline","iMessage_Facetime","Webex","WhatsApp","iCloud","Viber","iTunes", \
-    "Radius","WinUpdate","TeamViewer","tuenti"
-#endif
-
 #ifdef __cplusplus
 }
 #endif

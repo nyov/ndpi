@@ -1664,7 +1664,7 @@ AC_CACHE_VAL([lt_cv_sys_max_cmd_len], [dnl
 
   osf*)
     # Dr. Hans Ekkehard Plesser reports seeing a kernel panic running configure
-    # due to this test when exec_disable_arg_limit is 1 on Tru_int64_t. It is not
+    # due to this test when exec_disable_arg_limit is 1 on Tru64. It is not
     # nice to cause kernel panics so lets avoid the loop below.
     # First set a reasonable default.
     lt_cv_sys_max_cmd_len=16384
@@ -3429,7 +3429,7 @@ else
 	# Check to see if the nm accepts a BSD-compat flag.
 	# Adding the `sed 1q' prevents false positives on HP-UX, which says:
 	#   nm: unknown option "B" ignored
-	# Tru_int64_t's nm complains that /dev/null is an invalid object file
+	# Tru64's nm complains that /dev/null is an invalid object file
 	case `"$tmp_nm" -B /dev/null 2>&1 | sed '1q'` in
 	*/dev/null* | *'Invalid file or object type'*)
 	  lt_cv_path_NM="$tmp_nm -B"
@@ -4078,7 +4078,7 @@ m4_if([$1], [CXX], [
 	  cxx*)
 	    # Compaq C++
 	    # Make sure the PIC flag is empty.  It appears that all Alpha
-	    # Linux and Compaq Tru_int64_t Unix objects are PIC.
+	    # Linux and Compaq Tru64 Unix objects are PIC.
 	    _LT_TAGVAR(lt_prog_compiler_pic, $1)=
 	    _LT_TAGVAR(lt_prog_compiler_static, $1)='-non_shared'
 	    ;;
@@ -4133,7 +4133,7 @@ m4_if([$1], [CXX], [
 	    # Digital/Compaq C++
 	    _LT_TAGVAR(lt_prog_compiler_wl, $1)='-Wl,'
 	    # Make sure the PIC flag is empty.  It appears that all Alpha
-	    # Linux and Compaq Tru_int64_t Unix objects are PIC.
+	    # Linux and Compaq Tru64 Unix objects are PIC.
 	    _LT_TAGVAR(lt_prog_compiler_pic, $1)=
 	    _LT_TAGVAR(lt_prog_compiler_static, $1)='-non_shared'
 	    ;;

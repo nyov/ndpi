@@ -356,6 +356,10 @@ struct ndpi_flow_tcp_struct {
   u_int8_t citrix_packet_id;
 #endif
 
+#ifdef NDPI_PROTOCOL_LOTUS_NOTES
+  u_int8_t lotus_notes_packet_id;
+#endif
+
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif

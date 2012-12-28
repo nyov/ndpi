@@ -1,6 +1,7 @@
 /*
  * ndpi_protocols.h
  * Copyright (C) 2009-2011 by ipoque GmbH
+ * Copyright (C) 2011-2012 by ntop.org
  *
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
@@ -330,6 +331,7 @@ void ndpi_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct 
 void ndpi_search_radius(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_wsus(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_lotus_notes(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 
 
 

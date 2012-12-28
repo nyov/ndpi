@@ -333,6 +333,8 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WINDOWS_UPDATE, "WINDOWS_UPDATE", ndpi_build_default_ports(0, 0, 0) /* TCP */, ndpi_build_default_ports(0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TEAMVIEWER, "TEAMVIEWER", ndpi_build_default_ports(0, 0, 0) /* TCP */, ndpi_build_default_ports(0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TUENTI, "TUENTI", ndpi_build_default_ports(0, 0, 0) /* TCP */, ndpi_build_default_ports(0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LOTUS_NOTES, "LotusNotes", ndpi_build_default_ports(1352, 0, 0) /* TCP */, ndpi_build_default_ports(0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SAP, "SAP", ndpi_build_default_ports(3201, 0, 0) /* TCP */, ndpi_build_default_ports(0, 0, 0) /* UDP */); /* Missing dissector: port based only */
 
   for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
     if(ndpi_mod->proto_defaults[i].protoName == NULL) {
@@ -2004,6 +2006,19 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_CITRIX);
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_CITRIX);
+    a++;
+  }
+#endif
+
+#ifdef NDPI_PROTOCOL_LOTUS_NOTES
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_LOTUS_NOTES) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_lotus_notes;
+    ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
+      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_LOTUS_NOTES);
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_LOTUS_NOTES);
     a++;
   }
 #endif
