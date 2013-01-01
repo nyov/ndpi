@@ -502,13 +502,18 @@ typedef struct ndpi_call_function_struct {
   u_int8_t detection_feature;
 } ndpi_call_function_struct_t;
 
-#define MAX_DEFAULT_PORTS        3
+#define MAX_DEFAULT_PORTS        5
 
 /* ntop extensions */
 typedef struct ndpi_proto_defaults {
   char *protoName;
-  u_int16_t *tcpDefaultPorts, *udpDefaultPorts;
+  u_int16_t protoId;
 } ndpi_proto_defaults_t;
+
+typedef struct ndpi_default_ports_tree_node {
+  ndpi_proto_defaults_t *proto;
+  u_int16_t default_port;
+} ndpi_default_ports_tree_node_t;
 
 typedef struct ndpi_detection_module_struct {
   NDPI_PROTOCOL_BITMASK detection_bitmask;
