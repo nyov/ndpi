@@ -128,6 +128,7 @@ libndpi_la_SOURCES = ndpi_main.c \
 			protocols/sflow.c \
 			protocols/radius.c \
 			protocols/teamviewer.c \
-			protocols/lotus_notes.c
+			protocols/lotus_notes.c \
+			protocols/gtp.c
 
 # NTOP protocols are at the end

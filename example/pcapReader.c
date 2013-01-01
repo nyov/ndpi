@@ -3,23 +3,23 @@
  *
  * Copyright (C) 2009 by ipoque GmbH
  * Copyright (C) 2012 by ntop.org
- * 
+ *
  * This file is part of OpenDPI, an open source deep packet inspection
  * library based on the PACE technology by ipoque GmbH
- * 
+ *
  * OpenDPI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * OpenDPI is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with OpenDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -38,12 +38,13 @@
 
 // cli options
 static char *_pcap_file = NULL;
+static char *_protoFilePath = NULL;
 
 // pcap
 static char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
 static pcap_t *_pcap_handle = NULL;
 static int _pcap_datalink_type = 0;
-static u_int8_t enable_protocol_guess = 1;
+static u_int8_t enable_protocol_guess = 1, verbose = 0;
 
 // detection
 static struct ndpi_detection_module_struct *ndpi_struct = NULL;
@@ -86,7 +87,7 @@ typedef struct osdpi_flow {
   u_int16_t upper_port;
   u_int8_t protocol;
   struct ndpi_flow_struct *ndpi_flow;
-  
+
   u_int16_t packets, bytes;
   // result only, not used for flow identification
   u_int32_t detected_protocol;
@@ -122,7 +123,7 @@ static int string_to_detection_bitmask(char *str, NDPI_PROTOCOL_BITMASK * dbm)
 	if (strlen(prot_short_str[a]) == (ptr - oldptr) &&
 	    (memcmp(&str[oldptr], prot_short_str[a], ptr - oldptr) == 0)) {
 	  NDPI_ADD_PROTOCOL_TO_BITMASK(*dbm, a);
-	  printf("Protocol parameter detected as protocol %s\n", 
+	  printf("Protocol parameter detected as protocol %s\n",
 		 ndpi_get_proto_name(ndpi_struct, a));
 	}
       }
@@ -136,6 +137,17 @@ static int string_to_detection_bitmask(char *str, NDPI_PROTOCOL_BITMASK * dbm)
 }
 #endif
 
+static void help() {
+  printf("pcapReader -f <file>.pcap [-p <protos>][-d][-h][-v]\n\n"
+	 "Usage:\n"
+	 "  -f <file>.pcap            | Specify a pcap file to read packets from\n"
+	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
+	 "  -d                        | Disable protocol guess and use only DPI\n"
+	 "  -h                        | This help\n"
+	 "  -v                        | Verbose 'unknown protocol' packet print\n");
+  exit(-1);
+}
+
 static void parseOptions(int argc, char **argv)
 {
   int opt;
@@ -144,7 +156,7 @@ static void parseOptions(int argc, char **argv)
   NDPI_BITMASK_SET_ALL(debug_messages_bitmask);
 #endif
 
-  while ((opt = getopt(argc, argv, "df:e:")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:e:hp:v")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -152,6 +164,11 @@ static void parseOptions(int argc, char **argv)
     case 'f':
       _pcap_file = optarg;
       break;
+
+    case 'p':
+      _protoFilePath = optarg;
+    break;
+
     case 'e':
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
       // set debug logging bitmask to all protocols
@@ -167,17 +184,21 @@ static void parseOptions(int argc, char **argv)
       printf("ERROR: option -e : DEBUG MESSAGES DEACTIVATED\n");
       exit(-1);
 #endif
+      break;    
+
+    case 'v':
+      verbose = 1;
       break;
+
+    case 'h':
+    default:
+      help();
     }
   }
 
   // check parameters
   if (_pcap_file == NULL || strcmp(_pcap_file, "") == 0) {
-    printf("pcapReader -f <file>.pcap [-d]\n\n"
-	   "Usage:\n"
-	   "  -f <file>.pcap            | Specify a pcap file to read packets from\n"
-	   "  -d                        | Disable protocol guess and use only DPI\n");       
-    exit(-1);
+    help();
   }
 }
 
@@ -317,7 +338,7 @@ static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t
 static void setupDetection(void)
 {
   u_int32_t i;
-  NDPI_PROTOCOL_BITMASK all;  
+  NDPI_PROTOCOL_BITMASK all;
 
   // init global detection structure
   ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, debug_printf);
@@ -364,6 +385,9 @@ static void setupDetection(void)
   // clear memory for results
   memset(protocol_counter, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
   memset(protocol_counter_bytes, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
+
+  if(_protoFilePath != NULL)
+    ndpi_load_protocols_file(ndpi_struct, _protoFilePath);
 }
 
 static void terminateDetection(void)
@@ -382,6 +406,60 @@ static void terminateDetection(void)
   free(osdpi_flows);
 }
 
+static char* ipProto2Name(u_short proto_id) {
+  static char proto[8];
+
+  switch(proto_id) {
+  case IPPROTO_TCP:
+    return("TCP");
+    break;
+  case IPPROTO_UDP:
+    return("UDP");
+    break;
+  case IPPROTO_ICMP:
+    return("ICMP");
+    break;
+  case 112:
+    return("VRRP");
+    break;
+  }
+
+  snprintf(proto, sizeof(proto), "%u", proto_id);
+  return(proto);
+}
+
+/*
+ * A faster replacement for inet_ntoa().
+ */
+char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
+  char *cp, *retStr;
+  uint byte;
+  int n;
+
+  cp = &buf[bufLen];
+  *--cp = '\0';
+
+  n = 4;
+  do {
+    byte = addr & 0xff;
+    *--cp = byte % 10 + '0';
+    byte /= 10;
+    if (byte > 0) {
+      *--cp = byte % 10 + '0';
+      byte /= 10;
+      if (byte > 0)
+	*--cp = byte + '0';
+    }
+    *--cp = '.';
+    addr >>= 8;
+  } while (--n > 0);
+
+  /* Convert the string to lowercase */
+  retStr = (char*)(cp+1);
+
+  return(retStr);
+}
+
 static unsigned int packet_processing(const uint64_t time, const struct ndpi_iphdr *iph, uint16_t ipsize, uint16_t rawsize)
 {
   struct ndpi_id_struct *src = NULL;
@@ -390,14 +468,13 @@ static unsigned int packet_processing(const uint64_t time, const struct ndpi_iph
   struct ndpi_flow_struct *ndpi_flow = NULL;
   u_int32_t protocol = 0;
 
-
   src = get_id((u_int8_t *) & iph->saddr);
   dst = get_id((u_int8_t *) & iph->daddr);
 
   flow = get_osdpi_flow(iph, ipsize);
   if (flow != NULL) {
     ndpi_flow = flow->ndpi_flow;
-    flow->packets++, flow->bytes += rawsize;    
+    flow->packets++, flow->bytes += rawsize;
   }
 
   ip_packet_count++;
@@ -406,7 +483,7 @@ static unsigned int packet_processing(const uint64_t time, const struct ndpi_iph
 #ifndef NDPI_ENABLE_DEBUG_MESSAGES
   if (ip_packet_count % 499 == 0) {
     printf("\rip packets scanned: \x1b[33m%-10llu\x1b[0m ip bytes scanned: \x1b[34m%-10llu\x1b[0m",
-	   (long long unsigned int)ip_packet_count, 
+	   (long long unsigned int)ip_packet_count,
 	   (long long unsigned int)total_bytes);
   }
 #endif
@@ -425,11 +502,20 @@ static unsigned int packet_processing(const uint64_t time, const struct ndpi_iph
     return 0;
   }
 
-  protocol_counter[protocol]++;
-  protocol_counter_bytes[protocol] += rawsize;
+#if 0
+  if(verbose && (protocol == 0)) {
+    char buf1[32], buf2[32];
+
+    printf("%s %s:%u > %s:%u [proto: %u/%s]\n",
+	   ipProto2Name(flow->protocol),
+	   intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)), ntohs(flow->lower_port),
+	   intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)), ntohs(flow->upper_port),
+	   protocol, ndpi_get_proto_name(ndpi_struct, protocol));
+  }
+#endif
 
   if (flow != NULL)
-    flow->detected_protocol = protocol;  
+    flow->detected_protocol = protocol;
 
   return 0;
 }
@@ -441,17 +527,17 @@ static void printResults(void)
   printf("\x1b[2K\n");
   printf("pcap file contains\n");
   printf("\tip packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
-	 (long long unsigned int)ip_packet_count, 
+	 (long long unsigned int)ip_packet_count,
 	 (long long unsigned int)raw_packet_count);
   printf("\tip bytes:     \x1b[34m%-13llu\x1b[0m\n",
 	 (long long unsigned int)total_bytes);
   printf("\tunique ids:   \x1b[35m%-13u\x1b[0m\n", osdpi_id_count);
   printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
-
-  if(enable_protocol_guess) {
-    for (j = 0; j < osdpi_flow_count; j++) {
+  
+  for (j = 0; j < osdpi_flow_count; j++) {
+    if(enable_protocol_guess) {
       if (osdpi_flows[j].detected_protocol == 0 /* UNKNOWN */) {
-	osdpi_flows[j].detected_protocol = 
+	osdpi_flows[j].detected_protocol =
 	  ndpi_guess_undetected_protocol(ndpi_struct,
 					 osdpi_flows[j].protocol,
 					 ntohl(osdpi_flows[j].lower_ip),
@@ -460,16 +546,16 @@ static void printResults(void)
 					 ntohs(osdpi_flows[j].upper_port));
 
 	if (osdpi_flows[j].detected_protocol != 0) {
-	  protocol_counter[osdpi_flows[j].detected_protocol] += osdpi_flows[j].packets;
-	  protocol_counter_bytes[osdpi_flows[j].detected_protocol] += osdpi_flows[j].bytes;
-	  protocol_counter[0] -= osdpi_flows[j].packets, protocol_counter_bytes[0] -= osdpi_flows[j].bytes;
 	  guessed_flow_protocols++;
 	}
       }
     }
 
-    printf("\tguessed flow protocols: \x1b[36m%-13u\x1b[0m\n", guessed_flow_protocols);
+    protocol_counter[osdpi_flows[j].detected_protocol] += osdpi_flows[j].packets;
+    protocol_counter_bytes[osdpi_flows[j].detected_protocol] += osdpi_flows[j].bytes;
   }
+  
+  printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
 
   printf("\n\ndetected protocols:\n");
   for (i = 0; i <= NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
@@ -485,10 +571,37 @@ static void printResults(void)
     if (protocol_counter[i] > 0) {
       printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
 	     "flows: \x1b[36m%-13u\x1b[0m\n",
-	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i], 
+	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
 	     (long long unsigned int)protocol_counter_bytes[i], protocol_flows);
     }
   }
+
+
+  if(verbose) {
+    u_int not_printed = 1;
+
+    for (j = 0; j < osdpi_flow_count; j++) {
+      if (osdpi_flows[j].detected_protocol == 0) {	
+	char buf1[32], buf2[32];
+
+	if(not_printed) {
+	  printf("\n\nundetected flows:\n");
+	  not_printed = 0;
+	}
+
+	printf("\t%s %s:%u > %s:%u [proto: %u/%s][%u pkts/%u bytes]\n",
+	       ipProto2Name(osdpi_flows[j].protocol),
+	       intoaV4(ntohl(osdpi_flows[j].lower_ip), buf1, sizeof(buf1)), 
+	       ntohs(osdpi_flows[j].lower_port),
+	       intoaV4(ntohl(osdpi_flows[j].upper_ip), buf2, sizeof(buf2)), 
+	       ntohs(osdpi_flows[j].upper_port),
+	       osdpi_flows[j].detected_protocol,
+	       ndpi_get_proto_name(ndpi_struct, osdpi_flows[j].detected_protocol),
+	       osdpi_flows[j].packets, osdpi_flows[j].bytes);
+      }
+    }
+  }
+
   printf("\n\n");
 }
 

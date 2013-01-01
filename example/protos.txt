@@ -1,0 +1,5 @@
+#  Format:
+#  <tcp|udp>:<port>,<tcp|udp>:<port>,.....@<proto>
+
+tcp:80,tcp:3128@HTTP
+udp:139@NETBIOS
