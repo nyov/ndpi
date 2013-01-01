@@ -1,28 +1,26 @@
 /*
  * pcapReader.c
  *
- * Copyright (C) 2009 by ipoque GmbH
- * Copyright (C) 2012 by ntop.org
+! * Copyright (C) 2009-2011 by ipoque GmbH
+ * Copyright (C) 2011-12 - ntop.org
  *
- * This file is part of OpenDPI, an open source deep packet inspection
- * library based on the PACE technology by ipoque GmbH
+ * This file is part of nDPI, an open source deep packet inspection
+ * library based on the OpenDPI and PACE technology by ipoque GmbH
  *
- * OpenDPI is free software: you can redistribute it and/or modify
+ * nDPI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * OpenDPI is distributed in the hope that it will be useful,
+ * nDPI is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with OpenDPI.  If not, see <http://www.gnu.org/licenses/>.
+ * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,7 +28,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <netinet/in.h>
-
+#include <search.h>
 #include <pcap.h>
 
 #include "linux_compat.h"
@@ -45,6 +43,7 @@ static char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
 static pcap_t *_pcap_handle = NULL;
 static int _pcap_datalink_type = 0;
 static u_int8_t enable_protocol_guess = 1, verbose = 0;
+static u_int32_t guessed_flow_protocols = 0;
 
 // detection
 static struct ndpi_detection_module_struct *ndpi_struct = NULL;
@@ -62,7 +61,7 @@ static u_int64_t ip_packet_count = 0;
 static u_int64_t total_bytes = 0;
 static u_int64_t protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 static u_int64_t protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
-
+static u_int32_t protocol_flows[NDPI_MAX_SUPPORTED_PROTOCOLS] = { 0 };
 
 // id tracking
 typedef struct osdpi_id {
@@ -95,7 +94,7 @@ typedef struct osdpi_flow {
 
 static u_int32_t size_flow_struct = 0;
 #define			MAX_OSDPI_FLOWS			200000
-static struct osdpi_flow *osdpi_flows;
+static struct osdpi_flow *osdpi_flows_root = NULL;
 static u_int32_t osdpi_flow_count = 0;
 
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
@@ -184,7 +183,7 @@ static void parseOptions(int argc, char **argv)
       printf("ERROR: option -e : DEBUG MESSAGES DEACTIVATED\n");
       exit(-1);
 #endif
-      break;    
+      break;
 
     case 'v':
       verbose = 1;
@@ -256,155 +255,6 @@ static void *get_id(const u_int8_t * ip)
   }
 }
 
-static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t ipsize)
-{
-  u_int32_t i;
-  u_int16_t l4_packet_len;
-  struct ndpi_tcphdr *tcph = NULL;
-  struct ndpi_udphdr *udph = NULL;
-  u_int32_t lower_ip;
-  u_int32_t upper_ip;
-  u_int16_t lower_port;
-  u_int16_t upper_port;
-
-  if (ipsize < 20)
-    return NULL;
-
-  if ((iph->ihl * 4) > ipsize || ipsize < ntohs(iph->tot_len)
-      || (iph->frag_off & htons(0x1FFF)) != 0)
-    return NULL;
-
-  l4_packet_len = ntohs(iph->tot_len) - (iph->ihl * 4);
-
-  if (iph->saddr < iph->daddr) {
-    lower_ip = iph->saddr;
-    upper_ip = iph->daddr;
-  } else {
-    lower_ip = iph->daddr;
-    upper_ip = iph->saddr;
-  }
-
-  if (iph->protocol == 6 && l4_packet_len >= 20) {
-    // tcp
-    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + iph->ihl * 4);
-    if (iph->saddr < iph->daddr) {
-      lower_port = tcph->source;
-      upper_port = tcph->dest;
-    } else {
-      lower_port = tcph->dest;
-      upper_port = tcph->source;
-    }
-  } else if (iph->protocol == 17 && l4_packet_len >= 8) {
-    // udp
-    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + iph->ihl * 4);
-    if (iph->saddr < iph->daddr) {
-      lower_port = udph->source;
-      upper_port = udph->dest;
-    } else {
-      lower_port = udph->dest;
-      upper_port = udph->source;
-    }
-  } else {
-    // non tcp/udp protocols
-    lower_port = 0;
-    upper_port = 0;
-  }
-
-  for (i = 0; i < osdpi_flow_count; i++) {
-    if (osdpi_flows[i].protocol == iph->protocol &&
-	osdpi_flows[i].lower_ip == lower_ip &&
-	osdpi_flows[i].upper_ip == upper_ip &&
-	osdpi_flows[i].lower_port == lower_port && osdpi_flows[i].upper_port == upper_port) {
-      return &osdpi_flows[i];
-    }
-  }
-  if (osdpi_flow_count == MAX_OSDPI_FLOWS) {
-    printf("ERROR: maximum flow count (%u) has been exceeded\n", MAX_OSDPI_FLOWS);
-    exit(-1);
-  } else {
-    struct osdpi_flow *flow;
-    osdpi_flows[osdpi_flow_count].protocol = iph->protocol;
-    osdpi_flows[osdpi_flow_count].lower_ip = lower_ip;
-    osdpi_flows[osdpi_flow_count].upper_ip = upper_ip;
-    osdpi_flows[osdpi_flow_count].lower_port = lower_port;
-    osdpi_flows[osdpi_flow_count].upper_port = upper_port;
-    flow = &osdpi_flows[osdpi_flow_count];
-
-    osdpi_flow_count += 1;
-    return flow;
-  }
-}
-
-static void setupDetection(void)
-{
-  u_int32_t i;
-  NDPI_PROTOCOL_BITMASK all;
-
-  // init global detection structure
-  ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, debug_printf);
-  if (ndpi_struct == NULL) {
-    printf("ERROR: global structure initialization failed\n");
-    exit(-1);
-  }
-  // enable all protocols
-  NDPI_BITMASK_SET_ALL(all);
-  ndpi_set_protocol_detection_bitmask2(ndpi_struct, &all);
-
-  // allocate memory for id and flow tracking
-  size_id_struct = ndpi_detection_get_sizeof_ndpi_id_struct();
-  size_flow_struct = ndpi_detection_get_sizeof_ndpi_flow_struct();
-
-  osdpi_ids = malloc(MAX_OSDPI_IDS * sizeof(struct osdpi_id));
-  if (osdpi_ids == NULL) {
-    printf("ERROR: malloc for osdpi_ids failed\n");
-    exit(-1);
-  }
-  for (i = 0; i < MAX_OSDPI_IDS; i++) {
-    memset(&osdpi_ids[i], 0, sizeof(struct osdpi_id));
-    osdpi_ids[i].ndpi_id = calloc(1, size_id_struct);
-    if (osdpi_ids[i].ndpi_id == NULL) {
-      printf("ERROR: malloc for ndpi_id_struct failed\n");
-      exit(-1);
-    }
-  }
-
-  osdpi_flows = malloc(MAX_OSDPI_FLOWS * sizeof(struct osdpi_flow));
-  if (osdpi_flows == NULL) {
-    printf("ERROR: malloc for osdpi_flows failed\n");
-    exit(-1);
-  }
-  for (i = 0; i < MAX_OSDPI_FLOWS; i++) {
-    memset(&osdpi_flows[i], 0, sizeof(struct osdpi_flow));
-    osdpi_flows[i].ndpi_flow = calloc(1, size_flow_struct);
-    if (osdpi_flows[i].ndpi_flow == NULL) {
-      printf("ERROR: malloc for ndpi_flow_struct failed\n");
-      exit(-1);
-    }
-  }
-
-  // clear memory for results
-  memset(protocol_counter, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
-  memset(protocol_counter_bytes, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
-
-  if(_protoFilePath != NULL)
-    ndpi_load_protocols_file(ndpi_struct, _protoFilePath);
-}
-
-static void terminateDetection(void)
-{
-  u_int32_t i;
-
-  ndpi_exit_detection_module(ndpi_struct, free_wrapper);
-
-  for (i = 0; i < MAX_OSDPI_IDS; i++) {
-    free(osdpi_ids[i].ndpi_id);
-  }
-  free(osdpi_ids);
-  for (i = 0; i < MAX_OSDPI_FLOWS; i++) {
-    free(osdpi_flows[i].ndpi_flow);
-  }
-  free(osdpi_flows);
-}
 
 static char* ipProto2Name(u_short proto_id) {
   static char proto[8];
@@ -458,6 +308,233 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
   retStr = (char*)(cp+1);
 
   return(retStr);
+}
+
+static void printFlow(struct osdpi_flow *flow) {
+  char buf1[32], buf2[32];
+
+  printf("\t%s %s:%u > %s:%u [proto: %u/%s][%u pkts/%u bytes]\n",
+	 ipProto2Name(flow->protocol),
+	 intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)),
+	 ntohs(flow->lower_port),
+	 intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)),
+	 ntohs(flow->upper_port),
+	 flow->detected_protocol,
+	 ndpi_get_proto_name(ndpi_struct, flow->detected_protocol),
+	 flow->packets, flow->bytes);
+}
+
+static void node_print_unknown_proto_walker(const void *node, const VISIT which, const int depth) {
+  struct osdpi_flow *flow = *(struct osdpi_flow**)node;
+
+  if (flow->detected_protocol != 0 /* UNKNOWN */) return;
+
+  if((which == preorder) || (which == leaf)) /* Avoid walking the same node multiple times */
+    printFlow(flow);
+}
+
+static void node_proto_guess_walker(const void *node, const VISIT which, const int depth) {
+  struct osdpi_flow *flow = *(struct osdpi_flow**)node;
+  char buf1[32], buf2[32];
+
+#if 0
+  printf("<%d>Walk on node %s (%p)\n",
+	 depth,
+	 which == preorder?"preorder":
+	 which == postorder?"postorder":
+	 which == endorder?"endorder":
+	 which == leaf?"leaf": "unknown",
+	 flow);
+#endif
+
+  if((which == preorder) || (which == leaf)) { /* Avoid walking the same node multiple times */
+    if(enable_protocol_guess) {
+      if (flow->detected_protocol == 0 /* UNKNOWN */) {
+	flow->detected_protocol = ndpi_guess_undetected_protocol(ndpi_struct,
+								 flow->protocol,
+								 ntohl(flow->lower_ip),
+								 ntohs(flow->lower_port),
+								 ntohl(flow->upper_ip),
+								 ntohs(flow->upper_port));
+
+	if (flow->detected_protocol != 0)
+	  guessed_flow_protocols++;
+
+	// printFlow(flow);
+      }
+    }
+
+    protocol_counter[flow->detected_protocol]       += flow->packets;
+    protocol_counter_bytes[flow->detected_protocol] += flow->bytes;
+    protocol_flows[flow->detected_protocol]++;
+  }
+}
+
+static int node_cmp(const void *a, const void *b) {
+  struct osdpi_flow *fa = (struct osdpi_flow*)a;
+  struct osdpi_flow *fb = (struct osdpi_flow*)b;
+
+  if(fa->lower_ip < fb->lower_ip) return(-1); else { if(fa->lower_ip > fb->lower_ip) return(1); }
+  if(fa->lower_port < fb->lower_port) return(-1); else { if(fa->lower_port > fb->lower_port) return(1); }
+  if(fa->upper_ip < fb->upper_ip) return(-1); else { if(fa->upper_ip > fb->upper_ip) return(1); }
+  if(fa->upper_port < fb->upper_port) return(-1); else { if(fa->upper_port > fb->upper_port) return(1); }
+  if(fa->protocol < fb->protocol) return(-1); else { if(fa->protocol > fb->protocol) return(1); }
+
+  return(0);
+}
+
+
+static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t ipsize)
+{
+  u_int32_t i;
+  u_int16_t l4_packet_len;
+  struct ndpi_tcphdr *tcph = NULL;
+  struct ndpi_udphdr *udph = NULL;
+  u_int32_t lower_ip;
+  u_int32_t upper_ip;
+  u_int16_t lower_port;
+  u_int16_t upper_port;
+  struct osdpi_flow flow;
+  const void *ret;
+
+  if (ipsize < 20)
+    return NULL;
+
+  if ((iph->ihl * 4) > ipsize || ipsize < ntohs(iph->tot_len)
+      || (iph->frag_off & htons(0x1FFF)) != 0)
+    return NULL;
+
+  l4_packet_len = ntohs(iph->tot_len) - (iph->ihl * 4);
+
+  if (iph->saddr < iph->daddr) {
+    lower_ip = iph->saddr;
+    upper_ip = iph->daddr;
+  } else {
+    lower_ip = iph->daddr;
+    upper_ip = iph->saddr;
+  }
+
+  if (iph->protocol == 6 && l4_packet_len >= 20) {
+    // tcp
+    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + iph->ihl * 4);
+    if (iph->saddr < iph->daddr) {
+      lower_port = tcph->source;
+      upper_port = tcph->dest;
+    } else {
+      lower_port = tcph->dest;
+      upper_port = tcph->source;
+    }
+  } else if (iph->protocol == 17 && l4_packet_len >= 8) {
+    // udp
+    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + iph->ihl * 4);
+    if (iph->saddr < iph->daddr) {
+      lower_port = udph->source;
+      upper_port = udph->dest;
+    } else {
+      lower_port = udph->dest;
+      upper_port = udph->source;
+    }
+  } else {
+    // non tcp/udp protocols
+    lower_port = 0;
+    upper_port = 0;
+  }
+
+  flow.protocol = iph->protocol;
+  flow.lower_ip = lower_ip;
+  flow.upper_ip = upper_ip;
+  flow.lower_port = lower_port;
+  flow.upper_port = upper_port;
+
+  ret = tfind(&flow, (void*)&osdpi_flows_root, node_cmp);
+
+  if(ret == NULL) {
+    if (osdpi_flow_count == MAX_OSDPI_FLOWS) {
+      printf("ERROR: maximum flow count (%u) has been exceeded\n", MAX_OSDPI_FLOWS);
+      exit(-1);
+    } else {
+      struct osdpi_flow *newflow = (struct osdpi_flow*)malloc(sizeof(struct osdpi_flow));
+
+      if(newflow == NULL) {
+	printf("[NDPI] %s(1): not enough memory\n", __FUNCTION__);
+	return(NULL);
+      }
+
+      memset(newflow, 0, sizeof(struct osdpi_flow));
+      newflow->protocol = iph->protocol;
+      newflow->lower_ip = lower_ip, newflow->upper_ip = upper_ip;
+      newflow->lower_port = lower_port, newflow->upper_port = upper_port;
+
+      if((newflow->ndpi_flow = calloc(1, size_flow_struct)) == NULL) {
+	printf("[NDPI] %s(2): not enough memory\n", __FUNCTION__);
+	return(NULL);
+      }
+
+      tsearch(newflow, (void*)&osdpi_flows_root, node_cmp); /* Add */
+
+      osdpi_flow_count += 1;
+
+      //printFlow(newflow);
+      return(newflow);
+    }
+  } else
+    return *(struct osdpi_flow**)ret;
+}
+
+static void setupDetection(void)
+{
+  u_int32_t i;
+  NDPI_PROTOCOL_BITMASK all;
+
+  // init global detection structure
+  ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, debug_printf);
+  if (ndpi_struct == NULL) {
+    printf("ERROR: global structure initialization failed\n");
+    exit(-1);
+  }
+  // enable all protocols
+  NDPI_BITMASK_SET_ALL(all);
+  ndpi_set_protocol_detection_bitmask2(ndpi_struct, &all);
+
+  // allocate memory for id and flow tracking
+  size_id_struct = ndpi_detection_get_sizeof_ndpi_id_struct();
+  size_flow_struct = ndpi_detection_get_sizeof_ndpi_flow_struct();
+
+  osdpi_ids = malloc(MAX_OSDPI_IDS * sizeof(struct osdpi_id));
+  if (osdpi_ids == NULL) {
+    printf("ERROR: malloc for osdpi_ids failed\n");
+    exit(-1);
+  }
+  for (i = 0; i < MAX_OSDPI_IDS; i++) {
+    memset(&osdpi_ids[i], 0, sizeof(struct osdpi_id));
+    osdpi_ids[i].ndpi_id = calloc(1, size_id_struct);
+    if (osdpi_ids[i].ndpi_id == NULL) {
+      printf("ERROR: malloc for ndpi_id_struct failed\n");
+      exit(-1);
+    }
+  }
+
+  // clear memory for results
+  memset(protocol_counter, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
+  memset(protocol_counter_bytes, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
+
+  if(_protoFilePath != NULL)
+    ndpi_load_protocols_file(ndpi_struct, _protoFilePath);
+}
+
+static void terminateDetection(void)
+{
+  u_int32_t i;
+
+  ndpi_exit_detection_module(ndpi_struct, free_wrapper);
+
+  for (i = 0; i < MAX_OSDPI_IDS; i++) {
+    free(osdpi_ids[i].ndpi_id);
+  }
+  free(osdpi_ids);
+
+  /* Free flows (TODO) */
+
 }
 
 static unsigned int packet_processing(const uint64_t time, const struct ndpi_iphdr *iph, uint16_t ipsize, uint16_t rawsize)
@@ -522,7 +599,7 @@ static unsigned int packet_processing(const uint64_t time, const struct ndpi_iph
 
 static void printResults(void)
 {
-  u_int32_t i, j, guessed_flow_protocols = 0;
+  u_int32_t i, j;
 
   printf("\x1b[2K\n");
   printf("pcap file contains\n");
@@ -533,73 +610,26 @@ static void printResults(void)
 	 (long long unsigned int)total_bytes);
   printf("\tunique ids:   \x1b[35m%-13u\x1b[0m\n", osdpi_id_count);
   printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
-  
-  for (j = 0; j < osdpi_flow_count; j++) {
-    if(enable_protocol_guess) {
-      if (osdpi_flows[j].detected_protocol == 0 /* UNKNOWN */) {
-	osdpi_flows[j].detected_protocol =
-	  ndpi_guess_undetected_protocol(ndpi_struct,
-					 osdpi_flows[j].protocol,
-					 ntohl(osdpi_flows[j].lower_ip),
-					 ntohs(osdpi_flows[j].lower_port),
-					 ntohl(osdpi_flows[j].upper_ip),
-					 ntohs(osdpi_flows[j].upper_port));
 
-	if (osdpi_flows[j].detected_protocol != 0) {
-	  guessed_flow_protocols++;
-	}
-      }
-    }
-
-    protocol_counter[osdpi_flows[j].detected_protocol] += osdpi_flows[j].packets;
-    protocol_counter_bytes[osdpi_flows[j].detected_protocol] += osdpi_flows[j].bytes;
-  }
+  twalk(osdpi_flows_root, node_proto_guess_walker);
+  if(enable_protocol_guess) 
+    printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
   
-  printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
 
   printf("\n\ndetected protocols:\n");
   for (i = 0; i <= NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
-    u_int32_t protocol_flows = 0;
-
-    // count flows for that protocol
-    for (j = 0; j < osdpi_flow_count; j++) {
-      if (osdpi_flows[j].detected_protocol == i) {
-	protocol_flows++;
-      }
-    }
 
     if (protocol_counter[i] > 0) {
       printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
 	     "flows: \x1b[36m%-13u\x1b[0m\n",
 	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
-	     (long long unsigned int)protocol_counter_bytes[i], protocol_flows);
+	     (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
     }
   }
 
-
-  if(verbose) {
-    u_int not_printed = 1;
-
-    for (j = 0; j < osdpi_flow_count; j++) {
-      if (osdpi_flows[j].detected_protocol == 0) {	
-	char buf1[32], buf2[32];
-
-	if(not_printed) {
-	  printf("\n\nundetected flows:\n");
-	  not_printed = 0;
-	}
-
-	printf("\t%s %s:%u > %s:%u [proto: %u/%s][%u pkts/%u bytes]\n",
-	       ipProto2Name(osdpi_flows[j].protocol),
-	       intoaV4(ntohl(osdpi_flows[j].lower_ip), buf1, sizeof(buf1)), 
-	       ntohs(osdpi_flows[j].lower_port),
-	       intoaV4(ntohl(osdpi_flows[j].upper_ip), buf2, sizeof(buf2)), 
-	       ntohs(osdpi_flows[j].upper_port),
-	       osdpi_flows[j].detected_protocol,
-	       ndpi_get_proto_name(ndpi_struct, osdpi_flows[j].detected_protocol),
-	       osdpi_flows[j].packets, osdpi_flows[j].bytes);
-      }
-    }
+  if(verbose && (protocol_counter[0] > 0)) {
+    printf("\n\nundetected flows:\n");
+    twalk(osdpi_flows_root, node_print_unknown_proto_walker);
   }
 
   printf("\n\n");
