@@ -1,7 +1,8 @@
 /*
  * ndpi_main.c
+ *
  * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-12 - ntop.org
+ * Copyright (C) 2011-13 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -104,7 +105,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
     int i;
 
     for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
-      if(ndpi_struct->proto_defaults[i].protoName) 
+      if(ndpi_struct->proto_defaults[i].protoName)
 	free(ndpi_struct->proto_defaults[i].protoName);
     }
 
@@ -115,10 +116,10 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 /* ******************************************************************** */
 
 u_int16_t* ndpi_build_default_ports(u_int16_t *ports,
-				    u_int16_t portA, u_int16_t portB, u_int16_t portC, 
+				    u_int16_t portA, u_int16_t portB, u_int16_t portC,
 				    u_int16_t portD, u_int16_t portE) {
   int i = 0;
-  
+
   ports[i++] = portA;
   ports[i++] = portB;
   ports[i++] = portC;
@@ -131,7 +132,7 @@ u_int16_t* ndpi_build_default_ports(u_int16_t *ports,
 /* ******************************************************************** */
 
 static void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
-				    u_int16_t protoId, char *protoName,				    
+				    u_int16_t protoId, char *protoName,
 				    u_int16_t *tcpDefPorts, u_int16_t *udpDefPorts) {
   char *name = strdup(protoName);
   int j;
@@ -143,7 +144,7 @@ static void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mo
 
   ndpi_mod->proto_defaults[protoId].protoName = name,
     ndpi_mod->proto_defaults[protoId].protoId = protoId;
- 
+
   for(j=0; j<MAX_DEFAULT_PORTS; j++) {
     if(udpDefPorts[j] != 0) addDefaultPort(udpDefPorts[j], &ndpi_mod->proto_defaults[protoId], &udpRoot);
     if(tcpDefPorts[j] != 0) addDefaultPort(tcpDefPorts[j], &ndpi_mod->proto_defaults[protoId], &tcpRoot);
@@ -199,7 +200,7 @@ static void addDefaultPort(u_int16_t port, ndpi_proto_defaults_t *def, ndpi_defa
 
     node->proto = def, node->default_port = port;
     ret = *(ndpi_default_ports_tree_node_t**)tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
-    
+
     if(ret != node) {
       printf("[NDPI] %s(): found duplicate for port %u\n", __FUNCTION__, port);
       free(node);
