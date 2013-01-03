@@ -34,6 +34,8 @@
 #include "linux_compat.h"
 #include "ndpi_main.h"
 
+static void setupDetection(void);
+
 // cli options
 static char *_pcap_file = NULL;
 static char *_protoFilePath = NULL;
@@ -144,6 +146,10 @@ static void help() {
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -h                        | This help\n"
 	 "  -v                        | Verbose 'unknown protocol' packet print\n");
+
+  printf("\n\nSupported protocols:\n");
+  setupDetection();
+  ndpi_dump_protocols(ndpi_struct);
   exit(-1);
 }
 

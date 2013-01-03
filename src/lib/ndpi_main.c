@@ -287,7 +287,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_IRC, "IRC", ndpi_build_default_ports(ports_a, 194, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 194, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_POPO, "POPO", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_UNENCRYPED_JABBER, "UNENCRYPED_JABBER", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MSN, "MSN", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MSN, "MSN", ndpi_build_default_ports(ports_a, 1863, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_OSCAR, "OSCAR", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_YAHOO, "YAHOO", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_BATTLEFIELD, "BATTLEFIELD", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
@@ -340,7 +340,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MEEBO, "MEEBO", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FACEBOOK, "FACEBOOK", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TWITTER, "TWITTER", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_DROPBOX, "DROPBOX", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_DROPBOX, "DROPBOX", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 17500 /* LanSync */, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GMAIL, "GMAIL", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GOOGLE_MAPS, "GOOGLE_MAPS", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_YOUTUBE, "YOUTUBE", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
@@ -372,6 +372,11 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LOTUS_NOTES, "LotusNotes", ndpi_build_default_ports(ports_a, 1352, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SAP, "SAP", ndpi_build_default_ports(ports_a, 3201, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GTP, "GTP", ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 2152, 2123, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_UPNP, "UPnP", ndpi_build_default_ports(ports_a, 1780, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 1900, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
+
+  /* http://en.wikipedia.org/wiki/Link-local_Multicast_Name_Resolution */
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LLMNR, "LLMNR", ndpi_build_default_ports(ports_a, 5355, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 5355, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_REMOTE_SCAN, "RemoteScan", ndpi_build_default_ports(ports_a, 6077, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 6078, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
 
   for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
     if(ndpi_mod->proto_defaults[i].protoName == NULL) {
