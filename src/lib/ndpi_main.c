@@ -29,6 +29,152 @@
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
+#ifdef WIN32
+/* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
+#define strtok_r strtok
+
+/* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
+
+typedef enum {
+        preorder,
+        postorder,
+        endorder,
+        leaf
+} VISIT;
+
+void    *tdelete(const void * __restrict, void ** __restrict,
+            int (*)(const void *, const void *));
+void    *tfind(const void *, void * const *,
+            int (*)(const void *, const void *));
+void    *tsearch(const void *, void **, int (*)(const void *, const void *));
+void     twalk(const void *, void (*)(const void *, VISIT, int));
+
+typedef struct node_t {
+    char	  *key;
+    struct node_t *left, *right;
+} node;
+
+/* find or insert datum into search tree */
+void *
+tsearch(const void *vkey, void **vrootp,
+    int (*compar)(const void *, const void *))
+{
+    node *q;
+    char *key = (char *)vkey;
+    node **rootp = (node **)vrootp;
+
+    if (rootp == (struct node_t **)0)
+	return ((void *)0);
+    while (*rootp != (struct node_t *)0) {	/* Knuth's T1: */
+	int r;
+
+	if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
+	    return ((void *)*rootp);		/* we found it! */
+	rootp = (r < 0) ?
+	    &(*rootp)->left :		/* T3: follow left branch */
+	    &(*rootp)->right;		/* T4: follow right branch */
+    }
+    q = (node *) malloc(sizeof(node));	/* T5: key not found */
+    if (q != (struct node_t *)0) {	/* make new node */
+	*rootp = q;			/* link new node to old */
+	q->key = key;			/* initialize new node */
+	q->left = q->right = (struct node_t *)0;
+    }
+    return ((void *)q);
+}
+
+/* delete node with given key */
+void *
+tdelete(const void *vkey, void **vrootp,
+    int (*compar)(const void *, const void *))
+{
+    node **rootp = (node **)vrootp;
+    char *key = (char *)vkey;
+    node *p = (node *)1;
+    node *q;
+    node *r;
+    int cmp;
+
+    if (rootp == (struct node_t **)0 || *rootp == (struct node_t *)0)
+	return ((struct node_t *)0);
+    while ((cmp = (*compar)(key, (*rootp)->key)) != 0) {
+	p = *rootp;
+	rootp = (cmp < 0) ?
+	    &(*rootp)->left :		/* follow left branch */
+	    &(*rootp)->right;		/* follow right branch */
+	if (*rootp == (struct node_t *)0)
+	    return ((void *)0);		/* key not found */
+    }
+    r = (*rootp)->right;			/* D1: */
+    if ((q = (*rootp)->left) == (struct node_t *)0)	/* Left (struct node_t *)0? */
+	q = r;
+    else if (r != (struct node_t *)0) {		/* Right link is null? */
+	if (r->left == (struct node_t *)0) {	/* D2: Find successor */
+	    r->left = q;
+	    q = r;
+	} else {			/* D3: Find (struct node_t *)0 link */
+	    for (q = r->left; q->left != (struct node_t *)0; q = r->left)
+		r = q;
+	    r->left = q->right;
+	    q->left = (*rootp)->left;
+	    q->right = (*rootp)->right;
+	}
+    }
+    free((struct node_t *) *rootp);	/* D4: Free node */
+    *rootp = q;				/* link parent to new node */
+    return(p);
+}
+
+/* Walk the nodes of a tree */
+static void
+trecurse(node *root, void (*action)(const void *, VISIT, int), int level)
+{
+    if (root->left == (struct node_t *)0 && root->right == (struct node_t *)0)
+	(*action)(root, leaf, level);
+    else {
+	(*action)(root, preorder, level);
+	if (root->left != (struct node_t *)0)
+	    trecurse(root->left, action, level + 1);
+	(*action)(root, postorder, level);
+	if (root->right != (struct node_t *)0)
+	    trecurse(root->right, action, level + 1);
+	(*action)(root, endorder, level);
+    }
+}
+
+/* Walk the nodes of a tree */
+void
+twalk(const void *vroot, void (*action)(const void *, VISIT, int))
+{
+    node *root = (node *)vroot;
+
+    if (root != (node *)0 && action != (void (*)(const void *, VISIT, int))0)
+	trecurse(root, action, 0);
+}
+
+/* find a node, or return 0 */
+void *
+tfind(const void *vkey, void * const *vrootp,
+    int (*compar)(const void *, const void *))
+{
+    char *key = (char *)vkey;
+    node **rootp = (node **)vrootp;
+
+    if (rootp == (struct node_t **)0)
+	return ((struct node_t *)0);
+    while (*rootp != (struct node_t *)0) {	/* T1: */
+	int r;
+	if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
+	    return (*rootp);		/* key found */
+	rootp = (r < 0) ?
+	    &(*rootp)->left :		/* T3: follow left branch */
+	    &(*rootp)->right;		/* T4: follow right branch */
+    }
+    return (node *)0;
+}
+
+#endif
+
 static ndpi_default_ports_tree_node_t *tcpRoot = NULL, *udpRoot = NULL;
 
 /* Forward */
