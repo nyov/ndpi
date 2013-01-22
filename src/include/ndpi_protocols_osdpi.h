@@ -207,6 +207,7 @@ typedef struct {
 #define NDPI_LAST_IMPLEMENTED_PROTOCOL                          155
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
+#define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                            32
 #ifdef __cplusplus
 }
 #endif

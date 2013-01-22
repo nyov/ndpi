@@ -595,7 +595,7 @@ typedef struct ndpi_detection_module_struct {
   u_int8_t ip_version_limit;
 
   /* ********************* */
-  ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS];
+  ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
 } ndpi_detection_module_struct_t;
 
 typedef struct ndpi_flow_struct {

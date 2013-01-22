@@ -29,6 +29,8 @@
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
+static u_int _ndpi_num_supported_protocols = NDPI_MAX_SUPPORTED_PROTOCOLS, _ndpi_num_custom_protocols = 0;
+
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
 #define strtok_r strtok
@@ -36,141 +38,141 @@
 /* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
 
 typedef enum {
-        preorder,
-        postorder,
-        endorder,
-        leaf
+  preorder,
+  postorder,
+  endorder,
+  leaf
 } VISIT;
 
 void    *tdelete(const void * __restrict, void ** __restrict,
-            int (*)(const void *, const void *));
+		 int (*)(const void *, const void *));
 void    *tfind(const void *, void * const *,
-            int (*)(const void *, const void *));
+	       int (*)(const void *, const void *));
 void    *tsearch(const void *, void **, int (*)(const void *, const void *));
 void     twalk(const void *, void (*)(const void *, VISIT, int));
 
 typedef struct node_t {
-    char	  *key;
-    struct node_t *left, *right;
+  char	  *key;
+  struct node_t *left, *right;
 } node;
 
 /* find or insert datum into search tree */
 void *
 tsearch(const void *vkey, void **vrootp,
-    int (*compar)(const void *, const void *))
+	int (*compar)(const void *, const void *))
 {
-    node *q;
-    char *key = (char *)vkey;
-    node **rootp = (node **)vrootp;
+  node *q;
+  char *key = (char *)vkey;
+  node **rootp = (node **)vrootp;
 
-    if (rootp == (struct node_t **)0)
-	return ((void *)0);
-    while (*rootp != (struct node_t *)0) {	/* Knuth's T1: */
-	int r;
+  if (rootp == (struct node_t **)0)
+    return ((void *)0);
+  while (*rootp != (struct node_t *)0) {	/* Knuth's T1: */
+    int r;
 
-	if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
-	    return ((void *)*rootp);		/* we found it! */
-	rootp = (r < 0) ?
-	    &(*rootp)->left :		/* T3: follow left branch */
-	    &(*rootp)->right;		/* T4: follow right branch */
-    }
-    q = (node *) malloc(sizeof(node));	/* T5: key not found */
-    if (q != (struct node_t *)0) {	/* make new node */
-	*rootp = q;			/* link new node to old */
-	q->key = key;			/* initialize new node */
-	q->left = q->right = (struct node_t *)0;
-    }
-    return ((void *)q);
+    if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
+      return ((void *)*rootp);		/* we found it! */
+    rootp = (r < 0) ?
+      &(*rootp)->left :		/* T3: follow left branch */
+      &(*rootp)->right;		/* T4: follow right branch */
+  }
+  q = (node *) malloc(sizeof(node));	/* T5: key not found */
+  if (q != (struct node_t *)0) {	/* make new node */
+    *rootp = q;			/* link new node to old */
+    q->key = key;			/* initialize new node */
+    q->left = q->right = (struct node_t *)0;
+  }
+  return ((void *)q);
 }
 
 /* delete node with given key */
 void *
 tdelete(const void *vkey, void **vrootp,
-    int (*compar)(const void *, const void *))
+	int (*compar)(const void *, const void *))
 {
-    node **rootp = (node **)vrootp;
-    char *key = (char *)vkey;
-    node *p = (node *)1;
-    node *q;
-    node *r;
-    int cmp;
+  node **rootp = (node **)vrootp;
+  char *key = (char *)vkey;
+  node *p = (node *)1;
+  node *q;
+  node *r;
+  int cmp;
 
-    if (rootp == (struct node_t **)0 || *rootp == (struct node_t *)0)
-	return ((struct node_t *)0);
-    while ((cmp = (*compar)(key, (*rootp)->key)) != 0) {
-	p = *rootp;
-	rootp = (cmp < 0) ?
-	    &(*rootp)->left :		/* follow left branch */
-	    &(*rootp)->right;		/* follow right branch */
-	if (*rootp == (struct node_t *)0)
-	    return ((void *)0);		/* key not found */
+  if (rootp == (struct node_t **)0 || *rootp == (struct node_t *)0)
+    return ((struct node_t *)0);
+  while ((cmp = (*compar)(key, (*rootp)->key)) != 0) {
+    p = *rootp;
+    rootp = (cmp < 0) ?
+      &(*rootp)->left :		/* follow left branch */
+      &(*rootp)->right;		/* follow right branch */
+    if (*rootp == (struct node_t *)0)
+      return ((void *)0);		/* key not found */
+  }
+  r = (*rootp)->right;			/* D1: */
+  if ((q = (*rootp)->left) == (struct node_t *)0)	/* Left (struct node_t *)0? */
+    q = r;
+  else if (r != (struct node_t *)0) {		/* Right link is null? */
+    if (r->left == (struct node_t *)0) {	/* D2: Find successor */
+      r->left = q;
+      q = r;
+    } else {			/* D3: Find (struct node_t *)0 link */
+      for (q = r->left; q->left != (struct node_t *)0; q = r->left)
+	r = q;
+      r->left = q->right;
+      q->left = (*rootp)->left;
+      q->right = (*rootp)->right;
     }
-    r = (*rootp)->right;			/* D1: */
-    if ((q = (*rootp)->left) == (struct node_t *)0)	/* Left (struct node_t *)0? */
-	q = r;
-    else if (r != (struct node_t *)0) {		/* Right link is null? */
-	if (r->left == (struct node_t *)0) {	/* D2: Find successor */
-	    r->left = q;
-	    q = r;
-	} else {			/* D3: Find (struct node_t *)0 link */
-	    for (q = r->left; q->left != (struct node_t *)0; q = r->left)
-		r = q;
-	    r->left = q->right;
-	    q->left = (*rootp)->left;
-	    q->right = (*rootp)->right;
-	}
-    }
-    free((struct node_t *) *rootp);	/* D4: Free node */
-    *rootp = q;				/* link parent to new node */
-    return(p);
+  }
+  free((struct node_t *) *rootp);	/* D4: Free node */
+  *rootp = q;				/* link parent to new node */
+  return(p);
 }
 
 /* Walk the nodes of a tree */
 static void
 trecurse(node *root, void (*action)(const void *, VISIT, int), int level)
 {
-    if (root->left == (struct node_t *)0 && root->right == (struct node_t *)0)
-	(*action)(root, leaf, level);
-    else {
-	(*action)(root, preorder, level);
-	if (root->left != (struct node_t *)0)
-	    trecurse(root->left, action, level + 1);
-	(*action)(root, postorder, level);
-	if (root->right != (struct node_t *)0)
-	    trecurse(root->right, action, level + 1);
-	(*action)(root, endorder, level);
-    }
+  if (root->left == (struct node_t *)0 && root->right == (struct node_t *)0)
+    (*action)(root, leaf, level);
+  else {
+    (*action)(root, preorder, level);
+    if (root->left != (struct node_t *)0)
+      trecurse(root->left, action, level + 1);
+    (*action)(root, postorder, level);
+    if (root->right != (struct node_t *)0)
+      trecurse(root->right, action, level + 1);
+    (*action)(root, endorder, level);
+  }
 }
 
 /* Walk the nodes of a tree */
 void
 twalk(const void *vroot, void (*action)(const void *, VISIT, int))
 {
-    node *root = (node *)vroot;
+  node *root = (node *)vroot;
 
-    if (root != (node *)0 && action != (void (*)(const void *, VISIT, int))0)
-	trecurse(root, action, 0);
+  if (root != (node *)0 && action != (void (*)(const void *, VISIT, int))0)
+    trecurse(root, action, 0);
 }
 
 /* find a node, or return 0 */
 void *
 tfind(const void *vkey, void * const *vrootp,
-    int (*compar)(const void *, const void *))
+      int (*compar)(const void *, const void *))
 {
-    char *key = (char *)vkey;
-    node **rootp = (node **)vrootp;
+  char *key = (char *)vkey;
+  node **rootp = (node **)vrootp;
 
-    if (rootp == (struct node_t **)0)
-	return ((struct node_t *)0);
-    while (*rootp != (struct node_t *)0) {	/* T1: */
-	int r;
-	if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
-	    return (*rootp);		/* key found */
-	rootp = (r < 0) ?
-	    &(*rootp)->left :		/* T3: follow left branch */
-	    &(*rootp)->right;		/* T4: follow right branch */
-    }
-    return (node *)0;
+  if (rootp == (struct node_t **)0)
+    return ((struct node_t *)0);
+  while (*rootp != (struct node_t *)0) {	/* T1: */
+    int r;
+    if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
+      return (*rootp);		/* key found */
+    rootp = (r < 0) ?
+      &(*rootp)->left :		/* T3: follow left branch */
+      &(*rootp)->right;		/* T4: follow right branch */
+  }
+  return (node *)0;
 }
 
 #endif
@@ -250,7 +252,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
   if(ndpi_struct != NULL) {
     int i;
 
-    for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
+    for(i=0; i<_ndpi_num_supported_protocols; i++) {
       if(ndpi_struct->proto_defaults[i].protoName)
 	free(ndpi_struct->proto_defaults[i].protoName);
     }
@@ -283,7 +285,7 @@ static void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mo
   char *name = strdup(protoName);
   int j;
 
-  if(protoId >= NDPI_MAX_SUPPORTED_PROTOCOLS) {
+  if(protoId >= NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS) {
     printf("[NDPI] %s(protoId=%d): INTERNAL ERROR\n", __FUNCTION__, protoId);
     return;
   }
@@ -525,7 +527,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LLMNR, "LLMNR", ndpi_build_default_ports(ports_a, 5355, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 5355, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_REMOTE_SCAN, "RemoteScan", ndpi_build_default_ports(ports_a, 6077, 0, 0, 0, 0) /* TCP */, ndpi_build_default_ports(ports_b, 6078, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
 
-  for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
+  for(i=0; i<_ndpi_num_supported_protocols; i++) {
     if(ndpi_mod->proto_defaults[i].protoName == NULL) {
       printf("[NDPI] %s(missing protoId=%d) INTERNAL ERROR: not all protocols have been initialized\n", __FUNCTION__, i);
     }
@@ -572,6 +574,12 @@ static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, ndpi_pr
 
 /* ******************************************************************** */
 
+u_int ndpi_get_num_supported_protocols() {
+  return(_ndpi_num_supported_protocols);
+}
+
+/* ******************************************************************** */
+
 /*
   Format:
   <tcp|udp>:<port>,<tcp|udp>:<port>,.....@<proto>
@@ -580,7 +588,7 @@ static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, ndpi_pr
   tcp:80,tcp:3128@HTTP
   udp:139@NETBIOS
 
- */
+*/
 int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char* path) {
   FILE *fd = fopen(path, "r");
 
@@ -609,7 +617,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     } else
       at[0] = 0, proto = &at[1];
 
-    for(i=0, def = NULL; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
+    for(i=0, def = NULL; i<_ndpi_num_supported_protocols; i++) {
       if(strcmp(ndpi_mod->proto_defaults[i].protoName, proto) == 0) {
 	def = &ndpi_mod->proto_defaults[i];
 	break;
@@ -617,8 +625,19 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     }
 
     if(def == NULL) {
-      printf("Skipping unknown protocol '%s'\n", proto);
-      continue;
+      u_int16_t ports_a[MAX_DEFAULT_PORTS] , ports_b[MAX_DEFAULT_PORTS];
+
+      if(_ndpi_num_custom_protocols >= (NDPI_MAX_NUM_CUSTOM_PROTOCOLS-1)) {
+	printf("Too many protocols defined (%u): skipping protocol %s\n", 
+	       _ndpi_num_custom_protocols, proto);
+	continue;
+      }
+
+      ndpi_set_proto_defaults(ndpi_mod, _ndpi_num_supported_protocols, strdup(proto), 
+			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			      ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+      def = &ndpi_mod->proto_defaults[_ndpi_num_supported_protocols];
+      _ndpi_num_supported_protocols++, _ndpi_num_custom_protocols++;
     }
 
     elem = strtok_r(line, ",", &holder);
@@ -3434,7 +3453,7 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
   if (packet->parsed_lines >= 1) {
     packet->line[packet->parsed_lines].len
       = (u_int16_t)(((unsigned long) &packet->payload[packet->payload_packet_len]) -
-      ((unsigned long) packet->line[packet->parsed_lines].ptr));
+		    ((unsigned long) packet->line[packet->parsed_lines].ptr));
     packet->parsed_lines++;
   }
 }
@@ -3462,8 +3481,8 @@ void ndpi_parse_packet_line_info_unix(struct ndpi_detection_module_struct *ndpi_
   for (a = 0; a < end; a++) {
     if (packet->payload[a] == 0x0a) {
       packet->unix_line[packet->parsed_unix_lines].len = (u_int16_t)(
-	((unsigned long) &packet->payload[a]) -
-	((unsigned long) packet->unix_line[packet->parsed_unix_lines].ptr));
+								     ((unsigned long) &packet->payload[a]) -
+								     ((unsigned long) packet->unix_line[packet->parsed_unix_lines].ptr));
 
       if (packet->parsed_unix_lines >= (NDPI_MAX_PARSE_LINES_PER_PACKET - 1)) {
 	break;
@@ -4161,7 +4180,7 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 
 char* ndpi_get_proto_name(struct ndpi_detection_module_struct *mod,
 			  u_int16_t proto_id) {
-  if(proto_id > NDPI_LAST_IMPLEMENTED_PROTOCOL) proto_id = NDPI_PROTOCOL_UNKNOWN;
+  if(proto_id > _ndpi_num_supported_protocols) proto_id = NDPI_PROTOCOL_UNKNOWN;
   return(mod->proto_defaults[proto_id].protoName);
 }
 
@@ -4170,6 +4189,6 @@ char* ndpi_get_proto_name(struct ndpi_detection_module_struct *mod,
 void ndpi_dump_protocols(struct ndpi_detection_module_struct *mod) {
   int i;
 
-  for(i=0; i<NDPI_MAX_SUPPORTED_PROTOCOLS; i++)
+  for(i=0; i<_ndpi_num_supported_protocols; i++)
     printf("[%3d] %s\n", i, mod->proto_defaults[i].protoName);
 }

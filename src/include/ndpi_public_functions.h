@@ -242,6 +242,7 @@ extern "C" {
 
   int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char* path);
 
+  u_int ndpi_get_num_supported_protocols();
 #ifdef __cplusplus
 }
 #endif
