@@ -3,4 +3,5 @@
 
 tcp:81,tcp:8181@HTTP
 udp:5061@SIP
-#udp:7500@Hello
+tcp:860,udp:860,tcp:3260,udp:3260@iSCSI
+
