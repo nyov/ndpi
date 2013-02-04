@@ -51,12 +51,6 @@ static u_int32_t guessed_flow_protocols = 0;
 static struct ndpi_detection_module_struct *ndpi_struct = NULL;
 static u_int32_t detection_tick_resolution = 1000;
 
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-static char *prot_short_str[] = { NDPI_PROTOCOL_SHORT_STRING };
-
-static NDPI_PROTOCOL_BITMASK debug_messages_bitmask;
-#endif
-
 // results
 static u_int64_t raw_packet_count = 0;
 static u_int64_t ip_packet_count = 0;
@@ -99,44 +93,6 @@ static u_int32_t size_flow_struct = 0;
 static struct osdpi_flow *osdpi_flows_root = NULL;
 static u_int32_t osdpi_flow_count = 0;
 
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-static int string_to_detection_bitmask(char *str, NDPI_PROTOCOL_BITMASK * dbm)
-{
-  u_int32_t a;
-  u_int32_t oldptr = 0;
-  u_int32_t ptr = 0;
-  NDPI_BITMASK_RESET(*dbm);
-
-  printf("Protocol parameter given: %s\n", str);
-
-  if (strcmp(str, "all") == 0) {
-    printf("Protocol parameter all parsed\n");
-    NDPI_BITMASK_SET_ALL(*dbm);
-    printf("Bitmask is: " NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_STRING " \n",
-	   NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_VALUE(*dbm));
-    return 0;
-  }
-  // parse bitmask
-  while (1) {
-    if (str[ptr] == 0 || str[ptr] == ' ') {
-      printf("Protocol parameter: parsed: %.*s,\n", ptr - oldptr, &str[oldptr]);
-      for (a = 1; a <= NDPI_MAX_SUPPORTED_PROTOCOLS; a++) {
-	if (strlen(prot_short_str[a]) == (ptr - oldptr) &&
-	    (memcmp(&str[oldptr], prot_short_str[a], ptr - oldptr) == 0)) {
-	  NDPI_ADD_PROTOCOL_TO_BITMASK(*dbm, a);
-	  printf("Protocol parameter detected as protocol %s\n",
-		 ndpi_get_proto_name(ndpi_struct, a));
-	}
-      }
-      oldptr = ptr + 1;
-      if (str[ptr] == 0)
-	break;
-    }
-    ptr++;
-  }
-  return 0;
-}
-#endif
 
 static void help() {
   printf("pcapReader -f <file>.pcap [-p <protos>][-d][-h][-v]\n\n"
@@ -157,11 +113,7 @@ static void parseOptions(int argc, char **argv)
 {
   int opt;
 
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-  NDPI_BITMASK_SET_ALL(debug_messages_bitmask);
-#endif
-
-  while ((opt = getopt(argc, argv, "df:e:hp:v")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:hp:v")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -173,23 +125,6 @@ static void parseOptions(int argc, char **argv)
     case 'p':
       _protoFilePath = optarg;
     break;
-
-    case 'e':
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-      // set debug logging bitmask to all protocols
-      if (string_to_detection_bitmask(optarg, &debug_messages_bitmask) != 0) {
-	printf("ERROR option -e needs a valid list of protocols");
-	exit(-1);
-      }
-
-      printf("debug messages Bitmask is: " NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_STRING "\n",
-	     NDPI_BITMASK_DEBUG_OUTPUT_BITMASK_VALUE(debug_messages_bitmask));
-
-#else
-      printf("ERROR: option -e : DEBUG MESSAGES DEACTIVATED\n");
-      exit(-1);
-#endif
-      break;
 
     case 'v':
       verbose = 1;
@@ -209,25 +144,6 @@ static void parseOptions(int argc, char **argv)
 
 static void debug_printf(u_int32_t protocol, void *id_struct, ndpi_log_level_t log_level, const char *format, ...)
 {
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(debug_messages_bitmask, protocol) != 0) {
-    const char *protocol_string;
-    const char *file;
-    const char *func;
-    u_int32_t line;
-    va_list ap;
-    va_start(ap, format);
-
-    protocol_string = prot_short_str[protocol];
-
-    ndpi_debug_get_last_log_function_line(ndpi_struct, &file, &func, &line);
-
-    printf("\nDEBUG: %s:%s:%u Prot: %s, level: %u packet: %llu :", file, func, line, protocol_string,
-	   log_level, raw_packet_count);
-    vprintf(format, ap);
-    va_end(ap);
-  }
-#endif
 }
 
 static void *malloc_wrapper(unsigned long size)
@@ -562,14 +478,6 @@ static unsigned int packet_processing(const uint64_t time, const struct ndpi_iph
 
   ip_packet_count++;
   total_bytes += rawsize;
-
-#ifndef NDPI_ENABLE_DEBUG_MESSAGES
-  if (ip_packet_count % 499 == 0) {
-    printf("\rip packets scanned: \x1b[33m%-10llu\x1b[0m ip bytes scanned: \x1b[34m%-10llu\x1b[0m",
-	   (long long unsigned int)ip_packet_count,
-	   (long long unsigned int)total_bytes);
-  }
-#endif
 
   // only handle unfragmented packets
   if ((iph->frag_off & htons(0x1FFF)) == 0) {
