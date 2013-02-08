@@ -22,13 +22,24 @@
  *
  */
 
+
+#ifndef __KERNEL__
 #include <stdlib.h>
 #include <errno.h>
+#endif
+
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
-static u_int _ndpi_num_supported_protocols = NDPI_MAX_SUPPORTED_PROTOCOLS, _ndpi_num_custom_protocols = 0;
+#ifdef __KERNEL__
+#define printf printk
+#endif
+
+static u_int _ndpi_num_supported_protocols = NDPI_MAX_SUPPORTED_PROTOCOLS;
+#ifndef __KERNEL__
+static u_int _ndpi_num_custom_protocols = 0;
+#endif
 
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
@@ -189,6 +200,17 @@ static void addDefaultPort(u_int16_t port, ndpi_proto_defaults_t *def, ndpi_defa
 void* ndpi_malloc(unsigned long size) { return(_ndpi_malloc(size)); }
 void  ndpi_free(void *ptr)            { ndpi_free(ptr); }
 
+char *ndpi_strdup(const char *s) {
+  int len = strlen(s);
+  char *m = ndpi_malloc(len+1);
+
+  if(m) {
+    memcpy(m, s, len);
+    m[len] = '\0';
+  }
+
+  return(m);
+}
 
 u_int32_t ndpi_detection_get_sizeof_ndpi_flow_struct(void)
 {
@@ -293,7 +315,7 @@ u_int16_t* ndpi_build_default_ports(u_int16_t *ports,
 static void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
 				    u_int16_t protoId, char *protoName,
 				    u_int16_t *tcpDefPorts, u_int16_t *udpDefPorts) {
-  char *name = strdup(protoName);
+  char *name = ndpi_strdup(protoName);
   int j;
 
   if(protoId >= NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS) {
@@ -547,7 +569,10 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 
 /* ******************************************************************** */
 
-static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t *root) {
+#ifndef __KERNEL__
+static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, 
+				  ndpi_proto_defaults_t *def, 
+				  ndpi_default_ports_tree_node_t *root) {
   u_int num_ports, i;
 
   if(*ports == NULL) {
@@ -582,6 +607,7 @@ static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, ndpi_pr
     return(0);
   }
 }
+#endif
 
 /* ******************************************************************** */
 
@@ -601,6 +627,9 @@ u_int ndpi_get_num_supported_protocols() {
 
 */
 int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char* path) {
+#ifdef __KERNEL__
+  return(0);
+#else
   FILE *fd = fopen(path, "r");
 
   if(fd == NULL) {
@@ -644,7 +673,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
 	continue;
       }
 
-      ndpi_set_proto_defaults(ndpi_mod, _ndpi_num_supported_protocols, strdup(proto), 
+      ndpi_set_proto_defaults(ndpi_mod, _ndpi_num_supported_protocols, ndpi_strdup(proto), 
 			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			      ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
       def = &ndpi_mod->proto_defaults[_ndpi_num_supported_protocols];
@@ -679,6 +708,9 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   printf("\nUDP:\n");
   ndpi_twalk(udpRoot, ndpi_default_ports_tree_node_t_walker);
 #endif
+#endif
+
+  return(0);
 }
 
 /* ******************************************************************** */
@@ -688,7 +720,6 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 {
   NDPI_PROTOCOL_BITMASK detection_bitmask_local;
   NDPI_PROTOCOL_BITMASK *detection_bitmask = &detection_bitmask_local;
-  u_int16_t *tcpPorts, *udpPorts;
   u_int32_t a = 0;
 
   ndpi_init_protocol_defaults(ndpi_struct);
@@ -4141,9 +4172,11 @@ u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_ch
 
 /* ****************************************************** */
 
+#ifndef __KERNEL__
 static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
   return(((match_port == sport) || (match_port == dport)) ? 1 : 0);
 }
+#endif
 
 /* ****************************************************** */
 

@@ -108,7 +108,7 @@ struct ndpi_ip6_ext
 #define s6_addr16		__u6_addr.__u6_addr16
 #define s6_addr32		__u6_addr.__u6_addr32
 #else
-#ifndef OPENDPI_NETFILTER_MODULE
+#ifndef __KERNEL__
 #include <arpa/inet.h>
 #endif
 #endif

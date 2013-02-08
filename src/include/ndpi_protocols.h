@@ -43,7 +43,7 @@
 #define get_l32(X,O)  get_u_int32_t(X,O)
 #elif defined(__BIG_ENDIAN__)
 /* convert the bytes from big to little endian */
-#ifndef OPENDPI_NETFILTER_MODULE
+#ifndef __KERNEL__
 # define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
 # define get_l32(X,O) bswap_32(get_u_int32_t(X,O))
 #else

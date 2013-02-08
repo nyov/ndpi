@@ -26,7 +26,7 @@
 #ifndef __NDPI_MAIN_INCLUDE_FILE__
 #define __NDPI_MAIN_INCLUDE_FILE__
 
-#ifndef OPENDPI_NETFILTER_MODULE
+#ifndef __KERNEL__
 #include <stdint.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -36,7 +36,7 @@
 #ifndef WIN32
 #if 1 && !defined __APPLE__ && !defined __FreeBSD__
 
-#ifndef OPENDPI_NETFILTER_MODULE
+#ifndef __KERNEL__
 #  include <endian.h>
 #  include <byteswap.h>
 #else
@@ -47,7 +47,7 @@
 
 /* default includes */
 
-#ifndef OPENDPI_NETFILTER_MODULE
+#ifndef __KERNEL__
 #include <sys/param.h>
 #include <limits.h>
 #endif
@@ -73,7 +73,7 @@ typedef unsigned __int64 u_int64_t;
 #endif
 
 #ifndef WIN32
-#ifndef OPENDPI_NETFILTER_MODULE
+#ifndef __KERNEL__
 #  include <netinet/ip.h>
 #  include <netinet/tcp.h>
 #  include <netinet/udp.h>

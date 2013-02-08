@@ -30,6 +30,7 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
   const u_int8_t *packet_payload = packet->payload;
   u_int32_t payload_len = packet->payload_packet_len;
   time_t now;
+  struct timeval now_tv;
 
   if((packet->udp != NULL)
      && (payload_len >= 24)      
@@ -44,13 +45,8 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
 
     when = ntohl(*_when);
 
-#ifndef OPENDPI_NETFILTER_MODULE
-    now = time(NULL);
-#else
-    struct timeval now_tv;
     do_gettimeofday(&now_tv);
     now = now_tv.tv_sec;
-#endif
 
     if((when >= 946684800 /* 1/1/2000 */) && (when <= now)) {
       NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
