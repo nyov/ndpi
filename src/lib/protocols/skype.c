@@ -23,6 +23,7 @@
 
 #ifdef NDPI_PROTOCOL_SKYPE
 
+#if 0
 static u_int is_private_addr(u_int32_t addr) {
   addr = ntohl(addr);
 
@@ -35,12 +36,12 @@ static u_int is_private_addr(u_int32_t addr) {
   else
     return(0);
 }
+#endif
 
 static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &flow->packet;
-  
-  const u_int8_t *packet_payload = packet->payload;
+  struct ndpi_packet_struct *packet = &flow->packet;  
+  // const u_int8_t *packet_payload = packet->payload;
   u_int32_t payload_len = packet->payload_packet_len;
 
 #if 0

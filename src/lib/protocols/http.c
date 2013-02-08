@@ -529,7 +529,7 @@ int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct
 }
 
 static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
-  int i = 0;
+  // int i = 0;
   struct ndpi_packet_struct *packet = &flow->packet;
 
   if(packet->iph /* IPv4 only */) {
@@ -700,6 +700,10 @@ static void check_http_payload(struct ndpi_detection_module_struct *ndpi_struct,
 static u_int16_t http_request_url_offset(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
+
+  NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "====>>>> HTTP: %c%c%c%c [len: %u]\n",
+	   packet->payload[0], packet->payload[1], packet->payload[2], packet->payload[3],
+	   packet->payload_packet_len);
 
   /* FIRST PAYLOAD PACKET FROM CLIENT */
   /* check if the packet starts with POST or GET */

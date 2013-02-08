@@ -47,10 +47,10 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over tcp.\n");
   }
 
-  if((dport == 53) || (sport == 53)
+  if(((dport == 53) || (sport == 53))
      && (packet->payload_packet_len > sizeof(struct dns_packet_header))) {
     struct dns_packet_header header, *dns = (struct dns_packet_header*)&packet->payload[packet->tcp ? 2 : 0];
-    u_int8_t is_query, ret_code, standard_query, is_dns = 0;
+    u_int8_t is_query, ret_code, is_dns = 0;
     
     header.flags = ntohs(dns->flags);
     header.transaction_id = ntohs(dns->transaction_id);

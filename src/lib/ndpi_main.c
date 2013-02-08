@@ -4139,8 +4139,7 @@ char *ndpi_get_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
 #endif
   snprintf(ndpi_struct->ip_string, NDPI_IP_STRING_SIZE, "%u.%u.%u.%u", a[0], a[1], a[2], a[3]);
   return ndpi_struct->ip_string;
-  char *ndpi_get_packet_dst_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
-				      const struct ndpi_packet_struct *packet)}
+}
 
 
 /* get the string representation of the source ip address from packet */
