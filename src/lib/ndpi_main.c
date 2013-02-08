@@ -24,7 +24,6 @@
 
 #include <stdlib.h>
 #include <errno.h>
-#include <search.h>
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
@@ -34,40 +33,41 @@ static u_int _ndpi_num_supported_protocols = NDPI_MAX_SUPPORTED_PROTOCOLS, _ndpi
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
 #define strtok_r strtok
+#endif
 
 /* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
 
 typedef enum {
-  preorder,
-  postorder,
-  endorder,
-  leaf
-} VISIT;
+  ndpi_preorder,
+  ndpi_postorder,
+  ndpi_endorder,
+  ndpi_leaf
+} ndpi_VISIT;
 
-void    *tdelete(const void * __restrict, void ** __restrict,
+void    *ndpi_tdelete(const void * __restrict, void ** __restrict,
 		 int (*)(const void *, const void *));
-void    *tfind(const void *, void * const *,
+void    *ndpi_tfind(const void *, void * const *,
 	       int (*)(const void *, const void *));
-void    *tsearch(const void *, void **, int (*)(const void *, const void *));
-void     twalk(const void *, void (*)(const void *, VISIT, int));
+void    *ndpi_tsearch(const void *, void **, int (*)(const void *, const void *));
+void     ndpi_twalk(const void *, void (*)(const void *, ndpi_VISIT, int));
 
 typedef struct node_t {
   char	  *key;
   struct node_t *left, *right;
-} node;
+} ndpi_node;
 
 /* find or insert datum into search tree */
 void *
-tsearch(const void *vkey, void **vrootp,
+ndpi_tsearch(const void *vkey, void **vrootp,
 	int (*compar)(const void *, const void *))
 {
-  node *q;
+  ndpi_node *q;
   char *key = (char *)vkey;
-  node **rootp = (node **)vrootp;
+  ndpi_node **rootp = (ndpi_node **)vrootp;
 
-  if (rootp == (struct node_t **)0)
+  if (rootp == (ndpi_node **)0)
     return ((void *)0);
-  while (*rootp != (struct node_t *)0) {	/* Knuth's T1: */
+  while (*rootp != (ndpi_node *)0) {	/* Knuth's T1: */
     int r;
 
     if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
@@ -76,95 +76,95 @@ tsearch(const void *vkey, void **vrootp,
       &(*rootp)->left :		/* T3: follow left branch */
       &(*rootp)->right;		/* T4: follow right branch */
   }
-  q = (node *) malloc(sizeof(node));	/* T5: key not found */
-  if (q != (struct node_t *)0) {	/* make new node */
+  q = (ndpi_node *) ndpi_malloc(sizeof(ndpi_node));	/* T5: key not found */
+  if (q != (ndpi_node *)0) {	/* make new node */
     *rootp = q;			/* link new node to old */
     q->key = key;			/* initialize new node */
-    q->left = q->right = (struct node_t *)0;
+    q->left = q->right = (ndpi_node *)0;
   }
   return ((void *)q);
 }
 
 /* delete node with given key */
 void *
-tdelete(const void *vkey, void **vrootp,
+ndpi_tdelete(const void *vkey, void **vrootp,
 	int (*compar)(const void *, const void *))
 {
-  node **rootp = (node **)vrootp;
+  ndpi_node **rootp = (ndpi_node **)vrootp;
   char *key = (char *)vkey;
-  node *p = (node *)1;
-  node *q;
-  node *r;
+  ndpi_node *p = (ndpi_node *)1;
+  ndpi_node *q;
+  ndpi_node *r;
   int cmp;
 
-  if (rootp == (struct node_t **)0 || *rootp == (struct node_t *)0)
-    return ((struct node_t *)0);
+  if (rootp == (ndpi_node **)0 || *rootp == (ndpi_node *)0)
+    return ((ndpi_node *)0);
   while ((cmp = (*compar)(key, (*rootp)->key)) != 0) {
     p = *rootp;
     rootp = (cmp < 0) ?
       &(*rootp)->left :		/* follow left branch */
       &(*rootp)->right;		/* follow right branch */
-    if (*rootp == (struct node_t *)0)
+    if (*rootp == (ndpi_node *)0)
       return ((void *)0);		/* key not found */
   }
   r = (*rootp)->right;			/* D1: */
-  if ((q = (*rootp)->left) == (struct node_t *)0)	/* Left (struct node_t *)0? */
+  if ((q = (*rootp)->left) == (ndpi_node *)0)	/* Left (ndpi_node *)0? */
     q = r;
-  else if (r != (struct node_t *)0) {		/* Right link is null? */
-    if (r->left == (struct node_t *)0) {	/* D2: Find successor */
+  else if (r != (ndpi_node *)0) {		/* Right link is null? */
+    if (r->left == (ndpi_node *)0) {	/* D2: Find successor */
       r->left = q;
       q = r;
-    } else {			/* D3: Find (struct node_t *)0 link */
-      for (q = r->left; q->left != (struct node_t *)0; q = r->left)
+    } else {			/* D3: Find (ndpi_node *)0 link */
+      for (q = r->left; q->left != (ndpi_node *)0; q = r->left)
 	r = q;
       r->left = q->right;
       q->left = (*rootp)->left;
       q->right = (*rootp)->right;
     }
   }
-  free((struct node_t *) *rootp);	/* D4: Free node */
+  ndpi_free((ndpi_node *) *rootp);	/* D4: Free node */
   *rootp = q;				/* link parent to new node */
   return(p);
 }
 
 /* Walk the nodes of a tree */
 static void
-trecurse(node *root, void (*action)(const void *, VISIT, int), int level)
+trecurse(ndpi_node *root, void (*action)(const void *, ndpi_VISIT, int), int level)
 {
-  if (root->left == (struct node_t *)0 && root->right == (struct node_t *)0)
-    (*action)(root, leaf, level);
+  if (root->left == (ndpi_node *)0 && root->right == (ndpi_node *)0)
+    (*action)(root, ndpi_leaf, level);
   else {
-    (*action)(root, preorder, level);
-    if (root->left != (struct node_t *)0)
+    (*action)(root, ndpi_preorder, level);
+    if (root->left != (ndpi_node *)0)
       trecurse(root->left, action, level + 1);
-    (*action)(root, postorder, level);
-    if (root->right != (struct node_t *)0)
+    (*action)(root, ndpi_postorder, level);
+    if (root->right != (ndpi_node *)0)
       trecurse(root->right, action, level + 1);
-    (*action)(root, endorder, level);
+    (*action)(root, ndpi_endorder, level);
   }
 }
 
 /* Walk the nodes of a tree */
 void
-twalk(const void *vroot, void (*action)(const void *, VISIT, int))
+ndpi_twalk(const void *vroot, void (*action)(const void *, ndpi_VISIT, int))
 {
-  node *root = (node *)vroot;
+  ndpi_node *root = (ndpi_node *)vroot;
 
-  if (root != (node *)0 && action != (void (*)(const void *, VISIT, int))0)
+  if (root != (ndpi_node *)0 && action != (void (*)(const void *, ndpi_VISIT, int))0)
     trecurse(root, action, 0);
 }
 
 /* find a node, or return 0 */
 void *
-tfind(const void *vkey, void * const *vrootp,
+ndpi_tfind(const void *vkey, void * const *vrootp,
       int (*compar)(const void *, const void *))
 {
   char *key = (char *)vkey;
-  node **rootp = (node **)vrootp;
+  ndpi_node **rootp = (ndpi_node **)vrootp;
 
-  if (rootp == (struct node_t **)0)
-    return ((struct node_t *)0);
-  while (*rootp != (struct node_t *)0) {	/* T1: */
+  if (rootp == (ndpi_node **)0)
+    return ((ndpi_node *)0);
+  while (*rootp != (ndpi_node *)0) {	/* T1: */
     int r;
     if ((r = (*compar)(key, (*rootp)->key)) == 0)	/* T2: */
       return (*rootp);		/* key found */
@@ -172,15 +172,23 @@ tfind(const void *vkey, void * const *vrootp,
       &(*rootp)->left :		/* T3: follow left branch */
       &(*rootp)->right;		/* T4: follow right branch */
   }
-  return (node *)0;
+  return (ndpi_node *)0;
 }
 
-#endif
+/* ****************************************** */
+
+static void *(*_ndpi_malloc)(unsigned long size);
+static void  (*_ndpi_free)(void *ptr);
 
 static ndpi_default_ports_tree_node_t *tcpRoot = NULL, *udpRoot = NULL;
 
 /* Forward */
 static void addDefaultPort(u_int16_t port, ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t **root);
+
+
+void* ndpi_malloc(unsigned long size) { return(_ndpi_malloc(size)); }
+void  ndpi_free(void *ptr)            { ndpi_free(ptr); }
+
 
 u_int32_t ndpi_detection_get_sizeof_ndpi_flow_struct(void)
 {
@@ -193,13 +201,16 @@ u_int32_t ndpi_detection_get_sizeof_ndpi_id_struct(void)
 }
 
 
-struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second, void
-								*(*ndpi_malloc)
-								(unsigned
-								 long size),
+struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second, 
+								void* (*__ndpi_malloc)(unsigned long size),
+								void  (*__ndpi_free)(void *ptr),
 								ndpi_debug_function_ptr ndpi_debug_printf)
 {
   struct ndpi_detection_module_struct *ndpi_str;
+
+  _ndpi_malloc = __ndpi_malloc;
+  _ndpi_free = __ndpi_free;
+
   ndpi_str = ndpi_malloc(sizeof(struct ndpi_detection_module_struct));
 
   if (ndpi_str == NULL) {
@@ -254,7 +265,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 
     for(i=0; i<_ndpi_num_supported_protocols; i++) {
       if(ndpi_struct->proto_defaults[i].protoName)
-	free(ndpi_struct->proto_defaults[i].protoName);
+	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
 
     ndpi_free(ndpi_struct);
@@ -321,23 +332,23 @@ static int ndpi_default_ports_tree_node_t_cmp(const void *a, const void *b) {
 
 /* ******************************************************************** */
 
-void ndpi_default_ports_tree_node_t_walker(const void *node, const VISIT which, const int depth) {
+void ndpi_default_ports_tree_node_t_walker(const void *node, const ndpi_VISIT which, const int depth) {
   ndpi_default_ports_tree_node_t *f = *(ndpi_default_ports_tree_node_t **)node;
 
 
   printf("<%d>Walk on node %s (%u)\n",
 	 depth,
-	 which == preorder?"preorder":
-	 which == postorder?"postorder":
-	 which == endorder?"endorder":
-	 which == leaf?"leaf": "unknown",
+	 which == ndpi_preorder?"ndpi_preorder":
+	 which == ndpi_postorder?"ndpi_postorder":
+	 which == ndpi_endorder?"ndpi_endorder":
+	 which == ndpi_leaf?"ndpi_leaf": "unknown",
 	 f->default_port);
 }
 
 /* ******************************************************************** */
 
 static void addDefaultPort(u_int16_t port, ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t **root) {
-  ndpi_default_ports_tree_node_t *node = (ndpi_default_ports_tree_node_t*)malloc(sizeof(ndpi_default_ports_tree_node_t));
+  ndpi_default_ports_tree_node_t *node = (ndpi_default_ports_tree_node_t*)ndpi_malloc(sizeof(ndpi_default_ports_tree_node_t));
 
   // printf("[NDPI] %s(%d)\n", __FUNCTION__, port);
 
@@ -347,11 +358,11 @@ static void addDefaultPort(u_int16_t port, ndpi_proto_defaults_t *def, ndpi_defa
     ndpi_default_ports_tree_node_t *ret;
 
     node->proto = def, node->default_port = port;
-    ret = *(ndpi_default_ports_tree_node_t**)tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
+    ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
 
     if(ret != node) {
       printf("[NDPI] %s(): found duplicate for port %u\n", __FUNCTION__, port);
-      free(node);
+      ndpi_free(node);
     }
   }
 }
@@ -551,7 +562,7 @@ static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, ndpi_pr
     printf("Too many ports defined: ignored port %d\n", new_port);
     return(-1);
   } else {
-    u_int16_t *new_ports = (u_int16_t*)malloc(num_ports+1);
+    u_int16_t *new_ports = (u_int16_t*)ndpi_malloc(num_ports+1);
 
     if(new_ports == NULL) {
       printf("Not enough memory\n");
@@ -564,7 +575,7 @@ static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port, ndpi_pr
     new_ports[i++] = new_port;
     new_ports[i++] = 0;
 
-    free(*ports);
+    ndpi_free(*ports);
     *ports = new_ports;
 
     addDefaultPort(new_port, def, &root);
@@ -664,9 +675,9 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
 
 #if 0
   printf("\nTCP:\n");
-  twalk(tcpRoot, ndpi_default_ports_tree_node_t_walker);
+  ndpi_twalk(tcpRoot, ndpi_default_ports_tree_node_t_walker);
   printf("\nUDP:\n");
-  twalk(udpRoot, ndpi_default_ports_tree_node_t_walker);
+  ndpi_twalk(udpRoot, ndpi_default_ports_tree_node_t_walker);
 #endif
 }
 
@@ -4161,11 +4172,11 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   ndpi_default_ports_tree_node_t node;
 
   node.default_port = sport;
-  ret = tfind(&node, (proto == IPPROTO_TCP) ? (void*)&tcpRoot : (void*)&udpRoot, ndpi_default_ports_tree_node_t_cmp);
+  ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&tcpRoot : (void*)&udpRoot, ndpi_default_ports_tree_node_t_cmp);
 
   if(ret == NULL) {
     node.default_port = dport;
-    ret = tfind(&node, (proto == IPPROTO_TCP) ? (void*)&tcpRoot : (void*)&udpRoot, ndpi_default_ports_tree_node_t_cmp);
+    ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&tcpRoot : (void*)&udpRoot, ndpi_default_ports_tree_node_t_cmp);
   }
 
   if(ret != NULL) {

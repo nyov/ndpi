@@ -409,7 +409,7 @@ static void setupDetection(void)
   NDPI_PROTOCOL_BITMASK all;
 
   // init global detection structure
-  ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, debug_printf);
+  ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, free_wrapper, debug_printf);
   if (ndpi_struct == NULL) {
     printf("ERROR: global structure initialization failed\n");
     exit(-1);
