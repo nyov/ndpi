@@ -23,6 +23,10 @@
 
 #ifdef NDPI_PROTOCOL_NETFLOW
 
+#ifndef __KERNEL__
+#define do_gettimeofday(a) gettimeofday(a, NULL)
+#endif
+
 static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
