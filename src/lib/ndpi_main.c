@@ -296,6 +296,12 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 
 /* ******************************************************************** */
 
+char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id) {
+  return((id >= _ndpi_num_supported_protocols) ? NULL : ndpi_mod->proto_defaults[id].protoName);
+}
+
+/* ******************************************************************** */
+
 u_int16_t* ndpi_build_default_ports(u_int16_t *ports,
 				    u_int16_t portA, u_int16_t portB, u_int16_t portC,
 				    u_int16_t portD, u_int16_t portE) {

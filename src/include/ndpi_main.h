@@ -126,5 +126,6 @@ extern void ndpi_packet_dst_ip_get(const struct ndpi_packet_struct *packet, ndpi
 extern char *ndpi_get_ip_string(struct ndpi_detection_module_struct *ndpi_struct, const ndpi_ip_addr_t * ip);
 extern char *ndpi_get_packet_src_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
 					   const struct ndpi_packet_struct *packet);
+extern char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id);
 
 #endif							/* __NDPI_MAIN_INCLUDE_FILE__ */
