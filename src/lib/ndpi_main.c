@@ -201,7 +201,7 @@ static void addDefaultPort(ndpi_port_range *range,
 
 
 void* ndpi_malloc(unsigned long size) { return(_ndpi_malloc(size)); }
-void  ndpi_free(void *ptr)            { ndpi_free(ptr); }
+void  ndpi_free(void *ptr)            { _ndpi_free(ptr); }
 
 char *ndpi_strdup(const char *s) {
   int len = strlen(s);
