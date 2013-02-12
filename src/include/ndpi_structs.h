@@ -506,6 +506,10 @@ typedef struct ndpi_call_function_struct {
 
 #define MAX_DEFAULT_PORTS        5
 
+typedef struct {
+  u_int16_t port_low, port_high;
+} ndpi_port_range;
+
 /* ntop extensions */
 typedef struct ndpi_proto_defaults {
   char *protoName;
