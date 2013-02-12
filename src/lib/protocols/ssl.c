@@ -40,7 +40,7 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
 }
 
 /* Can't call libc functions from kernel space, define some stub instead */
-inline int ndpi_min(int a, int b) { return(a < b ? a : b); }
+
 #define ndpi_isalpha(ch) (((ch) >= 'a' && (ch) <= 'z') || ((ch) >= 'A' && (ch) <= 'Z'))
 #define ndpi_isdigit(ch) ((ch) >= '0' && (ch) <= '9')
 #define ndpi_isspace(ch) (((ch) >= '\t' && (ch) <= '\r') || ((ch) == ' '))

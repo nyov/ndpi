@@ -29,8 +29,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
   typedef struct ndpi_protocol_bitmask_struct {
     u_int64_t bitmask[3];
   } ndpi_protocol_bitmask_struct_t;
@@ -76,6 +74,8 @@ extern "C" {
 #define NDPI_BITMASK_IS_ZERO(a) ( (a).bitmask[0] == 0 && (a).bitmask[1] == 0 && (a).bitmask[2] == 0)
 #define NDPI_BITMASK_CONTAINS_NEGATED_BITMASK(a,b) ((((a).bitmask[0] & ~(b).bitmask[0]) == ~(b).bitmask[0]) && (((a).bitmask[1] & ~(b).bitmask[1]) == ~(b).bitmask[1]) && (((a).bitmask[2] & ~(b).bitmask[2]) == ~(b).bitmask[2]))
 
+#define ndpi_min(a,b)   ((a < b) ? a : b)
+#define ndpi_max(a,b)   ((a > b) ? a : b)
 
 #define NDPI_PARSE_PACKET_LINE_INFO(ndpi_struct,flow,packet)		\
                         if (packet->packet_lines_parsed_complete != 1) {        \
