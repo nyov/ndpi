@@ -505,10 +505,27 @@ static ndpi_protocol_match host_match[] = {
   { NULL, 0 }
 };
 
-int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, 
-			char *string_to_match, u_int string_to_match_len) {
-  int i = 0;
+int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, 
+			struct ndpi_flow_struct *flow, 
+			char *string_to_match, 
+			u_int string_to_match_len) {
+  int i = 0, end = string_to_match_len-1, num_found = 0;
   struct ndpi_packet_struct *packet = &flow->packet;
+
+  while(end > 0) {
+    if(string_to_match[end] == '.') {
+      num_found++;
+      if(num_found == 2) {
+	end++;
+	break;
+      }
+    }
+    end--;
+  }
+
+  strncpy(flow->l4.tcp.host_server_name, 
+	  &string_to_match[end], 
+	  ndpi_min(sizeof(flow->l4.tcp.host_server_name)-1, string_to_match_len-end));
 
   while(host_match[i].string_to_match != NULL) {
     if(ndpi_strnstr(string_to_match, 

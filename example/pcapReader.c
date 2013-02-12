@@ -94,7 +94,7 @@ static struct osdpi_flow *osdpi_flows_root = NULL;
 static u_int32_t osdpi_flow_count = 0;
 
 
-static void help() {
+static void help(u_int long_help) {
   printf("pcapReader -f <file>.pcap [-p <protos>][-d][-h][-v]\n\n"
 	 "Usage:\n"
 	 "  -f <file>.pcap            | Specify a pcap file to read packets from\n"
@@ -103,9 +103,12 @@ static void help() {
 	 "  -h                        | This help\n"
 	 "  -v                        | Verbose 'unknown protocol' packet print\n");
 
-  printf("\n\nSupported protocols:\n");
-  setupDetection();
-  ndpi_dump_protocols(ndpi_struct);
+  if(long_help) {
+    printf("\n\nSupported protocols:\n");
+    setupDetection();
+    ndpi_dump_protocols(ndpi_struct);
+  }
+
   exit(-1);
 }
 
@@ -131,19 +134,24 @@ static void parseOptions(int argc, char **argv)
       break;
 
     case 'h':
+      help(1);
+      break;
+
     default:
-      help();
+      help(0);
+      break;
     }
   }
 
   // check parameters
   if (_pcap_file == NULL || strcmp(_pcap_file, "") == 0) {
-    help();
+    help(0);
   }
 }
 
-static void debug_printf(u_int32_t protocol, void *id_struct, ndpi_log_level_t log_level, const char *format, ...)
-{
+static void debug_printf(u_int32_t protocol, void *id_struct, 
+			 ndpi_log_level_t log_level, 
+			 const char *format, ...) {
 }
 
 static void *malloc_wrapper(unsigned long size)
@@ -246,7 +254,9 @@ static void printFlow(struct osdpi_flow *flow) {
 	 flow->packets, flow->bytes);
 }
 
-static void node_print_unknown_proto_walker(const void *node, const VISIT which, const int depth) {
+static void node_print_unknown_proto_walker(const void *node, 
+					    const VISIT which, 
+					    const int depth) {
   struct osdpi_flow *flow = *(struct osdpi_flow**)node;
 
   if (flow->detected_protocol != 0 /* UNKNOWN */) return;
@@ -459,7 +469,8 @@ static void terminateDetection(void)
 
 }
 
-static unsigned int packet_processing(const uint64_t time, const struct ndpi_iphdr *iph, uint16_t ipsize, uint16_t rawsize)
+static unsigned int packet_processing(const u_int64_t time, const struct ndpi_iphdr *iph, 
+				      uint16_t ipsize, uint16_t rawsize)
 {
   struct ndpi_id_struct *src = NULL;
   struct ndpi_id_struct *dst = NULL;
@@ -505,8 +516,13 @@ static unsigned int packet_processing(const uint64_t time, const struct ndpi_iph
   }
 #endif
 
-  if (flow != NULL)
+  if (flow != NULL) {
     flow->detected_protocol = protocol;
+#if 0
+    if(ndpi_flow->l4.tcp.host_server_name[0] != '\0')
+      printf("%s\n", ndpi_flow->l4.tcp.host_server_name);
+#endif
+  }
 
   return 0;
 }

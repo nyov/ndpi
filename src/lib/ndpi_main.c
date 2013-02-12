@@ -56,9 +56,9 @@ typedef enum {
 } ndpi_VISIT;
 
 void    *ndpi_tdelete(const void * __restrict, void ** __restrict,
-		 int (*)(const void *, const void *));
+		      int (*)(const void *, const void *));
 void    *ndpi_tfind(const void *, void * const *,
-	       int (*)(const void *, const void *));
+		    int (*)(const void *, const void *));
 void    *ndpi_tsearch(const void *, void **, int (*)(const void *, const void *));
 void     ndpi_twalk(const void *, void (*)(const void *, ndpi_VISIT, int));
 

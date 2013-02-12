@@ -212,6 +212,9 @@ typedef struct ndpi_id_struct {
   u_int32_t pplive_last_packet_time_set:1;
 #endif
 } ndpi_id_struct;
+
+/* ************************************************** */ 
+
 struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_FLASH
   u_int16_t flash_bytes;
@@ -280,6 +283,7 @@ struct ndpi_flow_tcp_struct {
   u_int32_t http_stage:2;
   u_int32_t http_empty_line_seen:1;
   u_int32_t http_wait_for_retransmission:1;
+  u_char    host_server_name[64];
 #endif							// NDPI_PROTOCOL_HTTP
 #ifdef NDPI_PROTOCOL_FLASH
   u_int32_t flash_stage:3;
@@ -365,7 +369,9 @@ struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
-} 
+}
+
+/* ************************************************** */ 
 
 #if !defined(WIN32)
   __attribute__ ((__packed__))
@@ -413,6 +419,8 @@ struct ndpi_flow_udp_struct {
   u_int8_t teamviewer_stage;
 #endif
 }
+
+/* ************************************************** */ 
 
 #if !defined(WIN32)
   __attribute__ ((__packed__))
@@ -541,10 +549,8 @@ typedef struct ndpi_detection_module_struct {
   struct ndpi_call_function_struct callback_buffer_tcp_payload[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
   u_int32_t callback_buffer_size_tcp_payload;
 
-
   struct ndpi_call_function_struct callback_buffer_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
   u_int32_t callback_buffer_size_udp;
-
 
   struct ndpi_call_function_struct callback_buffer_non_tcp_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
   u_int32_t callback_buffer_size_non_tcp_udp;
