@@ -834,6 +834,12 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
     if (flow->l4.tcp.http_stage == 0) {
       filename_start = http_request_url_offset(ndpi_struct, flow);
       if (filename_start == 0) {
+	if (packet->payload_packet_len >= 7 && memcmp(packet->payload, "HTTP/1.", 7) == 0) {
+	  NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP response found (truncated flow ?)\n");
+	  ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP);
+	  return;
+	}
+
 	NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "filename not found, exclude\n");
 	http_bitmask_exclude(flow);
 	return;
@@ -844,6 +850,9 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
       if (packet->parsed_lines <= 1) {
 	/* parse one more packet .. */
 	NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "just one line, search next packet\n");
+
+	packet->http_method.ptr = packet->line[0].ptr;
+        packet->http_method.len = filename_start - 1;
 	flow->l4.tcp.http_stage = 1;
 	return;
       }
@@ -880,7 +889,6 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
       ndpi_parse_packet_line_info(ndpi_struct, flow);
 
       if (packet->parsed_lines <= 1) {
-
 	/* wait some packets in case request is split over more than 2 packets */
 	if (flow->packet_counter < 5) {
 	  NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG,
@@ -906,7 +914,19 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
 	return;
       }
     }
+  } else {
+    /* We have received a response for a previously identified partial HTTP request */
+    
+    if((packet->parsed_lines == 1) && (packet->packet_direction == 1 /* server -> client */)) {
+      /* 
+	 In apache if you do "GET /\n\n" the response comes without any header so we can assume that
+	 this can be the case
+      */
+      ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP);
+      return;
+    }
   }
+
   NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP: REQUEST NOT HTTP CONFORM\n");
   http_bitmask_exclude(flow);
   return;
