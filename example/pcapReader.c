@@ -46,6 +46,7 @@ static pcap_t *_pcap_handle = NULL;
 static int _pcap_datalink_type = 0;
 static u_int8_t enable_protocol_guess = 1, verbose = 0;
 static u_int32_t guessed_flow_protocols = 0;
+static u_int16_t decode_tunnels = 0;
 
 // detection
 static struct ndpi_detection_module_struct *ndpi_struct = NULL;
@@ -59,6 +60,9 @@ static u_int64_t protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 static u_int64_t protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 static u_int32_t protocol_flows[NDPI_MAX_SUPPORTED_PROTOCOLS] = { 0 };
 
+
+#define GTP_U_V1_PORT 2152
+
 // id tracking
 typedef struct osdpi_id {
   u_int8_t ip[4];
@@ -66,9 +70,6 @@ typedef struct osdpi_id {
 } osdpi_id_t;
 
 static u_int32_t size_id_struct = 0;
-#define			MAX_OSDPI_IDS			50000
-static struct osdpi_id *osdpi_ids;
-static u_int32_t osdpi_id_count = 0;
 
 #ifndef ETH_P_IP
 #define ETH_P_IP 0x0800
@@ -86,6 +87,8 @@ typedef struct osdpi_flow {
   u_int16_t packets, bytes;
   // result only, not used for flow identification
   u_int32_t detected_protocol;
+
+  void *src_id, *dst_id;
 } osdpi_flow_t;
 
 static u_int32_t size_flow_struct = 0;
@@ -95,11 +98,12 @@ static u_int32_t osdpi_flow_count = 0;
 
 
 static void help(u_int long_help) {
-  printf("pcapReader -f <file>.pcap [-p <protos>][-d][-h][-v]\n\n"
+  printf("pcapReader -f <file>.pcap [-p <protos>][-d][-h][-t][-v]\n\n"
 	 "Usage:\n"
 	 "  -f <file>.pcap            | Specify a pcap file to read packets from\n"
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
 	 "  -d                        | Disable protocol guess and use only DPI\n"
+	 "  -t                        | Dissect GTP tunnels\n"
 	 "  -h                        | This help\n"
 	 "  -v                        | Verbose 'unknown protocol' packet print\n");
 
@@ -116,7 +120,7 @@ static void parseOptions(int argc, char **argv)
 {
   int opt;
 
-  while ((opt = getopt(argc, argv, "df:hp:v")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:hp:tv")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -128,6 +132,10 @@ static void parseOptions(int argc, char **argv)
     case 'p':
       _protoFilePath = optarg;
     break;
+
+    case 't':
+      decode_tunnels = 1;
+      break;
 
     case 'v':
       verbose = 1;
@@ -149,8 +157,8 @@ static void parseOptions(int argc, char **argv)
   }
 }
 
-static void debug_printf(u_int32_t protocol, void *id_struct, 
-			 ndpi_log_level_t log_level, 
+static void debug_printf(u_int32_t protocol, void *id_struct,
+			 ndpi_log_level_t log_level,
 			 const char *format, ...) {
 }
 
@@ -162,27 +170,6 @@ static void *malloc_wrapper(unsigned long size)
 static void free_wrapper(void *freeable)
 {
   free(freeable);
-}
-
-static void *get_id(const u_int8_t * ip)
-{
-  u_int32_t i;
-  for (i = 0; i < osdpi_id_count; i++) {
-    if (memcmp(osdpi_ids[i].ip, ip, sizeof(u_int8_t) * 4) == 0) {
-      return osdpi_ids[i].ndpi_id;
-    }
-  }
-  if (osdpi_id_count == MAX_OSDPI_IDS) {
-    printf("ERROR: maximum unique id count (%u) has been exceeded\n", MAX_OSDPI_IDS);
-    exit(-1);
-  } else {
-    struct ndpi_id_struct *ndpi_id;
-    memcpy(osdpi_ids[osdpi_id_count].ip, ip, sizeof(u_int8_t) * 4);
-    ndpi_id = osdpi_ids[osdpi_id_count].ndpi_id;
-
-    osdpi_id_count += 1;
-    return ndpi_id;
-  }
 }
 
 
@@ -254,8 +241,8 @@ static void printFlow(struct osdpi_flow *flow) {
 	 flow->packets, flow->bytes);
 }
 
-static void node_print_unknown_proto_walker(const void *node, 
-					    const VISIT which, 
+static void node_print_unknown_proto_walker(const void *node,
+					    const VISIT which,
 					    const int depth) {
   struct osdpi_flow *flow = *(struct osdpi_flow**)node;
 
@@ -402,6 +389,16 @@ static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t
 	return(NULL);
       }
 
+      if((newflow->src_id = calloc(1, size_id_struct)) == NULL) {
+	printf("[NDPI] %s(3): not enough memory\n", __FUNCTION__);
+	return(NULL);
+      }
+
+      if((newflow->dst_id = calloc(1, size_id_struct)) == NULL) {
+	printf("[NDPI] %s(4): not enough memory\n", __FUNCTION__);
+	return(NULL);
+      }
+
       tsearch(newflow, (void*)&osdpi_flows_root, node_cmp); /* Add */
 
       osdpi_flow_count += 1;
@@ -432,20 +429,6 @@ static void setupDetection(void)
   size_id_struct = ndpi_detection_get_sizeof_ndpi_id_struct();
   size_flow_struct = ndpi_detection_get_sizeof_ndpi_flow_struct();
 
-  osdpi_ids = malloc(MAX_OSDPI_IDS * sizeof(struct osdpi_id));
-  if (osdpi_ids == NULL) {
-    printf("ERROR: malloc for osdpi_ids failed\n");
-    exit(-1);
-  }
-  for (i = 0; i < MAX_OSDPI_IDS; i++) {
-    memset(&osdpi_ids[i], 0, sizeof(struct osdpi_id));
-    osdpi_ids[i].ndpi_id = calloc(1, size_id_struct);
-    if (osdpi_ids[i].ndpi_id == NULL) {
-      printf("ERROR: malloc for ndpi_id_struct failed\n");
-      exit(-1);
-    }
-  }
-
   // clear memory for results
   memset(protocol_counter, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
   memset(protocol_counter_bytes, 0, (NDPI_MAX_SUPPORTED_PROTOCOLS + 1) * sizeof(u_int64_t));
@@ -460,45 +443,38 @@ static void terminateDetection(void)
 
   ndpi_exit_detection_module(ndpi_struct, free_wrapper);
 
-  for (i = 0; i < MAX_OSDPI_IDS; i++) {
-    free(osdpi_ids[i].ndpi_id);
-  }
-  free(osdpi_ids);
-
   /* Free flows (TODO) */
 
 }
 
-static unsigned int packet_processing(const u_int64_t time, const struct ndpi_iphdr *iph, 
+static unsigned int packet_processing(const u_int64_t time, const struct ndpi_iphdr *iph,
 				      uint16_t ipsize, uint16_t rawsize)
 {
-  struct ndpi_id_struct *src = NULL;
-  struct ndpi_id_struct *dst = NULL;
-  struct osdpi_flow *flow = NULL;
+  struct ndpi_id_struct *src, *dst;
+  struct osdpi_flow *flow;
   struct ndpi_flow_struct *ndpi_flow = NULL;
   u_int32_t protocol = 0;
-
-  src = get_id((u_int8_t *) & iph->saddr);
-  dst = get_id((u_int8_t *) & iph->daddr);
+  u_int16_t frag_off = ntohs(iph->frag_off);
 
   flow = get_osdpi_flow(iph, ipsize);
   if (flow != NULL) {
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
+    src = flow->src_id, dst = flow->dst_id;
   }
 
   ip_packet_count++;
   total_bytes += rawsize;
 
   // only handle unfragmented packets
-  if ((iph->frag_off & htons(0x1FFF)) == 0) {
+  if ((frag_off & 0x3FFF) == 0) {
     // here the actual detection is performed
     protocol = ndpi_detection_process_packet(ndpi_struct, ndpi_flow, (uint8_t *) iph, ipsize, time, src, dst);
   } else {
     static u_int8_t frag_warning_used = 0;
+
     if (frag_warning_used == 0) {
       printf("\n\nWARNING: fragmented ip packets are not supported and will be skipped \n\n");
-      sleep(2);
       frag_warning_used = 1;
     }
     return 0;
@@ -538,13 +514,12 @@ static void printResults(void)
 	 (long long unsigned int)raw_packet_count);
   printf("\tip bytes:     \x1b[34m%-13llu\x1b[0m\n",
 	 (long long unsigned int)total_bytes);
-  printf("\tunique ids:   \x1b[35m%-13u\x1b[0m\n", osdpi_id_count);
-  printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
+    printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
 
   twalk(osdpi_flows_root, node_proto_guess_walker);
-  if(enable_protocol_guess) 
+  if(enable_protocol_guess)
     printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
-  
+
 
   printf("\n\ndetected protocols:\n");
   for (i = 0; i <= NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
@@ -590,7 +565,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[sizeof(struct ndpi_ethhdr)];
   u_int64_t time;
   static u_int64_t lasttime = 0;
-  u_int16_t type;
+  u_int16_t type, ip_offset;
 
   raw_packet_count++;
 
@@ -608,37 +583,75 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   // just work on Ethernet packets that contain IP
   if (_pcap_datalink_type == DLT_EN10MB && type == htons(ETH_P_IP)
       && header->caplen >= sizeof(struct ndpi_ethhdr)) {
+    u_int16_t frag_off = ntohs(iph->frag_off);
 
-    if (header->caplen < header->len) {
+    if(header->caplen < header->len) {
       static u_int8_t cap_warning_used = 0;
       if (cap_warning_used == 0) {
-	printf
-	  ("\n\nWARNING: packet capture size is smaller than packet size, DETECTION MIGHT NOT WORK CORRECTLY OR EVEN CRASH\n\n");
-	sleep(2);
+	printf("\n\nWARNING: packet capture size is smaller than packet size, DETECTION MIGHT NOT WORK CORRECTLY\n\n");
 	cap_warning_used = 1;
       }
     }
 
     if (iph->version != 4) {
       static u_int8_t ipv4_warning_used = 0;
+
+    v4_warning:
       if (ipv4_warning_used == 0) {
-	printf("\n\nWARNING: only IPv4 packets are supported, all other packets will be discarded\n\n");
-	sleep(2);
+	printf("\n\nWARNING: only IPv4 packets are supported in this demo (nDPI supports both IPv4 and IPv6), all other packets will be discarded\n\n");
 	ipv4_warning_used = 1;
       }
       return;
     }
+
+    ip_offset = sizeof(struct ndpi_ethhdr);
+    if(decode_tunnels && (iph->protocol == IPPROTO_UDP) && ((frag_off & 0x3FFF) == 0)) {
+      u_short ip_len = ((u_short)iph->ihl * 4);
+      struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[sizeof(struct ndpi_ethhdr)+ip_len];
+      u_int16_t sport = ntohs(udp->source), dport = ntohs(udp->dest);
+      
+      if((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {	 
+	/* Check if it's GTPv1 */
+	u_int offset = sizeof(struct ndpi_ethhdr)+ip_len+sizeof(struct ndpi_udphdr);
+	u_int8_t flags = packet[offset];
+	u_int8_t message_type = packet[offset+1];
+	
+	if((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) && (message_type == 0xFF /* T-PDU */)) {
+	  ip_offset = sizeof(struct ndpi_ethhdr)+ip_len+sizeof(struct ndpi_udphdr)+8 /* GTPv1 header len */;
+
+	  if(flags & 0x04) ip_offset += 1; /* next_ext_header is present */
+	  if(flags & 0x02) ip_offset += 4; /* sequence_number is present (it also includes next_ext_header and pdu_number) */
+	  if(flags & 0x01) ip_offset += 1; /* pdu_number is present */
+
+	  iph = (struct ndpi_iphdr *) &packet[ip_offset];
+
+	  if (iph->version != 4) {
+	    // printf("WARNING: not good (packet_id=%u)!\n", (unsigned int)raw_packet_count);
+	    goto v4_warning;
+	  }
+	}
+      }
+      
+    }
+
     // process the packet
-    packet_processing(time, iph, header->len - sizeof(struct ndpi_ethhdr), header->len);
+    packet_processing(time, iph, header->len - ip_offset, header->len);
   }
 
 }
 
 static void runPcapLoop(void)
 {
-  if (_pcap_handle != NULL) {
+
+  printf("\n-----------------------------------------------------------\n"
+	 "* NOTE: This is demo app to show *some* nDPI features.\n"
+	 "* In this demo we have implemented only some basic features\n"
+	 "* just to show you what you can do with the library. Feel \n"
+	 "* free to extend it and send us the patches for inclusion\n"
+	 "------------------------------------------------------------\n\n");
+
+  if (_pcap_handle != NULL)
     pcap_loop(_pcap_handle, -1, &pcap_packet_callback, NULL);
-  }
 }
 
 int main(int argc, char **argv)
