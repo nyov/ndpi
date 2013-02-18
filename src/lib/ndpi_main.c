@@ -177,7 +177,7 @@ static void ndpi_tdestroy_recurse(ndpi_node* root, void (*free_action)(void *)) 
     ndpi_tdestroy_recurse(root->right, free_action);
   
   (*free_action) ((void *) root->key);
-  free(root);
+  ndpi_free(root);
 }
 
 void ndpi_tdestroy(void *vrootp, void (*freefct)(void *)) {
