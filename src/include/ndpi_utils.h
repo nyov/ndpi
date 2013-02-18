@@ -29,6 +29,7 @@
 
 #include "ndpi_protocols.h"
 
+
 extern char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
 #endif							/* _NDPI_UTILS_H_ */

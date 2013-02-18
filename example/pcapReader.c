@@ -131,7 +131,7 @@ static void parseOptions(int argc, char **argv)
 
     case 'p':
       _protoFilePath = optarg;
-    break;
+      break;
 
     case 't':
       decode_tunnels = 1;
@@ -241,9 +241,7 @@ static void printFlow(struct osdpi_flow *flow) {
 	 flow->packets, flow->bytes);
 }
 
-static void node_print_unknown_proto_walker(const void *node,
-					    const VISIT which,
-					    const int depth) {
+static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth) {
   struct osdpi_flow *flow = *(struct osdpi_flow**)node;
 
   if (flow->detected_protocol != 0 /* UNKNOWN */) return;
@@ -252,7 +250,7 @@ static void node_print_unknown_proto_walker(const void *node,
     printFlow(flow);
 }
 
-static void node_proto_guess_walker(const void *node, const VISIT which, const int depth) {
+static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth) {
   struct osdpi_flow *flow = *(struct osdpi_flow**)node;
   char buf1[32], buf2[32];
 
@@ -314,7 +312,7 @@ static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t
   u_int16_t lower_port;
   u_int16_t upper_port;
   struct osdpi_flow flow;
-  const void *ret;
+  void *ret;
 
   if (ipsize < 20)
     return NULL;
@@ -365,7 +363,7 @@ static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t
   flow.lower_port = lower_port;
   flow.upper_port = upper_port;
 
-  ret = tfind(&flow, (void*)&osdpi_flows_root, node_cmp);
+  ret = ndpi_tfind(&flow, (void*)&osdpi_flows_root, node_cmp);
 
   if(ret == NULL) {
     if (osdpi_flow_count == MAX_OSDPI_FLOWS) {
@@ -399,7 +397,7 @@ static struct osdpi_flow *get_osdpi_flow(const struct ndpi_iphdr *iph, u_int16_t
 	return(NULL);
       }
 
-      tsearch(newflow, (void*)&osdpi_flows_root, node_cmp); /* Add */
+      ndpi_tsearch(newflow, (void*)&osdpi_flows_root, node_cmp); /* Add */
 
       osdpi_flow_count += 1;
 
@@ -437,14 +435,23 @@ static void setupDetection(void)
     ndpi_load_protocols_file(ndpi_struct, _protoFilePath);
 }
 
+static void free_osdpi_flow(struct osdpi_flow *flow) {
+  ndpi_free(flow->ndpi_flow);
+  ndpi_free(flow->src_id);
+  ndpi_free(flow->dst_id);
+}
+
+static void osdpi_flow_freer(void *node) {
+  struct osdpi_flow *flow = (struct osdpi_flow*)node;
+  free_osdpi_flow(flow);
+  ndpi_free(flow);
+}
+
+
 static void terminateDetection(void)
 {
-  u_int32_t i;
-
+  ndpi_tdestroy(osdpi_flows_root, osdpi_flow_freer);
   ndpi_exit_detection_module(ndpi_struct, free_wrapper);
-
-  /* Free flows (TODO) */
-
 }
 
 static unsigned int packet_processing(const u_int64_t time, const struct ndpi_iphdr *iph,
@@ -514,9 +521,9 @@ static void printResults(void)
 	 (long long unsigned int)raw_packet_count);
   printf("\tip bytes:     \x1b[34m%-13llu\x1b[0m\n",
 	 (long long unsigned int)total_bytes);
-    printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
+  printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", osdpi_flow_count);
 
-  twalk(osdpi_flows_root, node_proto_guess_walker);
+  ndpi_twalk(osdpi_flows_root, node_proto_guess_walker);
   if(enable_protocol_guess)
     printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
 
@@ -534,7 +541,7 @@ static void printResults(void)
 
   if(verbose && (protocol_counter[0] > 0)) {
     printf("\n\nundetected flows:\n");
-    twalk(osdpi_flows_root, node_print_unknown_proto_walker);
+    ndpi_twalk(osdpi_flows_root, node_print_unknown_proto_walker);
   }
 
   printf("\n\n");
@@ -609,13 +616,13 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
       u_short ip_len = ((u_short)iph->ihl * 4);
       struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[sizeof(struct ndpi_ethhdr)+ip_len];
       u_int16_t sport = ntohs(udp->source), dport = ntohs(udp->dest);
-      
-      if((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {	 
+
+      if((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {
 	/* Check if it's GTPv1 */
 	u_int offset = sizeof(struct ndpi_ethhdr)+ip_len+sizeof(struct ndpi_udphdr);
 	u_int8_t flags = packet[offset];
 	u_int8_t message_type = packet[offset+1];
-	
+
 	if((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) && (message_type == 0xFF /* T-PDU */)) {
 	  ip_offset = sizeof(struct ndpi_ethhdr)+ip_len+sizeof(struct ndpi_udphdr)+8 /* GTPv1 header len */;
 
@@ -631,7 +638,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 	  }
 	}
       }
-      
+
     }
 
     // process the packet

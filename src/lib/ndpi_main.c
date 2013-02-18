@@ -48,25 +48,6 @@ static u_int _ndpi_num_custom_protocols = 0;
 
 /* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
 
-typedef enum {
-  ndpi_preorder,
-  ndpi_postorder,
-  ndpi_endorder,
-  ndpi_leaf
-} ndpi_VISIT;
-
-void    *ndpi_tdelete(const void * __restrict, void ** __restrict,
-		      int (*)(const void *, const void *));
-void    *ndpi_tfind(const void *, void * const *,
-		    int (*)(const void *, const void *));
-void    *ndpi_tsearch(const void *, void **, int (*)(const void *, const void *));
-void     ndpi_twalk(const void *, void (*)(const void *, ndpi_VISIT, int));
-
-typedef struct node_t {
-  char	  *key;
-  struct node_t *left, *right;
-} ndpi_node;
-
 /* find or insert datum into search tree */
 void *
 ndpi_tsearch(const void *vkey, void **vrootp,
@@ -188,6 +169,26 @@ ndpi_tfind(const void *vkey, void * const *vrootp,
 
 /* ****************************************** */
 
+/* Walk the nodes of a tree */
+static void ndpi_tdestroy_recurse(ndpi_node* root, void (*free_action)(void *)) {
+  if (root->left != NULL)
+    ndpi_tdestroy_recurse(root->left, free_action);
+  if (root->right != NULL)
+    ndpi_tdestroy_recurse(root->right, free_action);
+  
+  (*free_action) ((void *) root->key);
+  free(root);
+}
+
+void ndpi_tdestroy(void *vrootp, void (*freefct)(void *)) {
+  ndpi_node *root = (ndpi_node *) vrootp;
+
+  if (root != NULL)
+    ndpi_tdestroy_recurse(root, freefct);
+}
+
+/* ****************************************** */
+
 static void *(*_ndpi_malloc)(unsigned long size);
 static void  (*_ndpi_free)(void *ptr);
 
@@ -292,6 +293,9 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
       if(ndpi_struct->proto_defaults[i].protoName)
 	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
+
+    ndpi_tdestroy(udpRoot, ndpi_free);
+    ndpi_tdestroy(tcpRoot, ndpi_free);
 
     ndpi_free(ndpi_struct);
   }

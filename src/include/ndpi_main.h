@@ -89,6 +89,27 @@ typedef unsigned __int64 u_int64_t;
 #include "ndpi_macros.h"
 #include "ndpi_protocols_osdpi.h"
 
+typedef enum {
+  ndpi_preorder,
+  ndpi_postorder,
+  ndpi_endorder,
+  ndpi_leaf
+} ndpi_VISIT;
+
+void *ndpi_tdelete(const void * __restrict, void ** __restrict,
+		   int (*)(const void *, const void *));
+void *ndpi_tfind(const void *, void * const *, int (*)(const void *, const void *));
+void *ndpi_tsearch(const void *, void **, int (*)(const void *, const void *));
+void ndpi_twalk(const void *, void (*)(const void *, ndpi_VISIT, int));
+void ndpi_tdestroy(void *vrootp, void (*freefct)(void *));
+
+
+typedef struct node_t {
+  char	  *key;
+  struct node_t *left, *right;
+} ndpi_node;
+
+
 u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 
 u_int32_t ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
