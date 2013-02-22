@@ -92,7 +92,7 @@ typedef struct osdpi_flow {
 } osdpi_flow_t;
 
 static u_int32_t size_flow_struct = 0;
-#define			MAX_OSDPI_FLOWS			200000
+#define			MAX_OSDPI_FLOWS			2000000
 static struct osdpi_flow *osdpi_flows_root = NULL;
 static u_int32_t osdpi_flow_count = 0;
 
@@ -468,7 +468,8 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
     src = flow->src_id, dst = flow->dst_id;
-  }
+  } else
+    return;
 
   ip_packet_count++;
   total_bytes += rawsize;
