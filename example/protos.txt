@@ -6,3 +6,23 @@ udp:5061-5062@SIP
 tcp:860,udp:860,tcp:3260,udp:3260@iSCSI
 tcp:3000@ntop
 
+#  Subprotocols
+#  Format:
+#  <proto>.<field>:<value>,<proto>.<field>:<value>,.....@<subproto>
+
+HTTP.host:".twitter.com",HTTP.host:".twttr.com"@TWITTER
+HTTP.host:".netflix.com"@NETFLIX
+HTTP.host:".facebook.com",HTTP.host:".fbcdn.net"@FACEBOOK
+HTTP.host:".dropbox.com"@DROPBOX
+HTTP.host:".gmail."@GMAIL
+HTTP.host:"maps.google.com",HTTP.host:"maps.gstatic.com"@GOOGLE_MAPS
+HTTP.host:".gstatic.com",HTTP.host:".google.com"@GOOGLE
+HTTP.host:".youtube."@YOUTUBE
+HTTP.host:"itunes.apple.com"@APPLE_ITUNES
+HTTP.host:".icloud.com"@APPLE_ICLOUD
+HTTP.host:".apple.com",HTTP.host:".mzstatic.com"@APPLE
+HTTP.host:".viber.com"@VIBER
+HTTP.host:".last.fm"@LASTFM
+HTTP.host:".grooveshark.com"@GROOVESHARK
+HTTP.host:".tuenti.com"@TUENTI
+

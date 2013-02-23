@@ -480,30 +480,38 @@ char* ndpi_strnstr(const char *s, const char *find, size_t slen) {
 }
 
 
-static ndpi_protocol_match host_match[] = {
-  { ".twitter.com",      NDPI_PROTOCOL_TWITTER },
-  { ".netflix.com",      NDPI_PROTOCOL_NETFLIX },
-  { ".twttr.com",        NDPI_PROTOCOL_TWITTER },
-  { ".facebook.com",     NDPI_PROTOCOL_FACEBOOK },
-  { ".fbcdn.net",        NDPI_PROTOCOL_FACEBOOK },
-  { ".dropbox.com",      NDPI_PROTOCOL_DROPBOX },
-  { ".gmail.",           NDPI_PROTOCOL_GMAIL },
-  { "maps.google.com",   NDPI_PROTOCOL_GOOGLE_MAPS },
-  { "maps.gstatic.com",  NDPI_PROTOCOL_GOOGLE_MAPS },
-  { ".gstatic.com",      NDPI_PROTOCOL_GOOGLE },
-  { ".google.com",       NDPI_PROTOCOL_GOOGLE },
-  { ".youtube.",         NDPI_PROTOCOL_YOUTUBE },
-  { "itunes.apple.com",  NDPI_PROTOCOL_APPLE_ITUNES },
-  { ".apple.com",        NDPI_PROTOCOL_APPLE },
-  { ".mzstatic.com",     NDPI_PROTOCOL_APPLE },
-  { ".facebook.com",     NDPI_PROTOCOL_FACEBOOK },
-  { ".icloud.com",       NDPI_PROTOCOL_APPLE_ICLOUD },
-  { ".viber.com",        NDPI_PROTOCOL_VIBER },
-  { ".last.fm",          NDPI_PROTOCOL_LASTFM },
-  { ".grooveshark.com",  NDPI_PROTOCOL_GROOVESHARK },
-  { ".tuenti.com",       NDPI_PROTOCOL_TUENTI },
-  { NULL, 0 }
-};
+static ndpi_protocol_match *host_match = NULL;
+static int host_match_num_items = 0;
+
+void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct, 
+				char *attr, char *value, int protocol_id) {
+  /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_PROTOCOL_FACEBOOK */
+
+  if (strcmp(attr, "host") != 0) {
+#ifdef DEBUG
+    printf("[NTOP] attribute %s not supported\n", attr);
+#endif
+    return;
+  }
+
+  host_match = realloc(host_match, sizeof(ndpi_protocol_match) * (host_match_num_items + 1));
+  
+  host_match[host_match_num_items].string_to_match = strdup(value); 
+  host_match[host_match_num_items].protocol_id = protocol_id;
+
+  if (host_match[host_match_num_items].string_to_match == NULL) {
+#ifdef DEBUG
+    printf("[NTOP] memory allocation failure\n");
+#endif
+    return;
+  }
+
+  host_match_num_items++;
+
+#ifdef DEBUG
+  printf("[NTOP] new http subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
+#endif
+}
 
 int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, 
 			struct ndpi_flow_struct *flow, 
@@ -527,7 +535,7 @@ int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct,
 	  &string_to_match[end], 
 	  ndpi_min(sizeof(flow->l4.tcp.host_server_name)-1, string_to_match_len-end));
 
-  while(host_match[i].string_to_match != NULL) {
+  for (i = 0; i < host_match_num_items; i++) {
     if(ndpi_strnstr(string_to_match, 
 		    host_match[i].string_to_match, 
 		    string_to_match_len) != NULL) {

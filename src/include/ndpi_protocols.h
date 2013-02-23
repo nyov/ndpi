@@ -135,6 +135,8 @@ void ndpi_search_mail_smtp_tcp(struct ndpi_detection_module_struct
 			       *ndpi_struct, struct ndpi_flow_struct *flow);
 
 /* HTTP entry */
+void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct, 
+				char *attr, char *value, int protocol_id);
 void ndpi_search_http_tcp(struct ndpi_detection_module_struct
 			  *ndpi_struct, struct ndpi_flow_struct *flow);
 

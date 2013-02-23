@@ -226,81 +226,6 @@ u_int32_t ndpi_detection_get_sizeof_ndpi_id_struct(void)
   return sizeof(struct ndpi_id_struct);
 }
 
-
-struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second, 
-								void* (*__ndpi_malloc)(unsigned long size),
-								void  (*__ndpi_free)(void *ptr),
-								ndpi_debug_function_ptr ndpi_debug_printf)
-{
-  struct ndpi_detection_module_struct *ndpi_str;
-
-  _ndpi_malloc = __ndpi_malloc;
-  _ndpi_free = __ndpi_free;
-
-  ndpi_str = ndpi_malloc(sizeof(struct ndpi_detection_module_struct));
-
-  if (ndpi_str == NULL) {
-    ndpi_debug_printf(0, NULL, NDPI_LOG_DEBUG, "ndpi_init_detection_module initial malloc failed\n");
-    return NULL;
-  }
-  memset(ndpi_str, 0, sizeof(struct ndpi_detection_module_struct));
-
-
-  NDPI_BITMASK_RESET(ndpi_str->detection_bitmask);
-#ifdef NDPI_ENABLE_DEBUG_MESSAGES
-  ndpi_str->ndpi_debug_printf = ndpi_debug_printf;
-  ndpi_str->user_data = NULL;
-#endif
-
-
-  ndpi_str->ticks_per_second = ticks_per_second;
-  ndpi_str->tcp_max_retransmission_window_size = NDPI_DEFAULT_MAX_TCP_RETRANSMISSION_WINDOW_SIZE;
-  ndpi_str->directconnect_connection_ip_tick_timeout =
-    NDPI_DIRECTCONNECT_CONNECTION_IP_TICK_TIMEOUT * ticks_per_second;
-
-  ndpi_str->gadugadu_peer_connection_timeout = NDPI_GADGADU_PEER_CONNECTION_TIMEOUT * ticks_per_second;
-  ndpi_str->edonkey_upper_ports_only = NDPI_EDONKEY_UPPER_PORTS_ONLY;
-  ndpi_str->ftp_connection_timeout = NDPI_FTP_CONNECTION_TIMEOUT * ticks_per_second;
-
-  ndpi_str->pplive_connection_timeout = NDPI_PPLIVE_CONNECTION_TIMEOUT * ticks_per_second;
-
-  ndpi_str->rtsp_connection_timeout = NDPI_RTSP_CONNECTION_TIMEOUT * ticks_per_second;
-  ndpi_str->tvants_connection_timeout = NDPI_TVANTS_CONNECTION_TIMEOUT * ticks_per_second;
-  ndpi_str->irc_timeout = NDPI_IRC_CONNECTION_TIMEOUT * ticks_per_second;
-  ndpi_str->gnutella_timeout = NDPI_GNUTELLA_CONNECTION_TIMEOUT * ticks_per_second;
-
-  ndpi_str->battlefield_timeout = NDPI_BATTLEFIELD_CONNECTION_TIMEOUT * ticks_per_second;
-
-  ndpi_str->thunder_timeout = NDPI_THUNDER_CONNECTION_TIMEOUT * ticks_per_second;
-  ndpi_str->yahoo_detect_http_connections = NDPI_YAHOO_DETECT_HTTP_CONNECTIONS;
-
-  ndpi_str->yahoo_lan_video_timeout = NDPI_YAHOO_LAN_VIDEO_TIMEOUT * ticks_per_second;
-  ndpi_str->zattoo_connection_timeout = NDPI_ZATTOO_CONNECTION_TIMEOUT * ticks_per_second;
-  ndpi_str->jabber_stun_timeout = NDPI_JABBER_STUN_TIMEOUT * ticks_per_second;
-  ndpi_str->jabber_file_transfer_timeout = NDPI_JABBER_FT_TIMEOUT * ticks_per_second;
-  ndpi_str->soulseek_connection_ip_tick_timeout = NDPI_SOULSEEK_CONNECTION_IP_TICK_TIMEOUT * ticks_per_second;
-  ndpi_str->manolito_subscriber_timeout = NDPI_MANOLITO_SUBSCRIBER_TIMEOUT;
-  return ndpi_str;
-}
-
-void ndpi_exit_detection_module(struct ndpi_detection_module_struct
-				*ndpi_struct, void (*ndpi_free) (void *ptr))
-{
-  if(ndpi_struct != NULL) {
-    int i;
-
-    for(i=0; i<_ndpi_num_supported_protocols; i++) {
-      if(ndpi_struct->proto_defaults[i].protoName)
-	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
-    }
-
-    ndpi_tdestroy(udpRoot, ndpi_free);
-    ndpi_tdestroy(tcpRoot, ndpi_free);
-
-    ndpi_free(ndpi_struct);
-  }
-}
-
 /* ******************************************************************** */
 
 char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id) {
@@ -798,30 +723,15 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MEEBO, "MEEBO",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FACEBOOK, "FACEBOOK",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TWITTER, "TWITTER",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_DROPBOX, "DROPBOX",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 17500 /* LanSync */, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GMAIL, "GMAIL",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GOOGLE_MAPS, "GOOGLE_MAPS",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_YOUTUBE, "YOUTUBE",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SKYPE, "SKYPE",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GOOGLE, "GOOGLE",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
+  			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_DCERPC, "DCERPC",
 			  ndpi_build_default_ports(ports_a, 135, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
@@ -843,12 +753,6 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_NETFLIX, "NETFLIX",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LASTFM, "LASTFM",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_GROOVESHARK, "GROOVESHARK",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SKYFILE_PREPAID, "SKYFILE_PREPAID",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
@@ -862,21 +766,12 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_APPLE, "APPLE",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
+  			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WEBEX, "WEBEX",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WHATSAPP, "WHATSAPP",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_APPLE_ICLOUD, "APPLE_ICLOUD",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_VIBER, "VIBER",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_APPLE_ITUNES, "APPLE_ITUNES",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_RADIUS, "RADIUS",
@@ -886,9 +781,6 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TEAMVIEWER, "TEAMVIEWER",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
-			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TUENTI, "TUENTI",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LOTUS_NOTES, "LotusNotes",
@@ -916,6 +808,87 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
     if(ndpi_mod->proto_defaults[i].protoName == NULL) {
       printf("[NDPI] %s(missing protoId=%d) INTERNAL ERROR: not all protocols have been initialized\n", __FUNCTION__, i);
     }
+  }
+}
+
+/* ******************************************************************** */
+
+struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second, 
+								void* (*__ndpi_malloc)(unsigned long size),
+								void  (*__ndpi_free)(void *ptr),
+								ndpi_debug_function_ptr ndpi_debug_printf)
+{
+  struct ndpi_detection_module_struct *ndpi_str;
+
+  _ndpi_malloc = __ndpi_malloc;
+  _ndpi_free = __ndpi_free;
+
+  ndpi_str = ndpi_malloc(sizeof(struct ndpi_detection_module_struct));
+
+  if (ndpi_str == NULL) {
+    ndpi_debug_printf(0, NULL, NDPI_LOG_DEBUG, "ndpi_init_detection_module initial malloc failed\n");
+    return NULL;
+  }
+  memset(ndpi_str, 0, sizeof(struct ndpi_detection_module_struct));
+
+
+  NDPI_BITMASK_RESET(ndpi_str->detection_bitmask);
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+  ndpi_str->ndpi_debug_printf = ndpi_debug_printf;
+  ndpi_str->user_data = NULL;
+#endif
+
+
+  ndpi_str->ticks_per_second = ticks_per_second;
+  ndpi_str->tcp_max_retransmission_window_size = NDPI_DEFAULT_MAX_TCP_RETRANSMISSION_WINDOW_SIZE;
+  ndpi_str->directconnect_connection_ip_tick_timeout =
+    NDPI_DIRECTCONNECT_CONNECTION_IP_TICK_TIMEOUT * ticks_per_second;
+
+  ndpi_str->gadugadu_peer_connection_timeout = NDPI_GADGADU_PEER_CONNECTION_TIMEOUT * ticks_per_second;
+  ndpi_str->edonkey_upper_ports_only = NDPI_EDONKEY_UPPER_PORTS_ONLY;
+  ndpi_str->ftp_connection_timeout = NDPI_FTP_CONNECTION_TIMEOUT * ticks_per_second;
+
+  ndpi_str->pplive_connection_timeout = NDPI_PPLIVE_CONNECTION_TIMEOUT * ticks_per_second;
+
+  ndpi_str->rtsp_connection_timeout = NDPI_RTSP_CONNECTION_TIMEOUT * ticks_per_second;
+  ndpi_str->tvants_connection_timeout = NDPI_TVANTS_CONNECTION_TIMEOUT * ticks_per_second;
+  ndpi_str->irc_timeout = NDPI_IRC_CONNECTION_TIMEOUT * ticks_per_second;
+  ndpi_str->gnutella_timeout = NDPI_GNUTELLA_CONNECTION_TIMEOUT * ticks_per_second;
+
+  ndpi_str->battlefield_timeout = NDPI_BATTLEFIELD_CONNECTION_TIMEOUT * ticks_per_second;
+
+  ndpi_str->thunder_timeout = NDPI_THUNDER_CONNECTION_TIMEOUT * ticks_per_second;
+  ndpi_str->yahoo_detect_http_connections = NDPI_YAHOO_DETECT_HTTP_CONNECTIONS;
+
+  ndpi_str->yahoo_lan_video_timeout = NDPI_YAHOO_LAN_VIDEO_TIMEOUT * ticks_per_second;
+  ndpi_str->zattoo_connection_timeout = NDPI_ZATTOO_CONNECTION_TIMEOUT * ticks_per_second;
+  ndpi_str->jabber_stun_timeout = NDPI_JABBER_STUN_TIMEOUT * ticks_per_second;
+  ndpi_str->jabber_file_transfer_timeout = NDPI_JABBER_FT_TIMEOUT * ticks_per_second;
+  ndpi_str->soulseek_connection_ip_tick_timeout = NDPI_SOULSEEK_CONNECTION_IP_TICK_TIMEOUT * ticks_per_second;
+  ndpi_str->manolito_subscriber_timeout = NDPI_MANOLITO_SUBSCRIBER_TIMEOUT;
+
+
+  ndpi_init_protocol_defaults(ndpi_str);
+
+
+  return ndpi_str;
+}
+
+void ndpi_exit_detection_module(struct ndpi_detection_module_struct
+				*ndpi_struct, void (*ndpi_free) (void *ptr))
+{
+  if(ndpi_struct != NULL) {
+    int i;
+
+    for(i=0; i<_ndpi_num_supported_protocols; i++) {
+      if(ndpi_struct->proto_defaults[i].protoName)
+	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
+    }
+
+    ndpi_tdestroy(udpRoot, ndpi_free);
+    ndpi_tdestroy(tcpRoot, ndpi_free);
+
+    ndpi_free(ndpi_struct);
   }
 }
 
@@ -996,6 +969,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   while(fd) {
     char buffer[512], *line, *at, *proto, *elem, *holder;
     ndpi_proto_defaults_t *def;
+    int subprotocol_id;
     int i;
 
     if(!(line = fgets(buffer, sizeof(buffer), fd)))
@@ -1006,7 +980,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     else
       line[i-1] = '\0';
 
-    at = strchr(line, '@');
+    at = strrchr(line, '@');
     if(at == NULL) {
       printf("Invalid line '%s'\n", line);
       continue;
@@ -1016,6 +990,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     for(i=0, def = NULL; i<_ndpi_num_supported_protocols; i++) {
       if(strcmp(ndpi_mod->proto_defaults[i].protoName, proto) == 0) {
 	def = &ndpi_mod->proto_defaults[i];
+        subprotocol_id = i;
 	break;
       }
     }
@@ -1033,29 +1008,58 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
 			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 			 
 			      ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
       def = &ndpi_mod->proto_defaults[_ndpi_num_supported_protocols];
+      subprotocol_id = _ndpi_num_supported_protocols;
       _ndpi_num_supported_protocols++, _ndpi_num_custom_protocols++;
     }
 
     elem = strtok_r(line, ",", &holder);
     while(elem != NULL) {
+      char *attr = elem, *value;
       char *port;
       ndpi_port_range range;
+      int is_tcp = 0, is_udp = 0, protocol_id;
 
-      if((elem[0] != 't') && (elem[0] != 'u')) {
-	printf("Invalid protocol definition (tcp or udp) %s", elem);
-	continue;
+      if (strncmp(attr, "tcp", 3) == 0)
+        is_tcp = 1;
+      else if (strncmp(attr, "udp", 3) == 0)
+        is_udp = 1;
+      else {
+	for (i = 0; i < NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
+	  if (strncmp(attr, ndpi_mod->proto_defaults[i].protoName, 
+	              strlen(ndpi_mod->proto_defaults[i].protoName)) == 0) {
+	    if (ndpi_mod->subprotocol_conf[i].func != NULL) {
+	      protocol_id = i;
+	      attr = &attr[strlen(ndpi_mod->proto_defaults[i].protoName) + 1]; /* remove <PROTO>. */
+	      break;
+	    }
+	  }
+	}
+	if (i == NDPI_MAX_SUPPORTED_PROTOCOLS) {
+	  printf("Invalid protocol definition %s", attr);
+	  continue;
+	}
       }
 
-      if(elem[3] != ':') {
-	printf("Invalid port definition %s", elem);
+      value = strchr(elem, ':');
+      if(value == NULL) {
+	printf("Invalid attribute definition %s", elem);
 	continue;
+      } else {
+        value[0] = '\0';
+        value++;
       }
 
-      if(sscanf(&elem[4], "%u-%u", (unsigned int *)&range.port_low, 
-		(unsigned int *)&range.port_high) != 2)
-	range.port_low = range.port_high = atoi(&elem[4]);
-      
-      addDefaultPort(&range, def, (elem[0] == 't' /* TCP */) ? &tcpRoot : &udpRoot);
+      if (is_tcp || is_udp) {
+        if(sscanf(value, "%u-%u", (unsigned int *)&range.port_low, 
+		  (unsigned int *)&range.port_high) != 2)
+	  range.port_low = range.port_high = atoi(&elem[4]);
+        addDefaultPort(&range, def, is_tcp ? &tcpRoot : &udpRoot);
+      } else {
+        if (value[0] == '"') value++; /* remove leading " */
+	if (value[strlen(value)-1] == '"') value[strlen(value)-1] = '\0'; /* remove trailing " */
+        ndpi_mod->subprotocol_conf[protocol_id].func(ndpi_mod, attr, value, subprotocol_id);
+      }
+
       elem = strtok_r(NULL, ",", &holder);
     }
   }
@@ -1081,8 +1085,6 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   NDPI_PROTOCOL_BITMASK detection_bitmask_local;
   NDPI_PROTOCOL_BITMASK *detection_bitmask = &detection_bitmask_local;
   u_int32_t a = 0;
-
-  ndpi_init_protocol_defaults(ndpi_struct);
 
   NDPI_BITMASK_SET(detection_bitmask_local, *dbm);
   NDPI_BITMASK_SET(ndpi_struct->detection_bitmask, *dbm);
@@ -1152,6 +1154,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   hack_do_http_detection:
 
+    ndpi_struct->subprotocol_conf[NDPI_PROTOCOL_HTTP].func = ndpi_http_subprotocol_conf;
     ndpi_struct->callback_buffer[a].func = ndpi_search_http_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD;
 

@@ -512,6 +512,10 @@ typedef struct ndpi_call_function_struct {
   u_int8_t detection_feature;
 } ndpi_call_function_struct_t;
 
+typedef struct ndpi_subprotocol_conf_struct {
+  void (*func) (struct ndpi_detection_module_struct *, char *attr, char *value, int protocol_id);
+} ndpi_subprotocol_conf_struct_t;
+
 #define MAX_DEFAULT_PORTS        5
 
 typedef struct {
@@ -568,6 +572,9 @@ typedef struct ndpi_detection_module_struct {
   u_int32_t edonkey_upper_ports_only:1;
   u_int32_t edonkey_safe_mode:1;
   u_int32_t directconnect_connection_ip_tick_timeout;
+
+  /* subprotocol registration handler */
+  struct ndpi_subprotocol_conf_struct subprotocol_conf[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 
   /*gadu gadu*/
   u_int32_t gadugadu_peer_connection_timeout;
