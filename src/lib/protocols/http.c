@@ -485,6 +485,7 @@ static int host_match_num_items = 0;
 
 void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct, 
 				char *attr, char *value, int protocol_id) {
+  static ndpi_protocol_match *tmp_host_match;
   /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_PROTOCOL_FACEBOOK */
 
   if (strcmp(attr, "host") != 0) {
@@ -494,17 +495,23 @@ void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct
     return;
   }
 
-  host_match = realloc(host_match, sizeof(ndpi_protocol_match) * (host_match_num_items + 1));
-  
-  host_match[host_match_num_items].string_to_match = strdup(value); 
-  host_match[host_match_num_items].protocol_id = protocol_id;
-
-  if (host_match[host_match_num_items].string_to_match == NULL) {
-#ifdef DEBUG
-    printf("[NTOP] memory allocation failure\n");
-#endif
+  /* realloc */
+  tmp_host_match = ndpi_malloc(sizeof(ndpi_protocol_match) * (host_match_num_items + 1));
+  if (tmp_host_match == NULL) {
     return;
   }
+  if (host_match != NULL) {
+    memcpy(tmp_host_match, host_match, sizeof(ndpi_protocol_match) * host_match_num_items);
+    ndpi_free(host_match);
+  }
+  host_match = tmp_host_match; 
+  
+  host_match[host_match_num_items].string_to_match = strdup(value);
+  if (host_match[host_match_num_items].string_to_match == NULL) {
+    return;
+  }
+
+  host_match[host_match_num_items].protocol_id = protocol_id;
 
   host_match_num_items++;
 
