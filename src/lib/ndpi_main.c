@@ -960,6 +960,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   return(0);
 #else
   FILE *fd = fopen(path, "r");
+  int i;
 
   if(fd == NULL) {
     printf("Unable to open file %s [%s]", path, strerror(errno));
@@ -970,7 +971,6 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     char buffer[512], *line, *at, *proto, *elem, *holder;
     ndpi_proto_defaults_t *def;
     int subprotocol_id;
-    int i;
 
     if(!(line = fgets(buffer, sizeof(buffer), fd)))
       break;
@@ -996,7 +996,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     }
 
     if(def == NULL) {
-      ndpi_port_range ports_a[MAX_DEFAULT_PORTS] , ports_b[MAX_DEFAULT_PORTS];
+      ndpi_port_range ports_a[MAX_DEFAULT_PORTS], ports_b[MAX_DEFAULT_PORTS];
 
       if(_ndpi_num_custom_protocols >= (NDPI_MAX_NUM_CUSTOM_PROTOCOLS-1)) {
 	printf("Too many protocols defined (%u): skipping protocol %s\n", 
@@ -1065,6 +1065,11 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   }
 
   fclose(fd);
+
+  /* telling plugins that we have done with configuration */
+  for (i = 0; i < NDPI_MAX_SUPPORTED_PROTOCOLS; i++)
+    if (ndpi_mod->subprotocol_conf[i].func != NULL)
+      ndpi_mod->subprotocol_conf[i].func(ndpi_mod, "finalize", NULL, -1);
 
 #if 0
   printf("\nTCP:\n");
