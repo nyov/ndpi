@@ -194,8 +194,6 @@ static void  (*_ndpi_free)(void *ptr);
 
 /* ****************************************** */
 
-static ndpi_default_ports_tree_node_t *tcpRoot = NULL, *udpRoot = NULL;
-
 /* Forward */
 static void addDefaultPort(ndpi_port_range *range,
 			   ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t **root);
@@ -287,8 +285,8 @@ static void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mo
     ndpi_mod->proto_defaults[protoId].protoId = protoId;
 
   for(j=0; j<MAX_DEFAULT_PORTS; j++) {
-    if(udpDefPorts[j].port_low != 0) addDefaultPort(&udpDefPorts[j], &ndpi_mod->proto_defaults[protoId], &udpRoot);
-    if(tcpDefPorts[j].port_low != 0) addDefaultPort(&tcpDefPorts[j], &ndpi_mod->proto_defaults[protoId], &tcpRoot);
+    if(udpDefPorts[j].port_low != 0) addDefaultPort(&udpDefPorts[j], &ndpi_mod->proto_defaults[protoId], &ndpi_mod->udpRoot);
+    if(tcpDefPorts[j].port_low != 0) addDefaultPort(&tcpDefPorts[j], &ndpi_mod->proto_defaults[protoId], &ndpi_mod->tcpRoot);
   }
 
 #if 0
@@ -388,7 +386,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_HTTP, "HTTP",
-			  ndpi_build_default_ports(ports_a, 80, 3000 /* ntop */, 0, 0, 0) /* TCP */, 
+			  ndpi_build_default_ports(ports_a, 80, 0 /* ntop */, 0, 0, 0) /* TCP */, 
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MDNS, "MDNS",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */, 
@@ -885,8 +883,8 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
 
-    ndpi_tdestroy(udpRoot, ndpi_free);
-    ndpi_tdestroy(tcpRoot, ndpi_free);
+    ndpi_tdestroy(ndpi_struct->udpRoot, ndpi_free);
+    ndpi_tdestroy(ndpi_struct->tcpRoot, ndpi_free);
 
     ndpi_free(ndpi_struct);
   }
@@ -1053,7 +1051,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
         if(sscanf(value, "%u-%u", (unsigned int *)&range.port_low, 
 		  (unsigned int *)&range.port_high) != 2)
 	  range.port_low = range.port_high = atoi(&elem[4]);
-        addDefaultPort(&range, def, is_tcp ? &tcpRoot : &udpRoot);
+        addDefaultPort(&range, def, is_tcp ? &ndpi_mod->tcpRoot : &ndpi_mod->udpRoot);
       } else {
         if (value[0] == '"') value++; /* remove leading " */
 	if (value[strlen(value)-1] == '"') value[strlen(value)-1] = '\0'; /* remove trailing " */
@@ -4572,11 +4570,11 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   ndpi_default_ports_tree_node_t node;
 
   node.default_port = sport;
-  ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&tcpRoot : (void*)&udpRoot, ndpi_default_ports_tree_node_t_cmp);
+  ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
 
   if(ret == NULL) {
     node.default_port = dport;
-    ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&tcpRoot : (void*)&udpRoot, ndpi_default_ports_tree_node_t_cmp);
+    ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
   }
 
   if(ret != NULL) {

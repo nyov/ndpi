@@ -559,6 +559,8 @@ typedef struct ndpi_detection_module_struct {
   struct ndpi_call_function_struct callback_buffer_non_tcp_udp[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
   u_int32_t callback_buffer_size_non_tcp_udp;
 
+  ndpi_default_ports_tree_node_t *tcpRoot, *udpRoot;
+
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
   /* debug callback, only set when debug is used */
   ndpi_debug_function_ptr ndpi_debug_printf;
