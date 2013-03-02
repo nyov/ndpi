@@ -19,14 +19,14 @@
 */
 
 #ifdef __KERNEL__
-#include "ndpi_main.h"
-#include "ndpi_protocols.h"
-#include "ndpi_utils.h"
-#else
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #endif
+
+#include "ndpi_main.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
 
 #include "node.h"
 #include "sort.h"
