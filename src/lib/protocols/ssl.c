@@ -192,7 +192,7 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
     
     if(rc > 0) {
       /* printf("***** [SSL] %s\n", certificate); */
-      if(matchStringProtocol(ndpi_struct, flow, certificate, strlen(certificate)) != -1)
+      if(ndpi_match_string_subprotocol(ndpi_struct, flow, certificate, strlen(certificate)) != NDPI_PROTOCOL_UNKNOWN)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
   }

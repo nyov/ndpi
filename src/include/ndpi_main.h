@@ -122,6 +122,7 @@ u_int32_t ndpi_bytestream_to_ipv4(const u_int8_t * str, u_int16_t max_chars_to_r
 #include "ndpi_protocol_history.h"
 #include "ndpi_structs.h"
 
+
 /* function to parse a packet which has line based information into a line based structure
  * this function will also set some well known line pointers like:
  *  - host, user agent, empty line,....

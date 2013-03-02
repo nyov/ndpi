@@ -456,175 +456,6 @@ static void rtsp_parse_packet_acceptline(struct ndpi_detection_module_struct
 }
 #endif
 
-/*
- * Find the first occurrence of find in s, where the search is limited to the
- * first slen characters of s.
- */
-char* ndpi_strnstr(const char *s, const char *find, size_t slen) {
-  char c, sc;
-  size_t len;
-
-  if ((c = *find++) != '\0') {
-    len = strlen(find);
-    do {
-      do {
-	if (slen-- < 1 || (sc = *s++) == '\0')
-	  return (NULL);
-      } while (sc != c);
-      if (len > slen)
-	return (NULL);
-    } while (strncmp(s, find, len) != 0);
-    s--;
-  }
-  return ((char *)s);
-}
-
-#ifdef AHOCORASICK
-static AC_AUTOMATA_t *ac_automa = NULL;
-
-static int matching_protocol_id;
-
-int ac_match_handler(AC_MATCH_t *m, void *param) {
-
-  /* Available info:
-   * m->match_num
-   * m->position
-   * for (j=0; j < m->match_num; j++) {
-   *   m->patterns[j].rep.number
-   *   m->patterns[j].astring);
-   * }
-   */
-
-  /* Stopping to the first match. We might consider searching
-   * for the more specific match, paying more cpu cycles. */
-  matching_protocol_id = m->patterns[0].rep.number;
-
-  return 1; /* 0 to continue searching, !0 to stop */
-}
-#else
-static ndpi_protocol_match *host_match = NULL;
-static int host_match_num_items = 0;
-#endif
-
-void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct, 
-				char *attr, char *value, int protocol_id) {
-#ifdef AHOCORASICK
-  AC_PATTERN_t ac_pattern;
-#else
-  ndpi_protocol_match *tmp_host_match;
-#endif
-
-  /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_PROTOCOL_FACEBOOK */
-
-#ifdef AHOCORASICK
-  if (strcmp(attr, "finalize") == 0) { /* trick to finalize automa */
-    if (ac_automa != NULL)
-      ac_automata_finalize(ac_automa);
-    return;
-  }
-#endif
-
-  if (strcmp(attr, "host") != 0) {
-#ifdef DEBUG
-    printf("[NTOP] attribute %s not supported\n", attr);
-#endif
-    return;
-  }
-
-#ifdef AHOCORASICK
-  if (ac_automa == NULL)
-    ac_automa = ac_automata_init(ac_match_handler); 
-    /* call ac_automata_release(ac_automa); to free ac_automa */
-
-  ac_pattern.astring = value;
-  ac_pattern.rep.number = protocol_id;
-  ac_pattern.length = strlen(tmp_patt.astring);
-  ac_automata_add(ac_automa, &ac_pattern);
-#else
-  /* realloc */
-  tmp_host_match = ndpi_malloc(sizeof(ndpi_protocol_match) * (host_match_num_items + 1));
-  if (tmp_host_match == NULL) {
-    return;
-  }
-  if (host_match != NULL) {
-    memcpy(tmp_host_match, host_match, sizeof(ndpi_protocol_match) * host_match_num_items);
-    ndpi_free(host_match);
-  }
-  host_match = tmp_host_match; 
-  
-  host_match[host_match_num_items].string_to_match = strdup(value);
-  if (host_match[host_match_num_items].string_to_match == NULL) {
-    return;
-  }
-
-  host_match[host_match_num_items].protocol_id = protocol_id;
-
-  host_match_num_items++;
-#endif
-
-#ifdef DEBUG
-  printf("[NTOP] new http subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
-#endif
-}
-
-int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, 
-			struct ndpi_flow_struct *flow, 
-			char *string_to_match, 
-			u_int string_to_match_len) {
-  int i = 0, end = string_to_match_len-1, num_found = 0;
-  struct ndpi_packet_struct *packet = &flow->packet;
-#ifdef AHOCORASICK
-  AC_TEXT_t ac_input_text;
-#endif
-
-  while(end > 0) {
-    if(string_to_match[end] == '.') {
-      num_found++;
-      if(num_found == 2) {
-	end++;
-	break;
-      }
-    }
-    end--;
-  }
-
-  strncpy(flow->l4.tcp.host_server_name, 
-	  &string_to_match[end], 
-	  ndpi_min(sizeof(flow->l4.tcp.host_server_name)-1, string_to_match_len-end));
-
-#ifdef AHOCORASICK
-  matching_protocol_id = -1;
-
-  ac_input_text.astring = string_to_match;
-  ac_input_text.length = string_to_match_len;
-  ac_automata_search (ac_automa, &ac_input_text, 0);
-  
-  ac_automata_reset(ac_automa);
-
-  if (matching_protocol_id != -1) {
-    packet->detected_protocol_stack[0] = matching_protocol_id;
-    return(packet->detected_protocol_stack[0]);
-  }
-#else
-  for (i = 0; i < host_match_num_items; i++) {
-    if(ndpi_strnstr(string_to_match, 
-		    host_match[i].string_to_match, 
-		    string_to_match_len) != NULL) {
-      packet->detected_protocol_stack[0] = host_match[i].protocol_id;
-      return(packet->detected_protocol_stack[0]);
-    } else
-      i++;
-  }
-#endif
-
-#ifdef DEBUG
-  string_to_match[string_to_match_len] = '\0';
-  printf("[NTOP] Unable to find a match for '%s'\n", string_to_match);
-#endif
-
-  return(-1);
-}
-
 static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   // int i = 0;
   struct ndpi_packet_struct *packet = &flow->packet;
@@ -640,7 +471,6 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
       return;
     }
 
-
     /* 
        CIDR:           69.53.224.0/19
        OriginAS:       AS2906
@@ -653,12 +483,10 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
     }
   }
     
-  if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) 
-    return;
-
-  matchStringProtocol(ndpi_struct, flow,
-		      (char*)packet->host_line.ptr, 
-		      packet->host_line.len);
+  if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP) {
+    /* Try matching subprotocols */
+    ndpi_match_string_subprotocol(ndpi_struct, flow, (char*)packet->host_line.ptr, packet->host_line.len);
+  }
 }
 
 static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct
@@ -743,6 +571,11 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 #endif
 
     parseHttpSubprotocol(ndpi_struct, flow);
+    
+    if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
+      ndpi_int_http_add_connection(ndpi_struct, flow, packet->detected_protocol_stack[0]);
+      return; /* We have identified a sub-protocol so we're done */
+    }
   }
 
   /* check for accept line */

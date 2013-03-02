@@ -56,9 +56,9 @@ static u_int32_t detection_tick_resolution = 1000;
 static u_int64_t raw_packet_count = 0;
 static u_int64_t ip_packet_count = 0;
 static u_int64_t total_bytes = 0;
-static u_int64_t protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
-static u_int64_t protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
-static u_int32_t protocol_flows[NDPI_MAX_SUPPORTED_PROTOCOLS] = { 0 };
+static u_int64_t protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1];
+static u_int64_t protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1];
+static u_int32_t protocol_flows[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1] = { 0 };
 
 
 #define GTP_U_V1_PORT 2152
@@ -455,7 +455,7 @@ static void terminateDetection(void)
 }
 
 static unsigned int packet_processing(const u_int64_t time, const struct ndpi_iphdr *iph,
-				      uint16_t ipsize, uint16_t rawsize)
+				      u_int16_t ipsize, u_int16_t rawsize)
 {
   struct ndpi_id_struct *src, *dst;
   struct osdpi_flow *flow;
@@ -530,8 +530,7 @@ static void printResults(void)
 
 
   printf("\n\ndetected protocols:\n");
-  for (i = 0; i <= NDPI_MAX_SUPPORTED_PROTOCOLS; i++) {
-
+  for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
     if (protocol_counter[i] > 0) {
       printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
 	     "flows: \x1b[36m%-13u\x1b[0m\n",

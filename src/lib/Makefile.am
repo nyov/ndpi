@@ -16,10 +16,14 @@ LIB_ANC=0
 # ntop
 AM_CFLAGS=-fPIC
 
-libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/include/
+libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/include/  -I$(top_srcdir)/src/lib/third_party/include/
 libndpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
 
-libndpi_la_SOURCES = ndpi_main.c \
+libndpi_la_SOURCES = \
+			third_party/src/ahocorasick.c \
+			third_party/src/node.c \
+			third_party/src/sort.c \
+			ndpi_main.c \
 			protocols/afp.c \
 			protocols/aimini.c \
 			protocols/applejuice.c \

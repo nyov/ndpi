@@ -158,42 +158,46 @@ extern "C" {
 #define NDPI_PROTOCOL_WARCRAFT3					116
 #define NDPI_PROTOCOL_WORLD_OF_KUNG_FU				117
 #define NDPI_PROTOCOL_MEEBO					118
+#define NDPI_PROTOCOL_FACEBOOK                                  119
+#define NDPI_PROTOCOL_TWITTER                                   120
+#define NDPI_PROTOCOL_DROPBOX                                   121
+#define NDPI_PROTOCOL_GMAIL                                     122
+#define NDPI_PROTOCOL_GOOGLE_MAPS                               123
+#define NDPI_PROTOCOL_YOUTUBE                                   124
+#define NDPI_PROTOCOL_SKYPE                                     125
+#define NDPI_PROTOCOL_GOOGLE                                    126
+#define NDPI_PROTOCOL_DCERPC                                    127
+#define NDPI_PROTOCOL_NETFLOW                                   128
+#define NDPI_PROTOCOL_SFLOW                                     129
+#define NDPI_PROTOCOL_HTTP_CONNECT                              130
+#define NDPI_PROTOCOL_HTTP_PROXY                                131
+#define NDPI_PROTOCOL_CITRIX                                    132
+#define NDPI_PROTOCOL_NETFLIX                                   133
+#define NDPI_PROTOCOL_LASTFM                                    134
+#define NDPI_PROTOCOL_GROOVESHARK                               135
+#define NDPI_PROTOCOL_SKYFILE_PREPAID                           136
+#define NDPI_PROTOCOL_SKYFILE_RUDICS                            137
+#define NDPI_PROTOCOL_SKYFILE_POSTPAID                          138
+#define NDPI_PROTOCOL_CITRIX_ONLINE                             139
+#define NDPI_PROTOCOL_APPLE                                     140
+#define NDPI_PROTOCOL_WEBEX                                     141
+#define NDPI_PROTOCOL_WHATSAPP                                  142
+#define NDPI_PROTOCOL_APPLE_ICLOUD                              143
+#define NDPI_PROTOCOL_VIBER                                     144
+#define NDPI_PROTOCOL_APPLE_ITUNES                              145
+#define NDPI_PROTOCOL_RADIUS                                    146
+#define NDPI_PROTOCOL_WINDOWS_UPDATE                            147 /* Thierry Laurion */
+#define NDPI_PROTOCOL_TEAMVIEWER                                148 /* xplico.org */
+#define NDPI_PROTOCOL_TUENTI                                    149
+#define NDPI_PROTOCOL_LOTUS_NOTES                               150
+#define NDPI_PROTOCOL_SAP                                       151
+#define NDPI_PROTOCOL_GTP                                       152
+#define NDPI_PROTOCOL_UPNP                                      153
+#define NDPI_PROTOCOL_LLMNR                                     154
+#define NDPI_PROTOCOL_REMOTE_SCAN                               155
 
-typedef struct {
-  char *string_to_match;
-  int protocol_id;
-} ndpi_protocol_match;
-
-#define NDPI_PROTOCOL_TWITTER				        119
-#define NDPI_PROTOCOL_SKYPE				        120
-#define NDPI_PROTOCOL_GOOGLE				        121
-#define NDPI_PROTOCOL_DCERPC				        122
-#define NDPI_PROTOCOL_NETFLOW				        123
-#define NDPI_PROTOCOL_SFLOW				        124
-#define NDPI_PROTOCOL_HTTP_CONNECT				125
-#define NDPI_PROTOCOL_HTTP_PROXY				126
-#define NDPI_PROTOCOL_CITRIX				        127
-#define NDPI_PROTOCOL_NETFLIX				        128
-#define NDPI_PROTOCOL_SKYFILE_PREPAID                           129
-#define NDPI_PROTOCOL_SKYFILE_RUDICS                            130
-#define NDPI_PROTOCOL_SKYFILE_POSTPAID                          131
-#define NDPI_PROTOCOL_CITRIX_ONLINE                             132
-#define NDPI_PROTOCOL_APPLE                                     133
-#define NDPI_PROTOCOL_WEBEX                                     134
-#define NDPI_PROTOCOL_WHATSAPP                                  135
-#define NDPI_PROTOCOL_RADIUS                                    136
-#define NDPI_PROTOCOL_WINDOWS_UPDATE                            137 /* Thierry Laurion */
-#define NDPI_PROTOCOL_TEAMVIEWER                                138 /* xplico.org */
-#define NDPI_PROTOCOL_LOTUS_NOTES				139
-#define NDPI_PROTOCOL_SAP					140
-#define NDPI_PROTOCOL_GTP					141
-#define NDPI_PROTOCOL_UPNP					142
-#define NDPI_PROTOCOL_LLMNR					143
-#define NDPI_PROTOCOL_REMOTE_SCAN				144
-
-/* NOTE: REMEMBER TO UPDATE NDPI_PROTOCOL_LONG_STRING / NDPI_PROTOCOL_SHORT_STRING */
-
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          144
+/* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          155
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128

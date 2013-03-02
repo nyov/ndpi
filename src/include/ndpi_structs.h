@@ -578,6 +578,15 @@ typedef struct ndpi_detection_module_struct {
   /* subprotocol registration handler */
   struct ndpi_subprotocol_conf_struct subprotocol_conf[NDPI_MAX_SUPPORTED_PROTOCOLS + 1];
 
+  u_int ndpi_num_supported_protocols;
+  #ifndef __KERNEL__
+  u_int ndpi_num_custom_protocols;
+  #endif
+
+  /* HTTP (and soon DNS) host matching */
+  void *ac_automa; /* Real type is AC_AUTOMATA_t */
+  u_int8_t ac_automa_finalized;
+
   /*gadu gadu*/
   u_int32_t gadugadu_peer_connection_timeout;
   /* pplive params */
