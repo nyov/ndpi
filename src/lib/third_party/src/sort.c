@@ -4,7 +4,9 @@
  * Jan 23 2005  Matt Mackall <mpm@selenic.com>
  */
 
-#ifndef __KERNEL__
+#ifdef __KERNEL__
+#include <linux/types.h>
+#else
 #include <stdlib.h>
 #include <stdio.h>
 #endif

@@ -18,10 +18,18 @@
  along with multifast.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#ifdef __KERNEL__
+#include "ndpi_main.h"
+#include "ndpi_protocols.h"
+#include "ndpi_utils.h"
+#else
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#endif
+
 #include "node.h"
+#include "sort.h"
 
 /* reallocation step for AC_NODE_t.matched_patterns */
 #define REALLOC_CHUNK_MATCHSTR 8
@@ -42,10 +50,9 @@ int  node_has_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * newstr);
  * FUNCTION: node_create
  * Create the node
  ******************************************************************************/
-struct node * node_create(void)
+AC_NODE_t * node_create(void)
 {
-  AC_NODE_t * thiz;
-  thiz = (AC_NODE_t *) ndpi_malloc (sizeof(AC_NODE_t));
+  AC_NODE_t * thiz =  (AC_NODE_t *) ndpi_malloc (sizeof(AC_NODE_t));
   node_init(thiz);
   node_assign_id(thiz);
   return thiz;
@@ -183,7 +190,7 @@ void node_register_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * str)
   if (thiz->matched_patterns_num >= thiz->matched_patterns_max)
     {
       thiz->matched_patterns_max += REALLOC_CHUNK_MATCHSTR;
-      thiz->matched_patterns = (AC_PATTERN_t *) realloc 
+      thiz->matched_patterns = (AC_PATTERN_t *) ndpi_realloc 
 	(thiz->matched_patterns, thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
     }
 
@@ -203,7 +210,7 @@ void node_register_outgoing
   if(thiz->outgoing_degree >= thiz->outgoing_max)
     {
       thiz->outgoing_max += REALLOC_CHUNK_OUTGOING;
-      thiz->outgoing = (struct edge *) realloc 
+      thiz->outgoing = (struct edge *) ndpi_realloc 
 	(thiz->outgoing, thiz->outgoing_max*sizeof(struct edge));
     }
 
@@ -248,9 +255,5 @@ int node_edge_compare (const void * l, const void * r)
  ******************************************************************************/
 void node_sort_edges (AC_NODE_t * thiz)
 {
-#if 1
   sort ((void *)thiz->outgoing, thiz->outgoing_degree, sizeof(struct edge), node_edge_compare, NULL);
-#else
-  qsort ((void *)thiz->outgoing, thiz->outgoing_degree, sizeof(struct edge), node_edge_compare);
-#endif
 }

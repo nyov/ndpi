@@ -27,11 +27,11 @@
 struct edge;
 
 /* automata node */
-typedef struct node
+typedef struct ac_node
 {
   int id; /* Node ID : for debugging purpose */
   short int final; /* 0: no ; 1: yes, it is a final node */
-  struct node * failure_node; /* The failure node of this node */
+  struct ac_node * failure_node; /* The failure node of this node */
   unsigned short depth; /* depth: distance between this node and the root */
 
   /* Matched patterns */
@@ -49,7 +49,7 @@ typedef struct node
 struct edge
 {
   AC_ALPHABET_t alpha; /* Edge alpha */
-  struct node * next; /* Target of the edge */
+  struct ac_node * next; /* Target of the edge */
 };
 
 
