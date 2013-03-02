@@ -562,6 +562,8 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
   }
   /* check for host line */
   if (packet->host_line.ptr != NULL) {
+    u_int len;
+
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HOST Line found %.*s\n",
 	    packet->host_line.len, packet->host_line.ptr);
 #ifdef NDPI_PROTOCOL_QQ
@@ -570,6 +572,11 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     }
 #endif
 
+    /* Copy result for nDPI apps */
+    len = ndpi_min(packet->host_line.len, sizeof(flow->l4.tcp.host_server_name)-1);
+    strncpy(flow->l4.tcp.host_server_name, packet->host_line.ptr, len);
+    flow->l4.tcp.host_server_name[len] = '\0';
+
     parseHttpSubprotocol(ndpi_struct, flow);
     
     if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
@@ -577,6 +584,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
       return; /* We have identified a sub-protocol so we're done */
     }
   }
+   
 
   /* check for accept line */
   if (packet->accept_line.ptr != NULL) {

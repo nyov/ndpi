@@ -507,8 +507,14 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
 
   if((flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN)
      || (iph->protocol == IPPROTO_UDP)
-     || ((iph->protocol == IPPROTO_TCP) && (flow->packets > 10)))
+     || ((iph->protocol == IPPROTO_TCP) && (flow->packets > 10))) {
     flow->detection_completed = 1;
+
+#if 0
+    if(flow->ndpi_flow->l4.tcp.host_server_name[0] != '\0')
+      printf("%s\n", flow->ndpi_flow->l4.tcp.host_server_name);
+#endif
+  }
 
 #if 0
   if(ndpi_flow->l4.tcp.host_server_name[0] != '\0')
@@ -534,7 +540,6 @@ static void printResults(void)
   ndpi_twalk(osdpi_flows_root, node_proto_guess_walker);
   if(enable_protocol_guess)
     printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
-
 
   printf("\n\ndetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
