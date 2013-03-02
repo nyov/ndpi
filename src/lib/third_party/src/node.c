@@ -18,7 +18,7 @@
  along with multifast.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifdef __KERNEL__
+#ifndef __KERNEL__
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
