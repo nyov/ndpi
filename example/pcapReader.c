@@ -81,7 +81,7 @@ typedef struct osdpi_flow {
   u_int32_t upper_ip;
   u_int16_t lower_port;
   u_int16_t upper_port;
-  u_int8_t protocol;
+  u_int8_t detection_completed, protocol;
   struct ndpi_flow_struct *ndpi_flow;
 
   u_int16_t packets, bytes;
@@ -474,6 +474,8 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   ip_packet_count++;
   total_bytes += rawsize;
 
+  if(flow->detection_completed) return;
+
   // only handle unfragmented packets
   if ((frag_off & 0x3FFF) == 0) {
     // here the actual detection is performed
@@ -485,6 +487,7 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
       printf("\n\nWARNING: fragmented ip packets are not supported and will be skipped \n\n");
       frag_warning_used = 1;
     }
+
     return 0;
   }
 
@@ -500,13 +503,17 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   }
 #endif
 
-  if (flow != NULL) {
-    flow->detected_protocol = protocol;
+  flow->detected_protocol = protocol;
+
+  if((flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN)
+     || (iph->protocol == IPPROTO_UDP)
+     || ((iph->protocol == IPPROTO_TCP) && (flow->packets > 10)))
+    flow->detection_completed = 1;
+
 #if 0
-    if(ndpi_flow->l4.tcp.host_server_name[0] != '\0')
-      printf("%s\n", ndpi_flow->l4.tcp.host_server_name);
-#endif
-  }
+  if(ndpi_flow->l4.tcp.host_server_name[0] != '\0')
+    printf("%s\n", ndpi_flow->l4.tcp.host_server_name);
+#endif  
 
   return 0;
 }

@@ -11,6 +11,7 @@ tcp:3000@ntop
 #  host:"<value>",host:"<value>",.....@<subproto>
 
 host:"googlesyndacation.com"@Google
+host:"venere.com"@Venere
 host:"kataweb.it",host:"repubblica.it"@Repubblica
 
 
