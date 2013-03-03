@@ -27,6 +27,13 @@
 #define __NDPI_LINUX_COMPAT_H__
 
 #include "ndpi_define.h"
+#include <machine/endian.h>
+
+#if _BYTE_ORDER == _LITTLE_ENDIAN
+#define __LITTLE_ENDIAN__ 1
+#else
+#define __BIG_ENDIAN__ 1
+#endif
 
 struct ndpi_ethhdr {
   u_char h_dest[6];       /* destination eth addr */
@@ -35,7 +42,7 @@ struct ndpi_ethhdr {
 } __attribute__((packed));
 
 struct ndpi_iphdr {
-#if defined(__LITTLE_ENDIAN__)
+#if defined(__LITTLE_ENDIAN__) 
   u_int8_t ihl:4, version:4;
 #elif defined(__BIG_ENDIAN__)
   u_int8_t version:4, ihl:4;

@@ -9,6 +9,7 @@
 #else
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/types.h>
 #endif
 
 /* This is a function ported from the Linux kernel lib/sort.c */
