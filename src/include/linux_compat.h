@@ -27,12 +27,15 @@
 #define __NDPI_LINUX_COMPAT_H__
 
 #include "ndpi_define.h"
+
+#ifdef __FreeBSD__
 #include <machine/endian.h>
 
 #if _BYTE_ORDER == _LITTLE_ENDIAN
 #define __LITTLE_ENDIAN__ 1
 #else
 #define __BIG_ENDIAN__ 1
+#endif
 #endif
 
 struct ndpi_ethhdr {
