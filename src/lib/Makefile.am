@@ -100,6 +100,7 @@ libndpi_la_SOURCES = \
 			protocols/socrates.c \
 			protocols/sopcast.c \
 			protocols/soulseek.c \
+			protocols/spotify.c \
 			protocols/ssdp.c \
 			protocols/ssh.c \
 			protocols/ssl.c \
