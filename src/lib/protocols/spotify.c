@@ -62,11 +62,18 @@ static void ndpi_check_spotify(struct ndpi_detection_module_struct *ndpi_struct,
 
 	78.31.8.0 - 78.31.15.255 (78.31.8.0/22)
 	AS29017
+
+	193.235.232.0 - 193.235.235.255 (193.235.232.0/22)
+	AS29017
       */
 
 	//printf("%08X - %08X\n", ntohl(packet->iph->saddr), ntohl(packet->iph->daddr));
 	if(((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0x4E1F0800 /* 78.31.8.0 */)
-	   || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0x4E1F0800 /* 78.31.8.0 */)) {
+	   || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0x4E1F0800 /* 78.31.8.0 */)
+	   /* **** */
+	   || ((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC1EBE800 /* 193.235.232.0 */)
+	   || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC1EBE800 /* 193.235.232.0 */)
+	   ) {
 	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SPOTIFY, NDPI_REAL_PROTOCOL);
 	  return;
 	}
