@@ -7,6 +7,11 @@
 #ifdef __KERNEL__
 #include <linux/types.h>
 #else
+#ifdef WIN32
+#include <stdint.h>
+typedef uint32_t u_int32_t;
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -21,14 +26,16 @@ static void u_int32_t_swap(void *a, void *b, int size)
   *(u_int32_t *)b = t;
 }
 
-static void generic_swap(void *a, void *b, int size)
+static void generic_swap(void *_a, void *_b, int size)
 {
   char t;
+  char *a = (char*)_a;
+  char *b = (char*)_b;
 
   do {
-    t = *(char *)a;
-    *(char *)a++ = *(char *)b;
-    *(char *)b++ = t;
+    t = *a;
+    *a++ = *b;
+    *b++ = t;
   } while (--size > 0);
 }
 
@@ -49,12 +56,13 @@ static void generic_swap(void *a, void *b, int size)
  * it less suitable for kernel use.
  */
 
-void sort(void *base, size_t num, size_t size,
+void sort(void *_base, size_t num, size_t size,
 	  int (*cmp_func)(const void *, const void *),
 	  void (*swap_func)(void *, void *, int size))
 {
   /* pre-scale counters for performance */
   int i = (num/2 - 1) * size, n = num * size, c, r;
+  char *base = (char*)_base;
 
   if (!swap_func)
     swap_func = (size == 4 ? u_int32_t_swap : generic_swap);

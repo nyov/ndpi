@@ -31,10 +31,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#include <sys/time.h>
 #endif
 
 #ifndef WIN32
+#include <sys/time.h>
 #if 1 && !defined __APPLE__ && !defined __FreeBSD__
 
 #ifndef __KERNEL__
