@@ -283,7 +283,6 @@ struct ndpi_flow_tcp_struct {
   u_int32_t http_stage:2;
   u_int32_t http_empty_line_seen:1;
   u_int32_t http_wait_for_retransmission:1;
-  u_char    host_server_name[64];
 #endif							// NDPI_PROTOCOL_HTTP
 #ifdef NDPI_PROTOCOL_FLASH
   u_int32_t flash_stage:3;
@@ -657,6 +656,7 @@ typedef struct ndpi_flow_struct {
     struct ndpi_flow_udp_struct udp;
   } l4;
 
+  u_char host_server_name[64]; /* HTTP host or DNS query */
 
   /* ALL protocol specific 64 bit variables here */
 

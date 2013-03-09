@@ -573,9 +573,9 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 #endif
 
     /* Copy result for nDPI apps */
-    len = ndpi_min(packet->host_line.len, sizeof(flow->l4.tcp.host_server_name)-1);
-    strncpy(flow->l4.tcp.host_server_name, packet->host_line.ptr, len);
-    flow->l4.tcp.host_server_name[len] = '\0';
+    len = ndpi_min(packet->host_line.len, sizeof(flow->host_server_name)-1);
+    strncpy(flow->host_server_name, packet->host_line.ptr, len);
+    flow->host_server_name[len] = '\0';
 
     parseHttpSubprotocol(ndpi_struct, flow);
     
@@ -585,7 +585,6 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     }
   }
    
-
   /* check for accept line */
   if (packet->accept_line.ptr != NULL) {
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "Accept Line found %.*s\n",

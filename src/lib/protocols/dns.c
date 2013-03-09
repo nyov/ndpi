@@ -49,7 +49,8 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 
   if(((dport == 53) || (sport == 53))
      && (packet->payload_packet_len > sizeof(struct dns_packet_header))) {
-    struct dns_packet_header header, *dns = (struct dns_packet_header*)&packet->payload[packet->tcp ? 2 : 0];
+    int i = packet->tcp ? 2 : 0;
+    struct dns_packet_header header, *dns = (struct dns_packet_header*)&packet->payload[i];
     u_int8_t is_query, ret_code, is_dns = 0;
     
     header.flags = ntohs(dns->flags);
@@ -89,10 +90,36 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	/* This is a good reply */
 	is_dns = 1;
       }
-
     }
 
     if(is_dns) {
+      int j = 0;
+#ifdef DEBUG
+      u_int16_t query_type, query_class;
+#endif
+
+      i += sizeof(struct dns_packet_header);
+
+      i++;
+      while((i < packet->payload_packet_len)
+	    && (j < (sizeof(flow->host_server_name)-1))	  
+	    && (packet->payload[i] != '\0')) {
+	flow->host_server_name[j] = tolower(packet->payload[i]);
+	if(flow->host_server_name[j] < ' ')
+	  flow->host_server_name[j] = '.';	
+	j++, i++;
+      }
+
+      flow->host_server_name[j] = '\0';
+
+#ifdef DEBUG
+      i++;
+      memcpy(&query_type, &packet->payload[i], 2); query_type  = ntohs(query_type), i += 2;
+      memcpy(&query_class, &packet->payload[i], 2); query_class  = ntohs(query_class), i += 2;
+
+      printf("%s [type=%04X][class=%04X]\n", flow->host_server_name, query_type, query_class);
+#endif
+
       NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "found DNS.\n");      
       ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DNS, NDPI_REAL_PROTOCOL);
     } else {
