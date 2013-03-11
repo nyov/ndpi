@@ -27,6 +27,7 @@
 #include <netinet/in.h>
 #include <search.h>
 #include <pcap.h>
+#include <signal.h>
 
 #include "linux_compat.h"
 #include "ndpi_main.h"
