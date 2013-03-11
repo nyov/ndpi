@@ -35,6 +35,7 @@ static void setupDetection(void);
 
 // cli options
 static char *_pcap_file = NULL;
+static char *_bpf_filter = NULL;
 static char *_protoFilePath = NULL;
 
 // pcap
@@ -45,10 +46,12 @@ static u_int8_t enable_protocol_guess = 1, verbose = 0;
 static u_int32_t guessed_flow_protocols = 0;
 static u_int16_t decode_tunnels = 0;
 static u_int16_t num_loops = 1;
+static u_int8_t shutdown_app = 0;
 
 // detection
 static struct ndpi_detection_module_struct *ndpi_struct = NULL;
 static u_int32_t detection_tick_resolution = 1000;
+static time_t capture_until = 0;
 
 // results
 static u_int64_t raw_packet_count = 0;
@@ -95,9 +98,12 @@ static u_int32_t ndpi_flow_count = 0;
 
 
 static void help(u_int long_help) {
-  printf("pcapReader -f <file>.pcap [-p <protos>][-l <loops>[-d][-h][-t][-v]\n\n"
+  printf("pcapReader -i <file|device> [-f <filter>][-s <duration>]\n"
+	 "           [-p <protos>][-l <loops>[-d][-h][-t][-v]\n\n"
 	 "Usage:\n"
-	 "  -f <file>.pcap            | Specify a pcap file to read packets from\n"
+	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture\n"
+	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
+	 "  -s <duration>             | Maximum capture duration in seconds (live traffic capture only)\n"
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
 	 "  -d                        | Disable protocol guess and use only DPI\n"
@@ -118,14 +124,18 @@ static void parseOptions(int argc, char **argv)
 {
   int opt;
 
-  while ((opt = getopt(argc, argv, "df:hp:l:tv")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:i:hp:l:s:tv")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
       break;
 
-    case 'f':
+    case 'i':
       _pcap_file = optarg;
+      break;
+
+    case 'f':
+      _bpf_filter = optarg;
       break;
 
     case 'l':
@@ -134,6 +144,10 @@ static void parseOptions(int argc, char **argv)
 
     case 'p':
       _protoFilePath = optarg;
+      break;
+
+    case 's':
+      capture_until = atoi(optarg);
       break;
 
     case 't':
@@ -569,15 +583,43 @@ static void printResults(void)
   printf("\n\n");
 }
 
-static void openPcapFile(void)
+static void openPcapFileOrDevice(void)
 {
-  _pcap_handle = pcap_open_offline(_pcap_file, _pcap_error_buffer);
+  u_int snaplen = 1514;
+  int promisc = 1;
+  char errbuf[PCAP_ERRBUF_SIZE];
+  
+  if((_pcap_handle = pcap_open_live(_pcap_file, snaplen, promisc, 500, errbuf)) == NULL) {
+    _pcap_handle = pcap_open_offline(_pcap_file, _pcap_error_buffer);
+    capture_until = 0;
 
-  if (_pcap_handle == NULL) {
-    printf("ERROR: could not open pcap file: %s\n", _pcap_error_buffer);
-    exit(-1);
-  }
+    if (_pcap_handle == NULL) {
+      printf("ERROR: could not open pcap file: %s\n", _pcap_error_buffer);
+      exit(-1);
+    } else
+      printf("Reading packets from pcap file %s...\n", _pcap_file);
+  } else
+    printf("Capturing live traffic from device %s...\n", _pcap_file);
+
   _pcap_datalink_type = pcap_datalink(_pcap_handle);
+
+  if(_bpf_filter != NULL) {
+    struct bpf_program fcode;
+
+    if(pcap_compile(_pcap_handle, &fcode, _bpf_filter, 1, 0xFFFFFF00) < 0) {
+      printf("pcap_compile error: '%s'\n", pcap_geterr(_pcap_handle));
+    } else {
+      if(pcap_setfilter(_pcap_handle, &fcode) < 0) {
+	printf("pcap_setfilter error: '%s'\n", pcap_geterr(_pcap_handle));
+      } else
+	printf("Succesfully set BPF filter to '%s'\n", _bpf_filter);
+    }
+  }
+
+  if(capture_until > 0) {
+    printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
+    capture_until += time(NULL);
+  }
 }
 
 static void closePcapFile(void)
@@ -586,6 +628,19 @@ static void closePcapFile(void)
     pcap_close(_pcap_handle);
   }
 }
+
+void sigproc(int sig) {
+  static int called = 0;
+
+  if(called) return; else called = 1;
+  shutdown_app = 1;
+
+  closePcapFile();
+  printResults();
+  terminateDetection();
+  exit(0);
+}
+
 
 // executed for each packet in the pcap file
 static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header, const u_char * packet)
@@ -597,6 +652,11 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   u_int16_t type, ip_offset;
 
   raw_packet_count++;
+
+  if((capture_until != 0) && (header->ts.tv_sec >= capture_until)) {
+    sigproc(0);
+    return;
+  }
 
   time = ((uint64_t) header->ts.tv_sec) * detection_tick_resolution +
     header->ts.tv_usec / (1000000 / detection_tick_resolution);
@@ -666,18 +726,18 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
     // process the packet
     packet_processing(time, iph, header->len - ip_offset, header->len);
   }
-
 }
 
 static void runPcapLoop(void)
 {
-  if (_pcap_handle != NULL)
+  if((!shutdown_app) && (_pcap_handle != NULL))
     pcap_loop(_pcap_handle, -1, &pcap_packet_callback, NULL);
 }
 
 void test_lib() {
   setupDetection();
-  openPcapFile();
+  openPcapFileOrDevice();
+  signal(SIGINT, sigproc);
   runPcapLoop();
   closePcapFile();
   printResults();
