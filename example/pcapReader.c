@@ -655,7 +655,9 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   raw_packet_count++;
 
   if((capture_until != 0) && (header->ts.tv_sec >= capture_until)) {
-    sigproc(0);
+    if(_pcap_handle != NULL)
+      pcap_breakloop(_pcap_handle);
+
     return;
   }
 
