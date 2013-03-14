@@ -196,9 +196,9 @@ extern "C" {
 #define NDPI_PROTOCOL_LLMNR                                     154
 #define NDPI_PROTOCOL_REMOTE_SCAN                               155
 #define NDPI_PROTOCOL_SPOTIFY                                   156
-
+#define NDPI_PROTOCOL_WEBM                                      157
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          156
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          157
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128

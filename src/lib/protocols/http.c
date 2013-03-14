@@ -443,6 +443,24 @@ static void move_parse_packet_contentline(struct ndpi_detection_module_struct
 }
 #endif
 
+#ifdef NDPI_PROTOCOL_WEBM
+static void webm_parse_packet_contentline(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+{
+  struct ndpi_packet_struct *packet = &flow->packet;
+
+  if (packet->content_line.len >= 10 && memcmp(packet->content_line.ptr, "audio/webm", 10) == 0) {
+    NDPI_LOG(NDPI_PROTOCOL_OGG, ndpi_struct, NDPI_LOG_DEBUG, "OGG: Content-Type: audio/webm found.\n");
+    ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WEBM);
+    return;
+  }
+  if (packet->content_line.len >= 10 && memcmp(packet->content_line.ptr, "video/webm", 10) == 0) {
+    NDPI_LOG(NDPI_PROTOCOL_OGG, ndpi_struct, NDPI_LOG_DEBUG, "OGG: Content-Type: video/webm found.\n");
+    ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WEBM);
+    return;
+  }
+}
+#endif
+
 #ifdef NDPI_PROTOCOL_RTSP
 static void rtsp_parse_packet_acceptline(struct ndpi_detection_module_struct
 					 *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -540,6 +558,10 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 #ifdef NDPI_PROTOCOL_MOVE
     if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_MOVE) != 0)
       move_parse_packet_contentline(ndpi_struct, flow);
+#endif
+#ifdef NDPI_PROTOCOL_WEBM
+    if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_WEBM) != 0)
+      webm_parse_packet_contentline(ndpi_struct, flow);
 #endif
   }
   /* check user agent here too */
