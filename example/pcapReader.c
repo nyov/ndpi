@@ -646,8 +646,8 @@ void sigproc(int sig) {
 // executed for each packet in the pcap file
 static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header, const u_char * packet)
 {
-  const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
-  struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[sizeof(struct ndpi_ethhdr)];
+  const struct ndpi_ethhdr *ethernet;
+  struct ndpi_iphdr *iph;
   u_int64_t time;
   static u_int64_t lasttime = 0;
   u_int16_t type, ip_offset;
@@ -669,12 +669,25 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   }
   lasttime = time;
 
+  if(_pcap_datalink_type == DLT_EN10MB) {
+    ethernet = (struct ndpi_ethhdr *) packet;
+    ip_offset = sizeof(struct ndpi_ethhdr);
+    type = ntohs(ethernet->h_proto);
+  } else if(_pcap_datalink_type == 113 /* Linux Cooked Capture */) {
+    type = packet[14] << 8 + packet[15];
+    ip_offset = 16;
+  } else
+    return;
 
-  type = ethernet->h_proto;
+  if(type == 0x8100 /* VLAN */) {
+    type = packet[ip_offset+2] << 8 + packet[ip_offset+3];
+    ip_offset += 4;
+  }
+
+  iph = (struct ndpi_iphdr *) &packet[ip_offset];
 
   // just work on Ethernet packets that contain IP
-  if (_pcap_datalink_type == DLT_EN10MB && type == htons(ETH_P_IP)
-      && header->caplen >= sizeof(struct ndpi_ethhdr)) {
+  if (type == ETH_P_IP && header->caplen >= ip_offset) {
     u_int16_t frag_off = ntohs(iph->frag_off);
 
     if(header->caplen < header->len) {
@@ -696,20 +709,19 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
       return;
     }
 
-    ip_offset = sizeof(struct ndpi_ethhdr);
     if(decode_tunnels && (iph->protocol == IPPROTO_UDP) && ((frag_off & 0x3FFF) == 0)) {
       u_short ip_len = ((u_short)iph->ihl * 4);
-      struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[sizeof(struct ndpi_ethhdr)+ip_len];
+      struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[ip_offset+ip_len];
       u_int16_t sport = ntohs(udp->source), dport = ntohs(udp->dest);
 
       if((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {
 	/* Check if it's GTPv1 */
-	u_int offset = sizeof(struct ndpi_ethhdr)+ip_len+sizeof(struct ndpi_udphdr);
+	u_int offset = ip_offset+ip_len+sizeof(struct ndpi_udphdr);
 	u_int8_t flags = packet[offset];
 	u_int8_t message_type = packet[offset+1];
 
 	if((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) && (message_type == 0xFF /* T-PDU */)) {
-	  ip_offset = sizeof(struct ndpi_ethhdr)+ip_len+sizeof(struct ndpi_udphdr)+8 /* GTPv1 header len */;
+	  ip_offset = ip_offset+ip_len+sizeof(struct ndpi_udphdr)+8 /* GTPv1 header len */;
 
 	  if(flags & 0x04) ip_offset += 1; /* next_ext_header is present */
 	  if(flags & 0x02) ip_offset += 4; /* sequence_number is present (it also includes next_ext_header and pdu_number) */

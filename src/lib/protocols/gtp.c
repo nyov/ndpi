@@ -50,10 +50,12 @@ static void ndpi_check_gtp(struct ndpi_detection_module_struct *ndpi_struct, str
     if((packet->udp->source == gtp_u) || (packet->udp->dest == gtp_u)
        || (packet->udp->source == gtp_c) || (packet->udp->dest == gtp_c)) {
       struct gtp_header_generic *gtp = (struct gtp_header_generic*)packet->payload;
-      u_int8_t gtp_version = gtp->flags & 0xE0;
+      u_int8_t gtp_version = (gtp->flags & 0xE0) >> 5;
 
-      if((gtp_version == 1) || (gtp_version == 2)) {
-	if(ntohs(gtp->message_len) <= (payload_len+sizeof(struct gtp_header_generic))) {
+      if((gtp_version == 0) || (gtp_version == 1) || (gtp_version == 2)) {
+	u_int16_t message_len = ntohs(gtp->message_len);
+	
+	if(message_len <= (payload_len-sizeof(struct gtp_header_generic))) {
 	  NDPI_LOG(NDPI_PROTOCOL_GTP, ndpi_struct, NDPI_LOG_DEBUG, "Found gtp.\n");
 	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_GTP, NDPI_REAL_PROTOCOL);
 	  return;
