@@ -69,107 +69,109 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct n
 
   /* Nothing matched so far: let's decode the certificate with some heuristics */
   if(packet->payload[0] == 0x16 /* Handshake */) {
-    u_int16_t total_len  = packet->payload[4] + 5 /* SSL Header */;
+    u_int16_t total_len = packet->payload[4] + 5 /* SSL Header */;
     u_int8_t handshake_protocol = packet->payload[5];
 
     memset(buffer, 0, buffer_len);
 
-    if(handshake_protocol == 0x02 /* Server Hello */) {
-      int i;
+    if(total_len <= packet->payload_packet_len) {
+      if(handshake_protocol == 0x02 /* Server Hello */) {
+	int i;
 
-      for(i=total_len; i < packet->payload_packet_len-3; i++) {
-	if((packet->payload[i] == 0x04)
-	   && (packet->payload[i+1] == 0x03)
-	   && (packet->payload[i+2] == 0x0c)) {
-	  u_int8_t server_len = packet->payload[i+3];
+	for(i=total_len; i < packet->payload_packet_len-3; i++) {
+	  if((packet->payload[i] == 0x04)
+	     && (packet->payload[i+1] == 0x03)
+	     && (packet->payload[i+2] == 0x0c)) {
+	    u_int8_t server_len = packet->payload[i+3];
 
-	  if(server_len+i+3 < packet->payload_packet_len) {
-	    char *server_name = (char*)&packet->payload[i+4];
-	    u_int8_t begin = 0, len, j, num_dots;
+	    if(server_len+i+3 < packet->payload_packet_len) {
+	      char *server_name = (char*)&packet->payload[i+4];
+	      u_int8_t begin = 0, len, j, num_dots;
 
-	    while(begin < server_len) {
-	      if(!ndpi_isprint(server_name[begin]))
-		begin++;
-	      else
-		break;
-	    }
-
-	    len = ndpi_min(server_len-begin, buffer_len-1);
-	    strncpy(buffer, &server_name[begin], len);
-	    buffer[len] = '\0';
-
-	    /* We now have to check if this looks like an IP address or host name */
-	    for(j=0, num_dots = 0; j<len; j++) {
-	      if(!ndpi_isprint((buffer[j]))) {
-		num_dots = 0; /* This is not what we look for */
-		break;
-	      } else if(buffer[j] == '.') {
-		num_dots++;
-		if(num_dots >=2) break;
+	      while(begin < server_len) {
+		if(!ndpi_isprint(server_name[begin]))
+		  begin++;
+		else
+		  break;
 	      }
-	    }
 
-	    if(num_dots >= 2) {
-	      stripCertificateTrailer(buffer, buffer_len);
+	      len = ndpi_min(server_len-begin, buffer_len-1);
+	      strncpy(buffer, &server_name[begin], len);
+	      buffer[len] = '\0';
 
-	      return(1 /* Server Certificate */);
+	      /* We now have to check if this looks like an IP address or host name */
+	      for(j=0, num_dots = 0; j<len; j++) {
+		if(!ndpi_isprint((buffer[j]))) {
+		  num_dots = 0; /* This is not what we look for */
+		  break;
+		} else if(buffer[j] == '.') {
+		  num_dots++;
+		  if(num_dots >=2) break;
+		}
+	      }
+
+	      if(num_dots >= 2) {
+		stripCertificateTrailer(buffer, buffer_len);
+
+		return(1 /* Server Certificate */);
+	      }
 	    }
 	  }
 	}
-      }
-    } else if(handshake_protocol == 0x01 /* Client Hello */) {
-      u_int offset, base_offset = 43;
-      u_int16_t session_id_len = packet->payload[base_offset];
-      if((session_id_len+base_offset+2) >= total_len) { 
-	u_int16_t cypher_len =  packet->payload[session_id_len+base_offset+2];
+      } else if(handshake_protocol == 0x01 /* Client Hello */) {
+	u_int offset, base_offset = 43;
+	u_int16_t session_id_len = packet->payload[base_offset];
+	if((session_id_len+base_offset+2) >= total_len) { 
+	  u_int16_t cypher_len =  packet->payload[session_id_len+base_offset+2];
 
-	offset = base_offset + session_id_len + cypher_len + 2;
+	  offset = base_offset + session_id_len + cypher_len + 2;
 
-	if(offset < total_len) {
-	  u_int16_t compression_len;
-	  u_int16_t extensions_len;
+	  if(offset < total_len) {
+	    u_int16_t compression_len;
+	    u_int16_t extensions_len;
 
-	  compression_len = packet->payload[offset+1];
-	  offset += compression_len + 3;
-	  extensions_len = packet->payload[offset];
+	    compression_len = packet->payload[offset+1];
+	    offset += compression_len + 3;
+	    extensions_len = packet->payload[offset];
 
-	  if((extensions_len+offset) < total_len) {
-	    u_int16_t extension_offset = 1; /* Move to the first extension */
+	    if((extensions_len+offset) < total_len) {
+	      u_int16_t extension_offset = 1; /* Move to the first extension */
 
-	    while(extension_offset < extensions_len) {
-	      u_int16_t extension_id, extension_len;
+	      while(extension_offset < extensions_len) {
+		u_int16_t extension_id, extension_len;
 
-	      memcpy(&extension_id, &packet->payload[offset+extension_offset], 2);
-	      extension_offset += 2;
+		memcpy(&extension_id, &packet->payload[offset+extension_offset], 2);
+		extension_offset += 2;
 
-	      memcpy(&extension_len, &packet->payload[offset+extension_offset], 2);
-	      extension_offset += 2;
+		memcpy(&extension_len, &packet->payload[offset+extension_offset], 2);
+		extension_offset += 2;
 
-	      extension_id = ntohs(extension_id), extension_len = ntohs(extension_len);
+		extension_id = ntohs(extension_id), extension_len = ntohs(extension_len);
 
-	      if(extension_id == 0) {
-		u_int begin = 0,len;
-		char *server_name = (char*)&packet->payload[offset+extension_offset];
+		if(extension_id == 0) {
+		  u_int begin = 0,len;
+		  char *server_name = (char*)&packet->payload[offset+extension_offset];
 
-		while(begin < extension_len) {
-		  if((!ndpi_isprint(server_name[begin]))
-		     || ndpi_ispunct(server_name[begin])
-		     || ndpi_isspace(server_name[begin]))
-		    begin++;
-		  else
-		    break;
+		  while(begin < extension_len) {
+		    if((!ndpi_isprint(server_name[begin]))
+		       || ndpi_ispunct(server_name[begin])
+		       || ndpi_isspace(server_name[begin]))
+		      begin++;
+		    else
+		      break;
+		  }
+
+		  len = ndpi_min(extension_len-begin, buffer_len-1);
+		  strncpy(buffer, &server_name[begin], len);
+		  buffer[len] = '\0';
+		  stripCertificateTrailer(buffer, buffer_len);
+
+		  /* We're happy now */
+		  return(2 /* Client Certificate */);
 		}
 
-		len = ndpi_min(extension_len-begin, buffer_len-1);
-		strncpy(buffer, &server_name[begin], len);
-		buffer[len] = '\0';
-		stripCertificateTrailer(buffer, buffer_len);
-
-		/* We're happy now */
-		return(2 /* Client Certificate */);
+		extension_offset += extension_len;
 	      }
-
-	      extension_offset += extension_len;
 	    }
 	  }
 	}
