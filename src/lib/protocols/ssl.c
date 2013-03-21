@@ -132,45 +132,48 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct n
 
 	    compression_len = packet->payload[offset+1];
 	    offset += compression_len + 3;
-	    extensions_len = packet->payload[offset];
 
-	    if((extensions_len+offset) < total_len) {
-	      u_int16_t extension_offset = 1; /* Move to the first extension */
+	    if(offset < total_len) {
+	      extensions_len = packet->payload[offset];
 
-	      while(extension_offset < extensions_len) {
-		u_int16_t extension_id, extension_len;
+	      if((extensions_len+offset) < total_len) {
+		u_int16_t extension_offset = 1; /* Move to the first extension */
 
-		memcpy(&extension_id, &packet->payload[offset+extension_offset], 2);
-		extension_offset += 2;
+		while(extension_offset < extensions_len) {
+		  u_int16_t extension_id, extension_len;
 
-		memcpy(&extension_len, &packet->payload[offset+extension_offset], 2);
-		extension_offset += 2;
+		  memcpy(&extension_id, &packet->payload[offset+extension_offset], 2);
+		  extension_offset += 2;
 
-		extension_id = ntohs(extension_id), extension_len = ntohs(extension_len);
+		  memcpy(&extension_len, &packet->payload[offset+extension_offset], 2);
+		  extension_offset += 2;
 
-		if(extension_id == 0) {
-		  u_int begin = 0,len;
-		  char *server_name = (char*)&packet->payload[offset+extension_offset];
+		  extension_id = ntohs(extension_id), extension_len = ntohs(extension_len);
 
-		  while(begin < extension_len) {
-		    if((!ndpi_isprint(server_name[begin]))
-		       || ndpi_ispunct(server_name[begin])
-		       || ndpi_isspace(server_name[begin]))
-		      begin++;
-		    else
-		      break;
+		  if(extension_id == 0) {
+		    u_int begin = 0,len;
+		    char *server_name = (char*)&packet->payload[offset+extension_offset];
+
+		    while(begin < extension_len) {
+		      if((!ndpi_isprint(server_name[begin]))
+			 || ndpi_ispunct(server_name[begin])
+			 || ndpi_isspace(server_name[begin]))
+			begin++;
+		      else
+			break;
+		    }
+
+		    len = ndpi_min(extension_len-begin, buffer_len-1);
+		    strncpy(buffer, &server_name[begin], len);
+		    buffer[len] = '\0';
+		    stripCertificateTrailer(buffer, buffer_len);
+
+		    /* We're happy now */
+		    return(2 /* Client Certificate */);
 		  }
 
-		  len = ndpi_min(extension_len-begin, buffer_len-1);
-		  strncpy(buffer, &server_name[begin], len);
-		  buffer[len] = '\0';
-		  stripCertificateTrailer(buffer, buffer_len);
-
-		  /* We're happy now */
-		  return(2 /* Client Certificate */);
+		  extension_offset += extension_len;
 		}
-
-		extension_offset += extension_len;
 	      }
 	    }
 	  }
