@@ -3,6 +3,13 @@ includes ntop extensions. I have tried to push them into the
 OpenDPI source tree but nobody in answering emails so I have
 decided to create my own source tree
 
+==========
+
+In case you want to add new protocols
+
+# autoreconf -ivf
+# ./configure
+# make
 
 --------------------------
 Luca Deri <deri@ntop.org>

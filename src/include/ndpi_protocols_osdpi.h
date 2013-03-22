@@ -197,8 +197,12 @@ extern "C" {
 #define NDPI_PROTOCOL_REMOTE_SCAN                               155
 #define NDPI_PROTOCOL_SPOTIFY                                   156
 #define NDPI_PROTOCOL_WEBM                                      157
+#define NDPI_PROTOCOL_H323                                      158 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_OPENVPN                                   159 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_NOE                                       160 /* Remy Mudingay <mudingay@ill.fr> */
+
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          157
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          160
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128

@@ -663,9 +663,17 @@ typedef struct ndpi_flow_struct {
   /* protocols which have marked a connection as this connection cannot be protocol XXX, multiple u_int64_t */
   NDPI_PROTOCOL_BITMASK excluded_protocol_bitmask;
 
+#if 0
 #ifdef NDPI_PROTOCOL_RTP
   u_int32_t rtp_ssid[2];
+  u_int16_t rtp_seqnum[2];			/* current highest sequence number (only goes forwards, is not decreased by retransmissions) */
+  /* tcp and udp */
+  u_int8_t rtp_payload_type[2];
+  u_int32_t rtp_stage1:2;			//0-3
+  u_int32_t rtp_stage2:2;
 #endif
+#endif
+
 #ifdef NDPI_PROTOCOL_I23V5
   u_int32_t i23v5_len1;
   u_int32_t i23v5_len2;
@@ -674,20 +682,9 @@ typedef struct ndpi_flow_struct {
   u_int16_t packet_counter;			// can be 0-65000
   u_int16_t packet_direction_counter[2];
   u_int16_t byte_counter[2];
-#ifdef NDPI_PROTOCOL_RTP
-  u_int16_t rtp_seqnum[2];			/* current highest sequence number (only goes forwards, is not decreased by retransmissions) */
-#endif
-#ifdef NDPI_PROTOCOL_RTP
-  /* tcp and udp */
-  u_int8_t rtp_payload_type[2];
-#endif
 
 #ifdef NDPI_PROTOCOL_BITTORRENT
   u_int8_t bittorrent_stage;		// can be 0-255
-#endif
-#ifdef NDPI_PROTOCOL_RTP
-  u_int32_t rtp_stage1:2;			//0-3
-  u_int32_t rtp_stage2:2;
 #endif
 #ifdef NDPI_PROTOCOL_EDONKEY
   u_int32_t edk_stage:5;			// 0-17

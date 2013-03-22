@@ -134,6 +134,8 @@ libndpi_la_SOURCES = \
 			protocols/radius.c \
 			protocols/teamviewer.c \
 			protocols/lotus_notes.c \
-			protocols/gtp.c
+			protocols/gtp.c \
+			protocols/h323.c \
+			protocols/openvpn.c
 
 # NTOP protocols are at the end

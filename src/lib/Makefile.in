@@ -142,7 +142,7 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-citrix.lo libndpi_la-dcerpc.lo \
 	libndpi_la-netflow.lo libndpi_la-sflow.lo libndpi_la-radius.lo \
 	libndpi_la-teamviewer.lo libndpi_la-lotus_notes.lo \
-	libndpi_la-gtp.lo
+	libndpi_la-gtp.lo libndpi_la-h323.lo libndpi_la-openvpn.lo
 libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
 libndpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -417,7 +417,9 @@ libndpi_la_SOURCES = \
 			protocols/radius.c \
 			protocols/teamviewer.c \
 			protocols/lotus_notes.c \
-			protocols/gtp.c
+			protocols/gtp.c \
+			protocols/h323.c \
+			protocols/openvpn.c
 
 all: all-am
 
@@ -526,6 +528,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-gnutella.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-gtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-guildwars.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-h323.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-halflife2_and_mods.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-http.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-http_activesync.Plo@am__quote@
@@ -560,6 +563,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-non_tcp_udp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-ntp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-openft.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-openvpn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-oscar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-pando.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-pcanywhere.Plo@am__quote@
@@ -1437,6 +1441,20 @@ libndpi_la-gtp.lo: protocols/gtp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/gtp.c' object='libndpi_la-gtp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-gtp.lo `test -f 'protocols/gtp.c' || echo '$(srcdir)/'`protocols/gtp.c
+
+libndpi_la-h323.lo: protocols/h323.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-h323.lo -MD -MP -MF $(DEPDIR)/libndpi_la-h323.Tpo -c -o libndpi_la-h323.lo `test -f 'protocols/h323.c' || echo '$(srcdir)/'`protocols/h323.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-h323.Tpo $(DEPDIR)/libndpi_la-h323.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/h323.c' object='libndpi_la-h323.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-h323.lo `test -f 'protocols/h323.c' || echo '$(srcdir)/'`protocols/h323.c
+
+libndpi_la-openvpn.lo: protocols/openvpn.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-openvpn.lo -MD -MP -MF $(DEPDIR)/libndpi_la-openvpn.Tpo -c -o libndpi_la-openvpn.lo `test -f 'protocols/openvpn.c' || echo '$(srcdir)/'`protocols/openvpn.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-openvpn.Tpo $(DEPDIR)/libndpi_la-openvpn.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/openvpn.c' object='libndpi_la-openvpn.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-openvpn.lo `test -f 'protocols/openvpn.c' || echo '$(srcdir)/'`protocols/openvpn.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

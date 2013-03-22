@@ -991,6 +991,16 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
 
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_H323, "H323",
+			  ndpi_build_default_ports(ports_a, 1719, 1720, 3478, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 1719, 1720, 3478, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_OPENVPN, "OpenVPN",
+			  ndpi_build_default_ports(ports_a, 1194, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 1194, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_NOE, "NOE",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+
   init_string_based_protocols(ndpi_mod);
 
   for(i=0; i<ndpi_mod->ndpi_num_supported_protocols; i++) {
