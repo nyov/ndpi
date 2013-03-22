@@ -34,14 +34,18 @@
 #endif
 
 #ifndef WIN32
+#ifndef __KERNEL__
 #include <sys/time.h>
+#endif
+
 #if 1 && !defined __APPLE__ && !defined __FreeBSD__
 
 #ifndef __KERNEL__
-#  include <endian.h>
-#  include <byteswap.h>
+#include <endian.h>
+#include <byteswap.h>
 #else
-#  include <asm/byteorder.h>
+#include <asm/byteorder.h>
+#include <linux/ctype.h>
 #endif
 
 #endif
@@ -75,13 +79,13 @@ typedef unsigned __int64 u_int64_t;
 
 #ifndef WIN32
 #ifndef __KERNEL__
-#  include <netinet/ip.h>
-#  include <netinet/tcp.h>
-#  include <netinet/udp.h>
+#include <netinet/ip.h>
+#include <netinet/tcp.h>
+#include <netinet/udp.h>
 #else
-#  include <linux/ip.h>
-#  include <linux/tcp.h>
-#  include <linux/udp.h>
+#include <linux/ip.h>
+#include <linux/tcp.h>
+#include <linux/udp.h>
 #endif
 #endif
 
