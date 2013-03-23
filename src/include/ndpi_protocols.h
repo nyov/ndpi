@@ -160,9 +160,9 @@ void ndpi_search_rtsp_tcp_udp(struct ndpi_detection_module_struct
 void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct
 			       *ndpi_struct, struct ndpi_flow_struct *flow);
 
-/* manolito entry */
-void ndpi_search_manolito_tcp_udp(struct ndpi_detection_module_struct
-				  *ndpi_struct, struct ndpi_flow_struct *flow);
+/* vmware entry */
+void ndpi_search_vmware(struct ndpi_detection_module_struct
+			*ndpi_struct, struct ndpi_flow_struct *flow);
 
 /* imesh entry */
 void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
@@ -339,5 +339,9 @@ void ndpi_search_gtp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 void ndpi_search_spotify(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_h323(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_openvpn(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_noe(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ciscovpn(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_viber(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_teamspeak(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 
 #endif							/* __NDPI_PROTOCOLS_INCLUDE_FILE__ */

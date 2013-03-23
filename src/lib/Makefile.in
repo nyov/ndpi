@@ -114,7 +114,7 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-jabber.lo libndpi_la-kerberos.lo \
 	libndpi_la-kontiki.lo libndpi_la-ldap.lo \
 	libndpi_la-mail_imap.lo libndpi_la-mail_pop.lo \
-	libndpi_la-mail_smtp.lo libndpi_la-manolito.lo \
+	libndpi_la-mail_smtp.lo libndpi_la-vmware.lo \
 	libndpi_la-maplestory.lo libndpi_la-mdns.lo \
 	libndpi_la-meebo.lo libndpi_la-mgcp.lo libndpi_la-mms.lo \
 	libndpi_la-msn.lo libndpi_la-mssql.lo libndpi_la-mysql.lo \
@@ -125,9 +125,8 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-postgres.lo libndpi_la-pplive.lo \
 	libndpi_la-ppstream.lo libndpi_la-pptp.lo libndpi_la-qq.lo \
 	libndpi_la-quake.lo libndpi_la-rdp.lo libndpi_la-rtp.lo \
-	libndpi_la-rtsp.lo libndpi_la-secondlife.lo \
-	libndpi_la-shoutcast.lo libndpi_la-sip.lo libndpi_la-smb.lo \
-	libndpi_la-snmp.lo libndpi_la-socrates.lo \
+	libndpi_la-rtsp.lo libndpi_la-shoutcast.lo libndpi_la-sip.lo \
+	libndpi_la-smb.lo libndpi_la-snmp.lo libndpi_la-socrates.lo \
 	libndpi_la-sopcast.lo libndpi_la-soulseek.lo \
 	libndpi_la-spotify.lo libndpi_la-ssdp.lo libndpi_la-ssh.lo \
 	libndpi_la-ssl.lo libndpi_la-stealthnet.lo libndpi_la-steam.lo \
@@ -142,7 +141,9 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-citrix.lo libndpi_la-dcerpc.lo \
 	libndpi_la-netflow.lo libndpi_la-sflow.lo libndpi_la-radius.lo \
 	libndpi_la-teamviewer.lo libndpi_la-lotus_notes.lo \
-	libndpi_la-gtp.lo libndpi_la-h323.lo libndpi_la-openvpn.lo
+	libndpi_la-gtp.lo libndpi_la-h323.lo libndpi_la-noe.lo \
+	libndpi_la-ciscovpn.lo libndpi_la-teamspeak.lo \
+	libndpi_la-viber.lo libndpi_la-openvpn.lo
 libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
 libndpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -348,7 +349,7 @@ libndpi_la_SOURCES = \
 			protocols/mail_imap.c \
 			protocols/mail_pop.c \
 			protocols/mail_smtp.c \
-			protocols/manolito.c \
+			protocols/vmware.c \
 			protocols/maplestory.c \
 			protocols/mdns.c \
 			protocols/meebo.c \
@@ -375,7 +376,6 @@ libndpi_la_SOURCES = \
 			protocols/rdp.c \
 			protocols/rtp.c \
 			protocols/rtsp.c \
-			protocols/secondlife.c \
 			protocols/shoutcast.c \
 			protocols/sip.c \
 			protocols/smb.c \
@@ -419,6 +419,10 @@ libndpi_la_SOURCES = \
 			protocols/lotus_notes.c \
 			protocols/gtp.c \
 			protocols/h323.c \
+			protocols/noe.c \
+			protocols/ciscovpn.c \
+			protocols/teamspeak.c \
+			protocols/viber.c \
 			protocols/openvpn.c
 
 all: all-am
@@ -506,6 +510,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-battlefield.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-bgp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-bittorrent.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-ciscovpn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-citrix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-crossfire.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-dcerpc.Plo@am__quote@
@@ -546,7 +551,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mail_imap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mail_pop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mail_smtp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-manolito.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-maplestory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mdns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-meebo.Plo@am__quote@
@@ -560,6 +564,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-netflow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-nfs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-node.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-noe.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-non_tcp_udp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-ntp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-openft.Plo@am__quote@
@@ -578,7 +583,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rdp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rtsp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-secondlife.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-sflow.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-shoutcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-sip.Plo@am__quote@
@@ -598,6 +602,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-stun.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-syslog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-tds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-teamspeak.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-teamviewer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-telnet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-tftp.Plo@am__quote@
@@ -606,6 +611,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-tvuplayer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-usenet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-veohtv.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-viber.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-vmware.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-vnc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-warcraft3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-winmx.Plo@am__quote@
@@ -952,12 +959,12 @@ libndpi_la-mail_smtp.lo: protocols/mail_smtp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-mail_smtp.lo `test -f 'protocols/mail_smtp.c' || echo '$(srcdir)/'`protocols/mail_smtp.c
 
-libndpi_la-manolito.lo: protocols/manolito.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-manolito.lo -MD -MP -MF $(DEPDIR)/libndpi_la-manolito.Tpo -c -o libndpi_la-manolito.lo `test -f 'protocols/manolito.c' || echo '$(srcdir)/'`protocols/manolito.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-manolito.Tpo $(DEPDIR)/libndpi_la-manolito.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/manolito.c' object='libndpi_la-manolito.lo' libtool=yes @AMDEPBACKSLASH@
+libndpi_la-vmware.lo: protocols/vmware.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-vmware.lo -MD -MP -MF $(DEPDIR)/libndpi_la-vmware.Tpo -c -o libndpi_la-vmware.lo `test -f 'protocols/vmware.c' || echo '$(srcdir)/'`protocols/vmware.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-vmware.Tpo $(DEPDIR)/libndpi_la-vmware.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/vmware.c' object='libndpi_la-vmware.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-manolito.lo `test -f 'protocols/manolito.c' || echo '$(srcdir)/'`protocols/manolito.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-vmware.lo `test -f 'protocols/vmware.c' || echo '$(srcdir)/'`protocols/vmware.c
 
 libndpi_la-maplestory.lo: protocols/maplestory.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-maplestory.lo -MD -MP -MF $(DEPDIR)/libndpi_la-maplestory.Tpo -c -o libndpi_la-maplestory.lo `test -f 'protocols/maplestory.c' || echo '$(srcdir)/'`protocols/maplestory.c
@@ -1140,13 +1147,6 @@ libndpi_la-rtsp.lo: protocols/rtsp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/rtsp.c' object='libndpi_la-rtsp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-rtsp.lo `test -f 'protocols/rtsp.c' || echo '$(srcdir)/'`protocols/rtsp.c
-
-libndpi_la-secondlife.lo: protocols/secondlife.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-secondlife.lo -MD -MP -MF $(DEPDIR)/libndpi_la-secondlife.Tpo -c -o libndpi_la-secondlife.lo `test -f 'protocols/secondlife.c' || echo '$(srcdir)/'`protocols/secondlife.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-secondlife.Tpo $(DEPDIR)/libndpi_la-secondlife.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/secondlife.c' object='libndpi_la-secondlife.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-secondlife.lo `test -f 'protocols/secondlife.c' || echo '$(srcdir)/'`protocols/secondlife.c
 
 libndpi_la-shoutcast.lo: protocols/shoutcast.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-shoutcast.lo -MD -MP -MF $(DEPDIR)/libndpi_la-shoutcast.Tpo -c -o libndpi_la-shoutcast.lo `test -f 'protocols/shoutcast.c' || echo '$(srcdir)/'`protocols/shoutcast.c
@@ -1448,6 +1448,34 @@ libndpi_la-h323.lo: protocols/h323.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/h323.c' object='libndpi_la-h323.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-h323.lo `test -f 'protocols/h323.c' || echo '$(srcdir)/'`protocols/h323.c
+
+libndpi_la-noe.lo: protocols/noe.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-noe.lo -MD -MP -MF $(DEPDIR)/libndpi_la-noe.Tpo -c -o libndpi_la-noe.lo `test -f 'protocols/noe.c' || echo '$(srcdir)/'`protocols/noe.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-noe.Tpo $(DEPDIR)/libndpi_la-noe.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/noe.c' object='libndpi_la-noe.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-noe.lo `test -f 'protocols/noe.c' || echo '$(srcdir)/'`protocols/noe.c
+
+libndpi_la-ciscovpn.lo: protocols/ciscovpn.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-ciscovpn.lo -MD -MP -MF $(DEPDIR)/libndpi_la-ciscovpn.Tpo -c -o libndpi_la-ciscovpn.lo `test -f 'protocols/ciscovpn.c' || echo '$(srcdir)/'`protocols/ciscovpn.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-ciscovpn.Tpo $(DEPDIR)/libndpi_la-ciscovpn.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/ciscovpn.c' object='libndpi_la-ciscovpn.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-ciscovpn.lo `test -f 'protocols/ciscovpn.c' || echo '$(srcdir)/'`protocols/ciscovpn.c
+
+libndpi_la-teamspeak.lo: protocols/teamspeak.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-teamspeak.lo -MD -MP -MF $(DEPDIR)/libndpi_la-teamspeak.Tpo -c -o libndpi_la-teamspeak.lo `test -f 'protocols/teamspeak.c' || echo '$(srcdir)/'`protocols/teamspeak.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-teamspeak.Tpo $(DEPDIR)/libndpi_la-teamspeak.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/teamspeak.c' object='libndpi_la-teamspeak.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-teamspeak.lo `test -f 'protocols/teamspeak.c' || echo '$(srcdir)/'`protocols/teamspeak.c
+
+libndpi_la-viber.lo: protocols/viber.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-viber.lo -MD -MP -MF $(DEPDIR)/libndpi_la-viber.Tpo -c -o libndpi_la-viber.lo `test -f 'protocols/viber.c' || echo '$(srcdir)/'`protocols/viber.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-viber.Tpo $(DEPDIR)/libndpi_la-viber.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/viber.c' object='libndpi_la-viber.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-viber.lo `test -f 'protocols/viber.c' || echo '$(srcdir)/'`protocols/viber.c
 
 libndpi_la-openvpn.lo: protocols/openvpn.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-openvpn.lo -MD -MP -MF $(DEPDIR)/libndpi_la-openvpn.Tpo -c -o libndpi_la-openvpn.lo `test -f 'protocols/openvpn.c' || echo '$(srcdir)/'`protocols/openvpn.c

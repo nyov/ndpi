@@ -65,7 +65,7 @@ libndpi_la_SOURCES = \
 			protocols/mail_imap.c \
 			protocols/mail_pop.c \
 			protocols/mail_smtp.c \
-			protocols/manolito.c \
+			protocols/vmware.c \
 			protocols/maplestory.c \
 			protocols/mdns.c \
 			protocols/meebo.c \
@@ -92,7 +92,6 @@ libndpi_la_SOURCES = \
 			protocols/rdp.c \
 			protocols/rtp.c \
 			protocols/rtsp.c \
-			protocols/secondlife.c \
 			protocols/shoutcast.c \
 			protocols/sip.c \
 			protocols/smb.c \
@@ -136,6 +135,10 @@ libndpi_la_SOURCES = \
 			protocols/lotus_notes.c \
 			protocols/gtp.c \
 			protocols/h323.c \
+			protocols/noe.c \
+			protocols/ciscovpn.c \
+			protocols/teamspeak.c \
+			protocols/viber.c \
 			protocols/openvpn.c
 
 # NTOP protocols are at the end

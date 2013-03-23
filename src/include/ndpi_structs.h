@@ -137,9 +137,6 @@ typedef struct ndpi_id_struct {
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
   u_int32_t jabber_stun_or_ft_ts;
 #endif
-#ifdef NDPI_PROTOCOL_MANOLITO
-  u_int32_t manolito_last_pkt_arrival_time;
-#endif
 #ifdef NDPI_PROTOCOL_DIRECTCONNECT
   u_int32_t directconnect_last_safe_access_time;
 #endif
@@ -258,9 +255,6 @@ struct ndpi_flow_tcp_struct {
 #endif
 #ifdef NDPI_PROTOCOL_FILETOPIA
   u_int32_t filetopia_stage:2;
-#endif
-#ifdef NDPI_PROTOCOL_MANOLITO
-  u_int32_t manolito_stage:4;
 #endif
 #ifdef NDPI_PROTOCOL_TDS
   u_int32_t tds_stage:3;
@@ -612,7 +606,6 @@ typedef struct ndpi_detection_module_struct {
   u_int32_t zattoo_connection_timeout;
   u_int32_t jabber_stun_timeout;
   u_int32_t jabber_file_transfer_timeout;
-  u_int32_t manolito_subscriber_timeout;
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
 #define NDPI_IP_STRING_SIZE 40
   char ip_string[NDPI_IP_STRING_SIZE];

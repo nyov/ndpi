@@ -67,7 +67,7 @@ extern "C" {
 #define NDPI_PROTOCOL_DIRECTCONNECT				25
 #define NDPI_PROTOCOL_SOCRATES					26
 #define NDPI_PROTOCOL_WINMX					27
-#define NDPI_PROTOCOL_MANOLITO					28
+#define NDPI_PROTOCOL_VMWARE					28
 #define NDPI_PROTOCOL_PANDO					29
 #define NDPI_PROTOCOL_FILETOPIA					30
 #define NDPI_PROTOCOL_IMESH					31
@@ -112,7 +112,7 @@ extern "C" {
 #define NDPI_PROTOCOL_YAHOO					70
 #define NDPI_PROTOCOL_BATTLEFIELD				71
 #define NDPI_PROTOCOL_QUAKE					72
-#define NDPI_PROTOCOL_SECONDLIFE				73
+#define NDPI_PROTOCOL_VRRP 				        73
 #define NDPI_PROTOCOL_STEAM					74
 #define NDPI_PROTOCOL_HALFLIFE2					75
 #define NDPI_PROTOCOL_WORLDOFWARCRAFT				76
@@ -200,9 +200,11 @@ extern "C" {
 #define NDPI_PROTOCOL_H323                                      158 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_OPENVPN                                   159 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_NOE                                       160 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_CISCOVPN                                  161 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_TEAMSPEAK                                 162 /* Remy Mudingay <mudingay@ill.fr> */
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          160
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          162
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128
