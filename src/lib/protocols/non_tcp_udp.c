@@ -69,6 +69,7 @@ void ndpi_search_in_non_tcp_udp(struct ndpi_detection_module_struct
 #endif
       return;
   }
+
   switch (packet->l4_protocol) {
 #ifdef NDPI_PROTOCOL_IPSEC
   case NDPI_IPSEC_PROTOCOL_ESP:

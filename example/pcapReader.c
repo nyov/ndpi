@@ -328,7 +328,9 @@ static int node_cmp(const void *a, const void *b) {
 }
 
 
-static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t ipsize)
+static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t ipsize,
+				       struct ndpi_id_struct **src,
+				       struct ndpi_id_struct **dst)
 {
   u_int32_t i;
   u_int16_t l4_packet_len;
@@ -371,7 +373,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
   } else if (iph->protocol == 17 && l4_packet_len >= 8) {
     // udp
     udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + iph->ihl * 4);
-    if (iph->saddr < iph->daddr) {
+    if(iph->saddr < iph->daddr) {
       lower_port = udph->source;
       upper_port = udph->dest;
     } else {
@@ -429,10 +431,21 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
       ndpi_flow_count += 1;
 
       //printFlow(newflow);
+
+      *src = newflow->src_id, *dst = newflow->dst_id;
       return(newflow);
     }
-  } else
-    return *(struct ndpi_flow**)ret;
+  } else {
+    struct ndpi_flow *flow = *(struct ndpi_flow**)ret;
+	
+    if(flow->lower_ip == lower_ip && flow->upper_ip == upper_ip
+       && flow->lower_port == lower_port && flow->upper_port == upper_port)      
+      *src = flow->src_id, *dst = flow->dst_id;
+    else
+      *src = flow->dst_id, *dst = flow->src_id;
+
+    return flow;
+  }
 }
 
 static void setupDetection(void)
@@ -495,11 +508,10 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   u_int32_t protocol = 0;
   u_int16_t frag_off = ntohs(iph->frag_off);
 
-  flow = get_ndpi_flow(iph, ipsize);
+  flow = get_ndpi_flow(iph, ipsize, &src, &dst);
   if (flow != NULL) {
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
-    src = flow->src_id, dst = flow->dst_id;
   } else
     return;
 

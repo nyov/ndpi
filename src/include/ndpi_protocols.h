@@ -164,6 +164,9 @@ void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct
 void ndpi_search_vmware(struct ndpi_detection_module_struct
 			*ndpi_struct, struct ndpi_flow_struct *flow);
 
+void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct
+			    *ndpi_struct, struct ndpi_flow_struct *flow);
+
 /* imesh entry */
 void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
 			       *ndpi_struct, struct ndpi_flow_struct *flow);

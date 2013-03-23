@@ -77,6 +77,7 @@ libndpi_la_SOURCES = \
 			protocols/netbios.c \
 			protocols/nfs.c \
 			protocols/non_tcp_udp.c \
+			protocols/tcp_udp.c \
 			protocols/ntp.c \
 			protocols/openft.c \
 			protocols/oscar.c \

@@ -1943,6 +1943,12 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
     a++;
   }
 #endif
+
+  ndpi_struct->callback_buffer[a].func = ndpi_search_tcp_or_udp;
+  ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP;
+  NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
+  a++;
+
 #ifdef NDPI_PROTOCOL_SOPCAST
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SOPCAST) != 0) {
     ndpi_struct->callback_buffer[a].func = ndpi_search_sopcast;

@@ -119,10 +119,10 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-meebo.lo libndpi_la-mgcp.lo libndpi_la-mms.lo \
 	libndpi_la-msn.lo libndpi_la-mssql.lo libndpi_la-mysql.lo \
 	libndpi_la-netbios.lo libndpi_la-nfs.lo \
-	libndpi_la-non_tcp_udp.lo libndpi_la-ntp.lo \
-	libndpi_la-openft.lo libndpi_la-oscar.lo libndpi_la-pando.lo \
-	libndpi_la-pcanywhere.lo libndpi_la-popo.lo \
-	libndpi_la-postgres.lo libndpi_la-pplive.lo \
+	libndpi_la-non_tcp_udp.lo libndpi_la-tcp_udp.lo \
+	libndpi_la-ntp.lo libndpi_la-openft.lo libndpi_la-oscar.lo \
+	libndpi_la-pando.lo libndpi_la-pcanywhere.lo \
+	libndpi_la-popo.lo libndpi_la-postgres.lo libndpi_la-pplive.lo \
 	libndpi_la-ppstream.lo libndpi_la-pptp.lo libndpi_la-qq.lo \
 	libndpi_la-quake.lo libndpi_la-rdp.lo libndpi_la-rtp.lo \
 	libndpi_la-rtsp.lo libndpi_la-shoutcast.lo libndpi_la-sip.lo \
@@ -361,6 +361,7 @@ libndpi_la_SOURCES = \
 			protocols/netbios.c \
 			protocols/nfs.c \
 			protocols/non_tcp_udp.c \
+			protocols/tcp_udp.c \
 			protocols/ntp.c \
 			protocols/openft.c \
 			protocols/oscar.c \
@@ -601,6 +602,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-steam.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-stun.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-syslog.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-tcp_udp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-tds.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-teamspeak.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-teamviewer.Plo@am__quote@
@@ -1042,6 +1044,13 @@ libndpi_la-non_tcp_udp.lo: protocols/non_tcp_udp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/non_tcp_udp.c' object='libndpi_la-non_tcp_udp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-non_tcp_udp.lo `test -f 'protocols/non_tcp_udp.c' || echo '$(srcdir)/'`protocols/non_tcp_udp.c
+
+libndpi_la-tcp_udp.lo: protocols/tcp_udp.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-tcp_udp.lo -MD -MP -MF $(DEPDIR)/libndpi_la-tcp_udp.Tpo -c -o libndpi_la-tcp_udp.lo `test -f 'protocols/tcp_udp.c' || echo '$(srcdir)/'`protocols/tcp_udp.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-tcp_udp.Tpo $(DEPDIR)/libndpi_la-tcp_udp.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/tcp_udp.c' object='libndpi_la-tcp_udp.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-tcp_udp.lo `test -f 'protocols/tcp_udp.c' || echo '$(srcdir)/'`protocols/tcp_udp.c
 
 libndpi_la-ntp.lo: protocols/ntp.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-ntp.lo -MD -MP -MF $(DEPDIR)/libndpi_la-ntp.Tpo -c -o libndpi_la-ntp.lo `test -f 'protocols/ntp.c' || echo '$(srcdir)/'`protocols/ntp.c
