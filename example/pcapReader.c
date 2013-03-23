@@ -93,8 +93,10 @@ typedef struct ndpi_flow {
   void *src_id, *dst_id;
 } ndpi_flow_t;
 
+#define NUM_ROOTS        512
+
 static u_int32_t size_flow_struct = 0;
-static struct ndpi_flow *ndpi_flows_root = NULL;
+static struct ndpi_flow *ndpi_flows_root[NUM_ROOTS] = { NULL };
 static u_int32_t ndpi_flow_count = 0;
 
 
@@ -332,7 +334,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
 				       struct ndpi_id_struct **src,
 				       struct ndpi_id_struct **dst)
 {
-  u_int32_t i;
+  u_int32_t i, idx;
   u_int16_t l4_packet_len;
   struct ndpi_tcphdr *tcph = NULL;
   struct ndpi_udphdr *udph = NULL;
@@ -392,7 +394,8 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
   flow.lower_port = lower_port;
   flow.upper_port = upper_port;
 
-  ret = ndpi_tfind(&flow, (void*)&ndpi_flows_root, node_cmp);
+  idx = (lower_ip + upper_ip + iph->protocol + lower_port + upper_port) % NUM_ROOTS;
+  ret = ndpi_tfind(&flow, (void*)&ndpi_flows_root[idx], node_cmp);
 
   if(ret == NULL) {
     if (ndpi_flow_count == MAX_NDPI_FLOWS) {
@@ -405,7 +408,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
 	printf("[NDPI] %s(1): not enough memory\n", __FUNCTION__);
 	return(NULL);
       }
-
+      
       memset(newflow, 0, sizeof(struct ndpi_flow));
       newflow->protocol = iph->protocol;
       newflow->lower_ip = lower_ip, newflow->upper_ip = upper_ip;
@@ -426,7 +429,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
 	return(NULL);
       }
 
-      ndpi_tsearch(newflow, (void*)&ndpi_flows_root, node_cmp); /* Add */
+      ndpi_tsearch(newflow, (void*)&ndpi_flows_root[idx], node_cmp); /* Add */
 
       ndpi_flow_count += 1;
 
@@ -494,8 +497,13 @@ static void ndpi_flow_freer(void *node) {
 
 static void terminateDetection(void)
 {
-  ndpi_tdestroy(ndpi_flows_root, ndpi_flow_freer);
-  ndpi_flows_root = NULL;
+  int i;
+
+  for(i=0; i<NUM_ROOTS; i++) {
+    ndpi_tdestroy(ndpi_flows_root[i], ndpi_flow_freer);
+    ndpi_flows_root[i] = NULL;
+  }
+
   ndpi_exit_detection_module(ndpi_struct, free_wrapper);
 }
 
@@ -570,22 +578,44 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   return 0;
 }
 
-static void printResults(void)
+char* formatPackets(float numPkts, char *buf) {
+  if(numPkts < 1000) {
+    snprintf(buf, 32, "%.2f", numPkts);
+  } else if(numPkts < 1000000) {
+    snprintf(buf, 32, "%.2f K", numPkts/1000);
+  } else {
+    numPkts /= 1000000;
+    snprintf(buf, 32, "%.2f M", numPkts);
+  }
+
+  return(buf);
+}
+
+static void printResults(u_int64_t tot_usec)
 {
   u_int32_t i, j;
 
   printf("\x1b[2K\n");
   printf("pcap file contains\n");
-  printf("\tip packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
+  printf("\tIP packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
 	 (long long unsigned int)ip_packet_count,
 	 (long long unsigned int)raw_packet_count);
-  printf("\tip bytes:     \x1b[34m%-13llu\x1b[0m\n",
+  printf("\tIP bytes:     \x1b[34m%-13llu\x1b[0m\n",
 	 (long long unsigned int)total_bytes);
-  printf("\tunique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
+  printf("\tUnique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
 
-  ndpi_twalk(ndpi_flows_root, node_proto_guess_walker);
+  if(tot_usec > 0) {
+    char buf[32];
+    float t = (float)(ip_packet_count*1000000)/(float)tot_usec;
+
+    printf("\tnDPI throughout: \x1b[36m%s pps\x1b[0m\n", formatPackets(t, buf));
+  }
+
+  for(i=0; i<NUM_ROOTS; i++)
+    ndpi_twalk(ndpi_flows_root[i], node_proto_guess_walker);
+
   if(enable_protocol_guess)
-    printf("\tguessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
+    printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
 
   printf("\n\nDetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
@@ -599,10 +629,13 @@ static void printResults(void)
 
   if(verbose && (protocol_counter[0] > 0)) {
     printf("\n");
-    ndpi_twalk(ndpi_flows_root, node_print_known_proto_walker);
+
+    for(i=0; i<NUM_ROOTS; i++)
+      ndpi_twalk(ndpi_flows_root[i], node_print_known_proto_walker);
 
     printf("\n\nUndetected flows:\n");
-    ndpi_twalk(ndpi_flows_root, node_print_unknown_proto_walker);
+    for(i=0; i<NUM_ROOTS; i++)
+      ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker);
   }
 
   printf("\n\n");
@@ -661,7 +694,7 @@ void sigproc(int sig) {
   shutdown_app = 1;
 
   closePcapFile();
-  printResults();
+  printResults(0);
   terminateDetection();
   exit(0);
 }
@@ -774,12 +807,20 @@ static void runPcapLoop(void)
 }
 
 void test_lib() {
+  struct timeval begin, end;
+  u_int64_t tot_usec;
+  
   setupDetection();
   openPcapFileOrDevice();
   signal(SIGINT, sigproc);
+
+  gettimeofday(&begin, NULL);
   runPcapLoop();
+  gettimeofday(&end, NULL);
+  
+  tot_usec = end.tv_sec*1000000 + end.tv_usec - (begin.tv_sec*1000000 + begin.tv_usec);
   closePcapFile();
-  printResults();
+  printResults(tot_usec);
   terminateDetection();
 }
 
