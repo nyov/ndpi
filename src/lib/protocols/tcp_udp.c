@@ -76,6 +76,17 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
 	return;
       }
+
+      /*
+       * Ubunut One
+       * 91.189.89.0/21
+       * 255.255.248.0
+       */
+      if(((ntohl(packet->iph->saddr) & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0*/)
+	 || ((ntohl(packet->iph->daddr) & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0 */)) {
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_UBUNTUONE, NDPI_REAL_PROTOCOL);
+	return;
+      }
     }
   }
 }

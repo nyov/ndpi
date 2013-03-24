@@ -179,6 +179,12 @@ static void flash_parse_packet_contentline(struct ndpi_detection_module_struct *
 	    "FLASH: Content-Type: flv-application/octet-stream.\n");
     ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FLASH);
     return;
+  }  
+  if (packet->content_line.len >= 24 && memcmp(packet->content_line.ptr, "application/futuresplash", 24) == 0) {
+    NDPI_LOG(NDPI_PROTOCOL_FLASH, ndpi_struct, NDPI_LOG_DEBUG,
+	     "FLASH: Content-Type: application/futuresplash.\n");
+    ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FLASH);
+    return;
   }
 }
 #endif
