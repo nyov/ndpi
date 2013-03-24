@@ -140,6 +140,12 @@ libndpi_la_SOURCES = \
 			protocols/ciscovpn.c \
 			protocols/teamspeak.c \
 			protocols/viber.c \
-			protocols/openvpn.c
+			protocols/openvpn.c \
+			protocols/corba.c \
+			protocols/oracle.c \
+			protocols/rsync.c \
+			protocols/rtcp.c \
+			protocols/skinny.c \
+			protocols/tor.c
 
 # NTOP protocols are at the end

@@ -203,8 +203,16 @@ extern "C" {
 #define NDPI_PROTOCOL_CISCOVPN                                  161 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_TEAMSPEAK                                 162 /* Remy Mudingay <mudingay@ill.fr> */
 
+#define NDPI_PROTOCOL_TOR                                       163 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_SKINNY                                    164 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_RTCP                                      165 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_RSYNC                                     166 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_ORACLE                                    167 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_CORBA                                     168 /* Remy Mudingay <mudingay@ill.fr> */
+
+
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          162
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          168
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128
