@@ -39,11 +39,9 @@ void ndpi_search_rtcp(struct ndpi_detection_module_struct *ndpi_struct, struct n
     sport = ntohs(packet->udp->source), dport = ntohs(packet->udp->dest);
     NDPI_LOG(NDPI_PROTOCOL_RTCP, ndpi_struct, NDPI_LOG_DEBUG, "calculating dport over udp.\n");
     if((packet->payload_packet_len >= 28 || packet->payload_packet_len <= 1200) &&
-       (packet->payload[0] == 0x80 && (packet->payload[1] == 0xc8 || packet->payload[1] == 0xc9) &&
-	packet->payload[2] == 0x00) ||
-       (packet->payload[0] == 0x81 &&
-	(packet->payload[1] == 0xc8 || packet->payload[1] == 0xc9) &&
-	packet->payload[2] == 0x00)) {
+       ((packet->payload[0] == 0x80) && ((packet->payload[1] == 0xc8) || (packet->payload[1] == 0xc9)) && (packet->payload[2] == 0x00))
+       || ((packet->payload[0] == 0x81) && ((packet->payload[1] == 0xc8) || (packet->payload[1] == 0xc9)) 
+	   && (packet->payload[2] == 0x00))) {
       NDPI_LOG(NDPI_PROTOCOL_RTCP, ndpi_struct, NDPI_LOG_DEBUG, "found rtcp.\n");
       ndpi_int_rtcp_add_connection(ndpi_struct, flow);
     }
