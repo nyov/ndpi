@@ -103,7 +103,7 @@ typedef enum {
 void *ndpi_tdelete(const void * __restrict, void ** __restrict,
 		   int (*)(const void *, const void *));
 void *ndpi_tfind(const void *, void *, int (*)(const void *, const void *));
-void *ndpi_tsearch(const void *, void **, int (*)(const void *, const void *));
+void *ndpi_tsearch(const void *, void**, int (*)(const void *, const void *));
 void ndpi_twalk(const void *, void (*)(const void *, ndpi_VISIT, int));
 void ndpi_tdestroy(void *vrootp, void (*freefct)(void *));
 
