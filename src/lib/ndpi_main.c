@@ -150,7 +150,7 @@ ndpi_twalk(const void *vroot, void (*action)(const void *, ndpi_VISIT, int))
 
 /* find a node, or return 0 */
 void *
-ndpi_tfind(const void *vkey, void * const *vrootp,
+ndpi_tfind(const void *vkey, void *vrootp,
 	   int (*compar)(const void *, const void *))
 {
   char *key = (char *)vkey;
