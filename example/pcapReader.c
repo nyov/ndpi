@@ -524,7 +524,7 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
     return;
 
   ip_packet_count++;
-  total_bytes += rawsize;
+  total_bytes += rawsize + 24 /* CRC etc */;
 
   if(flow->detection_completed) return;
 
@@ -578,6 +578,40 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   return 0;
 }
 
+/* ****************************************************** */
+
+
+char* formatTraffic(float numBits, int bits, char *buf) {
+  char unit;
+
+  if(bits)
+    unit = 'b';
+  else
+    unit = 'B';
+
+  if(numBits < 1024) {
+    snprintf(buf, 32, "%lu %c", (unsigned long)numBits, unit);
+  } else if (numBits < 1048576) {
+    snprintf(buf, 32, "%.2f K%c", (float)(numBits)/1024, unit);
+  } else {
+    float tmpMBits = ((float)numBits)/1048576;
+
+    if(tmpMBits < 1024) {
+      snprintf(buf, 32, "%.2f M%c", tmpMBits, unit);
+    } else {
+      tmpMBits /= 1024;
+
+      if(tmpMBits < 1024) {
+	snprintf(buf, 32, "%.2f G%c", tmpMBits, unit);
+      } else {
+	snprintf(buf, 32, "%.2f T%c", (float)(tmpMBits)/1024, unit);
+      }
+    }
+  }
+
+  return(buf);
+}
+
 char* formatPackets(float numPkts, char *buf) {
   if(numPkts < 1000) {
     snprintf(buf, 32, "%.2f", numPkts);
@@ -605,10 +639,11 @@ static void printResults(u_int64_t tot_usec)
   printf("\tUnique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
 
   if(tot_usec > 0) {
-    char buf[32];
+    char buf[32], buf1[32];
     float t = (float)(ip_packet_count*1000000)/(float)tot_usec;
+    float b = (float)(total_bytes * 8 *1000000)/(float)tot_usec;
 
-    printf("\tnDPI throughout: \x1b[36m%s pps\x1b[0m\n", formatPackets(t, buf));
+    printf("\tnDPI throughout: \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
   }
 
   for(i=0; i<NUM_ROOTS; i++)
