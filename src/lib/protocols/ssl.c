@@ -63,20 +63,23 @@ static void stripCertificateTrailer(char *buffer, int buffer_len) {
   }
 }
 
-int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
+/* Code fixes courtesy of Alexsandro Brahm <alex@digistar.com.br> */
+int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
+		      struct ndpi_flow_struct *flow,
 		      char *buffer, int buffer_len) {
   struct ndpi_packet_struct *packet = &flow->packet;
 
   /* Nothing matched so far: let's decode the certificate with some heuristics */
   if(packet->payload[0] == 0x16 /* Handshake */) {
-    u_int16_t total_len = packet->payload[4] + 5 /* SSL Header */;
+    u_int16_t total_len  = (packet->payload[3] << 8) + packet->payload[4] + 5 /* SSL Header */;
     u_int8_t handshake_protocol = packet->payload[5];
 
     memset(buffer, 0, buffer_len);
 
     if(total_len <= packet->payload_packet_len) {
+      int i;
+
       if(handshake_protocol == 0x02 /* Server Hello */) {
-	int i;
 
 	for(i=total_len; i < packet->payload_packet_len-3; i++) {
 	  if((packet->payload[i] == 0x04)
@@ -121,11 +124,11 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct n
       } else if(handshake_protocol == 0x01 /* Client Hello */) {
 	u_int offset, base_offset = 43;
 	u_int16_t session_id_len = packet->payload[base_offset];
-	if((session_id_len+base_offset+2) >= total_len) { 
-	  u_int16_t cypher_len =  packet->payload[session_id_len+base_offset+2];
 
+	if((session_id_len+base_offset+2) <= total_len) {
+	  u_int16_t cypher_len =  packet->payload[session_id_len+base_offset+2] + (packet->payload[session_id_len+base_offset+1] << 8);
 	  offset = base_offset + session_id_len + cypher_len + 2;
-
+	  
 	  if(offset < total_len) {
 	    u_int16_t compression_len;
 	    u_int16_t extensions_len;
