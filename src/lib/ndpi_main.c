@@ -1207,7 +1207,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   }
 
   while(fd) {
-    char buffer[512], *line, *at, *proto, *elem, *holder;
+    char buffer[512], *line, *at, *proto, *elem;
     ndpi_proto_defaults_t *def;
     int subprotocol_id;
 
@@ -1254,7 +1254,6 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     elem = strtok_r(line, ",", &holder);
     while(elem != NULL) {
       char *attr = elem, *value;
-      char *port;
       ndpi_port_range range;
       int is_tcp = 0, is_udp = 0;
 
