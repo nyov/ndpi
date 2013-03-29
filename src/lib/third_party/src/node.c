@@ -189,9 +189,11 @@ void node_register_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * str)
   /* Manage memory */
   if (thiz->matched_patterns_num >= thiz->matched_patterns_max)
     {
-      thiz->matched_patterns_max += REALLOC_CHUNK_MATCHSTR;
       thiz->matched_patterns = (AC_PATTERN_t *) ndpi_realloc 
-	(thiz->matched_patterns, thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
+	(thiz->matched_patterns, thiz->matched_patterns_max*sizeof(AC_PATTERN_t),
+	 (REALLOC_CHUNK_MATCHSTR+thiz->matched_patterns_max)*sizeof(AC_PATTERN_t));
+
+      thiz->matched_patterns_max += REALLOC_CHUNK_MATCHSTR;
     }
 
   thiz->matched_patterns[thiz->matched_patterns_num].astring = str->astring;
@@ -209,9 +211,10 @@ void node_register_outgoing
 {
   if(thiz->outgoing_degree >= thiz->outgoing_max)
     {
-      thiz->outgoing_max += REALLOC_CHUNK_OUTGOING;
       thiz->outgoing = (struct edge *) ndpi_realloc 
-	(thiz->outgoing, thiz->outgoing_max*sizeof(struct edge));
+	(thiz->outgoing, thiz->outgoing_max*sizeof(struct edge),
+	 (REALLOC_CHUNK_OUTGOING+thiz->outgoing_max)*sizeof(struct edge));
+      thiz->outgoing_max += REALLOC_CHUNK_OUTGOING;
     }
 
   thiz->outgoing[thiz->outgoing_degree].alpha = alpha;

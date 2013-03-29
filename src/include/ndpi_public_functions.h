@@ -131,7 +131,7 @@ extern "C" {
   /* Public malloc/free */
   void* ndpi_malloc(unsigned long size);
   void  ndpi_free(void *ptr);
-  void *ndpi_realloc(void *ptr, size_t size);
+  void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size);
   char *ndpi_strdup(const char *s);
   char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
