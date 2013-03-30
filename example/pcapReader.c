@@ -676,6 +676,26 @@ static void printResults(u_int64_t tot_usec)
   printf("\n\n");
 }
 
+static void closePcapFile(void)
+{
+  if (_pcap_handle != NULL) {
+    pcap_close(_pcap_handle);
+  }
+}
+
+// executed for each packet in the pcap file
+void sigproc(int sig) {
+  static int called = 0;
+
+  if(called) return; else called = 1;
+  shutdown_app = 1;
+
+  closePcapFile();
+  printResults(0);
+  terminateDetection();
+  exit(0);
+}
+
 static void openPcapFileOrDevice(void)
 {
   u_int snaplen = 1514;
@@ -711,31 +731,13 @@ static void openPcapFileOrDevice(void)
 
   if(capture_until > 0) {
     printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
-    capture_until += time(NULL);
+
+    alarm(capture_until);
+    signal(SIGALRM, sigproc);
+    capture_until += time(NULL);    
   }
 }
 
-static void closePcapFile(void)
-{
-  if (_pcap_handle != NULL) {
-    pcap_close(_pcap_handle);
-  }
-}
-
-void sigproc(int sig) {
-  static int called = 0;
-
-  if(called) return; else called = 1;
-  shutdown_app = 1;
-
-  closePcapFile();
-  printResults(0);
-  terminateDetection();
-  exit(0);
-}
-
-
-// executed for each packet in the pcap file
 static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header, const u_char * packet)
 {
   const struct ndpi_ethhdr *ethernet;
@@ -837,6 +839,8 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 
 static void runPcapLoop(void)
 {
+
+
   if((!shutdown_app) && (_pcap_handle != NULL))
     pcap_loop(_pcap_handle, -1, &pcap_packet_callback, NULL);
 }
