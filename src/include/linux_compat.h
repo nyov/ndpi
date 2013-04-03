@@ -28,7 +28,7 @@
 
 #include "ndpi_define.h"
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__NetBSD__)
 #include <machine/endian.h>
 
 #if _BYTE_ORDER == _LITTLE_ENDIAN
