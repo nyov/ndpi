@@ -75,10 +75,14 @@ typedef unsigned __int64 u_int64_t;
 
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 #include <netinet/in.h>
+#if defined(__NetBSD__)
+#include <netinet/in_systm.h>
+#endif
 #endif
 
 #ifndef WIN32
 #ifndef __KERNEL__
+
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
