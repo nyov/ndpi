@@ -261,7 +261,7 @@ static void printFlow(struct ndpi_flow *flow) {
 	 flow->packets, flow->bytes);
 }
 
-static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth) {
+static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
 
   if (flow->detected_protocol != 0 /* UNKNOWN */) return;
@@ -270,7 +270,7 @@ static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, 
     printFlow(flow);
 }
 
-static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, int depth) {
+static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
 
   if (flow->detected_protocol == 0 /* UNKNOWN */) return;
@@ -279,7 +279,7 @@ static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, in
     printFlow(flow);
 }
 
-static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth) {
+static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
   char buf1[32], buf2[32];
 
@@ -293,7 +293,7 @@ static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int dept
 	 flow);
 #endif
 
-  if((which == preorder) || (which == leaf)) { /* Avoid walking the same node multiple times */
+  if((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
     if(enable_protocol_guess) {
       if (flow->detected_protocol == 0 /* UNKNOWN */) {
 	flow->detected_protocol = ndpi_guess_undetected_protocol(ndpi_struct,
@@ -647,7 +647,7 @@ static void printResults(u_int64_t tot_usec)
   }
 
   for(i=0; i<NUM_ROOTS; i++)
-    ndpi_twalk(ndpi_flows_root[i], node_proto_guess_walker);
+    ndpi_twalk(ndpi_flows_root[i], node_proto_guess_walker, NULL);
 
   if(enable_protocol_guess)
     printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
@@ -666,11 +666,11 @@ static void printResults(u_int64_t tot_usec)
     printf("\n");
 
     for(i=0; i<NUM_ROOTS; i++)
-      ndpi_twalk(ndpi_flows_root[i], node_print_known_proto_walker);
+      ndpi_twalk(ndpi_flows_root[i], node_print_known_proto_walker, NULL);
 
     printf("\n\nUndetected flows:\n");
     for(i=0; i<NUM_ROOTS; i++)
-      ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker);
+      ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker, NULL);
   }
 
   printf("\n\n");

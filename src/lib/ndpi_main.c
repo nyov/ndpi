@@ -123,29 +123,29 @@ ndpi_tdelete(const void *vkey, void **vrootp,
 
 /* Walk the nodes of a tree */
 static void
-trecurse(ndpi_node *root, void (*action)(const void *, ndpi_VISIT, int), int level)
+ndpi_trecurse(ndpi_node *root, void (*action)(const void *, ndpi_VISIT, int, void*), int level, void *user_data)
 {
   if (root->left == (ndpi_node *)0 && root->right == (ndpi_node *)0)
-    (*action)(root, ndpi_leaf, level);
+    (*action)(root, ndpi_leaf, level, user_data);
   else {
-    (*action)(root, ndpi_preorder, level);
+    (*action)(root, ndpi_preorder, level, user_data);
     if (root->left != (ndpi_node *)0)
-      trecurse(root->left, action, level + 1);
-    (*action)(root, ndpi_postorder, level);
+      ndpi_trecurse(root->left, action, level + 1, user_data);
+    (*action)(root, ndpi_postorder, level, user_data);
     if (root->right != (ndpi_node *)0)
-      trecurse(root->right, action, level + 1);
-    (*action)(root, ndpi_endorder, level);
+      ndpi_trecurse(root->right, action, level + 1, user_data);
+    (*action)(root, ndpi_endorder, level, user_data);
   }
 }
 
 /* Walk the nodes of a tree */
 void
-ndpi_twalk(const void *vroot, void (*action)(const void *, ndpi_VISIT, int))
+ndpi_twalk(const void *vroot, void (*action)(const void *, ndpi_VISIT, int, void *), void *user_data)
 {
   ndpi_node *root = (ndpi_node *)vroot;
 
-  if (root != (ndpi_node *)0 && action != (void (*)(const void *, ndpi_VISIT, int))0)
-    trecurse(root, action, 0);
+  if (root != (ndpi_node *)0 && action != (void (*)(const void *, ndpi_VISIT, int, void*))0)
+    ndpi_trecurse(root, action, 0, user_data);
 }
 
 /* find a node, or return 0 */
@@ -1284,9 +1284,9 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
 
 #if 0
   printf("\nTCP:\n");
-  ndpi_twalk(tcpRoot, ndpi_default_ports_tree_node_t_walker);
+  ndpi_twalk(tcpRoot, ndpi_default_ports_tree_node_t_walker, NULL);
   printf("\nUDP:\n");
-  ndpi_twalk(udpRoot, ndpi_default_ports_tree_node_t_walker);
+  ndpi_twalk(udpRoot, ndpi_default_ports_tree_node_t_walker, NULL);
 #endif
 #endif
 
