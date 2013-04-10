@@ -28,7 +28,7 @@
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
-#include "node.h"
+#include "../include/node.h"
 #include "sort.h"
 
 /* reallocation step for AC_NODE_t.matched_patterns */
