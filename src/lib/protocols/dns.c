@@ -26,6 +26,65 @@
 
 #ifdef NDPI_PROTOCOL_DNS
 
+static u_int getNameLength(u_int i, const u_int8_t *payload, u_int payloadLen) {
+  if(payload[i] == 0x00)
+    return(1);
+  else if(payload[i] == 0xC0)
+    return(2);
+  else {
+    u_int8_t len = payload[i];
+    u_int8_t off = len + 1;
+
+    if(off == 0) /* Bad packet */
+      return(0);
+    else
+      return(off + getNameLength(i+off, payload, payloadLen));
+  }	
+}
+
+/* *********************************************** */
+
+char* _intoaV4(unsigned int addr, char* buf, u_short bufLen) {
+  char *cp, *retStr;
+  uint byte;
+  int n;
+
+  cp = &buf[bufLen];
+  *--cp = '\0';
+
+  n = 4;
+  do {
+    byte = addr & 0xff;
+    *--cp = byte % 10 + '0';
+    byte /= 10;
+    if(byte > 0) {
+      *--cp = byte % 10 + '0';
+      byte /= 10;
+      if(byte > 0)
+	*--cp = byte + '0';
+    }
+    *--cp = '.';
+    addr >>= 8;
+  } while (--n > 0);
+
+  /* Convert the string to lowercase */
+  retStr = (char*)(cp+1);
+
+  return(retStr);
+}
+
+/* *********************************************** */
+
+u_int16_t get16(int *i, const u_int8_t *payload) {
+  u_int16_t v = *(u_int16_t*)&payload[*i];
+
+  (*i) += 2;
+
+  return(ntohs(v));
+}
+
+/* *********************************************** */
+
 struct dns_packet_header {
   u_int16_t transaction_id, flags, num_queries, answer_rrs, authority_rrs, additional_rrs;
 } __attribute__((packed));
@@ -52,7 +111,8 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     int i = packet->tcp ? 2 : 0;
     struct dns_packet_header header, *dns = (struct dns_packet_header*)&packet->payload[i];
     u_int8_t is_query, ret_code, is_dns = 0;
-    
+    u_int32_t a_record = 0, query_offset;
+
     header.flags = ntohs(dns->flags);
     header.transaction_id = ntohs(dns->transaction_id);
     header.num_queries = ntohs(dns->num_queries);
@@ -61,6 +121,8 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     header.additional_rrs = ntohs(dns->additional_rrs);
     is_query = (header.flags & 0x8000) ? 0 : 1;
     ret_code = is_query ? 0 : (header.flags & 0x0F);
+    i += sizeof(struct dns_packet_header);
+    query_offset = i;
 
     if(is_query) {
       /* DNS Request */
@@ -79,6 +141,60 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	 ) {
 	/* This is a good reply */
 	is_dns = 1;
+
+	i++;
+	
+	if(packet->payload[i] != '\0') {
+	  while((i < packet->payload_packet_len)
+		&& (packet->payload[i] != '\0')) {
+	    i++;
+	  }
+	  
+	  i++;
+	}
+
+	i += 4;
+
+	if(header.answer_rrs > 0) {
+	  u_int16_t rsp_type, rsp_class;
+	  u_int16_t num;
+
+	  for(num = 0; num < header.answer_rrs; num++) {
+	    u_int16_t data_len;
+	
+	    if((i+6) >= packet->payload_packet_len) {
+	      break;
+	    }
+
+	    if((data_len = getNameLength(i, packet->payload, packet->payload_packet_len)) == 0) {
+	      break;
+	    } else
+	      i += data_len;
+	
+	    rsp_type = get16(&i, packet->payload);
+	    rsp_class = get16(&i, packet->payload);
+
+	    i += 4;
+	    data_len = get16(&i, packet->payload);
+
+	    if((data_len <= 1) || (data_len > (packet->payload_packet_len-i))) {
+	      break;
+	    }
+	
+	    if(rsp_type == 1 /* A */) {
+	      if(data_len == 4) {
+		a_record = ntohl(*((u_int32_t*)&packet->payload[i]));
+		break; /* One record is enough */
+	      }
+	    }
+	
+	    if(data_len == 0) {
+	      break;
+	    }
+
+	    i += data_len;
+	  } /* for */
+	}
       }
 
       if((header.num_queries <= NDPI_MAX_DNS_REQUESTS)
@@ -98,9 +214,8 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
       u_int16_t query_type, query_class;
 #endif
 
-      i += sizeof(struct dns_packet_header);
+      i = query_offset+1;
 
-      i++;
       while((i < packet->payload_packet_len)
 	    && (j < (sizeof(flow->host_server_name)-1))	  
 	    && (packet->payload[i] != '\0')) {
@@ -110,6 +225,13 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	j++, i++;
       }
 
+      if(a_record != 0) {
+	char a_buf[32];
+	
+	j += snprintf(&flow->host_server_name[j], sizeof(flow->host_server_name)-1-j, "@%s",
+		      _intoaV4(a_record, a_buf, sizeof(a_buf)));
+      }
+		      
       flow->host_server_name[j] = '\0';
 
 #ifdef DEBUG
