@@ -34,6 +34,8 @@
 
 #include "ahocorasick.h"
 
+#include <time.h>
+
 #ifdef __KERNEL__
 #define printf printk
 #endif
@@ -1207,7 +1209,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   }
 
   while(fd) {
-    char buffer[512], *line, *at, *proto, *elem, *holder;
+    char buffer[512], *line, *at, *proto, *elem;
     ndpi_proto_defaults_t *def;
     int subprotocol_id;
 
@@ -4651,7 +4653,7 @@ void ndpi_int_change_packet_protocol(struct ndpi_detection_module_struct *ndpi_s
     new_is_real = (packet->protocol_stack_info.entry_is_real_protocol & (~preserve_bitmask)) << 1;
     new_is_real |= packet->protocol_stack_info.entry_is_real_protocol & preserve_bitmask;
 
-    packet->protocol_stack_info.entry_is_real_protocol = new_is_real;
+    packet->protocol_stack_info.entry_is_real_protocol = (u_int8_t)new_is_real;
 
     /* now set the new protocol */
 
@@ -5064,4 +5066,60 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 #endif
 
   return(NDPI_PROTOCOL_UNKNOWN);
+}
+
+
+				  
+/* ****************************************************** */
+
+#ifndef __GNUC__
+#define EPOCHFILETIME (116444736000000000i64)
+#else
+#define EPOCHFILETIME (116444736000000000LL)
+#endif
+
+struct timezone {
+  int tz_minuteswest; /* minutes W of Greenwich */
+  int tz_dsttime;     /* type of dst correction */
+};
+
+#if 0
+int gettimeofday(struct timeval *tv, void *notUsed) {
+  tv->tv_sec = time(NULL);
+  tv->tv_usec = 0;
+  return(0);
+}
+#endif
+
+int gettimeofday(struct timeval *tv, struct timezone *tz)
+{
+  FILETIME        ft;
+  LARGE_INTEGER   li;
+  __int64         t;
+  static int      tzflag;
+
+  if (tv)
+    {
+      GetSystemTimeAsFileTime(&ft);
+      li.LowPart  = ft.dwLowDateTime;
+      li.HighPart = ft.dwHighDateTime;
+      t  = li.QuadPart;       /* In 100-nanosecond intervals */
+      t -= EPOCHFILETIME;     /* Offset to the Epoch time */
+      t /= 10;                /* In microseconds */
+      tv->tv_sec  = (long)(t / 1000000);
+      tv->tv_usec = (long)(t % 1000000);
+    }
+
+  if (tz)
+    {
+      if (!tzflag)
+        {
+	  _tzset();
+	  tzflag++;
+        }
+      tz->tz_minuteswest = _timezone / 60;
+      tz->tz_dsttime = _daylight;
+    }
+
+  return 0;
 }

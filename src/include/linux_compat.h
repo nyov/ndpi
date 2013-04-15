@@ -38,11 +38,16 @@
 #endif
 #endif
 
+#pragma pack(push)  /* push current alignment to stack */
+#pragma pack(1)     /* set alignment to 1 byte boundary */
+
 struct ndpi_ethhdr {
   u_char h_dest[6];       /* destination eth addr */
   u_char h_source[6];     /* source ether addr    */
   u_int16_t h_proto;      /* packet type ID field */
-} __attribute__((packed));
+};
+
+#pragma pack(pop)   /* restore original alignment from stack */
 
 struct ndpi_iphdr {
 #if defined(__LITTLE_ENDIAN__) 

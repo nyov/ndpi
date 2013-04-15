@@ -60,6 +60,15 @@
 #endif
 
 #ifdef WIN32
+#include <Winsock2.h> /* winsock.h is included automatically */
+#include <process.h>
+#include <io.h>
+#include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
+#include <process.h> /* for getpid() and the exec..() family */
+
+
+#define snprintf	_snprintf
+
 #define __attribute__(x)
 typedef char int8_t;
 typedef unsigned char u_int8_t;

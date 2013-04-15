@@ -97,7 +97,7 @@ void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct
 				ndpi_int_postgres_add_connection(ndpi_struct, flow);
 				return;
 			}
-			size = ntohl(get_u_int32_t(packet->payload, 1)) + 1;
+			size = (u_int16_t)ntohl(get_u_int32_t(packet->payload, 1)) + 1;
 			if (packet->payload[size - 1] == 'S') {
 				if ((size + get_u_int32_t(packet->payload, (size + 1))) == packet->payload_packet_len) {
 					NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");

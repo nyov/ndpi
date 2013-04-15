@@ -21,10 +21,18 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef WIN32
+#include <winsock2.h> /* winsock.h is included automatically */
+#include <process.h>
+#include <io.h>
+#include <getopt.h> 
+#define getopt getopt____
+#else
 #include <unistd.h>
+#include <netinet/in.h>
+#endif
 #include <string.h>
 #include <stdarg.h>
-#include <netinet/in.h>
 #include <search.h>
 #include <pcap.h>
 #include <signal.h>
@@ -266,7 +274,7 @@ static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, 
 
   if (flow->detected_protocol != 0 /* UNKNOWN */) return;
 
-  if((which == preorder) || (which == leaf)) /* Avoid walking the same node multiple times */
+  if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
     printFlow(flow);
 }
 
@@ -275,13 +283,12 @@ static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, in
 
   if (flow->detected_protocol == 0 /* UNKNOWN */) return;
 
-  if((which == preorder) || (which == leaf)) /* Avoid walking the same node multiple times */
+  if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
     printFlow(flow);
 }
 
 static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
-  char buf1[32], buf2[32];
 
 #if 0
   printf("<%d>Walk on node %s (%p)\n",
@@ -334,7 +341,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
 				       struct ndpi_id_struct **src,
 				       struct ndpi_id_struct **dst)
 {
-  u_int32_t i, idx;
+  u_int32_t idx;
   u_int16_t l4_packet_len;
   struct ndpi_tcphdr *tcph = NULL;
   struct ndpi_udphdr *udph = NULL;
@@ -453,7 +460,6 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
 
 static void setupDetection(void)
 {
-  u_int32_t i;
   NDPI_PROTOCOL_BITMASK all;
 
   // init global detection structure
@@ -521,7 +527,7 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
   } else
-    return;
+    return(0);
 
   ip_packet_count++;
   total_bytes += rawsize + 24 /* CRC etc */;
@@ -531,7 +537,7 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   // only handle unfragmented packets
   if ((frag_off & 0x3FFF) == 0) {
     // here the actual detection is performed
-    protocol = ndpi_detection_process_packet(ndpi_struct, ndpi_flow, (uint8_t *) iph, ipsize, time, src, dst);
+    protocol = (const u_int32_t)ndpi_detection_process_packet(ndpi_struct, ndpi_flow, (uint8_t *) iph, ipsize, time, src, dst);
   } else {
     static u_int8_t frag_warning_used = 0;
 
@@ -627,7 +633,7 @@ char* formatPackets(float numPkts, char *buf) {
 
 static void printResults(u_int64_t tot_usec)
 {
-  u_int32_t i, j;
+  u_int32_t i;
 
   printf("\x1b[2K\n");
   printf("pcap file contains\n");
@@ -732,8 +738,10 @@ static void openPcapFileOrDevice(void)
   if(capture_until > 0) {
     printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
 
+#ifndef WIN32
     alarm(capture_until);
     signal(SIGALRM, sigproc);
+#endif
     capture_until += time(NULL);    
   }
 }
