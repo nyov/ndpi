@@ -75,7 +75,7 @@ static char* ndpi_intoa_v4(unsigned int addr, char* buf, u_short bufLen) {
 
 /* *********************************************** */
 
-u_int16_t get16(int *i, const u_int8_t *payload) {
+static u_int16_t get16(int *i, const u_int8_t *payload) {
   u_int16_t v = *(u_int16_t*)&payload[*i];
 
   (*i) += 2;
