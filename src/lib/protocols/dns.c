@@ -44,7 +44,7 @@ static u_int getNameLength(u_int i, const u_int8_t *payload, u_int payloadLen) {
 
 /* *********************************************** */
 
-char* _intoaV4(unsigned int addr, char* buf, u_short bufLen) {
+static char* ndpi_intoa_v4(unsigned int addr, char* buf, u_short bufLen) {
   char *cp, *retStr;
   uint byte;
   int n;
@@ -229,7 +229,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	char a_buf[32];
 	
 	j += snprintf(&flow->host_server_name[j], sizeof(flow->host_server_name)-1-j, "@%s",
-		      _intoaV4(a_record, a_buf, sizeof(a_buf)));
+		      ndpi_intoa_v4(a_record, a_buf, sizeof(a_buf)));
       }
 		      
       flow->host_server_name[j] = '\0';
