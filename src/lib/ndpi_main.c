@@ -1209,7 +1209,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   }
 
   while(fd) {
-    char buffer[512], *line, *at, *proto, *elem;
+    char buffer[512], *line, *at, *proto, *elem, *holder;
     ndpi_proto_defaults_t *def;
     int subprotocol_id;
 
@@ -5072,6 +5072,7 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 				  
 /* ****************************************************** */
 
+#ifdef WIN32
 #ifndef __GNUC__
 #define EPOCHFILETIME (116444736000000000i64)
 #else
@@ -5123,3 +5124,4 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
 
   return 0;
 }
+#endif /* WIN32 */
