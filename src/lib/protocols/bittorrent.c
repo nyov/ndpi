@@ -41,7 +41,7 @@ static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module
 						    *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  
+
   //  struct ndpi_id_struct *src = flow->src;
   //  struct ndpi_id_struct *dst = flow->dst;
 
@@ -347,7 +347,7 @@ static void ndpi_int_search_bittorrent_tcp(struct ndpi_detection_module_struct *
 {
 
   struct ndpi_packet_struct *packet = &flow->packet;
-  
+
   if (packet->payload_packet_len == 0) {
     return;
   }
@@ -378,12 +378,36 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
       ndpi_int_search_bittorrent_tcp(ndpi_struct, flow);
     }
     else if(packet->udp != NULL) {
+      /*
+	Check for uTP http://www.bittorrent.org/beps/bep_0029.html
+
+	wireshark/epan/dissectors/packet-bt-utp.c
+       */
+
+      if(packet->payload_packet_len >= 23 /* min header size */) {
+	/* Check if this is protocol v0 */
+	u_int8_t v0_extension = packet->payload[17];
+	u_int8_t v0_flags     = packet->payload[18];
+
+	/* Check if this is protocol v1 */
+	u_int8_t v1_version   = packet->payload[0];
+	u_int8_t v1_extension = packet->payload[1];
+
+	if((((v1_version & 0x0f) == 1)
+	   && ((v1_version >> 4) < 6 /* ST_NUM_STATES */)
+	   && (v1_extension      < 3 /* EXT_NUM_EXT */))
+	   || ((v0_flags < 6 /* ST_NUM_STATES */)
+	       || (v0_extension < 3 /* EXT_NUM_EXT */))) {
+	  goto bittorrent_found;
+	}
+      }
+
       flow->bittorrent_stage++;
 
       if(flow->bittorrent_stage < 10) {
 	if(packet->payload_packet_len > 19 /* min size */) {
 	  char *begin;
-	
+
 	  if(ndpi_strnstr(packet->payload, ":target20:", packet->payload_packet_len)
 	     || ndpi_strnstr(packet->payload, ":find_node1:", packet->payload_packet_len)
 	     || ndpi_strnstr(packet->payload, "d1:ad2:id20:", packet->payload_packet_len)) {
@@ -396,7 +420,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	    return;
 	  } else if((begin = memchr(packet->payload, 'B',  packet->payload_packet_len-19)) != NULL) {
 	    long offset = (u_long)begin - (u_long)packet->payload;
-	    
+
 	    if((packet->payload_packet_len-19) > offset) {
 	      if(memcmp(begin, "BitTorrent protocol", 19) == 0) {
 		goto bittorrent_found;
