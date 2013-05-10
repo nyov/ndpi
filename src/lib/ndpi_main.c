@@ -34,10 +34,10 @@
 
 #include "ahocorasick.h"
 
-#include <time.h>
-
 #ifdef __KERNEL__
 #define printf printk
+#else
+#include <time.h>
 #endif
 
 typedef struct {

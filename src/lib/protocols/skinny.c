@@ -43,16 +43,15 @@ void ndpi_search_skinny(struct ndpi_detection_module_struct *ndpi_struct, struct
   if(packet->tcp != NULL) {
     sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
     NDPI_LOG(NDPI_PROTOCOL_SKINNY, ndpi_struct, NDPI_LOG_DEBUG, "calculating SKINNY over tcp.\n");
-    if (dport == 2000  && (packet->payload_packet_len == 24 &&
-			   memcmp(&packet->payload[0], keypadmsg_8_bytes, 8) == 0) ||
-	(packet->payload_packet_len == 64 &&
-	 memcmp(&packet->payload[0], pattern_8_bytes, 8) == 0)) {
+    if (dport == 2000  && ((packet->payload_packet_len == 24 &&
+			    memcmp(&packet->payload[0], keypadmsg_8_bytes, 8) == 0) 
+			   || ((packet->payload_packet_len == 64) && memcmp(&packet->payload[0], pattern_8_bytes, 8) == 0))) {
       NDPI_LOG(NDPI_PROTOCOL_SKINNY, ndpi_struct, NDPI_LOG_DEBUG, "found skinny.\n");
       ndpi_int_skinny_add_connection(ndpi_struct, flow);
-    } else if (sport == 2000 && (packet->payload_packet_len == 28 &&
+    } else if (sport == 2000 && ((packet->payload_packet_len == 28 &&
 				 memcmp(&packet->payload[0], selectmsg_8_bytes, 8) == 0 ) ||
 	       (packet->payload_packet_len == 44 &&
-		memcmp(&packet->payload[0], pattern_9_bytes, 9) == 0 )) {
+		memcmp(&packet->payload[0], pattern_9_bytes, 9) == 0))) {
       NDPI_LOG(NDPI_PROTOCOL_SKINNY, ndpi_struct, NDPI_LOG_DEBUG, "found skinny.\n");
       ndpi_int_skinny_add_connection(ndpi_struct, flow);
     }
