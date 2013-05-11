@@ -602,7 +602,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 
     /* Copy result for nDPI apps */
     len = ndpi_min(packet->host_line.len, sizeof(flow->host_server_name)-1);
-    strncpy((const char*)flow->host_server_name, (const char*)packet->host_line.ptr, len);
+    strncpy((char*)flow->host_server_name, (char*)packet->host_line.ptr, len);
     flow->host_server_name[len] = '\0';
 
     parseHttpSubprotocol(ndpi_struct, flow);
