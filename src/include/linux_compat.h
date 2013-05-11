@@ -28,12 +28,6 @@
 
 #include "ndpi_define.h"
 
-struct ndpi_ethhdr {
-  u_char h_dest[6];       /* destination eth addr */
-  u_char h_source[6];     /* source ether addr    */
-  u_int16_t h_proto;      /* packet type ID field */
-};
-
 #if defined(__FreeBSD__) || defined(__NetBSD__)
 #include <machine/endian.h>
 
@@ -48,6 +42,17 @@ struct ndpi_ethhdr {
 #pragma pack(1)     /* set alignment to 1 byte boundary */
 
 #pragma pack(pop)   /* restore original alignment from stack */
+
+struct ndpi_ethhdr {
+  u_char h_dest[6];       /* destination eth addr */
+  u_char h_source[6];     /* source ether addr    */
+  u_int16_t h_proto;      /* packet type ID field */
+};
+
+struct ndpi_80211q {
+  u_int16_t vlanId;
+  u_int16_t protoType;
+};
 
 struct ndpi_iphdr {
 #if defined(__LITTLE_ENDIAN__) 
