@@ -234,6 +234,9 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 		      
       flow->host_server_name[j] = '\0';
 
+      if(j > 0)
+	ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
+
 #ifdef DEBUG
       i++;
       memcpy(&query_type, &packet->payload[i], 2); query_type  = ntohs(query_type), i += 2;
@@ -242,8 +245,14 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
       printf("%s [type=%04X][class=%04X]\n", flow->host_server_name, query_type, query_class);
 #endif
 
-      NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "found DNS.\n");      
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DNS, NDPI_REAL_PROTOCOL);
+      if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
+	/* 
+	   Do not set the protocol with DNS if ndpi_match_string_subprotocol() has
+	   matched a subprotocol
+	*/
+	NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "found DNS.\n");      
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DNS, NDPI_REAL_PROTOCOL);
+      }
     } else {
       NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "exclude DNS.\n");
       NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DNS);

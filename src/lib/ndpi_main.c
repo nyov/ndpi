@@ -5029,7 +5029,7 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
   struct ndpi_packet_struct *packet = &flow->packet;
   AC_TEXT_t ac_input_text;
 
-  if(ndpi_struct->ac_automa == NULL) return(NDPI_PROTOCOL_UNKNOWN);
+  if((ndpi_struct->ac_automa == NULL) || (string_to_match_len== 0)) return(NDPI_PROTOCOL_UNKNOWN);
 
   if(!ndpi_struct->ac_automa_finalized) {
     ac_automata_finalize((AC_AUTOMATA_t*)ndpi_struct->ac_automa);

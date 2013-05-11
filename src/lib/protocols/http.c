@@ -509,7 +509,8 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
     
   if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP) {
     /* Try matching subprotocols */
-    ndpi_match_string_subprotocol(ndpi_struct, flow, (char*)packet->host_line.ptr, packet->host_line.len);
+    // ndpi_match_string_subprotocol(ndpi_struct, flow, (char*)packet->host_line.ptr, packet->host_line.len);
+    ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
   }
 }
 
