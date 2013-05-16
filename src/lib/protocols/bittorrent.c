@@ -395,9 +395,9 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 
 	if((((v1_version & 0x0f) == 1)
 	   && ((v1_version >> 4) < 6 /* ST_NUM_STATES */)
-	   && (v1_extension      < 3 /* EXT_NUM_EXT */))
+	    && (v1_extension      < 3 /* EXT_NUM_EXT */))
 	   || ((v0_flags < 6 /* ST_NUM_STATES */)
-	       || (v0_extension < 3 /* EXT_NUM_EXT */))) {
+	       && (v0_extension < 3 /* EXT_NUM_EXT */))) {
 	  goto bittorrent_found;
 	}
       }
