@@ -649,7 +649,7 @@ typedef struct ndpi_flow_struct {
     struct ndpi_flow_udp_struct udp;
   } l4;
 
-  u_char host_server_name[64]; /* HTTP host or DNS query */
+  u_char host_server_name[256]; /* HTTP host or DNS query */
 
   /* ALL protocol specific 64 bit variables here */
 

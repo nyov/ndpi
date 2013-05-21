@@ -111,7 +111,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     int i = packet->tcp ? 2 : 0;
     struct dns_packet_header header, *dns = (struct dns_packet_header*)&packet->payload[i];
     u_int8_t is_query, ret_code, is_dns = 0;
-    u_int32_t a_record = 0, query_offset;
+    u_int32_t a_record[NDPI_MAX_DNS_REQUESTS] = { 0 }, query_offset, num_a_records = 0;
 
     header.flags = ntohs(dns->flags);
     header.transaction_id = ntohs(dns->transaction_id);
@@ -183,8 +183,12 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	
 	    if(rsp_type == 1 /* A */) {
 	      if(data_len == 4) {
-		a_record = ntohl(*((u_int32_t*)&packet->payload[i]));
-		break; /* One record is enough */
+		u_int32_t v = ntohl(*((u_int32_t*)&packet->payload[i]));
+
+		if(num_a_records < (NDPI_MAX_DNS_REQUESTS-1))
+		  a_record[num_a_records++] = v;
+		else
+		  break; /* One record is enough */
 	      }
 	    }
 	
@@ -227,15 +231,23 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 
       if(a_record != 0) {
 	char a_buf[32];
-	
-	j += snprintf(&flow->host_server_name[j], sizeof(flow->host_server_name)-1-j, "@%s",
-		      ndpi_intoa_v4(a_record, a_buf, sizeof(a_buf)));
+	int i;
+
+	for(i=0; i<num_a_records; i++) {
+	  j += snprintf(&flow->host_server_name[j], sizeof(flow->host_server_name)-1-j, "%s%s",
+			(i == 0) ? "@" : ";",
+			ndpi_intoa_v4(a_record[i], a_buf, sizeof(a_buf)));
+	}
       }
 		      
       flow->host_server_name[j] = '\0';
 
-      if(j > 0)
+      if(j > 0) {
+#ifdef DEBUG
+	printf("==> %s\n", flow->host_server_name);
+#endif
 	ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
+      }
 
 #ifdef DEBUG
       i++;
