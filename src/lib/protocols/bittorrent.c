@@ -385,19 +385,25 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
        */
 
       if(packet->payload_packet_len >= 23 /* min header size */) {
+#if 0
 	/* Check if this is protocol v0 */
 	u_int8_t v0_extension = packet->payload[17];
 	u_int8_t v0_flags     = packet->payload[18];
+#endif
 
 	/* Check if this is protocol v1 */
 	u_int8_t v1_version   = packet->payload[0];
 	u_int8_t v1_extension = packet->payload[1];
-
+	
 	if((((v1_version & 0x0f) == 1)
-	   && ((v1_version >> 4) < 6 /* ST_NUM_STATES */)
+	    && ((v1_version >> 4) < 6 /* ST_NUM_STATES */)
 	    && (v1_extension      < 3 /* EXT_NUM_EXT */))
+#if 0
+	   /* v0 version is pretty old and hard to dissect precisely */
 	   || ((v0_flags < 6 /* ST_NUM_STATES */)
-	       && (v0_extension < 3 /* EXT_NUM_EXT */))) {
+	       && (v0_extension < 3 /* EXT_NUM_EXT */))
+#endif
+	   ) {
 	  goto bittorrent_found;
 	}
       }
