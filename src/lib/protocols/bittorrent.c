@@ -370,6 +370,12 @@ static void ndpi_int_search_bittorrent_tcp(struct ndpi_detection_module_struct *
 void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
+
+  /* This is broadcast */
+  if(packet->iph 
+     && ((packet->iph->saddr == 0xFFFFFFFF) || (packet->iph->daddr == 0xFFFFFFFF)))
+    return;
+
   if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_BITTORRENT) {
     /* check for tcp retransmission here */
 
@@ -385,26 +391,30 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
        */
 
       if(packet->payload_packet_len >= 23 /* min header size */) {
-#if 0
 	/* Check if this is protocol v0 */
 	u_int8_t v0_extension = packet->payload[17];
 	u_int8_t v0_flags     = packet->payload[18];
-#endif
 
 	/* Check if this is protocol v1 */
 	u_int8_t v1_version   = packet->payload[0];
 	u_int8_t v1_extension = packet->payload[1];
 	
-	if((((v1_version & 0x0f) == 1)
-	    && ((v1_version >> 4) < 6 /* ST_NUM_STATES */)
-	    && (v1_extension      < 3 /* EXT_NUM_EXT */))
-#if 0
-	   /* v0 version is pretty old and hard to dissect precisely */
-	   || ((v0_flags < 6 /* ST_NUM_STATES */)
-	       && (v0_extension < 3 /* EXT_NUM_EXT */))
-#endif
-	   ) {
+	if(((v1_version & 0x0f) == 1)
+	   && ((v1_version >> 4) < 6 /* ST_NUM_STATES */)
+	   && (v1_extension      < 3 /* EXT_NUM_EXT */)) {
 	  goto bittorrent_found;
+	} else if((v0_flags < 6 /* ST_NUM_STATES */)
+		  && (v0_extension < 3 /* EXT_NUM_EXT */)) {
+	  u_int32_t ts, 
+	    // ts_usec, 
+	    now = (u_int32_t)time(NULL);
+	  
+	  ts      = ntohl(*((u_int32_t*)&(packet->payload[4])));
+	  // ts_usec = ntohl(*((u_int32_t*)&(packet->payload[8])));
+	  
+	  if((ts < (now+86400)) && (ts > (now-86400))) {
+	    goto bittorrent_found;
+	  }
 	}
       }
 
