@@ -146,6 +146,14 @@ extern "C" {
 								  void* (*__ndpi_malloc)(unsigned long size),
 								  void  (*__ndpi_free)(void *ptr),
 								  ndpi_debug_function_ptr ndpi_debug_printf);
+
+  /**
+   * This function enables cache support in nDPI used for some protocol such as Skype
+   * @param cache host name
+   * @param cache port
+   */
+  void ndpi_enable_cache(struct ndpi_detection_module_struct *ndpi_mod, char* host, u_int port);
+
   /**
    * This function destroys the detection module
    * @param ndpi_struct the to clearing detection module

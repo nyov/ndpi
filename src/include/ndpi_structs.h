@@ -26,6 +26,9 @@
 #ifndef __NDPI_STRUCTS_INCLUDE_FILE__
 #define __NDPI_STRUCTS_INCLUDE_FILE__
 
+#include "../../config.h"
+
+#include "ndpi_credis.h"
 #include "linux_compat.h"
 
 #include "ndpi_define.h"
@@ -611,6 +614,9 @@ typedef struct ndpi_detection_module_struct {
   char ip_string[NDPI_IP_STRING_SIZE];
 #endif
   u_int8_t ip_version_limit;
+
+  /* Redis */
+  NDPI_REDIS redis;
 
   /* ********************* */
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];

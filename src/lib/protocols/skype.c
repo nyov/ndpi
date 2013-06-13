@@ -52,6 +52,16 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	 packet->payload[3] & 0xFF);
 #endif
 
+  /*
+    Skype AS8220
+    212.161.8.0/24
+  */
+  if(((ntohl(packet->iph->saddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
+     || ((ntohl(packet->iph->daddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)) {
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+    return;
+  }
+  
   if(packet->udp != NULL) {
     flow->l4.udp.skype_packet_id++;
 

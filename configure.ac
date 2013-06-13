@@ -17,4 +17,7 @@ AC_CONFIG_FILES([Makefile
 		src/include/Makefile
 		libndpi.pc
 		])
+
+AC_CONFIG_HEADERS(config.h)
+
 AC_OUTPUT

@@ -28,11 +28,15 @@
 #include <errno.h>
 #endif
 
+#include "../../config.h"
+
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
 #include "ahocorasick.h"
+
+#include "ndpi_credis.c"
 
 #ifdef __KERNEL__
 #define printf printk
@@ -198,6 +202,14 @@ static void  (*_ndpi_free)(void *ptr);
 
 /* ****************************************** */
 
+
+
+
+
+
+
+/* ****************************************** */
+
 #ifdef WIN32
 /* http://opensource.apple.com/source/Libc/Libc-186/string.subproj/strcasecmp.c */
 
@@ -336,6 +348,16 @@ u_int32_t ndpi_detection_get_sizeof_ndpi_id_struct(void)
 
 char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id) {
   return((id >= ndpi_mod->ndpi_num_supported_protocols) ? NULL : ndpi_mod->proto_defaults[id].protoName);
+}
+
+/* ******************************************************************** */
+
+void ndpi_enable_cache(struct ndpi_detection_module_struct *ndpi_mod, char* redis_host, u_int redis_port) {
+  if(((ndpi_mod->redis = ndpi_credis_connect(redis_host, redis_port, 10000)) == NULL)
+     || (ndpi_credis_ping(ndpi_mod->redis) != 0)) {
+    printf("Redis Connection error: %s:%d", redis_host, redis_port);
+    ndpi_mod->redis = NULL;
+  }
 }
 
 /* ******************************************************************** */
@@ -1070,6 +1092,9 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   }
   memset(ndpi_str, 0, sizeof(struct ndpi_detection_module_struct));
 
+#ifdef HAVE_REDIS
+  ndpi_str->redis = NULL;
+#endif
 
   NDPI_BITMASK_RESET(ndpi_str->detection_bitmask);
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
@@ -3314,14 +3339,16 @@ static int ndpi_handle_ipv6_extension_headers(struct ndpi_detection_module_struc
   return 0;
 }
 #endif							/* NDPI_DETECTION_SUPPORT_IPV6 */
+
+
 static u_int8_t ndpi_iph_is_valid_and_not_fragmented(const struct ndpi_iphdr *iph, const u_int16_t ipsize)
 {
-#ifdef REQUIRE_FULL_PACKETS
+  //#ifdef REQUIRE_FULL_PACKETS
   if (ipsize < iph->ihl * 4 ||
       ipsize < ntohs(iph->tot_len) || ntohs(iph->tot_len) < iph->ihl * 4 || (iph->frag_off & htons(0x1FFF)) != 0) {
     return 0;
   }
-#endif
+  //#endif
 
   return 1;
 }
