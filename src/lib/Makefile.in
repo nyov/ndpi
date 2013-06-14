@@ -135,12 +135,11 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-fasttrack.lo libndpi_la-feidian.lo \
 	libndpi_la-fiesta.lo libndpi_la-filetopia.lo \
 	libndpi_la-flash.lo libndpi_la-florensia.lo libndpi_la-ftp.lo \
-	libndpi_la-gadu_gadu.lo libndpi_la-gnutella.lo \
-	libndpi_la-guildwars.lo libndpi_la-halflife2_and_mods.lo \
-	libndpi_la-http_activesync.lo libndpi_la-http.lo \
-	libndpi_la-i23v5.lo libndpi_la-iax.lo libndpi_la-icecast.lo \
-	libndpi_la-imesh.lo libndpi_la-ipp.lo libndpi_la-irc.lo \
-	libndpi_la-jabber.lo libndpi_la-kerberos.lo \
+	libndpi_la-gnutella.lo libndpi_la-guildwars.lo \
+	libndpi_la-halflife2_and_mods.lo libndpi_la-http_activesync.lo \
+	libndpi_la-http.lo libndpi_la-i23v5.lo libndpi_la-iax.lo \
+	libndpi_la-icecast.lo libndpi_la-imesh.lo libndpi_la-ipp.lo \
+	libndpi_la-irc.lo libndpi_la-jabber.lo libndpi_la-kerberos.lo \
 	libndpi_la-kontiki.lo libndpi_la-ldap.lo \
 	libndpi_la-mail_imap.lo libndpi_la-mail_pop.lo \
 	libndpi_la-mail_smtp.lo libndpi_la-vmware.lo \
@@ -404,7 +403,6 @@ libndpi_la_SOURCES = \
 			protocols/flash.c \
 			protocols/florensia.c \
 			protocols/ftp.c \
-			protocols/gadu_gadu.c \
 			protocols/gnutella.c \
 			protocols/guildwars.c \
 			protocols/halflife2_and_mods.c \
@@ -613,7 +611,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-flash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-florensia.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-ftp.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-gadu_gadu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-gnutella.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-gtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-guildwars.Plo@am__quote@
@@ -915,13 +912,6 @@ libndpi_la-ftp.lo: protocols/ftp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='protocols/ftp.c' object='libndpi_la-ftp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-ftp.lo `test -f 'protocols/ftp.c' || echo '$(srcdir)/'`protocols/ftp.c
-
-libndpi_la-gadu_gadu.lo: protocols/gadu_gadu.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-gadu_gadu.lo -MD -MP -MF $(DEPDIR)/libndpi_la-gadu_gadu.Tpo -c -o libndpi_la-gadu_gadu.lo `test -f 'protocols/gadu_gadu.c' || echo '$(srcdir)/'`protocols/gadu_gadu.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-gadu_gadu.Tpo $(DEPDIR)/libndpi_la-gadu_gadu.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='protocols/gadu_gadu.c' object='libndpi_la-gadu_gadu.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-gadu_gadu.lo `test -f 'protocols/gadu_gadu.c' || echo '$(srcdir)/'`protocols/gadu_gadu.c
 
 libndpi_la-gnutella.lo: protocols/gnutella.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-gnutella.lo -MD -MP -MF $(DEPDIR)/libndpi_la-gnutella.Tpo -c -o libndpi_la-gnutella.lo `test -f 'protocols/gnutella.c' || echo '$(srcdir)/'`protocols/gnutella.c

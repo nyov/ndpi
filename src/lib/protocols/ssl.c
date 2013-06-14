@@ -199,7 +199,8 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
     int rc = getSSLcertificate(ndpi_struct, flow, certificate, sizeof(certificate));
     
     if(rc > 0) {
-      printf("***** [SSL] %s\n", certificate);
+      packet->ssl_certificate_detected = 1;
+      // printf("***** [SSL] %s\n", certificate);
       if(ndpi_match_string_subprotocol(ndpi_struct, flow, certificate, strlen(certificate)) != NDPI_PROTOCOL_UNKNOWN)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
@@ -288,16 +289,24 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
       }
     }
 #endif
-
-
-
   }
+
  no_check_for_ssl_payload:
 #endif
-  NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
-  sslDetectProtocolFromCertificate(ndpi_struct, flow);
+  if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
+    NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
+    sslDetectProtocolFromCertificate(ndpi_struct, flow);    
 
-  ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
+    if(!packet->ssl_certificate_detected) {
+      /* SSL without certificate (Skype, Ultrasurf?) */
+      ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL_NO_CERT);
+#ifdef NDPI_PROTOCOL_SKYPE
+      //printf("[SSL] %08X -> %08X\n", packet->iph->saddr, packet->iph->daddr);
+      add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->saddr, 1);
+#endif
+    } else
+      ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
+  }
 }
 
 

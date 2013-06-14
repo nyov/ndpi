@@ -46,7 +46,6 @@ libndpi_la_SOURCES = \
 			protocols/flash.c \
 			protocols/florensia.c \
 			protocols/ftp.c \
-			protocols/gadu_gadu.c \
 			protocols/gnutella.c \
 			protocols/guildwars.c \
 			protocols/halflife2_and_mods.c \

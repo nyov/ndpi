@@ -221,9 +221,6 @@ void ndpi_search_iax(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 void ndpi_search_mgcp(struct ndpi_detection_module_struct
 		      *ndpi_struct, struct ndpi_flow_struct *flow);
 
-void ndpi_search_gadugadu(struct ndpi_detection_module_struct
-			  *ndpi_struct, struct ndpi_flow_struct *flow);
-
 void ndpi_search_zattoo(struct ndpi_detection_module_struct*ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_qq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_feidian(struct ndpi_detection_module_struct

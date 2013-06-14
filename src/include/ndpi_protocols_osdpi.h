@@ -103,7 +103,7 @@ extern "C" {
 #define NDPI_PROTOCOL_QQLIVE					61
 #define NDPI_PROTOCOL_THUNDER					62
 #define NDPI_PROTOCOL_SOULSEEK					63
-#define NDPI_PROTOCOL_GADUGADU					64
+#define NDPI_PROTOCOL_SSL_NO_CERT			        64 /* SSL without certificate (Skype, Ultrasurf?) - ntop.org */
 #define NDPI_PROTOCOL_IRC					65
 #define NDPI_PROTOCOL_POPO					66
 #define NDPI_PROTOCOL_UNENCRYPED_JABBER				67

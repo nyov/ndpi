@@ -200,11 +200,6 @@ typedef struct ndpi_id_struct {
 #ifdef NDPI_PROTOCOL_FTP
   u_int32_t ftp_timer_set:1;
 #endif
-#ifdef NDPI_PROTOCOL_GADUGADU
-  u_int32_t gadu_gadu_ft_direction:1;
-  u_int32_t gadu_gadu_voice:1;
-  u_int32_t gg_next_id:1;
-#endif
 #ifdef NDPI_PROTOCOL_RTSP
   u_int32_t rtsp_ts_set:1;
 #endif
@@ -261,9 +256,6 @@ struct ndpi_flow_tcp_struct {
 #endif
 #ifdef NDPI_PROTOCOL_TDS
   u_int32_t tds_stage:3;
-#endif
-#ifdef NDPI_PROTOCOL_GADUGADU
-  u_int32_t gadugadu_stage:2;
 #endif
 #ifdef NDPI_PROTOCOL_USENET
   u_int32_t usenet_stage:2;
@@ -495,6 +487,7 @@ typedef struct ndpi_packet_struct {
   u_int8_t packet_unix_lines_parsed_complete;
   u_int8_t empty_line_position_set;
   u_int8_t packet_direction:1;
+  u_int8_t ssl_certificate_detected;
 } ndpi_packet_struct_t;
 
 struct ndpi_detection_module_struct;
@@ -581,8 +574,6 @@ typedef struct ndpi_detection_module_struct {
   void *ac_automa; /* Real type is AC_AUTOMATA_t */
   u_int8_t ac_automa_finalized;
 
-  /*gadu gadu*/
-  u_int32_t gadugadu_peer_connection_timeout;
   /* pplive params */
   u_int32_t pplive_connection_timeout;
   /* ftp parameters */
