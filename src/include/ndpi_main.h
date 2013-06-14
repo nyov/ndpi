@@ -126,6 +126,37 @@ typedef struct node_t {
   struct node_t *left, *right;
 } ndpi_node;
 
+/* Least recently used cache */
+
+struct LruCacheNumEntry {
+  u_int64_t key;
+  u_int32_t value;
+};
+
+struct LruCacheStrEntry {
+  char *key, *value;
+  time_t expire_time;
+};
+
+struct LruCacheEntry {
+  u_int8_t numeric_node;
+
+  union {
+    struct LruCacheNumEntry num; /* numeric_node == 1 */
+    struct LruCacheStrEntry str; /* numeric_node == 0 */
+  } u;
+
+  struct LruCacheEntry *next; /* Hash collision list */
+};
+
+struct LruCache {
+  u_int32_t max_cache_node_len, hash_size, mem_size;
+  u_int32_t num_cache_add, num_cache_find, num_cache_misses;
+  u_int32_t last_num_cache_add, last_num_cache_find, last_num_cache_misses;
+  u_int32_t *current_hash_size; /* Allocated dynamically */
+  struct LruCacheEntry **hash;   /* Allocated dynamically */
+};
+
 
 u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 

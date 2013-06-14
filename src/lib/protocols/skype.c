@@ -57,7 +57,8 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
     212.161.8.0/24
   */
   if(((ntohl(packet->iph->saddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
-     || ((ntohl(packet->iph->daddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)) {
+     || ((ntohl(packet->iph->daddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
+     || (find_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr) == 1)) {
     ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
     return;
   }
@@ -73,6 +74,8 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	     && (packet->payload[2] == 0x02))) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);	
+
+	add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
       }
       
       return;
@@ -93,6 +96,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
       if((payload_len == 8) || (payload_len == 3)) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
       }
 
       /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */

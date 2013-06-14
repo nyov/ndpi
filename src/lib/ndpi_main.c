@@ -37,6 +37,9 @@
 #include "ahocorasick.h"
 
 #include "ndpi_credis.c"
+#include "ndpi_cache.c"
+
+#undef DEBUG
 
 #ifdef __KERNEL__
 #define printf printk
@@ -298,6 +301,18 @@ static void addDefaultPort(ndpi_port_range *range,
 /* ****************************************** */
 
 void* ndpi_malloc(unsigned long size) { return(_ndpi_malloc(size)); }
+
+/* ****************************************** */
+
+void* ndpi_calloc(unsigned long count, unsigned long size) { 
+  unsigned long len = count*size;
+  void *p = ndpi_malloc(len);
+
+  if(p)
+    memset(p, 0, len);
+
+  return(p);
+}
 
 /* ****************************************** */
 
@@ -1133,6 +1148,8 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_str->ndpi_num_custom_protocols = 0;
 
   ndpi_str->ac_automa = ac_automata_init(ac_match_handler);
+
+  init_lru_cache(&ndpi_str->skypeCache, 4096);
   ndpi_init_protocol_defaults(ndpi_str);
   return ndpi_str;
 }
@@ -1154,6 +1171,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
     if(ndpi_struct->ac_automa != NULL)
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
 
+    free_lru_cache(&ndpi_struct->skypeCache);
     ndpi_free(ndpi_struct);
   }
 }

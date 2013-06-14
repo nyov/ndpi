@@ -76,6 +76,8 @@ void close(int fd) {
 #define CR_MULTIPLEXING_API_SIZE_STR STRINGIFY(NDPI_CNDPI_REDIS_MULTIPLEXING_API_SIZE)
 #define CR_USED_MEMORY_HUMAN_SIZE_STR STRINGIFY(NDPI_CNDPI_REDIS_USED_MEMORY_HUMAN_SIZE)
 
+#undef PRINTDEBUG
+
 #ifdef PRINTDEBUG
 /* add -DPRINTDEBUG to CPPFLAGS in Makefile for debug outputs */
 #define DEBUG(...)                                 \
@@ -87,6 +89,7 @@ void close(int fd) {
 #else
 #define DEBUG(...)
 #endif
+
 
 /* format warnings are GNU C specific */
 #if !__GNUC__

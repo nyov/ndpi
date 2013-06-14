@@ -615,8 +615,9 @@ typedef struct ndpi_detection_module_struct {
 #endif
   u_int8_t ip_version_limit;
 
-  /* Redis */
+  /* Cache */
   NDPI_REDIS redis;
+  struct LruCache skypeCache;
 
   /* ********************* */
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
