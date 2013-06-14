@@ -36,9 +36,6 @@
 
 #include "ahocorasick.h"
 
-#include "ndpi_credis.c"
-#include "ndpi_cache.c"
-
 #undef DEBUG
 
 #ifdef __KERNEL__
@@ -46,6 +43,9 @@
 #else
 #include <time.h>
 #endif
+
+#include "ndpi_credis.c"
+#include "ndpi_cache.c"
 
 typedef struct {
   char *string_to_match, *proto_name;
