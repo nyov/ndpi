@@ -94,18 +94,18 @@ typedef struct _cr_redis* NDPI_REDIS;
 #define NDPI_CREDIS_SERVER_MASTER 1
 #define NDPI_CREDIS_SERVER_SLAVE 2
 
-typedef enum _cr_aggregate {
-  NONE,
-  SUM, 
-  MIN,
-  MAX
+typedef enum _ndpi_cr_aggregate {
+  NDPI_NONE,
+  NDPI_SUM, 
+  NDPI_MIN,
+  NDPI_MAX
 } NDPI_REDIS_AGGREGATE;
 
 #define NDPI_CREDIS_VERSION_STRING_SIZE 32
 #define NDPI_CREDIS_MULTIPLEXING_API_SIZE 16
 #define NDPI_CREDIS_USED_MEMORY_HUMAN_SIZE 32
 
-typedef struct _cr_info {
+typedef struct _ndpi_cr_info {
   char redis_version[NDPI_CREDIS_VERSION_STRING_SIZE];
   int arch_bits;
   char multiplexing_api[NDPI_CREDIS_MULTIPLEXING_API_SIZE];

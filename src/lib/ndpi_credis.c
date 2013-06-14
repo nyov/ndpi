@@ -1535,16 +1535,16 @@ static int cr_zstore(NDPI_REDIS rhnd, int inter, const char *destkey, int keyc, 
         return rc;
 
   switch (aggregate) {
-  case SUM: 
+  case NDPI_SUM: 
     rc = cr_appendstr(buf, "AGGREGATE SUM", 0);
     break;
-  case MIN:
+  case NDPI_MIN:
     rc = cr_appendstr(buf, "AGGREGATE MIN", 0);
     break;
-  case MAX:
+  case NDPI_MAX:
     rc = cr_appendstr(buf, "AGGREGATE MAX", 0);
     break;
-  case NONE:
+  case NDPI_NONE:
     ; /* avoiding compiler warning */
   }
   if (rc != 0)
