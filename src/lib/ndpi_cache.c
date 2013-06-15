@@ -53,6 +53,8 @@ int init_lru_cache(struct LruCache *cache, u_int32_t max_size) {
     printf("ERROR: Not enough memory?");
     return(-1);
   }
+
+  return(0);
 }
 
 /* ************************************ */
@@ -374,6 +376,7 @@ int add_to_lru_cache_str_timeout(struct LruCache *cache,
 
 int add_to_lru_cache_str(struct LruCache *cache, char *key, char *value) {
   add_to_lru_cache_str_timeout(cache, key, value, 0);
+  return(0);
 }
 
 /* ************************************ */

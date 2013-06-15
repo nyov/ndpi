@@ -42,7 +42,7 @@
 #include <time.h>
 #endif
 
-#include "ndpi_credis.c"
+// #include "ndpi_credis.c"
 #include "ndpi_cache.c"
 
 typedef struct {
@@ -366,11 +366,13 @@ char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int 
 /* ******************************************************************** */
 
 void ndpi_enable_cache(struct ndpi_detection_module_struct *ndpi_mod, char* redis_host, u_int redis_port) {
+#if 0
   if(((ndpi_mod->redis = ndpi_credis_connect(redis_host, redis_port, 10000)) == NULL)
      || (ndpi_credis_ping(ndpi_mod->redis) != 0)) {
     printf("Redis Connection error: %s:%d", redis_host, redis_port);
     ndpi_mod->redis = NULL;
   }
+#endif
 }
 
 /* ******************************************************************** */

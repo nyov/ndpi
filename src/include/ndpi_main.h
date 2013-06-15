@@ -70,15 +70,19 @@
 #define snprintf	_snprintf
 
 #define __attribute__(x)
-typedef char int8_t;
-typedef unsigned char u_int8_t;
-typedef unsigned char u_char;
-typedef __int16 int16_t;
-typedef unsigned __int16 u_int16_t;
-typedef __int32 int32_t;
-typedef unsigned __int32 u_int32_t;
-typedef unsigned __int64 u_int64_t;
+#include <stdint.h>
 #endif
+
+#ifndef __GNUC__
+typedef unsigned char  u_char;
+typedef unsigned short u_short;
+typedef unsigned int   uint;
+typedef unsigned long  u_long;
+#endif
+typedef u_char  u_int8_t;
+typedef u_short u_int16_t;
+typedef uint   u_int32_t;
+typedef unsigned __int64 u_int64_t;
 
 #include "linux_compat.h"
 
