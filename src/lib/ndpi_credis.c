@@ -76,18 +76,18 @@ void close(int fd) {
 #define CR_MULTIPLEXING_API_SIZE_STR STRINGIFY(NDPI_CNDPI_REDIS_MULTIPLEXING_API_SIZE)
 #define CR_USED_MEMORY_HUMAN_SIZE_STR STRINGIFY(NDPI_CNDPI_REDIS_USED_MEMORY_HUMAN_SIZE)
 
-#undef PRINTDEBUG
+#undef CREDIS_DEBUG
 
-#ifdef PRINTDEBUG
-/* add -DPRINTDEBUG to CPPFLAGS in Makefile for debug outputs */
-#define DEBUG(...)                                 \
+#ifdef CREDIS_DEBUG
+/* add -DCREDIS_DEBUG to CPPFLAGS in Makefile for debug outputs */
+#define DEBUG_PRINT(...)                                 \
   do {                                             \
     printf("%s() @ %d: ", __FUNCTION__, __LINE__); \
     printf(__VA_ARGS__);                           \
     printf("\n");                                  \
   } while (0)
 #else
-#define DEBUG(...)
+#define DEBUG_PRINT(...)
 #endif
 
 
@@ -157,7 +157,7 @@ static int cr_moremem(cr_buffer *buf, int size)
   n = size / CR_BUFFER_SIZE + 1;
   total = buf->size + n * CR_BUFFER_SIZE;
 
-  DEBUG("allocate %d x CR_BUFFER_SIZE, total %d bytes", n, total);
+  DEBUG_PRINT("allocate %d x CR_BUFFER_SIZE, total %d bytes", n, total);
 
   ptr = (char*)realloc(buf->data, total);
   if (ptr == NULL)
@@ -182,7 +182,7 @@ static int cr_morebulk(cr_multibulk *mb, int size)
   n = (size / CR_MULTIBULK_SIZE + 1) * CR_MULTIBULK_SIZE;
   total = mb->size + n;
 
-  DEBUG("allocate %d x CR_MULTIBULK_SIZE, total %d (%lu bytes)", 
+  DEBUG_PRINT("allocate %d x CR_MULTIBULK_SIZE, total %d (%lu bytes)", 
         n, total, total * ((sizeof(char *)+sizeof(int))));
   cptr = (char**)realloc(mb->bulks, total * sizeof(char *));
   iptr = (int*)realloc(mb->idxs, total * sizeof(int));
@@ -414,7 +414,7 @@ static int cr_readln(NDPI_REDIS rhnd, int start, char **line, int *idx)
          (nl = cr_findnl(buf->data + buf->idx + start, buf->len - (buf->idx + start))) == NULL) {
     avail = buf->size - buf->len;
     if (avail < CR_BUFFER_WATERMARK || avail < more) {
-      DEBUG("available buffer memory is low, get more memory");
+      DEBUG_PRINT("available buffer memory is low, get more memory");
       if (cr_moremem(buf, more>0?more:1))
         return NDPI_CREDIS_ERR_NOMEM;
 
@@ -423,7 +423,7 @@ static int cr_readln(NDPI_REDIS rhnd, int start, char **line, int *idx)
 
     rc = cr_receivedata(rhnd->fd, rhnd->timeout, buf->data + buf->len, avail);
     if (rc > 0) {
-      DEBUG("received %d bytes: %s", rc, buf->data + buf->len);
+      DEBUG_PRINT("received %d bytes: %s", rc, buf->data + buf->len);
       buf->len += rc;
     }
     else if (rc == 0)
@@ -444,7 +444,7 @@ static int cr_readln(NDPI_REDIS rhnd, int start, char **line, int *idx)
   len = nl - *line;
   buf->idx = (nl - buf->data) + 2; /* skip "\r\n" */
 
-  DEBUG("size=%d, len=%d, idx=%d, start=%d, line=%s", 
+  DEBUG_PRINT("size=%d, len=%d, idx=%d, start=%d, line=%s", 
         buf->size, buf->len, buf->idx, start, *line);
 
   return len;
@@ -461,7 +461,7 @@ static int cr_receivemultibulk(NDPI_REDIS rhnd, char *line)
     return 0;
   }
   else if (bnum > rhnd->reply.multibulk.size) {
-    DEBUG("available multibulk storage is low, get more memory");
+    DEBUG_PRINT("available multibulk storage is low, get more memory");
     if (cr_morebulk(&(rhnd->reply.multibulk), bnum - rhnd->reply.multibulk.size))
       return NDPI_CREDIS_ERR_NOMEM;
   }
@@ -482,7 +482,7 @@ static int cr_receivemultibulk(NDPI_REDIS rhnd, char *line)
   }
   
   if (bnum != 0) {
-    DEBUG("bnum != 0, bnum=%d, rc=%d", bnum, rc);
+    DEBUG_PRINT("bnum != 0, bnum=%d, rc=%d", bnum, rc);
     return NDPI_CREDIS_ERR_PROTOCOL;
   }
 
@@ -602,7 +602,7 @@ static int cr_sendandreceive(NDPI_REDIS rhnd, char recvtype)
 {
   int rc;
 
-  DEBUG("Sending message: len=%d, data=%s", rhnd->buf.len, rhnd->buf.data);
+  DEBUG_PRINT("Sending message: len=%d, data=%s", rhnd->buf.len, rhnd->buf.data);
 
   rc = cr_senddata(rhnd->fd, rhnd->timeout, rhnd->buf.data, rhnd->buf.len);
 
@@ -631,7 +631,7 @@ static int cr_sendfandreceive(NDPI_REDIS rhnd, char recvtype, const char *format
     return -1;
 
   if (rc >= buf->size) {
-    DEBUG("truncated, get more memory and try again");
+    DEBUG_PRINT("truncated, get more memory and try again");
     if (cr_moremem(buf, rc - buf->size + 1))
       return NDPI_CREDIS_ERR_NOMEM;
 
@@ -674,7 +674,7 @@ NDPI_REDIS ndpi_credis_connect(const char *host, int port, int timeout)
   WSADATA data;
   
   if (WSAStartup(MAKEWORD(2,2), &data) != 0) {
-    DEBUG("Failed to init Windows Sockets DLL\n");
+    DEBUG_PRINT("Failed to init Windows Sockets DLL\n");
     return NULL;
   }
 #endif
@@ -730,7 +730,7 @@ NDPI_REDIS ndpi_credis_connect(const char *host, int port, int timeout)
 
   flags = fcntl(fd, F_GETFL);
   if ((rc = fcntl(fd, F_SETFL, flags | O_NONBLOCK)) < 0) {
-    DEBUG("Setting socket non-blocking failed with: %d\n", rc);
+    DEBUG_PRINT("Setting socket non-blocking failed with: %d\n", rc);
   }
 
   if (connect(fd, (struct sockaddr *)&sa, sizeof(sa)) != 0) {
@@ -775,7 +775,7 @@ NDPI_REDIS ndpi_credis_connect(const char *host, int port, int timeout)
       rhnd->version.patch = rhnd->version.minor;
       rhnd->version.minor = 0;
     }
-    DEBUG("Connected to Redis version: %d.%d.%d\n", 
+    DEBUG_PRINT("Connected to Redis version: %d.%d.%d\n", 
           rhnd->version.major, rhnd->version.minor, rhnd->version.patch);
   }
 
