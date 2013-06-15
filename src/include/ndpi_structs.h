@@ -26,8 +26,6 @@
 #ifndef __NDPI_STRUCTS_INCLUDE_FILE__
 #define __NDPI_STRUCTS_INCLUDE_FILE__
 
-#include "../../config.h"
-
 #include "ndpi_credis.h"
 #include "linux_compat.h"
 

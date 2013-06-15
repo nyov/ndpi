@@ -28,8 +28,6 @@
 #include <errno.h>
 #endif
 
-#include "../../config.h"
-
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
