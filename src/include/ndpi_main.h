@@ -71,8 +71,6 @@
 
 #define __attribute__(x)
 #include <stdint.h>
-#endif
-
 #ifndef __GNUC__
 typedef unsigned char  u_char;
 typedef unsigned short u_short;
@@ -83,6 +81,8 @@ typedef u_char  u_int8_t;
 typedef u_short u_int16_t;
 typedef uint   u_int32_t;
 typedef unsigned __int64 u_int64_t;
+#endif /* Win32 */
+
 
 #include "linux_compat.h"
 
