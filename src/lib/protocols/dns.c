@@ -246,7 +246,9 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 #ifdef DEBUG
 	printf("==> %s\n", flow->host_server_name);
 #endif
-	ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
+
+	if(ndpi_struct->match_dns_host_names)
+	  ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
       }
 
 #ifdef DEBUG

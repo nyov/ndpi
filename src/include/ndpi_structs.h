@@ -610,6 +610,8 @@ typedef struct ndpi_detection_module_struct {
 
   /* ********************* */
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
+
+  u_int8_t match_dns_host_names:1;
 } ndpi_detection_module_struct_t;
 
 typedef struct ndpi_flow_struct {
