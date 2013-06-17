@@ -4992,6 +4992,11 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
+  if(ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, shost)
+     || ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, dhost)) {
+    return(NDPI_PROTOCOL_SKYPE);
+  }
+
   node.default_port = sport;
   ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
 

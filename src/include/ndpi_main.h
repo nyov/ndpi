@@ -133,7 +133,7 @@ typedef struct node_t {
 /* Least recently used cache */
 
 struct ndpi_LruCacheNumEntry {
-  u_int64_t key;
+  u_int32_t key;
   u_int32_t value;
 };
 

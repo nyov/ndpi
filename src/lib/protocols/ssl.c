@@ -48,7 +48,7 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
 #define ndpi_ispunct(ch) (((ch) >= '!' && (ch) <= '/') || \
                      ((ch) >= ':' && (ch) <= '@') || \
                      ((ch) >= '[' && (ch) <= '`') || \
-                     ((ch) >= '{' && (ch) <= '~')) 
+                     ((ch) >= '{' && (ch) <= '~'))
 
 static void stripCertificateTrailer(char *buffer, int buffer_len) {
   int i;
@@ -128,7 +128,7 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 	if((session_id_len+base_offset+2) <= total_len) {
 	  u_int16_t cypher_len =  packet->payload[session_id_len+base_offset+2] + (packet->payload[session_id_len+base_offset+1] << 8);
 	  offset = base_offset + session_id_len + cypher_len + 2;
-	  
+
 	  if(offset < total_len) {
 	    u_int16_t compression_len;
 	    u_int16_t extensions_len;
@@ -207,7 +207,8 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
 
-    if(packet->ssl_certificate_num_checks >= 2)
+    if((packet->ssl_certificate_num_checks >= 2)
+       && flow->l4.tcp.seen_syn && flow->l4.tcp.seen_syn_ack && flow->l4.tcp.seen_ack) /* We have seen the 3-way handshake */
       ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL_NO_CERT);
   }
 
@@ -222,7 +223,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 
   struct ndpi_packet_struct *packet = &flow->packet;
 #ifdef NDPI_PROTOCOL_ISKOOT
-  
+
 #endif
   //      struct ndpi_id_struct         *src=flow->src;
   //      struct ndpi_id_struct         *dst=flow->dst;
@@ -300,7 +301,7 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 #endif
   if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
     NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
-    sslDetectProtocolFromCertificate(ndpi_struct, flow);    
+    sslDetectProtocolFromCertificate(ndpi_struct, flow);
 
     if(!packet->ssl_certificate_detected) {
       /* SSL without certificate (Skype, Ultrasurf?) */
@@ -319,7 +320,7 @@ static u_int8_t ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct
 {
 
   struct ndpi_packet_struct *packet = &flow->packet;
-  //  
+  //
   //      struct ndpi_id_struct         *src=flow->src;
   //      struct ndpi_id_struct         *dst=flow->dst;
 
@@ -427,7 +428,7 @@ static u_int8_t ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct
 void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  
+
   //      struct ndpi_id_struct         *src=flow->src;
   //      struct ndpi_id_struct         *dst=flow->dst;
 
