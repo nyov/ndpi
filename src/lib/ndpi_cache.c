@@ -31,7 +31,7 @@ static u_int8_t traceLRU = 0;
 
 /* ************************************************************************ */
 
-int init_lru_cache(struct LruCache *cache, u_int32_t max_size) {
+int ndpi_init_lru_cache(struct ndpi_LruCache *cache, u_int32_t max_size) {
   if(unlikely(traceLRU))
     printf("%s(max_size=%u)", __FUNCTION__, max_size);
 
@@ -39,9 +39,9 @@ int init_lru_cache(struct LruCache *cache, u_int32_t max_size) {
   cache->hash_size = max_size/cache->max_cache_node_len;
 
 #ifdef FULL_STATS
-  cache->mem_size += cache->hash_size*sizeof(struct LruCacheEntry*);
+  cache->mem_size += cache->hash_size*sizeof(struct ndpi_LruCacheEntry*);
 #endif
-  if((cache->hash = (struct LruCacheEntry**)ndpi_calloc(cache->hash_size, sizeof(struct LruCacheEntry*))) == NULL) {
+  if((cache->hash = (struct ndpi_LruCacheEntry**)ndpi_calloc(cache->hash_size, sizeof(struct ndpi_LruCacheEntry*))) == NULL) {
     printf("ERROR: Not enough memory?");
     return(-1);
   }
@@ -59,7 +59,7 @@ int init_lru_cache(struct LruCache *cache, u_int32_t max_size) {
 
 /* ************************************ */
 
-static void free_lru_cache_entry(struct LruCache *cache, struct LruCacheEntry *entry) {
+static void free_lru_cache_entry(struct ndpi_LruCache *cache, struct ndpi_LruCacheEntry *entry) {
   if(entry->numeric_node) {
     ; /* Nothing to do */
   } else {
@@ -74,21 +74,21 @@ static void free_lru_cache_entry(struct LruCache *cache, struct LruCacheEntry *e
 
 /* ************************************ */
 
-void free_lru_cache(struct LruCache *cache) {
+void ndpi_free_lru_cache(struct ndpi_LruCache *cache) {
   int i;
 
   if(unlikely(traceLRU)) printf("%s()", __FUNCTION__);
 
   for(i=0; i<cache->hash_size; i++) {
-    struct LruCacheEntry *head = cache->hash[i];
+    struct ndpi_LruCacheEntry *head = cache->hash[i];
 
     while(head != NULL) {
-      struct LruCacheEntry *next = head->next;
+      struct ndpi_LruCacheEntry *next = head->next;
 
       free_lru_cache_entry(cache, head);
       ndpi_free(head);
 #ifdef FULL_STATS
-      cache->mem_size -= sizeof(struct LruCacheEntry);
+      cache->mem_size -= sizeof(struct ndpi_LruCacheEntry);
 #endif
       head = next;
     }
@@ -96,7 +96,7 @@ void free_lru_cache(struct LruCache *cache) {
 
   ndpi_free(cache->hash);
 #ifdef FULL_STATS
-  cache->mem_size -= cache->hash_size*sizeof(struct LruCacheEntry*);
+  cache->mem_size -= cache->hash_size*sizeof(struct ndpi_LruCacheEntry*);
 #endif
   ndpi_free(cache->current_hash_size);
 #ifdef FULL_STATS
@@ -106,7 +106,7 @@ void free_lru_cache(struct LruCache *cache) {
 
 /* ************************************ */
 
-static u_int32_t hash_string(char *a) {
+static u_int32_t lru_hash_string(char *a) {
   u_int32_t h = 0, i;
 
   for(i=0; a[i] != 0; i++) h += ((u_int32_t)a[i])*(i+1);
@@ -115,11 +115,11 @@ static u_int32_t hash_string(char *a) {
 
 /* ************************************ */
 
-u_int32_t lru_node_key_hash(struct LruCacheEntry *a) {
+static u_int32_t lru_node_key_hash(struct ndpi_LruCacheEntry *a) {
   if(a->numeric_node)
     return((u_int32_t)a->u.num.key);
   else
-    return(hash_string(a->u.str.key));
+    return(lru_hash_string(a->u.str.key));
 }
 
 /* ************************************ */
@@ -129,7 +129,7 @@ u_int32_t lru_node_key_hash(struct LruCacheEntry *a) {
   -1 a < b
   1  a > b
 */
-int lru_node_key_entry_compare(struct LruCacheEntry *a, struct LruCacheEntry *b) {
+static int lru_node_key_entry_compare(struct ndpi_LruCacheEntry *a, struct ndpi_LruCacheEntry *b) {
   if(a->numeric_node) {
     if(a->u.num.key == b->u.num.key)
       return(0);
@@ -143,8 +143,8 @@ int lru_node_key_entry_compare(struct LruCacheEntry *a, struct LruCacheEntry *b)
 
 /* ********************************************* */
 
-struct LruCacheEntry* allocCacheNumericNode(struct LruCache *cache, u_int64_t key, u_int32_t value) {
-  struct LruCacheEntry *node = (struct LruCacheEntry*)ndpi_calloc(1, sizeof(struct LruCacheEntry));
+struct ndpi_LruCacheEntry* lru_allocCacheNumericNode(struct ndpi_LruCache *cache, u_int64_t key, u_int32_t value) {
+  struct ndpi_LruCacheEntry *node = (struct ndpi_LruCacheEntry*)ndpi_calloc(1, sizeof(struct ndpi_LruCacheEntry));
 
   if(unlikely(traceLRU))
     printf("%s(key=%lu, value=%u)", __FUNCTION__, 
@@ -158,7 +158,7 @@ struct LruCacheEntry* allocCacheNumericNode(struct LruCache *cache, u_int64_t ke
   }
 
 #ifdef FULL_STATS
-  cache->mem_size += sizeof(struct LruCacheEntry);
+  cache->mem_size += sizeof(struct ndpi_LruCacheEntry);
   //printf("%s(key=%lu, value=%u) [memory: %u]", __FUNCTION__, key, value, cache->mem_size);
 #endif
 
@@ -167,8 +167,8 @@ struct LruCacheEntry* allocCacheNumericNode(struct LruCache *cache, u_int64_t ke
 
 /* ************************************ */
 
-struct LruCacheEntry* allocCacheStringNode(struct LruCache *cache, char *key, char *value, u_int32_t timeout) {
-  struct LruCacheEntry *node = (struct LruCacheEntry*)ndpi_calloc(1, sizeof(struct LruCacheEntry));
+struct ndpi_LruCacheEntry* lru_allocCacheStringNode(struct ndpi_LruCache *cache, char *key, char *value, u_int32_t timeout) {
+  struct ndpi_LruCacheEntry *node = (struct ndpi_LruCacheEntry*)ndpi_calloc(1, sizeof(struct ndpi_LruCacheEntry));
 
   if(unlikely(traceLRU))
     printf("%s(key=%s, value=%s)", __FUNCTION__, key, value);
@@ -181,7 +181,7 @@ struct LruCacheEntry* allocCacheStringNode(struct LruCache *cache, char *key, ch
     node->u.str.expire_time = (timeout == 0) ? 0 : (timeout + time(NULL));
 
 #ifdef FULL_STATS
-    cache->mem_size += sizeof(struct LruCacheEntry) + strlen(key) + strlen(value);
+    cache->mem_size += sizeof(struct ndpi_LruCacheEntry) + strlen(key) + strlen(value);
     //printf("%s(key=%s, value=%s) [memory: %u]", __FUNCTION__, key, value, cache->mem_size);
 #endif
   }
@@ -191,12 +191,12 @@ struct LruCacheEntry* allocCacheStringNode(struct LruCache *cache, char *key, ch
 
 /* ************************************ */
 
-static void trim_subhash(struct LruCache *cache, u_int32_t hash_id) {
+static void trim_subhash(struct ndpi_LruCache *cache, u_int32_t hash_id) {
   if(unlikely(traceLRU))
     printf("%s()", __FUNCTION__);
 
   if(cache->current_hash_size[hash_id] >= cache->max_cache_node_len) {
-    struct LruCacheEntry *head = cache->hash[hash_id], *prev = NULL;
+    struct ndpi_LruCacheEntry *head = cache->hash[hash_id], *prev = NULL;
 
     /* Find the last entry and remove it */
     while(head->next != NULL) {
@@ -209,7 +209,7 @@ static void trim_subhash(struct LruCache *cache, u_int32_t hash_id) {
       free_lru_cache_entry(cache, head);
       ndpi_free(head);
 #ifdef FULL_STATS
-      cache->mem_size -= sizeof(struct LruCacheEntry);
+      cache->mem_size -= sizeof(struct ndpi_LruCacheEntry);
 #endif
       cache->current_hash_size[hash_id]--;
     } else
@@ -219,8 +219,8 @@ static void trim_subhash(struct LruCache *cache, u_int32_t hash_id) {
 
 /* ************************************ */
 
-static void validate_unit_len(struct LruCache *cache, u_int32_t hash_id) {
-  struct LruCacheEntry *head = cache->hash[hash_id];
+static void validate_unit_len(struct ndpi_LruCache *cache, u_int32_t hash_id) {
+  struct ndpi_LruCacheEntry *head = cache->hash[hash_id];
   u_int num = 0;
 
   while(head != NULL) {
@@ -234,13 +234,13 @@ static void validate_unit_len(struct LruCache *cache, u_int32_t hash_id) {
 
 /* ************************************ */
 
-int add_to_lru_cache_num(struct LruCache *cache,
-			 u_int64_t key, u_int32_t value) {
+int ndpi_add_to_lru_cache_num(struct ndpi_LruCache *cache,
+			     u_int64_t key, u_int32_t value) {
   if(cache->hash_size == 0)
     return(0);
   else {
     u_int32_t hash_id = key % cache->hash_size;
-    struct LruCacheEntry *node;
+    struct ndpi_LruCacheEntry *node;
     u_int8_t node_already_existing = 0;
     int rc = 0;
 
@@ -252,7 +252,7 @@ int add_to_lru_cache_num(struct LruCache *cache,
 
     /* [1] Add to hash */
     if(cache->hash[hash_id] == NULL) {
-      if((node = allocCacheNumericNode(cache, key, value)) == NULL) {
+      if((node = lru_allocCacheNumericNode(cache, key, value)) == NULL) {
 	rc = -1;
 	goto ret_add_to_lru_cache;
       }
@@ -261,7 +261,7 @@ int add_to_lru_cache_num(struct LruCache *cache,
       cache->current_hash_size[hash_id]++;
     } else {
       /* Check if the element exists */
-      struct LruCacheEntry *head = cache->hash[hash_id];
+      struct ndpi_LruCacheEntry *head = cache->hash[hash_id];
 
       while(head != NULL) {
 	if(head->u.num.key == key) {
@@ -275,7 +275,7 @@ int add_to_lru_cache_num(struct LruCache *cache,
       }
 
       if(!node_already_existing) {
-	if((node = allocCacheNumericNode(cache, key, value)) == NULL) {
+	if((node = lru_allocCacheNumericNode(cache, key, value)) == NULL) {
 	  rc = -2;
 	  goto ret_add_to_lru_cache;
 	}
@@ -297,15 +297,15 @@ int add_to_lru_cache_num(struct LruCache *cache,
 
 /* ************************************ */
 
-int add_to_lru_cache_str_timeout(struct LruCache *cache,
-				 char *key, char *value,
-				 u_int32_t timeout) {
+int ndpi_add_to_lru_cache_str_timeout(struct ndpi_LruCache *cache,
+				     char *key, char *value,
+				     u_int32_t timeout) {
   if(cache->hash_size == 0)
     return(0);
   else {
-    u_int32_t hash_val =  hash_string(key);
+    u_int32_t hash_val =  lru_hash_string(key);
     u_int32_t hash_id = hash_val % cache->hash_size;
-    struct LruCacheEntry *node;
+    struct ndpi_LruCacheEntry *node;
     u_int8_t node_already_existing = 0;
     int rc = 0;
 
@@ -317,7 +317,7 @@ int add_to_lru_cache_str_timeout(struct LruCache *cache,
 
     /* [1] Add to hash */
     if(cache->hash[hash_id] == NULL) {
-      if((node = allocCacheStringNode(cache, key, value, timeout)) == NULL) {
+      if((node = lru_allocCacheStringNode(cache, key, value, timeout)) == NULL) {
 	rc = -1;
 	goto ret_add_to_lru_cache;
       }
@@ -326,7 +326,7 @@ int add_to_lru_cache_str_timeout(struct LruCache *cache,
       cache->current_hash_size[hash_id]++;
     } else {
       /* Check if the element exists */
-      struct LruCacheEntry *head = cache->hash[hash_id];
+      struct ndpi_LruCacheEntry *head = cache->hash[hash_id];
 
       while(head != NULL) {
 	if(strcmp(head->u.str.key, key) == 0) {
@@ -352,7 +352,7 @@ int add_to_lru_cache_str_timeout(struct LruCache *cache,
       }
 
       if(!node_already_existing) {
-	if((node = allocCacheStringNode(cache, key, value, timeout)) == NULL) {
+	if((node = lru_allocCacheStringNode(cache, key, value, timeout)) == NULL) {
 	  rc = -2;
 	  goto ret_add_to_lru_cache;
 	}
@@ -374,19 +374,19 @@ int add_to_lru_cache_str_timeout(struct LruCache *cache,
 
 /* ************************************ */
 
-int add_to_lru_cache_str(struct LruCache *cache, char *key, char *value) {
-  add_to_lru_cache_str_timeout(cache, key, value, 0);
+int ndpi_add_to_lru_cache_str(struct ndpi_LruCache *cache, char *key, char *value) {
+  ndpi_add_to_lru_cache_str_timeout(cache, key, value, 0);
   return(0);
 }
 
 /* ************************************ */
 
-u_int32_t find_lru_cache_num(struct LruCache *cache, u_int64_t key) {
+u_int32_t ndpi_find_lru_cache_num(struct ndpi_LruCache *cache, u_int64_t key) {
   if(cache->hash_size == 0)
     return(0);
   else {
     u_int32_t hash_id = key % cache->hash_size;
-    struct LruCacheEntry *head, *prev = NULL;
+    struct ndpi_LruCacheEntry *head, *prev = NULL;
     u_int32_t ret_val = NDPI_PROTOCOL_UNKNOWN;
 
     if(unlikely(traceLRU))
@@ -422,13 +422,13 @@ u_int32_t find_lru_cache_num(struct LruCache *cache, u_int64_t key) {
 
 /* ************************************ */
 
-char* find_lru_cache_str(struct LruCache *cache, char *key) {
+char*ndpi_find_lru_cache_str(struct ndpi_LruCache *cache, char *key) {
   if(cache->hash_size == 0)
     return(0);
   else {
-    u_int32_t hash_val =  hash_string(key);
+    u_int32_t hash_val =  lru_hash_string(key);
     u_int32_t hash_id = hash_val % cache->hash_size;
-    struct LruCacheEntry *head, *prev = NULL;
+    struct ndpi_LruCacheEntry *head, *prev = NULL;
     char *ret_val = NULL;
     time_t now = time(NULL);
 
@@ -451,7 +451,7 @@ char* find_lru_cache_str(struct LruCache *cache, char *key) {
 	  free_lru_cache_entry(cache, head);
 	  ndpi_free(head);
 #ifdef FULL_STATS
-	  cache->mem_size -= sizeof(struct LruCacheEntry);
+	  cache->mem_size -= sizeof(struct ndpi_LruCacheEntry);
 #endif
 	  ret_val = NULL;
 	  cache->current_hash_size[hash_id]--;
@@ -473,7 +473,7 @@ char* find_lru_cache_str(struct LruCache *cache, char *key) {
 
 /* ************************************ */
 
-static void dumpLruCacheStat(struct LruCache *cache,
+static void dumpndpi_LruCacheStat(struct ndpi_LruCache *cache,
 			     char* cacheName, u_int timeDifference) {
   u_int32_t tot_cache_add = 0, tot_cache_find = 0;
   u_int32_t tot_mem = 0, grand_total_mem = 0;
@@ -494,7 +494,7 @@ static void dumpLruCacheStat(struct LruCache *cache,
   cache->last_num_cache_misses = cache->num_cache_misses;
 
   for(tot=0, tot_mem=0, j=0; j<cache->hash_size; j++)
-    tot += cache->current_hash_size[j], tot_mem += (cache->mem_size+sizeof(struct LruCache));
+    tot += cache->current_hash_size[j], tot_mem += (cache->mem_size+sizeof(struct ndpi_LruCache));
 
   grand_total += tot;
   grand_total_mem += tot_mem;

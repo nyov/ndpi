@@ -1150,7 +1150,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 
   ndpi_str->ac_automa = ac_automata_init(ac_match_handler);
 
-  init_lru_cache(&ndpi_str->skypeCache, 4096);
+  ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
   ndpi_init_protocol_defaults(ndpi_str);
   return ndpi_str;
 }
@@ -1172,7 +1172,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
     if(ndpi_struct->ac_automa != NULL)
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
 
-    free_lru_cache(&ndpi_struct->skypeCache);
+    ndpi_free_lru_cache(&ndpi_struct->skypeCache);
     ndpi_free(ndpi_struct);
   }
 }
