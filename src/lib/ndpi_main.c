@@ -560,6 +560,8 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
     { ".last.fm",          "LastFM", NDPI_PROTOCOL_LASTFM },
     { ".grooveshark.com",  "GrooveShark", NDPI_PROTOCOL_GROOVESHARK },
     { ".tuenti.com",       "Tuenti", NDPI_PROTOCOL_TUENTI },
+    { ".skype.com",        "Skype", NDPI_PROTOCOL_SKYPE },
+    { ".skypeassets.com",  "Skype", NDPI_PROTOCOL_SKYPE },
     { NULL, 0 }
   };
   int i;
