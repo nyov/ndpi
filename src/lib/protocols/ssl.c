@@ -197,13 +197,18 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
      || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
     char certificate[64];
     int rc = getSSLcertificate(ndpi_struct, flow, certificate, sizeof(certificate));
-    
+
+    packet->ssl_certificate_num_checks++;
+
     if(rc > 0) {
       packet->ssl_certificate_detected = 1;
       // printf("***** [SSL] %s\n", certificate);
       if(ndpi_match_string_subprotocol(ndpi_struct, flow, certificate, strlen(certificate)) != NDPI_PROTOCOL_UNKNOWN)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
+
+    if(packet->ssl_certificate_num_checks >= 2)
+      ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL_NO_CERT);
   }
 
   return(0);

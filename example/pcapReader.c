@@ -135,7 +135,7 @@ static void parseOptions(int argc, char **argv)
 {
   int opt;
 
-  while ((opt = getopt(argc, argv, "df:i:hp:l:s:tv")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:i:hp:l:s:tv:")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -166,7 +166,7 @@ static void parseOptions(int argc, char **argv)
       break;
 
     case 'v':
-      verbose = 1;
+      verbose = atoi(optarg);
       break;
 
     case 'h':
@@ -549,17 +549,15 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
     return 0;
   }
 
-#if 0
-  if(verbose && (protocol == 0)) {
+  if(verbose > 1) {
     char buf1[32], buf2[32];
-
+    
     printf("%s %s:%u > %s:%u [proto: %u/%s]\n",
 	   ipProto2Name(flow->protocol),
 	   intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)), ntohs(flow->lower_port),
 	   intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)), ntohs(flow->upper_port),
 	   protocol, ndpi_get_proto_name(ndpi_struct, protocol));
   }
-#endif
 
   flow->detected_protocol = protocol;
 

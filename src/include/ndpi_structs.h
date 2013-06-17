@@ -485,7 +485,7 @@ typedef struct ndpi_packet_struct {
   u_int8_t packet_unix_lines_parsed_complete;
   u_int8_t empty_line_position_set;
   u_int8_t packet_direction:1;
-  u_int8_t ssl_certificate_detected;
+  u_int8_t ssl_certificate_detected:4, ssl_certificate_num_checks:4;
 } ndpi_packet_struct_t;
 
 struct ndpi_detection_module_struct;
