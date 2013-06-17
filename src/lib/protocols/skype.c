@@ -23,7 +23,6 @@
 
 #ifdef NDPI_PROTOCOL_SKYPE
 
-#if 0
 static u_int is_private_addr(u_int32_t addr) {
   addr = ntohl(addr);
 
@@ -36,11 +35,10 @@ static u_int is_private_addr(u_int32_t addr) {
   else
     return(0);
 }
-#endif
 
 static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  struct ndpi_packet_struct *packet = &flow->packet;  
+  struct ndpi_packet_struct *packet = &flow->packet;
   // const u_int8_t *packet_payload = packet->payload;
   u_int32_t payload_len = packet->payload_packet_len;
 
@@ -58,26 +56,25 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
   */
   if(((ntohl(packet->iph->saddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
      || ((ntohl(packet->iph->daddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
-     || (ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr) == 1)) {
+     || (ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, (u_int64_t)packet->iph->daddr) == 1)) {
     ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
     return;
   }
-  
+
   if(packet->udp != NULL) {
     flow->l4.udp.skype_packet_id++;
 
     if(flow->l4.udp.skype_packet_id < 5) {
       /* skype-to-skype */
       if(((payload_len == 3) && ((packet->payload[2] & 0x0F)== 0x0d))
-	 || ((payload_len >= 16) 
+	 || ((payload_len >= 16)
 	     && (packet->payload[0] != 0x30) /* Avoid invalid SNMP detection */
 	     && (packet->payload[2] == 0x02))) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);	
-
-	ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	if(!is_private_addr(ntohl(packet->iph->daddr))) ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
       }
-      
+
       return;
     }
 
@@ -96,7 +93,8 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
       if((payload_len == 8) || (payload_len == 3)) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
-	ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
+	if(!is_private_addr(ntohl(packet->iph->daddr)))
+	  ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
       }
 
       /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */
