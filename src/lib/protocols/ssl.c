@@ -309,7 +309,8 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
       ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL_NO_CERT);
 #ifdef NDPI_PROTOCOL_SKYPE
       //printf("[SSL] %08X -> %08X\n", packet->iph->saddr, packet->iph->daddr);
-      ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->saddr, 1);
+      if(packet->iph)
+	ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->saddr, 1);
 #endif
     } else
       ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
