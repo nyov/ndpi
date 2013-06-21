@@ -606,7 +606,10 @@ typedef struct ndpi_detection_module_struct {
 
   /* Cache */
   NDPI_REDIS redis;
+
+  /* Skype (we need a lock as this cache can be accessed concurrently) */
   struct ndpi_LruCache skypeCache;
+  pthread_mutex_t skypeCacheLock;
 
   /* ********************* */
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];

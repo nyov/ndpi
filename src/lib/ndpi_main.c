@@ -1151,6 +1151,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_str->ac_automa = ac_automata_init(ac_match_handler);
 
   ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
+  pthread_mutex_init(&ndpi_str->skypeCacheLock, NULL);
   ndpi_init_protocol_defaults(ndpi_str);
   return ndpi_str;
 }
@@ -1173,6 +1174,8 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
 
     ndpi_free_lru_cache(&ndpi_struct->skypeCache);
+    pthread_mutex_destroy(&ndpi_struct->skypeCacheLock);
+
     ndpi_free(ndpi_struct);
   }
 }
@@ -4992,10 +4995,13 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
+  pthread_mutex_lock(&ndpi_struct->skypeCacheLock);
   if(ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, shost)
      || ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, dhost)) {
+    pthread_mutex_unlock(&ndpi_struct->skypeCacheLock);
     return(NDPI_PROTOCOL_SKYPE);
   }
+  pthread_mutex_unlock(&ndpi_struct->skypeCacheLock);
 
   node.default_port = sport;
   ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
