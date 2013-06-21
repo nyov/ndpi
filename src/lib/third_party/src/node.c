@@ -148,7 +148,7 @@ int node_has_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * newstr)
       if (str->length != newstr->length)
 	continue;
 
-      for (j=0; j<str->length; j++)
+      for (j=0; j<(int)str->length; j++)
 	if(str->astring[j] != newstr->astring[j])
 	  continue;
 

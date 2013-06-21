@@ -79,7 +79,7 @@ void ndpi_free_lru_cache(struct ndpi_LruCache *cache) {
 
   if(unlikely(traceLRU)) printf("%s()", __FUNCTION__);
 
-  for(i=0; i<cache->hash_size; i++) {
+  for(i=0; i<(int)cache->hash_size; i++) {
     struct ndpi_LruCacheEntry *head = cache->hash[i];
 
     while(head != NULL) {
@@ -493,7 +493,7 @@ static void dumpndpi_LruCacheStat(struct ndpi_LruCache *cache,
   num_cache_misses += cache->num_cache_misses - cache->last_num_cache_misses;
   cache->last_num_cache_misses = cache->num_cache_misses;
 
-  for(tot=0, tot_mem=0, j=0; j<cache->hash_size; j++)
+  for(tot=0, tot_mem=0, j=0; j<(int)cache->hash_size; j++)
     tot += cache->current_hash_size[j], tot_mem += (cache->mem_size+sizeof(struct ndpi_LruCache));
 
   grand_total += tot;

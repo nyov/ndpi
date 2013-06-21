@@ -54,21 +54,21 @@ void ndpi_search_i23v5(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	if (packet->payload_packet_len > 7 && ((packet->payload[0] & 0x04) == 0x04 && (packet->payload[2] & 0x80) == 0x80)) {
 		NDPI_LOG(NDPI_PROTOCOL_I23V5, ndpi_struct, NDPI_LOG_DEBUG, "found i23v5 handshake bits.\n");
 
-		for (i = 3; i < packet->payload_packet_len - 5; i++) {
+		for (i = 3; i < (u_int32_t)packet->payload_packet_len - 5; i++) {
 			if (packet->payload[i] == 0x0d && packet->payload[i + 1] == 0x58) {
 				NDPI_LOG(NDPI_PROTOCOL_I23V5, ndpi_struct, NDPI_LOG_DEBUG, "found first i23v5 key len.\n");
 				flow->i23v5_len1 = get_u_int32_t(packet->payload, i + 2);
 				return;
 			}
 		}
-		for (i = 3; i < packet->payload_packet_len - 5; i++) {
+		for (i = 3; i < (u_int32_t)packet->payload_packet_len - 5; i++) {
 			if (packet->payload[i] == 0x0e && packet->payload[i + 1] == 0x58) {
 				NDPI_LOG(NDPI_PROTOCOL_I23V5, ndpi_struct, NDPI_LOG_DEBUG, "found second i23v5 key len.\n");
 				flow->i23v5_len2 = get_u_int32_t(packet->payload, i + 2);
 				return;
 			}
 		}
-		for (i = 3; i < packet->payload_packet_len - 5; i++) {
+		for (i = 3; i <(u_int32_t) packet->payload_packet_len - 5; i++) {
 			if (packet->payload[i] == 0x0f && packet->payload[i + 1] == 0x58) {
 				NDPI_LOG(NDPI_PROTOCOL_I23V5, ndpi_struct, NDPI_LOG_DEBUG, "found third i23v5 key len.\n");
 				flow->i23v5_len3 = get_u_int32_t(packet->payload, i + 2);
@@ -76,7 +76,7 @@ void ndpi_search_i23v5(struct ndpi_detection_module_struct *ndpi_struct, struct 
 			}
 		}
 		if (flow->i23v5_len1 != 0 && flow->i23v5_len2 != 0 && flow->i23v5_len3 != 0) {
-			for (i = 3; i < packet->payload_packet_len - 5; i++) {
+			for (i = 3; i < (u_int32_t)packet->payload_packet_len - 5; i++) {
 				sum = flow->i23v5_len1 + flow->i23v5_len2 + flow->i23v5_len3;
 				if (get_u_int32_t(packet->payload, i) == sum) {
 					NDPI_LOG(NDPI_PROTOCOL_I23V5, ndpi_struct, NDPI_LOG_DEBUG, "key sum matches.\n");

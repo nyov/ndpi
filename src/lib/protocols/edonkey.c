@@ -111,7 +111,6 @@ static void ndpi_int_edonkey_tcp(struct ndpi_detection_module_struct *ndpi_struc
 		/* check for client hello */
 		if (packet->payload_packet_len >= 32 && get_l32(packet->payload, 1) <= (packet->payload_packet_len - 5)
 			&& (packet->payload[0] == 0xe3 || packet->payload[0] == 0xc5)) {
-
 			if (packet->payload[5] == 0x01 && ((packet->payload[6] == 0x10 && get_l32(packet->payload, 29) < 0x0F)
 											   || (get_l32(packet->payload, 28) > 0x00
 												   && get_l32(packet->payload, 28) < 0x0F))) {

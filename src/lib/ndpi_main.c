@@ -1070,7 +1070,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 
   init_string_based_protocols(ndpi_mod);
 
-  for(i=0; i<ndpi_mod->ndpi_num_supported_protocols; i++) {
+  for(i=0; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++) {
     if(ndpi_mod->proto_defaults[i].protoName == NULL) {
       printf("[NDPI] %s(missing protoId=%d) INTERNAL ERROR: not all protocols have been initialized\n", __FUNCTION__, i);
     }
@@ -1162,7 +1162,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
   if(ndpi_struct != NULL) {
     int i;
 
-    for(i=0; i<ndpi_struct->ndpi_num_supported_protocols; i++) {
+    for(i=0; i<(int)ndpi_struct->ndpi_num_supported_protocols; i++) {
       if(ndpi_struct->proto_defaults[i].protoName)
 	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
@@ -1256,7 +1256,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   }
 
   while(fd) {
-    char buffer[512], *line, *at, *proto, *elem, *holder;
+    char buffer[512], *line, *at, *proto, *elem/*, *holder*/;
     ndpi_proto_defaults_t *def;
     int subprotocol_id;
 
@@ -1275,7 +1275,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     } else
       at[0] = 0, proto = &at[1];
 
-    for(i=0, def = NULL; i<ndpi_mod->ndpi_num_supported_protocols; i++) {
+    for(i=0, def = NULL; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++) {
       if(strcasecmp(ndpi_mod->proto_defaults[i].protoName, proto) == 0) {
 	def = &ndpi_mod->proto_defaults[i];
         subprotocol_id = i;
@@ -5031,7 +5031,7 @@ char* ndpi_get_proto_name(struct ndpi_detection_module_struct *ndpi_mod, u_int16
 void ndpi_dump_protocols(struct ndpi_detection_module_struct *ndpi_mod) {
   int i;
 
-  for(i=0; i<ndpi_mod->ndpi_num_supported_protocols; i++)
+  for(i=0; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++)
     printf("[%3d] %s\n", i, ndpi_mod->proto_defaults[i].protoName);
 }
 
@@ -5109,4 +5109,46 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 }
 
 
-	
+/* ****************************************************** */
+
+#ifdef WIN32
+				  
+int pthread_mutex_init(pthread_mutex_t *mutex, void *unused) {
+  unused = NULL;
+  *mutex = CreateMutex(NULL, FALSE, NULL);
+  return *mutex == NULL ? -1 : 0;
+}
+
+int pthread_mutex_destroy(pthread_mutex_t *mutex) {
+  return CloseHandle(*mutex) == 0 ? -1 : 0;
+}
+
+int pthread_mutex_lock(pthread_mutex_t *mutex) {
+  return WaitForSingleObject(*mutex, INFINITE) == WAIT_OBJECT_0 ? 0 : -1;
+}
+
+int pthread_mutex_unlock(pthread_mutex_t *mutex) {
+  return ReleaseMutex(*mutex) == 0 ? -1 : 0;
+}
+
+/*  http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob;f=src/port/gettimeofday.c;h=75a91993b74414c0a1c13a2a09ce739cb8aa8a08;hb=HEAD */
+int gettimeofday(struct timeval * tp, struct timezone * tzp) {
+	/* FILETIME of Jan 1 1970 00:00:00. */
+     const unsigned __int64 epoch = (__int64)(116444736000000000);
+   
+	  FILETIME    file_time;
+       SYSTEMTIME  system_time;
+       ULARGE_INTEGER ularge;
+   
+       GetSystemTime(&system_time);
+       SystemTimeToFileTime(&system_time, &file_time);
+       ularge.LowPart = file_time.dwLowDateTime;
+       ularge.HighPart = file_time.dwHighDateTime;
+   
+       tp->tv_sec = (long) ((ularge.QuadPart - epoch) / 10000000L);
+       tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
+   
+       return 0;
+ }
+#endif
+

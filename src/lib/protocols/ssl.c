@@ -166,7 +166,7 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 			break;
 		    }
 
-		    len = ndpi_min(extension_len-begin, buffer_len-1);
+		    len = (u_int)ndpi_min(extension_len-begin, buffer_len-1);
 		    strncpy(buffer, &server_name[begin], len);
 		    buffer[len] = '\0';
 		    stripCertificateTrailer(buffer, buffer_len);

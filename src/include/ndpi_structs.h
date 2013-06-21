@@ -413,6 +413,23 @@ struct ndpi_flow_udp_struct {
 #endif
   ;
 
+#if defined(WIN32)
+#define pthread_t              HANDLE
+#define pthread_mutex_t        HANDLE
+#define pthread_rwlock_t       pthread_mutex_t
+
+extern int pthread_mutex_init(pthread_mutex_t *mutex, void *unused);
+extern int pthread_mutex_destroy(pthread_mutex_t *mutex);
+extern int pthread_mutex_lock(pthread_mutex_t *mutex);
+extern int pthread_mutex_unlock(pthread_mutex_t *mutex);
+
+#define pthread_rwlock_init                     pthread_mutex_init
+#define pthread_rwlock_wrlock                   pthread_mutex_lock
+#define pthread_rwlock_rdlock                   pthread_mutex_lock
+#define pthread_rwlock_unlock                   pthread_mutex_unlock
+#define pthread_rwlock_destroy					pthread_mutex_destroy
+#endif
+
 typedef struct ndpi_int_one_line_struct {
   const u_int8_t *ptr;
   u_int16_t len;
