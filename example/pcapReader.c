@@ -37,6 +37,7 @@
 #include <pcap.h>
 #include <signal.h>
 
+#include "../config.h"
 #include "linux_compat.h"
 #include "ndpi_main.h"
 
@@ -881,6 +882,8 @@ int main(int argc, char **argv)
 	 "* just to show you what you can do with the library. Feel \n"
 	 "* free to extend it and send us the patches for inclusion\n"
 	 "------------------------------------------------------------\n\n");
+
+  printf("Using nDPI %s (%s)\n", PACKAGE_VERSION, ndpi_revision());
 
   for(i=0; i<num_loops; i++)
     test_lib();

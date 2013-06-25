@@ -5108,6 +5108,11 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
   return(NDPI_PROTOCOL_UNKNOWN);
 }
 
+/* ****************************************************** */
+
+char* ndpi_revision() {
+  return("$Revision$");
+}
 
 /* ****************************************************** */
 
