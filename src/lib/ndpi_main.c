@@ -4995,13 +4995,15 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
-  pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
-  if(ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, shost)
-     || ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, dhost)) {
+  if(shost && dhost) {
+    pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
+    if(ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, shost)
+       || ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, dhost)) {
+      pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+      return(NDPI_PROTOCOL_SKYPE);
+    }
     pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
-    return(NDPI_PROTOCOL_SKYPE);
   }
-  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
 
   node.default_port = sport;
   ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
