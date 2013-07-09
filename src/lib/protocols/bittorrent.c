@@ -384,15 +384,17 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
       ndpi_int_search_bittorrent_tcp(ndpi_struct, flow);
     }
     else if(packet->udp != NULL) {
+      if((ntohs(packet->udp->source) < 1024) 
+	 || (ntohs(packet->udp->dest) < 1024)) /* High ports only */
+	return;
+
       /*
 	Check for uTP http://www.bittorrent.org/beps/bep_0029.html
 
 	wireshark/epan/dissectors/packet-bt-utp.c
        */
 
-      if((packet->payload_packet_len >= 23      /* min header size */) 
-	 && (ntohs(packet->udp->source) > 1024) 
-	 && (ntohs(packet->udp->dest) > 1024)) {
+      if(packet->payload_packet_len >= 23 /* min header size */) {
 	/* Check if this is protocol v0 */
 	u_int8_t v0_extension = packet->payload[17];
 	u_int8_t v0_flags     = packet->payload[18];
