@@ -80,6 +80,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
 	if(packet->iph
 	   && (!is_private_addr(ntohl(packet->iph->daddr)))
+	   && (ntohs(packet->udp->source) > 1024) && (ntohs(packet->udp->dest) > 1024)
 	   && (ndpi_guess_undetected_protocol(ndpi_struct, IPPROTO_UDP,
 					      packet->iph->saddr, packet->udp->source,
 					      packet->iph->daddr, packet->udp->dest) == NDPI_PROTOCOL_UNKNOWN)) {
@@ -109,6 +110,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
 	if(packet->iph 
 	   && (!is_private_addr(ntohl(packet->iph->daddr)))
+	   && (ntohs(packet->tcp->source) > 1024) && (ntohs(packet->tcp->dest) > 1024)
 	   && (ndpi_guess_undetected_protocol(ndpi_struct, IPPROTO_TCP,
 					      packet->iph->saddr, packet->tcp->source,
 					      packet->iph->daddr, packet->tcp->dest) == NDPI_PROTOCOL_UNKNOWN)

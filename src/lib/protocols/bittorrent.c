@@ -390,7 +390,9 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	wireshark/epan/dissectors/packet-bt-utp.c
        */
 
-      if(packet->payload_packet_len >= 23 /* min header size */) {
+      if((packet->payload_packet_len >= 23      /* min header size */) 
+	 && (ntohs(packet->udp->source) > 1024) 
+	 && (ntohs(packet->udp->dest) > 1024)) {
 	/* Check if this is protocol v0 */
 	u_int8_t v0_extension = packet->payload[17];
 	u_int8_t v0_flags     = packet->payload[18];
@@ -409,7 +411,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	    // ts_usec, 
 	    now = (u_int32_t)time(NULL);
 	  
-	  ts      = ntohl(*((u_int32_t*)&(packet->payload[4])));
+	  ts = ntohl(*((u_int32_t*)&(packet->payload[4])));
 	  // ts_usec = ntohl(*((u_int32_t*)&(packet->payload[8])));
 	  
 	  if((ts < (now+86400)) && (ts > (now-86400))) {
