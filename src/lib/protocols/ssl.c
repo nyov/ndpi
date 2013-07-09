@@ -80,6 +80,7 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
       int i;
 
       if(handshake_protocol == 0x02 /* Server Hello */) {
+	flow->l4.tcp.ssl_seen_server_cert = 1;
 
 	for(i=total_len; i < packet->payload_packet_len-3; i++) {
 	  if((packet->payload[i] == 0x04)
@@ -128,6 +129,8 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 	if((session_id_len+base_offset+2) <= total_len) {
 	  u_int16_t cypher_len =  packet->payload[session_id_len+base_offset+2] + (packet->payload[session_id_len+base_offset+1] << 8);
 	  offset = base_offset + session_id_len + cypher_len + 2;
+
+	  flow->l4.tcp.ssl_seen_client_cert = 1;
 
 	  if(offset < total_len) {
 	    u_int16_t compression_len;
@@ -304,7 +307,8 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
     NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "found ssl connection.\n");
     sslDetectProtocolFromCertificate(ndpi_struct, flow);
 
-    if(!packet->ssl_certificate_detected) {
+    if(!packet->ssl_certificate_detected
+       && (!(flow->l4.tcp.ssl_seen_client_cert && flow->l4.tcp.ssl_seen_server_cert))) {
       /* SSL without certificate (Skype, Ultrasurf?) */
       ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL_NO_CERT);
 #ifdef NDPI_PROTOCOL_SKYPE

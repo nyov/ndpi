@@ -111,7 +111,7 @@ static u_int32_t ndpi_flow_count = 0;
 
 static void help(u_int long_help) {
   printf("pcapReader -i <file|device> [-f <filter>][-s <duration>]\n"
-	 "           [-p <protos>][-l <loops>[-d][-h][-t][-v]\n\n"
+	 "           [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n\n"
 	 "Usage:\n"
 	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture\n"
 	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
@@ -121,7 +121,7 @@ static void help(u_int long_help) {
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -t                        | Dissect GTP tunnels\n"
 	 "  -h                        | This help\n"
-	 "  -v                        | Verbose 'unknown protocol' packet print\n");
+	 "  -v <1|2>                  | Verbose 'unknown protocol' packet print. 1=verbose, 2=very verbose\n");
 
   if(long_help) {
     printf("\n\nSupported protocols:\n");
