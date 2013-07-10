@@ -1068,6 +1068,11 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
 
+  /* TODO: write a real protocol dissector */
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WHOIS_DAS, "WhoisDAS",
+			  ndpi_build_default_ports(ports_a, 43, 4343, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+
   init_string_based_protocols(ndpi_mod);
 
   for(i=0; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++) {

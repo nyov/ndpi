@@ -209,10 +209,11 @@ extern "C" {
 #define NDPI_PROTOCOL_ORACLE                                    167 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_CORBA                                     168 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_UBUNTUONE                                 169 /* Remy Mudingay <mudingay@ill.fr> */
+#define NDPI_PROTOCOL_WHOIS_DAS                                 170
 
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          169
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          170
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128
