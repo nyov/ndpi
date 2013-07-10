@@ -35,6 +35,28 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
   if (protocol != NDPI_PROTOCOL_SSL) {
     ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_CORRELATED_PROTOCOL);
   } else {
+    struct ndpi_packet_struct *packet = &flow->packet;
+
+    if(packet->tcp != NULL) {
+      switch(protocol) {
+      case NDPI_PROTOCOL_SSL:
+      case NDPI_PROTOCOL_SSL_NO_CERT:
+	{
+	  /* 
+	     In case of SSL there are probably sub-protocols
+	     such as IMAPS that can be otherwise detected
+	  */
+	  u_int16_t sport = ntohs(packet->tcp->source);
+	  u_int16_t dport = ntohs(packet->tcp->dest);
+	  
+	  if((sport == 465) || (dport == 465))      protocol = NDPI_PROTOCOL_MAIL_SMTP;
+	  else if((sport == 993) || (dport == 993)) protocol = NDPI_PROTOCOL_MAIL_IMAP;
+	  else if((sport == 995) || (dport == 995)) protocol = NDPI_PROTOCOL_MAIL_POP;
+	}
+	break;
+      }
+    }
+
     ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
   }
 }
