@@ -295,6 +295,8 @@ strncasecmp(s1, s2, n)
 /* Forward */
 static void addDefaultPort(ndpi_port_range *range,
 			   ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t **root);
+static int removeDefaultPort(ndpi_port_range *range,
+			     ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t **root);
 
 /* ****************************************** */
 
@@ -499,6 +501,35 @@ static void addDefaultPort(ndpi_port_range *range,
 
 /* ****************************************************** */
 
+/* 
+   NOTE
+
+   This function must be called with a semaphore set, this in order to avoid
+   changing the datastrutures while using them
+*/
+static int removeDefaultPort(ndpi_port_range *range,
+			     ndpi_proto_defaults_t *def, 
+			     ndpi_default_ports_tree_node_t **root) {
+  ndpi_default_ports_tree_node_t node;
+  ndpi_default_ports_tree_node_t *ret;
+  u_int16_t port;
+  
+  for(port=range->port_low; port<=range->port_high; port++) {
+    node.proto = def, node.default_port = port;
+    ret = *(ndpi_default_ports_tree_node_t**)ndpi_tdelete(&node, (void*)root, 
+							  ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
+    
+    if(ret != NULL) {
+      ndpi_free((ndpi_default_ports_tree_node_t*)ret);
+      return(0);
+    }
+  }
+
+  return(-1);
+}
+
+/* ****************************************************** */
+
 static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
 					 char *attr, char *value, int protocol_id) {
   AC_PATTERN_t ac_pattern;
@@ -534,6 +565,21 @@ static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *nd
 #endif
 
   return(0);
+}
+
+/* ****************************************************** */
+
+/* 
+   NOTE
+
+   This function must be called with a semaphore set, this in order to avoid
+   changing the datastrutures while using them
+*/
+static int ndpi_remove_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+					    char *attr, char *value, int protocol_id) {
+  
+  printf("[NDPI] Missing implementation of %s()\n", __FUNCTION__);
+  return(-1);
 }
 
 /* ******************************************************************** */
@@ -1239,6 +1285,88 @@ u_int ndpi_get_num_supported_protocols(struct ndpi_detection_module_struct *ndpi
 
 /* ******************************************************************** */
 
+int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, u_int8_t do_add) {
+  char *at, *proto, *elem, *holder;
+  ndpi_proto_defaults_t *def;
+  int subprotocol_id, i;
+
+  at = strrchr(rule, '@');
+  if(at == NULL) {
+    printf("Invalid rule '%s'\n", rule);
+    return(-1);
+  } else
+    at[0] = 0, proto = &at[1];
+
+  for(i=0, def = NULL; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++) {
+    if(strcasecmp(ndpi_mod->proto_defaults[i].protoName, proto) == 0) {
+      def = &ndpi_mod->proto_defaults[i];
+      subprotocol_id = i;
+      break;
+    }
+  }
+  
+  if(def == NULL) {
+    if(!do_add) {
+      /* We need to remove a rule */
+      printf("Unable to find protocol '%s': skipping rule '%s'\n", proto, rule);
+      return(-3);
+    } else {
+      ndpi_port_range ports_a[MAX_DEFAULT_PORTS], ports_b[MAX_DEFAULT_PORTS];
+      
+      if(ndpi_mod->ndpi_num_custom_protocols >= (NDPI_MAX_NUM_CUSTOM_PROTOCOLS-1)) {
+	printf("Too many protocols defined (%u): skipping protocol %s\n",
+	       ndpi_mod->ndpi_num_custom_protocols, proto);
+	return(-2);
+      }
+      
+      ndpi_set_proto_defaults(ndpi_mod, ndpi_mod->ndpi_num_supported_protocols, ndpi_strdup(proto),
+			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			      ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+      def = &ndpi_mod->proto_defaults[ndpi_mod->ndpi_num_supported_protocols];
+      subprotocol_id = ndpi_mod->ndpi_num_supported_protocols;
+      ndpi_mod->ndpi_num_supported_protocols++, ndpi_mod->ndpi_num_custom_protocols++;
+    }
+  }
+
+  elem = strtok_r(rule, ",", &holder);
+  while(elem != NULL) {
+    char *attr = elem, *value;
+    ndpi_port_range range;
+    int is_tcp = 0, is_udp = 0;
+
+    if (strncmp(attr, "tcp:", 4) == 0)
+      is_tcp = 1, value = &attr[4];
+    else if (strncmp(attr, "udp:", 4) == 0)
+      is_udp = 1, value = &attr[4];
+    else if (strncmp(attr, "host:", 5) == 0) {
+      /* host:"<value>",host:"<value>",.....@<subproto> */
+      value = &attr[5];
+      if (value[0] == '"') value++; /* remove leading " */
+      if (value[strlen(value)-1] == '"') value[strlen(value)-1] = '\0'; /* remove trailing " */
+    }
+
+    if (is_tcp || is_udp) {
+      if(sscanf(value, "%u-%u", (unsigned int *)&range.port_low, (unsigned int *)&range.port_high) != 2)
+	range.port_low = range.port_high = atoi(&elem[4]);
+      if(do_add)
+	addDefaultPort(&range, def, is_tcp ? &ndpi_mod->tcpRoot : &ndpi_mod->udpRoot);
+      else
+	removeDefaultPort(&range, def, is_tcp ? &ndpi_mod->tcpRoot : &ndpi_mod->udpRoot);
+    } else {
+      if(do_add)
+	ndpi_add_host_url_subprotocol(ndpi_mod, "host", value, subprotocol_id);
+      else
+	ndpi_remove_host_url_subprotocol(ndpi_mod, "host", value, subprotocol_id);
+    }
+
+    elem = strtok_r(NULL, ",", &holder);
+  }
+
+  return(0);
+}
+
+/* ******************************************************************** */
+
 /*
   Format:
   <tcp|udp>:<port>,<tcp|udp>:<port>,.....@<proto>
@@ -1261,9 +1389,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
   }
 
   while(fd) {
-    char buffer[512], *line, *at, *proto, *elem, *holder;
-    ndpi_proto_defaults_t *def;
-    int subprotocol_id;
+    char buffer[512], *line;
 
     if(!(line = fgets(buffer, sizeof(buffer), fd)))
       break;
@@ -1273,65 +1399,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
     else
       line[i-1] = '\0';
 
-    at = strrchr(line, '@');
-    if(at == NULL) {
-      printf("Invalid line '%s'\n", line);
-      continue;
-    } else
-      at[0] = 0, proto = &at[1];
-
-    for(i=0, def = NULL; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++) {
-      if(strcasecmp(ndpi_mod->proto_defaults[i].protoName, proto) == 0) {
-	def = &ndpi_mod->proto_defaults[i];
-        subprotocol_id = i;
-	break;
-      }
-    }
-
-    if(def == NULL) {
-      ndpi_port_range ports_a[MAX_DEFAULT_PORTS], ports_b[MAX_DEFAULT_PORTS];
-
-      if(ndpi_mod->ndpi_num_custom_protocols >= (NDPI_MAX_NUM_CUSTOM_PROTOCOLS-1)) {
-	printf("Too many protocols defined (%u): skipping protocol %s\n",
-	       ndpi_mod->ndpi_num_custom_protocols, proto);
-	continue;
-      }
-
-      ndpi_set_proto_defaults(ndpi_mod, ndpi_mod->ndpi_num_supported_protocols, ndpi_strdup(proto),
-			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
-			      ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-      def = &ndpi_mod->proto_defaults[ndpi_mod->ndpi_num_supported_protocols];
-      subprotocol_id = ndpi_mod->ndpi_num_supported_protocols;
-      ndpi_mod->ndpi_num_supported_protocols++, ndpi_mod->ndpi_num_custom_protocols++;
-    }
-
-    elem = strtok_r(line, ",", &holder);
-    while(elem != NULL) {
-      char *attr = elem, *value;
-      ndpi_port_range range;
-      int is_tcp = 0, is_udp = 0;
-
-      if (strncmp(attr, "tcp:", 4) == 0)
-        is_tcp = 1, value = &attr[4];
-      else if (strncmp(attr, "udp:", 4) == 0)
-        is_udp = 1, value = &attr[4];
-      else if (strncmp(attr, "host:", 5) == 0) {
-	/* host:"<value>",host:"<value>",.....@<subproto> */
-	value = &attr[5];
-        if (value[0] == '"') value++; /* remove leading " */
-	if (value[strlen(value)-1] == '"') value[strlen(value)-1] = '\0'; /* remove trailing " */
-      }
-
-      if (is_tcp || is_udp) {
-        if(sscanf(value, "%u-%u", (unsigned int *)&range.port_low, (unsigned int *)&range.port_high) != 2)
-	  range.port_low = range.port_high = atoi(&elem[4]);
-        addDefaultPort(&range, def, is_tcp ? &ndpi_mod->tcpRoot : &ndpi_mod->udpRoot);
-      } else {
-	ndpi_add_host_url_subprotocol(ndpi_mod, "host", value, subprotocol_id);
-      }
-
-      elem = strtok_r(NULL, ",", &holder);
-    }
+    ndpi_handle_rule(ndpi_mod, line, 1);
   }
 
   fclose(fd);
