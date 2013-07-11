@@ -145,6 +145,7 @@ libndpi_la_SOURCES = \
 			protocols/rsync.c \
 			protocols/rtcp.c \
 			protocols/skinny.c \
-			protocols/tor.c
+			protocols/tor.c \
+			protocols/whoisdas.c
 
 # NTOP protocols are at the end

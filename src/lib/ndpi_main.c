@@ -1113,9 +1113,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_UBUNTUONE, "UbuntuONE",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-
-  /* TODO: write a real protocol dissector */
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WHOIS_DAS, "WhoisDAS",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WHOIS_DAS, "Whois-DAS",
 			  ndpi_build_default_ports(ports_a, 43, 4343, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
 
@@ -3257,6 +3255,20 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_RSYNC);
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_RSYNC);
+    a++;
+  }
+#endif
+
+#ifdef NDPI_PROTOCOL_WHOIS_DAS
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WHOIS_DAS) != 0) {
+    ndpi_struct->callback_buffer[a].func = ndpi_search_whois_das;
+    ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
+      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
+
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_WHOIS_DAS);
+
+    NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].excluded_protocol_bitmask, NDPI_PROTOCOL_WHOIS_DAS);
     a++;
   }
 #endif
