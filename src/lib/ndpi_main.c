@@ -5115,6 +5115,18 @@ char* ndpi_get_proto_name(struct ndpi_detection_module_struct *ndpi_mod, u_int16
 
 /* ****************************************************** */
 
+int ndpi_get_protocol_id(struct ndpi_detection_module_struct *ndpi_mod, char *proto) {
+  int i;
+
+  for(i=0; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++)
+    if(strcasecmp(proto, ndpi_mod->proto_defaults[i].protoName) == 0)
+      return(i);
+
+  return(-1);
+}
+
+/* ****************************************************** */
+
 void ndpi_dump_protocols(struct ndpi_detection_module_struct *ndpi_mod) {
   int i;
 
