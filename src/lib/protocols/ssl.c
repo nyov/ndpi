@@ -49,9 +49,9 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
 	  u_int16_t sport = ntohs(packet->tcp->source);
 	  u_int16_t dport = ntohs(packet->tcp->dest);
 	  
-	  if((sport == 465) || (dport == 465))      protocol = NDPI_PROTOCOL_MAIL_SMTP;
-	  else if((sport == 993) || (dport == 993)) protocol = NDPI_PROTOCOL_MAIL_IMAP;
-	  else if((sport == 995) || (dport == 995)) protocol = NDPI_PROTOCOL_MAIL_POP;
+	  if((sport == 465) || (dport == 465))      protocol = NDPI_PROTOCOL_MAIL_SMTPS;
+	  else if((sport == 993) || (dport == 993)) protocol = NDPI_PROTOCOL_MAIL_IMAPS;
+	  else if((sport == 995) || (dport == 995)) protocol = NDPI_PROTOCOL_MAIL_POPS;
 	}
 	break;
       }

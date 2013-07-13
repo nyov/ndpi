@@ -40,7 +40,6 @@ libndpi_la_SOURCES = \
 			protocols/dofus.c \
 			protocols/edonkey.c \
 			protocols/fasttrack.c \
-			protocols/feidian.c \
 			protocols/fiesta.c \
 			protocols/filetopia.c \
 			protocols/flash.c \
@@ -51,7 +50,6 @@ libndpi_la_SOURCES = \
 			protocols/halflife2_and_mods.c \
 			protocols/http_activesync.c \
 			protocols/http.c \
-			protocols/i23v5.c \
 			protocols/iax.c \
 			protocols/icecast.c \
 			protocols/imesh.c \
@@ -80,7 +78,6 @@ libndpi_la_SOURCES = \
 			protocols/ntp.c \
 			protocols/openft.c \
 			protocols/oscar.c \
-			protocols/pando.c \
 			protocols/pcanywhere.c \
 			protocols/popo.c \
 			protocols/postgres.c \

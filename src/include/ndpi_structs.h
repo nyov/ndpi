@@ -404,9 +404,6 @@ struct ndpi_flow_udp_struct {
 #ifdef NDPI_PROTOCOL_PPSTREAM
   u_int32_t ppstream_stage:3;		// 0-7
 #endif
-#ifdef NDPI_PROTOCOL_FEIDIAN
-  u_int32_t feidian_stage:1;		// 0-7
-#endif
 #ifdef NDPI_PROTOCOL_HALFLIFE2
   u_int32_t halflife2_stage:2;		// 0 - 2
 #endif
@@ -709,11 +706,6 @@ typedef struct ndpi_flow_struct {
 #endif
 #endif
 
-#ifdef NDPI_PROTOCOL_I23V5
-  u_int32_t i23v5_len1;
-  u_int32_t i23v5_len2;
-  u_int32_t i23v5_len3;
-#endif
   u_int16_t packet_counter;			// can be 0-65000
   u_int16_t packet_direction_counter[2];
   u_int16_t byte_counter[2];
