@@ -78,6 +78,13 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	     && (packet->payload[2] == 0x02))) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+
+	/*
+	  The above check is a bit weak for assuming that the host peers are
+	  skype nodes. So ok to mark this connection as skype, but not to mark
+	  the host as skype node as this might be a PC that just started skype
+	 */
+#if 0
 	if(packet->iph
 	   && (!is_private_addr(ntohl(packet->iph->daddr)))
 	   && (ntohs(packet->udp->source) > 1024) && (ntohs(packet->udp->dest) > 1024)
@@ -85,9 +92,20 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 					      packet->iph->saddr, packet->udp->source,
 					      packet->iph->daddr, packet->udp->dest) == NDPI_PROTOCOL_UNKNOWN)) {
 	  pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
+	  	  
+	  if(0) {
+	    struct in_addr in;
+
+	    in.s_addr = packet->iph->saddr;
+	    printf("%s:%u", inet_ntoa(in), ntohs(packet->udp->source));
+	    in.s_addr = packet->iph->daddr;
+	    printf(" <-> %s:%u\n", inet_ntoa(in), ntohs(packet->udp->dest));
+	  }
+
 	  ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
 	  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
 	}
+#endif
       }
 
       return;

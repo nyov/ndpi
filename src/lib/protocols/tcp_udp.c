@@ -66,21 +66,33 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_APPLE, NDPI_REAL_PROTOCOL);
 	return;
       }
+
+      /* 
+	 Skype
+	 157.56.0.0/14, 157.60.0.0/16, 157.54.0.0/15
+      */
+      if(
+	 (((ntohl(packet->iph->saddr) & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000 /* 157.56.0.0/ */) || ((ntohl(packet->iph->daddr) & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000))
+	 || (((ntohl(packet->iph->saddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3C0000 /* 157.60.0.0/ */) || ((ntohl(packet->iph->daddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3D0000))
+	 || (((ntohl(packet->iph->saddr) & 0xFF7F0000 /* 255.255.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((ntohl(packet->iph->daddr) & 0xFF7F0000 /* 255.127.0.0 */) == 0x9D360000))
+	 ) {
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	return;
+      }
   
       /*
 	Google
 	173.194.0.0/16
       */
-      if(((ntohl(packet->iph->saddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000 /* 66.114.160.0 */)
-	 || ((ntohl(packet->iph->daddr) & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 66.114.160.0 */)) {
+      if(((ntohl(packet->iph->saddr) & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
+	 || ((ntohl(packet->iph->daddr) & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 173.194.0.0 */)) {
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_GOOGLE, NDPI_REAL_PROTOCOL);
 	return;
       }
 
       /*
-       * Ubunut One
-       * 91.189.89.0/21
-       * 255.255.248.0
+        Ubuntu One
+	91.189.89.0/21 (255.255.248.0)
        */
       if(((ntohl(packet->iph->saddr) & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0*/)
 	 || ((ntohl(packet->iph->daddr) & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0 */)) {
