@@ -350,5 +350,10 @@ void ndpi_search_rtcp(struct ndpi_detection_module_struct *ndpi_struct, struct n
 void ndpi_search_skinny(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_tor(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
+			     u_int32_t src_host, u_int32_t dst_host);
+void add_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
+			  u_int32_t src_host, u_int32_t dst_host);
 
-#endif							/* __NDPI_PROTOCOLS_INCLUDE_FILE__ */
+
+#endif /* __NDPI_PROTOCOLS_INCLUDE_FILE__ */

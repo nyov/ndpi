@@ -36,6 +36,46 @@ static u_int is_private_addr(u_int32_t addr) {
     return(0);
 }
 
+static u_int64_t get_skype_key(u_int32_t src_host, u_int32_t dst_host) {
+  u_int64_t key;
+  
+  if(src_host < dst_host) {
+    key = src_host;
+    key = (key << 32)+dst_host;
+  } else {
+    key = dst_host;
+    key = (key << 32)+src_host;
+  }
+
+  return(key);
+}
+
+u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
+			     u_int32_t src_host, u_int32_t dst_host) {
+  u_int64_t key = get_skype_key(src_host, dst_host);
+  int rc;
+
+  pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
+  rc = (u_int8_t)ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, key);
+  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+  
+  return(rc == 1 ? 1 : 0);
+}
+
+void add_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
+			  u_int32_t src_host, u_int32_t dst_host) {
+  u_int64_t key;
+  
+  if(is_private_addr(ntohl(src_host)) && is_private_addr(ntohl(dst_host)))
+    return;
+
+  key = get_skype_key(src_host, dst_host);
+
+  pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
+  ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, key, 1);
+  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+}
+
 static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
@@ -54,18 +94,12 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
     Skype AS8220
     212.161.8.0/24
   */
-  pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
   if(((ntohl(packet->iph->saddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
      || ((ntohl(packet->iph->daddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
-     || (ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, (u_int64_t)packet->iph->daddr) == 1)) {
-    pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
-    /* Acquire write lock */
-    pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
+     || is_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr)) {
     ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
-    pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
     return;
   }
-  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
 
   if(packet->udp != NULL) {
     flow->l4.udp.skype_packet_id++;
@@ -78,34 +112,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	     && (packet->payload[2] == 0x02))) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
-
-	/*
-	  The above check is a bit weak for assuming that the host peers are
-	  skype nodes. So ok to mark this connection as skype, but not to mark
-	  the host as skype node as this might be a PC that just started skype
-	 */
-#if 0
-	if(packet->iph
-	   && (!is_private_addr(ntohl(packet->iph->daddr)))
-	   && (ntohs(packet->udp->source) > 1024) && (ntohs(packet->udp->dest) > 1024)
-	   && (ndpi_guess_undetected_protocol(ndpi_struct, IPPROTO_UDP,
-					      packet->iph->saddr, packet->udp->source,
-					      packet->iph->daddr, packet->udp->dest) == NDPI_PROTOCOL_UNKNOWN)) {
-	  pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
-	  	  
-	  if(0) {
-	    struct in_addr in;
-
-	    in.s_addr = packet->iph->saddr;
-	    printf("%s:%u", inet_ntoa(in), ntohs(packet->udp->source));
-	    in.s_addr = packet->iph->daddr;
-	    printf(" <-> %s:%u\n", inet_ntoa(in), ntohs(packet->udp->dest));
-	  }
-
-	  ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
-	  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
-	}
-#endif
+	add_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr);
       }
 
       return;
@@ -126,17 +133,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
       if((payload_len == 8) || (payload_len == 3)) {
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
-	if(packet->iph 
-	   && (!is_private_addr(ntohl(packet->iph->daddr)))
-	   && (ntohs(packet->tcp->source) > 1024) && (ntohs(packet->tcp->dest) > 1024)
-	   && (ndpi_guess_undetected_protocol(ndpi_struct, IPPROTO_TCP,
-					      packet->iph->saddr, packet->tcp->source,
-					      packet->iph->daddr, packet->tcp->dest) == NDPI_PROTOCOL_UNKNOWN)
-	   ) {
-	  pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
-	  ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, packet->iph->daddr, 1);
-	  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
-	}
+	add_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr);
       }
 
       /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */
