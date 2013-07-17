@@ -57,6 +57,18 @@ typedef struct {
 
 /* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
 
+
+#ifdef __KERNEL__
+int atoi(const char *str) {
+  int rc;
+
+  if(kstrtoint(str, 0, &rc) == 0 /* Success */)
+    return(rc);
+  else
+    return(0);
+}
+#endif
+
 /* find or insert datum into search tree */
 void *
 ndpi_tsearch(const void *vkey, void **vrootp,
@@ -1200,7 +1212,13 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_str->ac_automa = ac_automata_init(ac_match_handler);
 
   ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
+
+#ifndef __KERNEL__
   pthread_rwlock_init(&ndpi_str->skypeCacheLock, NULL);
+#else
+  spin_lock_init(&ndpi_str->skypeCacheLock);
+#endif
+
   ndpi_init_protocol_defaults(ndpi_str);
   return ndpi_str;
 }
@@ -1223,8 +1241,9 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
 
     ndpi_free_lru_cache(&ndpi_struct->skypeCache);
+#ifndef __KERNEL__
     pthread_rwlock_destroy(&ndpi_struct->skypeCacheLock);
-
+#endif
     ndpi_free(ndpi_struct);
   }
 }
@@ -1284,7 +1303,7 @@ u_int ndpi_get_num_supported_protocols(struct ndpi_detection_module_struct *ndpi
 /* ******************************************************************** */
 
 int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, u_int8_t do_add) {
-  char *at, *proto, *elem, *holder;
+  char *at, *proto, *elem;
   ndpi_proto_defaults_t *def;
   int subprotocol_id, i;
 
@@ -1326,9 +1345,8 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
     }
   }
 
-  elem = strtok_r(rule, ",", &holder);
-  while(elem != NULL) {
-    char *attr = elem, *value;
+  while((elem = strsep(&rule, ",")) != NULL) {
+    char *attr = elem, *value = NULL;
     ndpi_port_range range;
     int is_tcp = 0, is_udp = 0;
 
@@ -1356,8 +1374,6 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
       else
 	ndpi_remove_host_url_subprotocol(ndpi_mod, "host", value, subprotocol_id);
     }
-
-    elem = strtok_r(NULL, ",", &holder);
   }
 
   return(0);
@@ -5042,15 +5058,8 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
-  if(shost && dhost) {
-    pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
-    if(ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, shost)
-       || ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, dhost)) {
-      pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
-      return(NDPI_PROTOCOL_SKYPE);
-    }
-    pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
-  }
+  if(shost && dhost && is_skype_connection(ndpi_struct, shost, dhost))
+    return(NDPI_PROTOCOL_SKYPE);
 
   node.default_port = sport;
   ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);

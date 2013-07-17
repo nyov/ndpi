@@ -370,11 +370,11 @@ struct ndpi_flow_tcp_struct {
 #define pthread_rwlock_t       pthread_mutex_t
 #endif
 
-#if (__GNUC_RH_RELEASE__ == 9)
+#if defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9)
 #define pthread_rwlock_t       pthread_mutex_t
 #endif
 
-#if defined(WIN32) || (__GNUC_RH_RELEASE__ == 9)
+#if defined(WIN32) || (defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9))
 extern int pthread_mutex_init(pthread_mutex_t *mutex, void *unused);
 extern int pthread_mutex_destroy(pthread_mutex_t *mutex);
 extern int pthread_mutex_lock(pthread_mutex_t *mutex);
@@ -647,7 +647,11 @@ typedef struct ndpi_detection_module_struct {
 
   /* Skype (we need a lock as this cache can be accessed concurrently) */
   struct ndpi_LruCache skypeCache;
+#ifndef __KERNEL__
   pthread_rwlock_t skypeCacheLock;
+#else
+  spinlock_t skypeCacheLock;
+#endif
 
   /* ********************* */
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
@@ -671,8 +675,7 @@ typedef struct ndpi_flow_struct {
     __attribute__ ((__packed__))
 #endif
     protocol_stack_info;
-#endif
-  
+#endif  
   
   /* init parameter, internal used to set up timestamp,... */
   u_int8_t init_finished:1;

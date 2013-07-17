@@ -20,14 +20,35 @@
 
 static u_int8_t traceLRU = 0;
 
+#ifndef __KERNEL__
 #ifdef __GNUC__
 #define likely(x)       __builtin_expect((x),1)
 #define unlikely(x)     __builtin_expect((x),0)
 #else
 #define likely(x)       (x)
 #define unlikely(x)     (x)
-
 #endif
+#endif
+
+/* ************************************************************************ */
+
+static u_int32_t get_now(void) {
+#ifndef __KERNEL__
+  return(time(NULL));
+#else
+  return(jiffies);
+#endif
+}
+
+/* ************************************************************************ */
+
+static u_int32_t compute_timeout(u_int32_t t) {
+#ifndef __KERNEL__
+  return(t);
+#else
+  return(t*HZ);
+#endif
+}
 
 /* ************************************************************************ */
 
@@ -115,21 +136,26 @@ static u_int32_t lru_hash_string(char *a) {
 
 /* ************************************ */
 
+#ifdef _NOT_USED_
 static u_int32_t lru_node_key_hash(struct ndpi_LruCacheEntry *a) {
   if(a->numeric_node)
     return((u_int32_t)a->u.num.key);
   else
     return(lru_hash_string(a->u.str.key));
 }
+#endif
 
 /* ************************************ */
+
+#ifdef _NOT_USED_
 /*
   Return codes
   0  Items are the same
   -1 a < b
   1  a > b
 */
-static int lru_node_key_entry_compare(struct ndpi_LruCacheEntry *a, struct ndpi_LruCacheEntry *b) {
+static int lru_node_key_entry_compare(struct ndpi_LruCacheEntry *a, 
+				      struct ndpi_LruCacheEntry *b) {
   if(a->numeric_node) {
     if(a->u.num.key == b->u.num.key)
       return(0);
@@ -140,6 +166,7 @@ static int lru_node_key_entry_compare(struct ndpi_LruCacheEntry *a, struct ndpi_
   } else
     return(strcmp(a->u.str.key, b->u.str.key));
 }
+#endif
 
 /* ********************************************* */
 
@@ -178,7 +205,7 @@ struct ndpi_LruCacheEntry* lru_allocCacheStringNode(struct ndpi_LruCache *cache,
   else {
     node->numeric_node = 0;
     node->u.str.key = ndpi_strdup(key), node->u.str.value = ndpi_strdup(value);
-    node->u.str.expire_time = (timeout == 0) ? 0 : (timeout + time(NULL));
+    node->u.str.expire_time = (timeout == 0) ? 0 : (compute_timeout(timeout) + get_now());
 
 #ifdef FULL_STATS
     cache->mem_size += sizeof(struct ndpi_LruCacheEntry) + strlen(key) + strlen(value);
@@ -219,6 +246,7 @@ static void trim_subhash(struct ndpi_LruCache *cache, u_int32_t hash_id) {
 
 /* ************************************ */
 
+#ifdef _NOT_USED_
 static void validate_unit_len(struct ndpi_LruCache *cache, u_int32_t hash_id) {
   struct ndpi_LruCacheEntry *head = cache->hash[hash_id];
   u_int num = 0;
@@ -231,6 +259,7 @@ static void validate_unit_len(struct ndpi_LruCache *cache, u_int32_t hash_id) {
     printf("ERROR: Invalid length [expected: %u][read: %u][hash_id: %u]",
 	       cache->current_hash_size[hash_id], num, hash_id);
 }
+#endif
 
 /* ************************************ */
 
@@ -344,7 +373,7 @@ int ndpi_add_to_lru_cache_str_timeout(struct ndpi_LruCache *cache,
 	  cache->mem_size += strlen(value);
 #endif
 
-	  node->u.str.expire_time = (timeout == 0) ? 0 : (timeout + time(NULL));
+	  node->u.str.expire_time = (timeout == 0) ? 0 : (compute_timeout(timeout) + get_now());
 	  node_already_existing = 1;
 	  break;
 	} else
@@ -430,7 +459,7 @@ char*ndpi_find_lru_cache_str(struct ndpi_LruCache *cache, char *key) {
     u_int32_t hash_id = hash_val % cache->hash_size;
     struct ndpi_LruCacheEntry *head, *prev = NULL;
     char *ret_val = NULL;
-    time_t now = time(NULL);
+    time_t now = get_now();
 
     if(unlikely(traceLRU))
       printf("%s(%s)", __FUNCTION__, key);
@@ -473,8 +502,9 @@ char*ndpi_find_lru_cache_str(struct ndpi_LruCache *cache, char *key) {
 
 /* ************************************ */
 
+#ifdef _NOT_USED_
 static void dumpndpi_LruCacheStat(struct ndpi_LruCache *cache,
-			     char* cacheName, u_int timeDifference) {
+				  char* cacheName, u_int timeDifference) {
   u_int32_t tot_cache_add = 0, tot_cache_find = 0;
   u_int32_t tot_mem = 0, grand_total_mem = 0;
   u_int32_t num_cache_add = 0, num_cache_find = 0;
@@ -515,4 +545,5 @@ static void dumpndpi_LruCacheStat(struct ndpi_LruCache *cache,
 	       cacheName, tot_cache_find, f, num_cache_misses, m, tot_cache_add, a, grand_total,
 	       (float)grand_total_mem/(float)(1024*1024));
 }
+#endif
 

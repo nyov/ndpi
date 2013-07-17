@@ -55,9 +55,17 @@ u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
   u_int64_t key = get_skype_key(src_host, dst_host);
   int rc;
 
+#ifndef __KERNEL__
   pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
+#else
+  spin_lock_bh(&ndpi_struct->skypeCacheLock);
+#endif
   rc = (u_int8_t)ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, key);
+#ifndef __KERNEL__
   pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+#else
+  spin_unlock_bh(&ndpi_struct->skypeCacheLock);
+#endif
   
   return(rc == 1 ? 1 : 0);
 }
@@ -71,9 +79,19 @@ void add_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
 
   key = get_skype_key(src_host, dst_host);
 
+#ifndef __KERNEL__
   pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
+#else
+  spin_lock_bh(&ndpi_struct->skypeCacheLock);
+#endif
+
   ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, key, 1);
+
+#ifndef __KERNEL__
   pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+#else
+  spin_unlock_bh(&ndpi_struct->skypeCacheLock);
+#endif
 }
 
 static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)

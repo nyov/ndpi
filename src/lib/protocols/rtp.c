@@ -31,7 +31,7 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 			    struct ndpi_flow_struct *flow,
 			    const u_int8_t * payload, const u_int16_t payload_len)
 {
-  struct ndpi_packet_struct *packet = &flow->packet;	
+  //struct ndpi_packet_struct *packet = &flow->packet;	
   u_int8_t payload_type = payload[1] & 0x7F;
   
   /* Check whether this is an RTP flow */

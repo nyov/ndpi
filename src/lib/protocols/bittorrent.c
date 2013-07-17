@@ -409,12 +409,17 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	  goto bittorrent_found;
 	} else if((v0_flags < 6 /* ST_NUM_STATES */)
 		  && (v0_extension < 3 /* EXT_NUM_EXT */)) {
-	  u_int32_t ts, 
-	    // ts_usec, 
-	    now = (u_int32_t)time(NULL);
-	  
-	  ts = ntohl(*((u_int32_t*)&(packet->payload[4])));
-	  // ts_usec = ntohl(*((u_int32_t*)&(packet->payload[8])));
+	  u_int32_t ts = ntohl(*((u_int32_t*)&(packet->payload[4])));
+	  u_int32_t now;
+
+#ifndef __KERNEL__
+	  now = (u_int32_t)time(NULL);
+#else
+	  struct timespec t;
+
+	  getnstimeofday(&t);
+	  now = t.tv_sec;	    
+#endif
 	  
 	  if((ts < (now+86400)) && (ts > (now-86400))) {
 	    goto bittorrent_found;

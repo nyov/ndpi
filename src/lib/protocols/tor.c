@@ -27,10 +27,11 @@ void ndpi_search_tor(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
     NDPI_LOG(NDPI_PROTOCOL_TOR, ndpi_struct, NDPI_LOG_DEBUG, "calculating TOR over tcp.\n");
 
-    if (((dport == 9001) || (sport == 9001)) || ((dport == 9030) || (sport == 9030)) &&
-	((packet->payload[0] == 0x17) || (packet->payload[0] == 0x16)) &&
-	(packet->payload[1] == 0x03) && (packet->payload[2] == 0x01) &&
-	(packet->payload[3] == 0x00)) {
+    if ((((dport == 9001) || (sport == 9001)) || ((dport == 9030) || (sport == 9030)))
+	&& ((packet->payload[0] == 0x17) || (packet->payload[0] == 0x16)) 
+	&& (packet->payload[1] == 0x03) 
+	&& (packet->payload[2] == 0x01) 
+	&& (packet->payload[3] == 0x00)) {
       NDPI_LOG(NDPI_PROTOCOL_TOR, ndpi_struct, NDPI_LOG_DEBUG, "found tor.\n");
       ndpi_int_tor_add_connection(ndpi_struct, flow);
     }
