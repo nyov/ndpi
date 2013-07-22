@@ -26,6 +26,7 @@
 #ifndef __KERNEL__
 #include <stdlib.h>
 #include <errno.h>
+#include <time.h>
 #endif
 
 #include "ndpi_main.h"
@@ -39,7 +40,6 @@
 #ifdef __KERNEL__
 #define printf printk
 #else
-#include <time.h>
 #endif
 
 // #include "ndpi_credis.c"
