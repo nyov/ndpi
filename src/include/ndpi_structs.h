@@ -370,11 +370,11 @@ struct ndpi_flow_tcp_struct {
 #define pthread_rwlock_t       pthread_mutex_t
 #endif
 
-#if defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9)
+#if (defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9)) || (defined(__GNUC_PATCHLEVEL__) && (__GNUC_PATCHLEVEL__ <= 3))
 #define pthread_rwlock_t       pthread_mutex_t
 #endif
 
-#if defined(WIN32) || (defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9))
+#if defined(WIN32) || (defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9)) || (defined(__GNUC_PATCHLEVEL__) && (__GNUC_PATCHLEVEL__ <= 3))
 extern int pthread_mutex_init(pthread_mutex_t *mutex, void *unused);
 extern int pthread_mutex_destroy(pthread_mutex_t *mutex);
 extern int pthread_mutex_lock(pthread_mutex_t *mutex);
