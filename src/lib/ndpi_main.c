@@ -1214,7 +1214,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
 
 #ifndef __KERNEL__
-  pthread_rwlock_init(&ndpi_str->skypeCacheLock, NULL);
+  pthread_mutex_init(&ndpi_str->skypeCacheLock, NULL);
 #else
   spin_lock_init(&ndpi_str->skypeCacheLock);
 #endif
@@ -1242,7 +1242,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 
     ndpi_free_lru_cache(&ndpi_struct->skypeCache);
 #ifndef __KERNEL__
-    pthread_rwlock_destroy(&ndpi_struct->skypeCacheLock);
+    pthread_mutex_destroy(&ndpi_struct->skypeCacheLock);
 #endif
     ndpi_free(ndpi_struct);
   }

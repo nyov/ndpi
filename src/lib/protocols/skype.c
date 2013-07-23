@@ -56,13 +56,13 @@ u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
   int rc;
 
 #ifndef __KERNEL__
-  pthread_rwlock_rdlock(&ndpi_struct->skypeCacheLock);
+  pthread_mutex_lock(&ndpi_struct->skypeCacheLock);
 #else
   spin_lock_bh(&ndpi_struct->skypeCacheLock);
 #endif
   rc = (u_int8_t)ndpi_find_lru_cache_num(&ndpi_struct->skypeCache, key);
 #ifndef __KERNEL__
-  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+  pthread_mutex_unlock(&ndpi_struct->skypeCacheLock);
 #else
   spin_unlock_bh(&ndpi_struct->skypeCacheLock);
 #endif
@@ -80,7 +80,7 @@ void add_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
   key = get_skype_key(src_host, dst_host);
 
 #ifndef __KERNEL__
-  pthread_rwlock_wrlock(&ndpi_struct->skypeCacheLock);
+  pthread_mutex_lock(&ndpi_struct->skypeCacheLock);
 #else
   spin_lock_bh(&ndpi_struct->skypeCacheLock);
 #endif
@@ -88,7 +88,7 @@ void add_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
   ndpi_add_to_lru_cache_num(&ndpi_struct->skypeCache, key, 1);
 
 #ifndef __KERNEL__
-  pthread_rwlock_unlock(&ndpi_struct->skypeCacheLock);
+  pthread_mutex_unlock(&ndpi_struct->skypeCacheLock);
 #else
   spin_unlock_bh(&ndpi_struct->skypeCacheLock);
 #endif

@@ -370,24 +370,6 @@ struct ndpi_flow_tcp_struct {
 #define pthread_rwlock_t       pthread_mutex_t
 #endif
 
-#if (defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9)) || (defined(__GNUC_PATCHLEVEL__) && (__GNUC_PATCHLEVEL__ <= 3))
-#define pthread_rwlock_t       pthread_mutex_t
-#endif
-
-#if defined(WIN32) || (defined(__GNUC_RH_RELEASE__) && (__GNUC_RH_RELEASE__ == 9)) || (defined(__GNUC_PATCHLEVEL__) && (__GNUC_PATCHLEVEL__ <= 3))
-extern int pthread_mutex_init(pthread_mutex_t *mutex, void *unused);
-extern int pthread_mutex_destroy(pthread_mutex_t *mutex);
-extern int pthread_mutex_lock(pthread_mutex_t *mutex);
-extern int pthread_mutex_unlock(pthread_mutex_t *mutex);
-
-#define pthread_rwlock_init                     pthread_mutex_init
-#define pthread_rwlock_wrlock                   pthread_mutex_lock
-#define pthread_rwlock_rdlock                   pthread_mutex_lock
-#define pthread_rwlock_unlock                   pthread_mutex_unlock
-#define pthread_rwlock_destroy                  pthread_mutex_destroy
-#endif
-
-
 struct ndpi_flow_udp_struct {
 #ifdef NDPI_PROTOCOL_BATTLEFIELD
   u_int32_t battlefield_msg_id;
@@ -648,7 +630,7 @@ typedef struct ndpi_detection_module_struct {
   /* Skype (we need a lock as this cache can be accessed concurrently) */
   struct ndpi_LruCache skypeCache;
 #ifndef __KERNEL__
-  pthread_rwlock_t skypeCacheLock;
+  pthread_mutex_t skypeCacheLock;
 #else
   spinlock_t skypeCacheLock;
 #endif
