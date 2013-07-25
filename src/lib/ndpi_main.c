@@ -4215,13 +4215,12 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
   packet->http_response.ptr = NULL;
   packet->http_response.len = 0;
 
-  if (packet->payload_packet_len == 0)
+  if((packet->payload_packet_len == 0) 
+     || (packet->payload == NULL))
     return;
 
   packet->line[packet->parsed_lines].ptr = packet->payload;
   packet->line[packet->parsed_lines].len = 0;
-
-
 
   for (a = 0; a < end; a++) {
     if (get_u_int16_t(packet->payload, a) == ntohs(0x0d0a)) {
