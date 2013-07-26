@@ -429,9 +429,9 @@ ndpi_port_range* ndpi_build_default_ports(ndpi_port_range *ports,
 
 /* ******************************************************************** */
 
-static void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
-				    u_int16_t protoId, char *protoName,
-				    ndpi_port_range *tcpDefPorts, ndpi_port_range *udpDefPorts) {
+void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
+			     u_int16_t protoId, char *protoName,
+			     ndpi_port_range *tcpDefPorts, ndpi_port_range *udpDefPorts) {
   char *name = ndpi_strdup(protoName);
   int j;
 
@@ -596,32 +596,33 @@ static int ndpi_remove_host_url_subprotocol(struct ndpi_detection_module_struct 
 
 /* ******************************************************************** */
 
+ndpi_protocol_match host_match[] = {
+  { ".twitter.com",      "Twitter", NDPI_PROTOCOL_TWITTER },
+  { ".twttr.com",        "Twitter", NDPI_PROTOCOL_TWITTER },
+  { ".netflix.com",      "NetFlix", NDPI_PROTOCOL_NETFLIX },
+  { ".facebook.com",     "FaceBook", NDPI_PROTOCOL_FACEBOOK },
+  { ".fbcdn.net",        "FaceBook", NDPI_PROTOCOL_FACEBOOK },
+  { ".dropbox.com",      "DropBox", NDPI_PROTOCOL_DROPBOX },
+  { ".gmail.",           "GoogleGmail", NDPI_PROTOCOL_GMAIL },
+  { "maps.google.com",   "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
+  { "maps.gstatic.com",  "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
+  { ".gstatic.com",      "Google", NDPI_PROTOCOL_GOOGLE },
+  { ".google.com",       "Google", NDPI_PROTOCOL_GOOGLE },
+  { ".youtube.",         "YouTube", NDPI_PROTOCOL_YOUTUBE },
+  { "itunes.apple.com",  "AppleiTunes", NDPI_PROTOCOL_APPLE_ITUNES },
+  { ".apple.com",        "Apple", NDPI_PROTOCOL_APPLE },
+  { ".mzstatic.com",     "Apple", NDPI_PROTOCOL_APPLE },
+  { ".icloud.com",       "AppleiCloud", NDPI_PROTOCOL_APPLE_ICLOUD },
+  { ".viber.com",        "Viber", NDPI_PROTOCOL_VIBER },
+  { ".last.fm",          "LastFM", NDPI_PROTOCOL_LASTFM },
+  { ".grooveshark.com",  "GrooveShark", NDPI_PROTOCOL_GROOVESHARK },
+  { ".tuenti.com",       "Tuenti", NDPI_PROTOCOL_TUENTI },
+  { ".skype.com",        "Skype", NDPI_PROTOCOL_SKYPE },
+  { ".skypeassets.com",  "Skype", NDPI_PROTOCOL_SKYPE },
+  { NULL, 0 }
+};
+
 static void init_string_based_protocols(struct ndpi_detection_module_struct *ndpi_mod) {
-  ndpi_protocol_match host_match[] = {
-    { ".twitter.com",      "Twitter", NDPI_PROTOCOL_TWITTER },
-    { ".twttr.com",        "Twitter", NDPI_PROTOCOL_TWITTER },
-    { ".netflix.com",      "NetFlix", NDPI_PROTOCOL_NETFLIX },
-    { ".facebook.com",     "FaceBook", NDPI_PROTOCOL_FACEBOOK },
-    { ".fbcdn.net",        "FaceBook", NDPI_PROTOCOL_FACEBOOK },
-    { ".dropbox.com",      "DropBox", NDPI_PROTOCOL_DROPBOX },
-    { ".gmail.",           "GoogleGmail", NDPI_PROTOCOL_GMAIL },
-    { "maps.google.com",   "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
-    { "maps.gstatic.com",  "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
-    { ".gstatic.com",      "Google", NDPI_PROTOCOL_GOOGLE },
-    { ".google.com",       "Google", NDPI_PROTOCOL_GOOGLE },
-    { ".youtube.",         "YouTube", NDPI_PROTOCOL_YOUTUBE },
-    { "itunes.apple.com",  "AppleiTunes", NDPI_PROTOCOL_APPLE_ITUNES },
-    { ".apple.com",        "Apple", NDPI_PROTOCOL_APPLE },
-    { ".mzstatic.com",     "Apple", NDPI_PROTOCOL_APPLE },
-    { ".icloud.com",       "AppleiCloud", NDPI_PROTOCOL_APPLE_ICLOUD },
-    { ".viber.com",        "Viber", NDPI_PROTOCOL_VIBER },
-    { ".last.fm",          "LastFM", NDPI_PROTOCOL_LASTFM },
-    { ".grooveshark.com",  "GrooveShark", NDPI_PROTOCOL_GROOVESHARK },
-    { ".tuenti.com",       "Tuenti", NDPI_PROTOCOL_TUENTI },
-    { ".skype.com",        "Skype", NDPI_PROTOCOL_SKYPE },
-    { ".skypeassets.com",  "Skype", NDPI_PROTOCOL_SKYPE },
-    { NULL, 0 }
-  };
   int i;
 
   for(i=0; host_match[i].string_to_match != NULL; i++) {
@@ -5180,7 +5181,15 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 /* ****************************************************** */
 
 void* ndpi_create_empty_automa(struct ndpi_detection_module_struct *ndpi_struct) {
-  return(ac_automata_init(ac_match_handler));
+  int i;
+  void *automa = ac_automata_init(ac_match_handler);
+
+  for(i=0; host_match[i].string_to_match != NULL; i++)
+    ndpi_add_host_url_subprotocol_to_automa(ndpi_struct,
+					    host_match[i].string_to_match, 
+					    host_match[i].protocol_id, automa);
+
+  return(automa);
 }
 
 /* ****************************************************** */
