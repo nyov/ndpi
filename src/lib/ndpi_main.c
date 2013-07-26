@@ -5179,6 +5179,61 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 
 /* ****************************************************** */
 
+void* ndpi_create_empty_automa(struct ndpi_detection_module_struct *ndpi_struct) {
+  return(ac_automata_init(ac_match_handler));
+}
+
+/* ****************************************************** */
+
+int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct, char *value, int protocol_id, void* automa) {
+  AC_PATTERN_t ac_pattern;
+
+  /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_PROTOCOL_FACEBOOK */
+
+#ifdef DEBUG
+  printf("[NDPI] ndpi_add_host_url_subprotocol(%s, %s, %d)\n", attr, value, protocol_id);
+#endif
+
+  if(protocol_id >= NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS) {
+    printf("[NDPI] %s(protoId=%d): INTERNAL ERROR\n", __FUNCTION__, protocol_id);
+    return(-1);
+  }
+
+  if(automa == NULL) return(-2);
+
+  ac_pattern.astring = value;
+  ac_pattern.rep.number = protocol_id;
+  ac_pattern.length = strlen(ac_pattern.astring);
+  ac_automata_add(((AC_AUTOMATA_t*)automa), &ac_pattern);
+
+#ifdef DEBUG
+  printf("[NTOP] new subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
+#endif
+
+  return(0);
+}
+
+/* ****************************************************** */
+
+void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa) {
+  void *old_automa;
+
+  ac_automata_finalize((AC_AUTOMATA_t*)automa);
+  ndpi_struct->ac_automa_finalized = 1;
+
+  old_automa = ndpi_struct->ac_automa;
+
+  ndpi_struct->ac_automa = automa;
+
+  if(old_automa != NULL) {
+    sleep(1); /* Make sure nobody is using it */
+    ac_automata_release((AC_AUTOMATA_t*)old_automa);
+  }
+}
+
+
+/* ****************************************************** */
+
 char* ndpi_revision() {
   return("$Revision$");
 }
