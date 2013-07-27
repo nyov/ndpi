@@ -37,6 +37,7 @@
 #undef DEBUG
 
 #ifdef __KERNEL__
+#include <linux/version.h>
 #define printf printk
 #else
 #include <time.h>
@@ -55,10 +56,105 @@ typedef struct {
 #define strtok_r(a,b,c) strtok(a,b)
 #endif
 
-/* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
-
-
 #ifdef __KERNEL__
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+static inline char _tolower(const char c)
+{
+  return c | 0x20;
+}
+
+static int _kstrtoull(const char *s, unsigned int base, unsigned long long *res)
+{
+  unsigned long long acc;
+  int ok;
+
+  if (base == 0) {
+    if (s[0] == '0') {
+      if (_tolower(s[1]) == 'x' && isxdigit(s[2]))
+	base = 16;
+      else
+	base = 8;
+    } else
+      base = 10;
+  }
+  if (base == 16 && s[0] == '0' && _tolower(s[1]) == 'x')
+    s += 2;
+
+  acc = 0;
+  ok = 0;
+  while (*s) {
+    unsigned int val;
+
+    if ('0' <= *s && *s <= '9')
+      val = *s - '0';
+    else if ('a' <= _tolower(*s) && _tolower(*s) <= 'f')
+      val = _tolower(*s) - 'a' + 10;
+    else if (*s == '\n') {
+      if (*(s + 1) == '\0')
+	break;
+      else
+	return -EINVAL;
+    } else
+      return -EINVAL;
+
+    if (val >= base)
+      return -EINVAL;
+    if (acc > div_u64(ULLONG_MAX - val, base))
+      return -ERANGE;
+    acc = acc * base + val;
+    ok = 1;
+
+    s++;
+  }
+  if (!ok)
+    return -EINVAL;
+  *res = acc;
+  return 0;
+}
+
+int kstrtoull(const char *s, unsigned int base, unsigned long long *res)
+{
+  if (s[0] == '+')
+    s++;
+  return _kstrtoull(s, base, res);
+}
+int kstrtoll(const char *s, unsigned int base, long long *res)
+{
+  unsigned long long tmp;
+  int rv;
+
+  if (s[0] == '-') {
+    rv = _kstrtoull(s + 1, base, &tmp);
+    if (rv < 0)
+      return rv;
+    if ((long long)(-tmp) >= 0)
+      return -ERANGE;
+    *res = -tmp;
+  } else {
+    rv = kstrtoull(s, base, &tmp);
+    if (rv < 0)
+      return rv;
+    if ((long long)tmp < 0)
+      return -ERANGE;
+    *res = tmp;
+  }
+  return 0;
+}
+int kstrtoint(const char *s, unsigned int base, int *res)
+{
+  long long tmp;
+  int rv;
+
+  rv = kstrtoll(s, base, &tmp);
+  if (rv < 0)
+    return rv;
+  if (tmp != (long long)(int)tmp)
+    return -ERANGE;
+  *res = tmp;
+  return 0;
+}
+#endif
+
 int atoi(const char *str) {
   int rc;
 
@@ -69,6 +165,7 @@ int atoi(const char *str) {
 }
 #endif
 
+/* ftp://ftp.cc.uoc.gr/mirrors/OpenBSD/src/lib/libc/stdlib/tsearch.c */
 /* find or insert datum into search tree */
 void *
 ndpi_tsearch(const void *vkey, void **vrootp,
@@ -316,7 +413,7 @@ void* ndpi_malloc(unsigned long size) { return(_ndpi_malloc(size)); }
 
 /* ****************************************** */
 
-void* ndpi_calloc(unsigned long count, unsigned long size) { 
+void* ndpi_calloc(unsigned long count, unsigned long size) {
   unsigned long len = count*size;
   void *p = ndpi_malloc(len);
 
@@ -513,24 +610,24 @@ static void addDefaultPort(ndpi_port_range *range,
 
 /* ****************************************************** */
 
-/* 
+/*
    NOTE
 
    This function must be called with a semaphore set, this in order to avoid
    changing the datastrutures while using them
 */
 static int removeDefaultPort(ndpi_port_range *range,
-			     ndpi_proto_defaults_t *def, 
+			     ndpi_proto_defaults_t *def,
 			     ndpi_default_ports_tree_node_t **root) {
   ndpi_default_ports_tree_node_t node;
   ndpi_default_ports_tree_node_t *ret;
   u_int16_t port;
-  
+
   for(port=range->port_low; port<=range->port_high; port++) {
     node.proto = def, node.default_port = port;
-    ret = *(ndpi_default_ports_tree_node_t**)ndpi_tdelete(&node, (void*)root, 
+    ret = *(ndpi_default_ports_tree_node_t**)ndpi_tdelete(&node, (void*)root,
 							  ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
-    
+
     if(ret != NULL) {
       ndpi_free((ndpi_default_ports_tree_node_t*)ret);
       return(0);
@@ -581,7 +678,7 @@ static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *nd
 
 /* ****************************************************** */
 
-/* 
+/*
    NOTE
 
    This function must be called with a semaphore set, this in order to avoid
@@ -589,7 +686,7 @@ static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *nd
 */
 static int ndpi_remove_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
 					    char *attr, char *value, int protocol_id) {
-  
+
   printf("[NDPI] Missing implementation of %s()\n", __FUNCTION__);
   return(-1);
 }
@@ -1322,7 +1419,7 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
       break;
     }
   }
-  
+
   if(def == NULL) {
     if(!do_add) {
       /* We need to remove a rule */
@@ -1330,13 +1427,13 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
       return(-3);
     } else {
       ndpi_port_range ports_a[MAX_DEFAULT_PORTS], ports_b[MAX_DEFAULT_PORTS];
-      
+
       if(ndpi_mod->ndpi_num_custom_protocols >= (NDPI_MAX_NUM_CUSTOM_PROTOCOLS-1)) {
 	printf("Too many protocols defined (%u): skipping protocol %s\n",
 	       ndpi_mod->ndpi_num_custom_protocols, proto);
 	return(-2);
       }
-      
+
       ndpi_set_proto_defaults(ndpi_mod, ndpi_mod->ndpi_num_supported_protocols, ndpi_strdup(proto),
 			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			      ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
@@ -4216,7 +4313,7 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
   packet->http_response.ptr = NULL;
   packet->http_response.len = 0;
 
-  if((packet->payload_packet_len == 0) 
+  if((packet->payload_packet_len == 0)
      || (packet->payload == NULL))
     return;
 
@@ -5186,7 +5283,7 @@ void* ndpi_create_empty_automa(struct ndpi_detection_module_struct *ndpi_struct)
 
   for(i=0; host_match[i].string_to_match != NULL; i++)
     ndpi_add_host_url_subprotocol_to_automa(ndpi_struct,
-					    host_match[i].string_to_match, 
+					    host_match[i].string_to_match,
 					    host_match[i].protocol_id, automa);
 
   return(automa);
@@ -5235,7 +5332,9 @@ void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* aut
   ndpi_struct->ac_automa = automa;
 
   if(old_automa != NULL) {
+#ifndef __KERNEL__
     sleep(1); /* Make sure nobody is using it */
+#endif
     ac_automata_release((AC_AUTOMATA_t*)old_automa);
   }
 }
@@ -5250,7 +5349,7 @@ char* ndpi_revision() {
 /* ****************************************************** */
 
 #ifdef WIN32
-				  
+
 int pthread_mutex_init(pthread_mutex_t *mutex, void *unused) {
   unused = NULL;
   *mutex = CreateMutex(NULL, FALSE, NULL);
@@ -5273,19 +5372,19 @@ int pthread_mutex_unlock(pthread_mutex_t *mutex) {
 int gettimeofday(struct timeval * tp, struct timezone * tzp) {
 	/* FILETIME of Jan 1 1970 00:00:00. */
      const unsigned __int64 epoch = (__int64)(116444736000000000);
-   
+
 	  FILETIME    file_time;
        SYSTEMTIME  system_time;
        ULARGE_INTEGER ularge;
-   
+
        GetSystemTime(&system_time);
        SystemTimeToFileTime(&system_time, &file_time);
        ularge.LowPart = file_time.dwLowDateTime;
        ularge.HighPart = file_time.dwHighDateTime;
-   
+
        tp->tv_sec = (long) ((ularge.QuadPart - epoch) / 10000000L);
        tp->tv_usec = (long) (system_time.wMilliseconds * 1000);
-   
+
        return 0;
  }
 #endif
