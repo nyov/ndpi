@@ -5350,6 +5350,7 @@ char* ndpi_revision() {
 
 #ifdef WIN32
 
+/*
 int pthread_mutex_init(pthread_mutex_t *mutex, void *unused) {
   unused = NULL;
   *mutex = CreateMutex(NULL, FALSE, NULL);
@@ -5367,7 +5368,7 @@ int pthread_mutex_lock(pthread_mutex_t *mutex) {
 int pthread_mutex_unlock(pthread_mutex_t *mutex) {
   return ReleaseMutex(*mutex) == 0 ? -1 : 0;
 }
-
+*/
 /*  http://git.postgresql.org/gitweb/?p=postgresql.git;a=blob;f=src/port/gettimeofday.c;h=75a91993b74414c0a1c13a2a09ce739cb8aa8a08;hb=HEAD */
 int gettimeofday(struct timeval * tp, struct timezone * tzp) {
 	/* FILETIME of Jan 1 1970 00:00:00. */
