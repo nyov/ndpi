@@ -699,6 +699,7 @@ ndpi_protocol_match host_match[] = {
   { ".netflix.com",      "NetFlix", NDPI_PROTOCOL_NETFLIX },
   { ".facebook.com",     "FaceBook", NDPI_PROTOCOL_FACEBOOK },
   { ".fbcdn.net",        "FaceBook", NDPI_PROTOCOL_FACEBOOK },
+  { "fbcdn-",            "FaceBook", NDPI_PROTOCOL_FACEBOOK },  /* fbcdn-video-a-akamaihd.net */
   { ".dropbox.com",      "DropBox", NDPI_PROTOCOL_DROPBOX },
   { ".gmail.",           "GoogleGmail", NDPI_PROTOCOL_GMAIL },
   { "maps.google.com",   "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
