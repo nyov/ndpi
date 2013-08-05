@@ -33,11 +33,14 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
 {
   //struct ndpi_packet_struct *packet = &flow->packet;	
   u_int8_t payload_type = payload[1] & 0x7F;
-  
+  u_int32_t *ssid = (u_int32_t*)&payload[8];
+
   /* Check whether this is an RTP flow */
   if((payload_len >= 12)
      && ((payload[0] & 0xFF) == 0x80) /* RTP magic byte[1] */
-     && ((payload_type <= 34          /* PT_H263 */))) {
+     && ((payload_type <= 34          /* PT_H263 */))
+     && (*ssid != 0)
+     ) {
     NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "Found rtp.\n");
     ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_RTP, NDPI_REAL_PROTOCOL);	
   } else {
@@ -50,7 +53,10 @@ void ndpi_search_rtp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  ndpi_rtp_search(ndpi_struct, flow, packet->payload, packet->payload_packet_len);
+  if((packet->udp != NULL)
+     && (ntohs(packet->udp->source) > 1023)
+     && (ntohs(packet->udp->dest) > 1023))
+    ndpi_rtp_search(ndpi_struct, flow, packet->payload, packet->payload_packet_len);
 }
 
 #if 0

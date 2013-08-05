@@ -181,7 +181,7 @@ static void parseOptions(int argc, char **argv)
   }
 
   // check parameters
-  if (_pcap_file == NULL || strcmp(_pcap_file, "") == 0) {
+  if(_pcap_file == NULL || strcmp(_pcap_file, "") == 0) {
     help(0);
   }
 }
@@ -240,10 +240,10 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
     byte = addr & 0xff;
     *--cp = byte % 10 + '0';
     byte /= 10;
-    if (byte > 0) {
+    if(byte > 0) {
       *--cp = byte % 10 + '0';
       byte /= 10;
-      if (byte > 0)
+      if(byte > 0)
 	*--cp = byte + '0';
     }
     *--cp = '.';
@@ -273,7 +273,7 @@ static void printFlow(struct ndpi_flow *flow) {
 static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
 
-  if (flow->detected_protocol != 0 /* UNKNOWN */) return;
+  if(flow->detected_protocol != 0 /* UNKNOWN */) return;
 
   if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
     printFlow(flow);
@@ -282,7 +282,7 @@ static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, 
 static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
 
-  if (flow->detected_protocol == 0 /* UNKNOWN */) return;
+  if(flow->detected_protocol == 0 /* UNKNOWN */) return;
 
   if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
     printFlow(flow);
@@ -303,7 +303,7 @@ static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int dept
 
   if((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
     if(enable_protocol_guess) {
-      if (flow->detected_protocol == 0 /* UNKNOWN */) {
+      if(flow->detected_protocol == 0 /* UNKNOWN */) {
 	flow->detected_protocol = ndpi_guess_undetected_protocol(ndpi_struct,
 								 flow->protocol,
 								 ntohl(flow->lower_ip),
@@ -311,7 +311,7 @@ static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int dept
 								 ntohl(flow->upper_ip),
 								 ntohs(flow->upper_port));
 
-	if (flow->detected_protocol != 0)
+	if(flow->detected_protocol != 0)
 	  guessed_flow_protocols++;
 
 	// printFlow(flow);
@@ -338,12 +338,15 @@ static int node_cmp(const void *a, const void *b) {
 }
 
 
-static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t ipsize,
+static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
+				       const struct ndpi_iphdr *iph,
+				       u_int16_t ipsize,
+				       u_int16_t l4_packet_len,
 				       struct ndpi_id_struct **src,
-				       struct ndpi_id_struct **dst)
+				       struct ndpi_id_struct **dst,
+				       u_int8_t *proto)
 {
   u_int32_t idx;
-  u_int16_t l4_packet_len;
   struct ndpi_tcphdr *tcph = NULL;
   struct ndpi_udphdr *udph = NULL;
   u_int32_t lower_ip;
@@ -353,16 +356,16 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
   struct ndpi_flow flow;
   void *ret;
 
-  if (ipsize < 20)
-    return NULL;
+  if(version == 4) {
+    if(ipsize < 20)
+      return NULL;
+    
+    if((iph->ihl * 4) > ipsize || ipsize < ntohs(iph->tot_len)
+       || (iph->frag_off & htons(0x1FFF)) != 0)
+      return NULL;
+  }
 
-  if ((iph->ihl * 4) > ipsize || ipsize < ntohs(iph->tot_len)
-      || (iph->frag_off & htons(0x1FFF)) != 0)
-    return NULL;
-
-  l4_packet_len = ntohs(iph->tot_len) - (iph->ihl * 4);
-
-  if (iph->saddr < iph->daddr) {
+  if(iph->saddr < iph->daddr) {
     lower_ip = iph->saddr;
     upper_ip = iph->daddr;
   } else {
@@ -370,19 +373,20 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
     upper_ip = iph->saddr;
   }
 
-  if (iph->protocol == 6 && l4_packet_len >= 20) {
+  *proto = iph->protocol;
+  if(iph->protocol == 6 && l4_packet_len >= 20) {
     // tcp
-    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + iph->ihl * 4);
-    if (iph->saddr < iph->daddr) {
+    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + ipsize);
+    if(iph->saddr < iph->daddr) {
       lower_port = tcph->source;
       upper_port = tcph->dest;
     } else {
       lower_port = tcph->dest;
       upper_port = tcph->source;
     }
-  } else if (iph->protocol == 17 && l4_packet_len >= 8) {
+  } else if(iph->protocol == 17 && l4_packet_len >= 8) {
     // udp
-    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + iph->ihl * 4);
+    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + ipsize);
     if(iph->saddr < iph->daddr) {
       lower_port = udph->source;
       upper_port = udph->dest;
@@ -406,7 +410,7 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
   ret = ndpi_tfind(&flow, (void*)&ndpi_flows_root[idx], node_cmp);
 
   if(ret == NULL) {
-    if (ndpi_flow_count == MAX_NDPI_FLOWS) {
+    if(ndpi_flow_count == MAX_NDPI_FLOWS) {
       printf("ERROR: maximum flow count (%u) has been exceeded\n", MAX_NDPI_FLOWS);
       exit(-1);
     } else {
@@ -459,13 +463,29 @@ static struct ndpi_flow *get_ndpi_flow(const struct ndpi_iphdr *iph, u_int16_t i
   }
 }
 
+static struct ndpi_flow *get_ndpi_flow6(const struct ndpi_ip6_hdr *iph6,
+					struct ndpi_id_struct **src,
+					struct ndpi_id_struct **dst,
+					u_int8_t *proto)
+{
+  struct ndpi_iphdr iph;
+
+  memset(&iph, 0, sizeof(iph));
+  iph.version = 4;
+  iph.saddr = iph6->ip6_src.__u6_addr.__u6_addr32[2] + iph6->ip6_src.__u6_addr.__u6_addr32[3];
+  iph.daddr = iph6->ip6_dst.__u6_addr.__u6_addr32[2] + iph6->ip6_dst.__u6_addr.__u6_addr32[3];
+  iph.protocol = iph6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
+  return(get_ndpi_flow(6, &iph, sizeof(struct ndpi_ip6_hdr), 
+		       ntohs(iph6->ip6_ctlun.ip6_un1.ip6_un1_plen), src, dst, proto));
+}
+
 static void setupDetection(void)
 {
   NDPI_PROTOCOL_BITMASK all;
 
   // init global detection structure
   ndpi_struct = ndpi_init_detection_module(detection_tick_resolution, malloc_wrapper, free_wrapper, debug_printf);
-  if (ndpi_struct == NULL) {
+  if(ndpi_struct == NULL) {
     printf("ERROR: global structure initialization failed\n");
     exit(-1);
   }
@@ -514,17 +534,25 @@ static void terminateDetection(void)
   ndpi_exit_detection_module(ndpi_struct, free_wrapper);
 }
 
-static unsigned int packet_processing(const u_int64_t time, const struct ndpi_iphdr *iph,
+static unsigned int packet_processing(const u_int64_t time, 
+				      const struct ndpi_iphdr *iph,
+				      struct ndpi_ip6_hdr *iph6,
 				      u_int16_t ipsize, u_int16_t rawsize)
 {
   struct ndpi_id_struct *src, *dst;
   struct ndpi_flow *flow;
   struct ndpi_flow_struct *ndpi_flow = NULL;
   u_int32_t protocol = 0;
-  u_int16_t frag_off = ntohs(iph->frag_off);
+  u_int8_t proto;
 
-  flow = get_ndpi_flow(iph, ipsize, &src, &dst);
-  if (flow != NULL) {
+  if(iph)
+    flow = get_ndpi_flow(4, iph, ipsize, 
+			 ntohs(iph->tot_len) - (iph->ihl * 4),
+			 &src, &dst, &proto);
+  else
+    flow = get_ndpi_flow6(iph6, &src, &dst, &proto);
+
+  if(flow != NULL) {
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
   } else
@@ -535,20 +563,9 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
 
   if(flow->detection_completed) return;
 
-  // only handle unfragmented packets
-  if ((frag_off & 0x3FFF) == 0) {
-    // here the actual detection is performed
-    protocol = (const u_int32_t)ndpi_detection_process_packet(ndpi_struct, ndpi_flow, (uint8_t *) iph, ipsize, time, src, dst);
-  } else {
-    static u_int8_t frag_warning_used = 0;
-
-    if (frag_warning_used == 0) {
-      printf("\n\nWARNING: fragmented ip packets are not supported and will be skipped \n\n");
-      frag_warning_used = 1;
-    }
-
-    return 0;
-  }
+  protocol = (const u_int32_t)ndpi_detection_process_packet(ndpi_struct, ndpi_flow, 
+							    iph ? (uint8_t *)iph : (uint8_t *)iph6,
+							    ipsize, time, src, dst);
 
   if(verbose > 1) {
     char buf1[32], buf2[32];
@@ -563,9 +580,12 @@ static unsigned int packet_processing(const u_int64_t time, const struct ndpi_ip
   flow->detected_protocol = protocol;
 
   if((flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN)
-     || (iph->protocol == IPPROTO_UDP)
-     || ((iph->protocol == IPPROTO_TCP) && (flow->packets > 10))) {
+     || (proto == IPPROTO_UDP)
+     || ((proto == IPPROTO_TCP) && (flow->packets > 10))) {
     flow->detection_completed = 1;
+
+    if(protocol == 0)
+      printf("Hey\n");
 
 #if 0
     if(flow->ndpi_flow->l4.tcp.host_server_name[0] != '\0')
@@ -596,7 +616,7 @@ char* formatTraffic(float numBits, int bits, char *buf) {
 
   if(numBits < 1024) {
     snprintf(buf, 32, "%lu %c", (unsigned long)numBits, unit);
-  } else if (numBits < 1048576) {
+  } else if(numBits < 1048576) {
     snprintf(buf, 32, "%.2f K%c", (float)(numBits)/1024, unit);
   } else {
     float tmpMBits = ((float)numBits)/1048576;
@@ -659,7 +679,7 @@ static void printResults(u_int64_t tot_usec)
 
   printf("\n\nDetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
-    if (protocol_counter[i] > 0) {
+    if(protocol_counter[i] > 0) {
       printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
 	     "flows: \x1b[36m%-13u\x1b[0m\n",
 	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
@@ -683,7 +703,7 @@ static void printResults(u_int64_t tot_usec)
 
 static void closePcapFile(void)
 {
-  if (_pcap_handle != NULL) {
+  if(_pcap_handle != NULL) {
     pcap_close(_pcap_handle);
   }
 }
@@ -711,7 +731,7 @@ static void openPcapFileOrDevice(void)
     _pcap_handle = pcap_open_offline(_pcap_file, _pcap_error_buffer);
     capture_until = 0;
 
-    if (_pcap_handle == NULL) {
+    if(_pcap_handle == NULL) {
       printf("ERROR: could not open pcap file: %s\n", _pcap_error_buffer);
       exit(-1);
     } else
@@ -749,9 +769,12 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 {
   const struct ndpi_ethhdr *ethernet;
   struct ndpi_iphdr *iph;
+  struct ndpi_ip6_hdr *iph6;
   u_int64_t time;
   static u_int64_t lasttime = 0;
-  u_int16_t type, ip_offset;
+  u_int16_t type, ip_offset, ip_len;
+  u_int16_t frag_off = 0;
+  u_int8_t proto = 0;
 
   raw_packet_count++;
 
@@ -764,7 +787,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 
   time = ((uint64_t) header->ts.tv_sec) * detection_tick_resolution +
     header->ts.tv_usec / (1000000 / detection_tick_resolution);
-  if (lasttime > time) {
+  if(lasttime > time) {
     // printf("\nWARNING: timestamp bug in the pcap file (ts delta: %llu, repairing)\n", lasttime - time);
     time = lasttime;
   }
@@ -788,60 +811,81 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   iph = (struct ndpi_iphdr *) &packet[ip_offset];
 
   // just work on Ethernet packets that contain IP
-  if (type == ETH_P_IP && header->caplen >= ip_offset) {
-    u_int16_t frag_off = ntohs(iph->frag_off);
+  if(type == ETH_P_IP && header->caplen >= ip_offset) {
+    frag_off = ntohs(iph->frag_off);
 
+    proto = iph->protocol;
     if(header->caplen < header->len) {
       static u_int8_t cap_warning_used = 0;
-      if (cap_warning_used == 0) {
+      if(cap_warning_used == 0) {
 	printf("\n\nWARNING: packet capture size is smaller than packet size, DETECTION MIGHT NOT WORK CORRECTLY\n\n");
 	cap_warning_used = 1;
       }
     }
+  }
+  
+  if(iph->version == 4) {
+    ip_len = ((u_short)iph->ihl * 4);
+    iph6 = NULL;
 
-    if (iph->version != 4) {
-      static u_int8_t ipv4_warning_used = 0;
-
-    v4_warning:
-      if (ipv4_warning_used == 0) {
-	printf("\n\nWARNING: only IPv4 packets are supported in this demo (nDPI supports both IPv4 and IPv6), all other packets will be discarded\n\n");
-	ipv4_warning_used = 1;
+    if((frag_off & 0x3FFF) != 0) {
+      static u_int8_t ipv4_frags_warning_used = 0;
+      
+    v4_frags_warning:
+      if(ipv4_frags_warning_used == 0) {
+	printf("\n\nWARNING: IPv4 fragments are not handled by this demo (nDPI supports them)\n");
+	ipv4_frags_warning_used = 1;
       }
-      return;
+      
+      return;      
     }
 
-    if(decode_tunnels && (iph->protocol == IPPROTO_UDP) && ((frag_off & 0x3FFF) == 0)) {
-      u_short ip_len = ((u_short)iph->ihl * 4);
-      struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[ip_offset+ip_len];
-      u_int16_t sport = ntohs(udp->source), dport = ntohs(udp->dest);
+  } else if(iph->version == 6) {
+    iph6 = (struct ndpi_ip6_hdr *)&packet[ip_offset];
+    proto = iph6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
+    ip_len = sizeof(struct ndpi_ip6_hdr);
+    iph = NULL;
+  } else {
+    static u_int8_t ipv4_warning_used = 0;
 
-      if((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {
-	/* Check if it's GTPv1 */
-	u_int offset = ip_offset+ip_len+sizeof(struct ndpi_udphdr);
-	u_int8_t flags = packet[offset];
-	u_int8_t message_type = packet[offset+1];
+  v4_warning:
+    if(ipv4_warning_used == 0) {
+      printf("\n\nWARNING: only IPv4/IPv6 packets are supported in this demo (nDPI supports both IPv4 and IPv6), all other packets will be discarded\n\n");
+      ipv4_warning_used = 1;
+    }
 
-	if((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) && (message_type == 0xFF /* T-PDU */)) {
-	  ip_offset = ip_offset+ip_len+sizeof(struct ndpi_udphdr)+8 /* GTPv1 header len */;
+    return;
+  }
 
-	  if(flags & 0x04) ip_offset += 1; /* next_ext_header is present */
-	  if(flags & 0x02) ip_offset += 4; /* sequence_number is present (it also includes next_ext_header and pdu_number) */
-	  if(flags & 0x01) ip_offset += 1; /* pdu_number is present */
+  if(decode_tunnels && (proto == IPPROTO_UDP)) {
+    struct ndpi_udphdr *udp = (struct ndpi_udphdr *)&packet[ip_offset+ip_len];
+    u_int16_t sport = ntohs(udp->source), dport = ntohs(udp->dest);
 
-	  iph = (struct ndpi_iphdr *) &packet[ip_offset];
+    if((sport == GTP_U_V1_PORT) || (dport == GTP_U_V1_PORT)) {
+      /* Check if it's GTPv1 */
+      u_int offset = ip_offset+ip_len+sizeof(struct ndpi_udphdr);
+      u_int8_t flags = packet[offset];
+      u_int8_t message_type = packet[offset+1];
 
-	  if (iph->version != 4) {
-	    // printf("WARNING: not good (packet_id=%u)!\n", (unsigned int)raw_packet_count);
-	    goto v4_warning;
-	  }
+      if((((flags & 0xE0) >> 5) == 1 /* GTPv1 */) && (message_type == 0xFF /* T-PDU */)) {
+	ip_offset = ip_offset+ip_len+sizeof(struct ndpi_udphdr)+8 /* GTPv1 header len */;
+
+	if(flags & 0x04) ip_offset += 1; /* next_ext_header is present */
+	if(flags & 0x02) ip_offset += 4; /* sequence_number is present (it also includes next_ext_header and pdu_number) */
+	if(flags & 0x01) ip_offset += 1; /* pdu_number is present */
+
+	iph = (struct ndpi_iphdr *) &packet[ip_offset];
+
+	if(iph->version != 4) {
+	  // printf("WARNING: not good (packet_id=%u)!\n", (unsigned int)raw_packet_count);
+	  goto v4_warning;
 	}
       }
-
     }
-
-    // process the packet
-    packet_processing(time, iph, header->len - ip_offset, header->len);
   }
+
+  // process the packet
+  packet_processing(time, iph, iph6, header->len - ip_offset, header->len);  
 }
 
 static void runPcapLoop(void)
@@ -921,7 +965,7 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
   __int64         t;
   static int      tzflag;
 
-  if (tv)
+  if(tv)
     {
       GetSystemTimeAsFileTime(&ft);
       li.LowPart  = ft.dwLowDateTime;
@@ -933,16 +977,15 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
       tv->tv_usec = (long)(t % 1000000);
     }
 
-  if (tz)
-    {
-      if (!tzflag)
-        {
-	  _tzset();
-	  tzflag++;
-        }
-      tz->tz_minuteswest = _timezone / 60;
-      tz->tz_dsttime = _daylight;
+  if(tz) {
+    if(!tzflag) {
+      _tzset();
+      tzflag++;
     }
+
+    tz->tz_minuteswest = _timezone / 60;
+    tz->tz_dsttime = _daylight;
+  }
 
   return 0;
 }

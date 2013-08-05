@@ -127,8 +127,8 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     if(is_query) {
       /* DNS Request */
       if((header.num_queries > 0) && (header.num_queries <= NDPI_MAX_DNS_REQUESTS)
-	 && (header.answer_rrs == 0)
-	 && (header.authority_rrs == 0)) {
+	 && (((header.flags & 0x2800) == 0x2800 /* Dynamic DNS Update */)
+	     || ((header.answer_rrs == 0) && (header.authority_rrs == 0)))) {
 	/* This is a good query */
 	is_dns = 1;
       }
