@@ -38,7 +38,7 @@ static void ndpi_rtp_search(struct ndpi_detection_module_struct *ndpi_struct,
   /* Check whether this is an RTP flow */
   if((payload_len >= 12)
      && ((payload[0] & 0xFF) == 0x80) /* RTP magic byte[1] */
-     && ((payload_type <= 34          /* PT_H263 */))
+     && ((payload_type < 128          /* http://anonsvn.wireshark.org/wireshark/trunk/epan/dissectors/packet-rtp.c */))
      && (*ssid != 0)
      ) {
     NDPI_LOG(NDPI_PROTOCOL_RTP, ndpi_struct, NDPI_LOG_DEBUG, "Found rtp.\n");

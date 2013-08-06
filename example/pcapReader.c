@@ -584,9 +584,6 @@ static unsigned int packet_processing(const u_int64_t time,
      || ((proto == IPPROTO_TCP) && (flow->packets > 10))) {
     flow->detection_completed = 1;
 
-    if(protocol == 0)
-      printf("Hey\n");
-
 #if 0
     if(flow->ndpi_flow->l4.tcp.host_server_name[0] != '\0')
       printf("%s\n", flow->ndpi_flow->l4.tcp.host_server_name);
