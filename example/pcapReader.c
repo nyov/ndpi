@@ -340,13 +340,14 @@ static int node_cmp(const void *a, const void *b) {
 
 static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
 				       const struct ndpi_iphdr *iph,
-				       u_int16_t ipsize,
+				       u_int16_t ip_offset,
+				       u_int16_t ipsize,				       
 				       u_int16_t l4_packet_len,
 				       struct ndpi_id_struct **src,
 				       struct ndpi_id_struct **dst,
 				       u_int8_t *proto)
 {
-  u_int32_t idx;
+  u_int32_t idx, l4_offset;
   struct ndpi_tcphdr *tcph = NULL;
   struct ndpi_udphdr *udph = NULL;
   u_int32_t lower_ip;
@@ -374,9 +375,10 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
   }
 
   *proto = iph->protocol;
+  l4_offset = iph->ihl * 4;
   if(iph->protocol == 6 && l4_packet_len >= 20) {
     // tcp
-    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + ipsize);
+    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + l4_offset);
     if(iph->saddr < iph->daddr) {
       lower_port = tcph->source;
       upper_port = tcph->dest;
@@ -386,7 +388,7 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
     }
   } else if(iph->protocol == 17 && l4_packet_len >= 8) {
     // udp
-    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + ipsize);
+    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + l4_offset);
     if(iph->saddr < iph->daddr) {
       lower_port = udph->source;
       upper_port = udph->dest;
@@ -405,6 +407,11 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
   flow.upper_ip = upper_ip;
   flow.lower_port = lower_port;
   flow.upper_port = upper_port;
+
+  /*
+    printf("[NDPI] [%u][%u:%u <-> %u:%u]\n", 
+    iph->protocol, lower_ip, lower_port, upper_ip, upper_port);
+  */
 
   idx = (lower_ip + upper_ip + iph->protocol + lower_port + upper_port) % NUM_ROOTS;
   ret = ndpi_tfind(&flow, (void*)&ndpi_flows_root[idx], node_cmp);
@@ -464,6 +471,7 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
 }
 
 static struct ndpi_flow *get_ndpi_flow6(const struct ndpi_ip6_hdr *iph6,
+					u_int16_t ip_offset,
 					struct ndpi_id_struct **src,
 					struct ndpi_id_struct **dst,
 					u_int8_t *proto)
@@ -475,8 +483,10 @@ static struct ndpi_flow *get_ndpi_flow6(const struct ndpi_ip6_hdr *iph6,
   iph.saddr = iph6->ip6_src.__u6_addr.__u6_addr32[2] + iph6->ip6_src.__u6_addr.__u6_addr32[3];
   iph.daddr = iph6->ip6_dst.__u6_addr.__u6_addr32[2] + iph6->ip6_dst.__u6_addr.__u6_addr32[3];
   iph.protocol = iph6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
-  return(get_ndpi_flow(6, &iph, sizeof(struct ndpi_ip6_hdr), 
-		       ntohs(iph6->ip6_ctlun.ip6_un1.ip6_un1_plen), src, dst, proto));
+  return(get_ndpi_flow(6, &iph, ip_offset, 
+		       sizeof(struct ndpi_ip6_hdr), 
+		       ntohs(iph6->ip6_ctlun.ip6_un1.ip6_un1_plen), 
+		       src, dst, proto));
 }
 
 static void setupDetection(void)
@@ -537,6 +547,7 @@ static void terminateDetection(void)
 static unsigned int packet_processing(const u_int64_t time, 
 				      const struct ndpi_iphdr *iph,
 				      struct ndpi_ip6_hdr *iph6,
+				      u_int16_t ip_offset,
 				      u_int16_t ipsize, u_int16_t rawsize)
 {
   struct ndpi_id_struct *src, *dst;
@@ -546,11 +557,11 @@ static unsigned int packet_processing(const u_int64_t time,
   u_int8_t proto;
 
   if(iph)
-    flow = get_ndpi_flow(4, iph, ipsize, 
+    flow = get_ndpi_flow(4, iph, ip_offset, ipsize,
 			 ntohs(iph->tot_len) - (iph->ihl * 4),
 			 &src, &dst, &proto);
   else
-    flow = get_ndpi_flow6(iph6, &src, &dst, &proto);
+    flow = get_ndpi_flow6(iph6, ip_offset, &src, &dst, &proto);
 
   if(flow != NULL) {
     ndpi_flow = flow->ndpi_flow;
@@ -882,7 +893,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   }
 
   // process the packet
-  packet_processing(time, iph, iph6, header->len - ip_offset, header->len);  
+  packet_processing(time, iph, iph6, ip_offset, header->len - ip_offset, header->len);  
 }
 
 static void runPcapLoop(void)
