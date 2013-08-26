@@ -5178,7 +5178,7 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 /* ****************************************************** */
 
 char* ndpi_get_proto_name(struct ndpi_detection_module_struct *ndpi_mod, u_int16_t proto_id) {
-  if(proto_id > ndpi_mod->ndpi_num_supported_protocols) proto_id = NDPI_PROTOCOL_UNKNOWN;
+  if(proto_id >= ndpi_mod->ndpi_num_supported_protocols) proto_id = NDPI_PROTOCOL_UNKNOWN;
   return(ndpi_mod->proto_defaults[proto_id].protoName);
 }
 
