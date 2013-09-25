@@ -605,7 +605,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 
 	  parent++;
 	  end = strchr(parent, ')');
-	  end[0] = '\0';
+	  if(end) end[0] = '\0';
 	  
 	  token = strtok_r(parent, ";", &w);
 	  if(token) {
