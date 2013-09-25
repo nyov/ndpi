@@ -671,6 +671,7 @@ typedef struct ndpi_flow_struct {
   } l4;
 
   u_char host_server_name[256]; /* HTTP host or DNS query */
+  u_char detected_os[32];       /* Via HTTP User-Agent    */
 
   /* ALL protocol specific 64 bit variables here */
 

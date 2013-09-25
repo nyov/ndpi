@@ -259,7 +259,7 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
 static void printFlow(struct ndpi_flow *flow) {
   char buf1[32], buf2[32];
 
-  printf("\t%s %s:%u > %s:%u [proto: %u/%s][%u pkts/%u bytes]\n",
+  printf("\t%s %s:%u > %s:%u [proto: %u/%s][%u pkts/%u bytes][%s]\n",
 	 ipProto2Name(flow->protocol),
 	 intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)),
 	 ntohs(flow->lower_port),
@@ -267,7 +267,8 @@ static void printFlow(struct ndpi_flow *flow) {
 	 ntohs(flow->upper_port),
 	 flow->detected_protocol,
 	 ndpi_get_proto_name(ndpi_struct, flow->detected_protocol),
-	 flow->packets, flow->bytes);
+	 flow->packets, flow->bytes,
+	 flow->ndpi_flow->host_server_name);
 }
 
 static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
@@ -581,11 +582,12 @@ static unsigned int packet_processing(const u_int64_t time,
   if(verbose > 1) {
     char buf1[32], buf2[32];
     
-    printf("%s %s:%u > %s:%u [proto: %u/%s]\n",
+    printf("%s %s:%u > %s:%u [proto: %u/%s][%s]\n",
 	   ipProto2Name(flow->protocol),
 	   intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)), ntohs(flow->lower_port),
 	   intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)), ntohs(flow->upper_port),
-	   protocol, ndpi_get_proto_name(ndpi_struct, protocol));
+	   protocol, ndpi_get_proto_name(ndpi_struct, protocol),
+	   flow->ndpi_flow->host_server_name);
   }
 
   flow->detected_protocol = protocol;

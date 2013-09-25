@@ -480,6 +480,20 @@ static void rtsp_parse_packet_acceptline(struct ndpi_detection_module_struct
 }
 #endif
 
+static void setHttpUserAgent(struct ndpi_flow_struct *flow, char *ua) {
+  if(!strcmp(ua, "Windows NT 5.0")) ua = "Windows 2000";
+  else if(!strcmp(ua, "Windows NT 5.1")) ua = "Windows XP";
+  else if(!strcmp(ua, "Windows NT 5.2")) ua = "Windows Server 2003";
+  else if(!strcmp(ua, "Windows NT 6.0")) ua = "Windows Vista";
+  else if(!strcmp(ua, "Windows NT 7.0")) ua = "Windows 7";
+  else if(!strcmp(ua, "Windows NT 6.1")) ua = "Windows 7";
+  else if(!strcmp(ua, "Windows NT 6.2")) ua = "Windows 8";
+  else if(!strcmp(ua, "Windows NT 6.3")) ua = "Windows 8.1";
+  
+  //printf("==> %s\n", ua);
+  snprintf(flow->detected_os, sizeof(flow->detected_os), "%s", ua);  
+}
+
 static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   // int i = 0;
   struct ndpi_packet_struct *packet = &flow->packet;
@@ -573,6 +587,63 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
   }
   /* check user agent here too */
   if (packet->user_agent_line.ptr != NULL && packet->user_agent_line.len != 0) {
+    /* Format: 
+       Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) ....
+    */
+    if(packet->user_agent_line.len > 7) {
+      char ua[256];
+      u_int mlen = ndpi_min(packet->user_agent_line.len, sizeof(ua)-1);
+
+      strncpy(ua, packet->user_agent_line.ptr, mlen);
+      ua[mlen] = '\0';
+      
+      if(strncmp(ua, "Mozilla", 7) == 0) {
+	char *parent = strchr(ua, '(');
+	
+	if(parent) {
+	  char *token, *w, *end;
+
+	  parent++;
+	  end = strchr(parent, ')');
+	  end[0] = '\0';
+	  
+	  token = strtok_r(parent, ";", &w);
+	  if(token) {
+	    if((strcmp(token, "X11") == 0)
+	       || (strcmp(token, "compatible") == 0)
+	       || (strcmp(token, "Macintosh") == 0)
+	       ) {
+	      token = strtok_r(NULL, ";", &w);
+	      if(token && (token[0] == ' ')) token++; /* Skip space */
+	      
+	      if(token 
+		 && ((strcmp(token, "U") == 0)
+		     || (strncmp(token, "MSIE", 4) == 0))) {
+		token = strtok_r(NULL, ";", &w);
+		if(token && (token[0] == ' ')) token++; /* Skip space */
+
+		if(token && (strncmp(token, "Update", 6)  == 0)) {
+		  token = strtok_r(NULL, ";", &w);
+
+		  if(token && (token[0] == ' ')) token++; /* Skip space */
+		  
+		  if(token && (strncmp(token, "AOL", 3)  == 0)) {
+		    token = strtok_r(NULL, ";", &w);
+
+		    if(token && (token[0] == ' ')) token++; /* Skip space */
+		  }
+		}
+	      }
+	    }
+
+	    if(token) {
+	      setHttpUserAgent(flow, token);
+	    }
+	  }
+	}
+      }
+    }
+
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "User Agent Type Line found %.*s\n",
 	    packet->user_agent_line.len, packet->user_agent_line.ptr);
 #ifdef NDPI_PROTOCOL_XBOX
