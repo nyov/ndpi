@@ -222,7 +222,7 @@ extern "C" {
 #define NDPI_LAST_IMPLEMENTED_PROTOCOL                          170
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
-#define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           128
+#define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)
 #ifdef __cplusplus
 }
 #endif

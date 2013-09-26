@@ -3949,8 +3949,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 	if ((ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
 	    ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask
 	    && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
-				    ndpi_struct->
-				    callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
+				    ndpi_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
 	    && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_payload[a].detection_bitmask,
 				    detection_bitmask) != 0) {
 	  ndpi_struct->callback_buffer_tcp_payload[a].func(ndpi_struct, flow);
@@ -5391,3 +5390,32 @@ int gettimeofday(struct timeval * tp, struct timezone * tzp) {
  }
 #endif
 
+int NDPI_BITMASK_COMPARE(NDPI_PROTOCOL_BITMASK a, NDPI_PROTOCOL_BITMASK b) {
+  int i;
+
+  for(i=0; i<NDPI_NUM_FDS_BITS; i++) {
+    if(a.fds_bits[i] & b.fds_bits[i])
+      return(1);
+  }
+
+  return(0);
+}
+
+int NDPI_BITMASK_IS_EMPTY(NDPI_PROTOCOL_BITMASK a) {
+  int i;
+
+  for(i=0; i<NDPI_NUM_FDS_BITS; i++)
+    if(a.fds_bits[i] != 0)
+      return(0);
+
+  return(1);
+}
+
+void NDPI_DUMP_BITMASK(NDPI_PROTOCOL_BITMASK a) {
+  int i;
+
+  for(i=0; i<NDPI_NUM_FDS_BITS; i++)
+    printf("[%d=%u]", i, a.fds_bits[i]);
+
+  printf("\n");
+}
