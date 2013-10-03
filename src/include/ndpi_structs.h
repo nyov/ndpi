@@ -673,6 +673,12 @@ typedef struct ndpi_flow_struct {
   u_char host_server_name[256]; /* HTTP host or DNS query */
   u_char detected_os[32];       /* Via HTTP User-Agent    */
 
+  union {
+    struct {
+      u_int8_t num_queries, num_answer_rrs;
+      u_int16_t query_type, query_class;
+    } dns;
+  } protos;
   /* ALL protocol specific 64 bit variables here */
 
   /* protocols which have marked a connection as this connection cannot be protocol XXX, multiple u_int64_t */

@@ -209,14 +209,12 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	 ) {
 	/* This is a good reply */
 	is_dns = 1;
+	flow->protos.dns.num_queries = header.num_queries, flow->protos.dns.num_answer_rrs = header.answer_rrs;
       }
     }
 
     if(is_dns) {
       int j = 0;
-#ifdef DEBUG
-      u_int16_t query_type, query_class;
-#endif
 
       i = query_offset+1;
 
@@ -251,12 +249,12 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	  ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
       }
 
-#ifdef DEBUG
       i++;
-      memcpy(&query_type, &packet->payload[i], 2); query_type  = ntohs(query_type), i += 2;
-      memcpy(&query_class, &packet->payload[i], 2); query_class  = ntohs(query_class), i += 2;
+      memcpy(&flow->protos.dns.query_type, &packet->payload[i], 2); flow->protos.dns.query_type  = ntohs(flow->protos.dns.query_type), i += 2;
+      memcpy(&flow->protos.dns.query_class, &packet->payload[i], 2); flow->protos.dns.query_class  = ntohs(flow->protos.dns.query_class), i += 2;
 
-      printf("%s [type=%04X][class=%04X]\n", flow->host_server_name, query_type, query_class);
+#ifdef DEBUG
+      printf("%s [type=%04X][class=%04X]\n", flow->host_server_name, flow->protos.dns.query_type, flow->protos.dns.query_class);
 #endif
 
       if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
