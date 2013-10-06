@@ -232,7 +232,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	int i;
 
 	for(i=0; i<num_a_records; i++) {
-	  j += snprintf(&flow->host_server_name[j], sizeof(flow->host_server_name)-1-j, "%s%s",
+	  j += snprintf((char*)&flow->host_server_name[j], sizeof(flow->host_server_name)-1-j, "%s%s",
 			(i == 0) ? "@" : ";",
 			ndpi_intoa_v4(a_record[i], a_buf, sizeof(a_buf)));
 	}
@@ -246,7 +246,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 #endif
 
 	if(ndpi_struct->match_dns_host_names)
-	  ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
+	  ndpi_match_string_subprotocol(ndpi_struct, flow, (char *)flow->host_server_name, strlen((const char*)flow->host_server_name));
       }
 
       i++;

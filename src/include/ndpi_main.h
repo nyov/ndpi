@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#include <pthread.h>
+#include <ctype.h>
 #endif
 
 #ifndef WIN32
@@ -38,13 +40,11 @@
 #include <sys/time.h>
 #endif
 
-#if 1 && !defined __APPLE__ && !defined __FreeBSD__ && !defined __NetBSD__
+#if !defined __APPLE__ && !defined __FreeBSD__ && !defined __NetBSD__
 
 #ifndef __KERNEL__
 #include <endian.h>
 #include <byteswap.h>
-#include <ctype.h>
-#include <pthread.h>
 #else
 #include <asm/byteorder.h>
 #include <linux/ctype.h>

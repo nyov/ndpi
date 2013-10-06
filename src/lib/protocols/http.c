@@ -491,7 +491,7 @@ static void setHttpUserAgent(struct ndpi_flow_struct *flow, char *ua) {
   else if(!strcmp(ua, "Windows NT 6.3")) ua = "Windows 8.1";
   
   //printf("==> %s\n", ua);
-  snprintf(flow->detected_os, sizeof(flow->detected_os), "%s", ua);  
+  snprintf((char*)flow->detected_os, sizeof(flow->detected_os), "%s", ua);  
 }
 
 static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
@@ -524,7 +524,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
   if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP) {
     /* Try matching subprotocols */
     // ndpi_match_string_subprotocol(ndpi_struct, flow, (char*)packet->host_line.ptr, packet->host_line.len);
-    ndpi_match_string_subprotocol(ndpi_struct, flow, flow->host_server_name, strlen(flow->host_server_name));
+    ndpi_match_string_subprotocol(ndpi_struct, flow, (char *)flow->host_server_name, strlen((const char *)flow->host_server_name));
   }
 }
 
@@ -594,7 +594,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
       char ua[256];
       u_int mlen = ndpi_min(packet->user_agent_line.len, sizeof(ua)-1);
 
-      strncpy(ua, packet->user_agent_line.ptr, mlen);
+      strncpy(ua, (const char *)packet->user_agent_line.ptr, mlen);
       ua[mlen] = '\0';
       
       if(strncmp(ua, "Mozilla", 7) == 0) {

@@ -37,7 +37,7 @@ void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, str
       u_int max_len = sizeof(flow->host_server_name)-1;
       u_int i, j;
       
-      for(i=strlen(flow->host_server_name), j=0; (i<max_len) && (j<packet->payload_packet_len); i++, j++) {
+      for(i=strlen((const char *)flow->host_server_name), j=0; (i<max_len) && (j<packet->payload_packet_len); i++, j++) {
 	if((packet->payload[j] == '\n') || (packet->payload[j] == '\r')) break;
 
 	flow->host_server_name[i] = packet->payload[j];

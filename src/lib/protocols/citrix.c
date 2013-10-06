@@ -62,7 +62,7 @@ static void ndpi_check_citrix(struct ndpi_detection_module_struct *ndpi_struct, 
 	char citrix_header[] = { 0x1a, 0x43, 0x47, 0x50, 0x2f, 0x30, 0x31 };
 	
 	if((memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0)
-	   || (ndpi_strnstr(packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
+	   || (ndpi_strnstr((const char *)packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
 	  NDPI_LOG(NDPI_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
 	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
 	}
