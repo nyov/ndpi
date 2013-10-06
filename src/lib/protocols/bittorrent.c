@@ -436,9 +436,9 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	if(packet->payload_packet_len > 19 /* min size */) {
 	  char *begin;
 
-	  if(ndpi_strnstr(packet->payload, ":target20:", packet->payload_packet_len)
-	     || ndpi_strnstr(packet->payload, ":find_node1:", packet->payload_packet_len)
-	     || ndpi_strnstr(packet->payload, "d1:ad2:id20:", packet->payload_packet_len)) {
+	  if(ndpi_strnstr((const char *)packet->payload, ":target20:", packet->payload_packet_len)
+	     || ndpi_strnstr((const char *)packet->payload, ":find_node1:", packet->payload_packet_len)
+	     || ndpi_strnstr((const char *)packet->payload, "d1:ad2:id20:", packet->payload_packet_len)) {
 	  bittorrent_found:
 	    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
 			       ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");

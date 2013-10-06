@@ -41,6 +41,7 @@
 #define printf printk
 #else
 #include <time.h>
+#include <unistd.h>
 #endif
 
 // #include "ndpi_credis.c"

@@ -10,6 +10,12 @@ AC_PROG_INSTALL
 
 LT_INIT
 
+case "$host:$CC" in
+    *darwin* )
+        PLATFORM_DEPENDENT="-fno-color-diagnostics"
+	;;
+esac
+
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
 AC_CONFIG_FILES([Makefile
@@ -19,5 +25,6 @@ AC_CONFIG_FILES([Makefile
 		])
 
 AC_CONFIG_HEADERS(config.h)
+AC_SUBST(PLATFORM_DEPENDENT)
 
 AC_OUTPUT

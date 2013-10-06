@@ -14,7 +14,7 @@ LIB_REV=4
 LIB_ANC=0
 
 # ntop
-AM_CFLAGS=-fPIC
+AM_CFLAGS=-fPIC @PLATFORM_DEPENDENT@
 
 libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/include/  -I$(top_srcdir)/src/lib/third_party/include/
 libndpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}

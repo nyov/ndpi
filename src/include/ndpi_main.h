@@ -43,6 +43,8 @@
 #ifndef __KERNEL__
 #include <endian.h>
 #include <byteswap.h>
+#include <ctype.h>
+#include <pthread.h>
 #else
 #include <asm/byteorder.h>
 #include <linux/ctype.h>
