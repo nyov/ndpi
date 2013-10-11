@@ -611,6 +611,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 	  if(token) {
 	    if((strcmp(token, "X11") == 0)
 	       || (strcmp(token, "compatible") == 0)
+	       || (strcmp(token, "Linux") == 0)
 	       || (strcmp(token, "Macintosh") == 0)
 	       ) {
 	      token = strtok_r(NULL, ";", &w);
