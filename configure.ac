@@ -12,7 +12,10 @@ LT_INIT
 
 case "$host:$CC" in
     *darwin* )
-        PLATFORM_DEPENDENT="-fno-color-diagnostics"
+        RES=`gcc -Wall -fno-color-diagnostics src/lib/ndpi_main.c 2>&1 | grep "unrecognized command line option "|wc -l`
+	if test $RES -eq 0; then
+	        PLATFORM_DEPENDENT="-fno-color-diagnostics"
+	fi
 	;;
 esac
 
