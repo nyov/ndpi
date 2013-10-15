@@ -528,6 +528,12 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
   }
 }
 
+/*
+  NOTE
+
+  ndpi_parse_packet_line_info @ ndpi_main.c
+  is the code that parses the packet
+ */
 static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct
 						   *ndpi_struct, struct ndpi_flow_struct *flow)
 {

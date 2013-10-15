@@ -98,6 +98,7 @@ typedef struct ndpi_flow {
   u_int16_t packets, bytes;
   // result only, not used for flow identification
   u_int32_t detected_protocol;
+  char host_server_name[48];
 
   void *src_id, *dst_id;
 } ndpi_flow_t;
@@ -268,7 +269,7 @@ static void printFlow(struct ndpi_flow *flow) {
 	 flow->detected_protocol,
 	 ndpi_get_proto_name(ndpi_struct, flow->detected_protocol),
 	 flow->packets, flow->bytes,
-	 flow->ndpi_flow->host_server_name);
+	 flow->host_server_name);
 }
 
 static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
@@ -573,22 +574,11 @@ static unsigned int packet_processing(const u_int64_t time,
   ip_packet_count++;
   total_bytes += rawsize + 24 /* CRC etc */;
 
-  if(flow->detection_completed) return;
+  if(flow->detection_completed) return(0);
 
   protocol = (const u_int32_t)ndpi_detection_process_packet(ndpi_struct, ndpi_flow, 
 							    iph ? (uint8_t *)iph : (uint8_t *)iph6,
 							    ipsize, time, src, dst);
-
-  if(verbose > 1) {
-    char buf1[32], buf2[32];
-    
-    printf("%s %s:%u > %s:%u [proto: %u/%s][%s]\n",
-	   ipProto2Name(flow->protocol),
-	   intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)), ntohs(flow->lower_port),
-	   intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)), ntohs(flow->upper_port),
-	   protocol, ndpi_get_proto_name(ndpi_struct, protocol),
-	   flow->ndpi_flow->host_server_name);
-  }
 
   flow->detected_protocol = protocol;
 
@@ -601,7 +591,19 @@ static unsigned int packet_processing(const u_int64_t time,
     if(flow->ndpi_flow->l4.tcp.host_server_name[0] != '\0')
       printf("%s\n", flow->ndpi_flow->l4.tcp.host_server_name);
 #endif
+    
+    if(verbose > 1) {
+      char buf1[32], buf2[32];
+      
+      printf("%s %s:%u > %s:%u [proto: %u/%s][%s]\n",
+	     ipProto2Name(flow->protocol),
+	     intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)), ntohs(flow->lower_port),
+	     intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)), ntohs(flow->upper_port),
+	     protocol, ndpi_get_proto_name(ndpi_struct, protocol),
+	     flow->ndpi_flow->host_server_name);
+    }
 
+    snprintf(flow->host_server_name, sizeof(flow->host_server_name), "%s", flow->ndpi_flow->host_server_name);
     free_ndpi_flow(flow);
   }
 
@@ -808,13 +810,13 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
     ip_offset = sizeof(struct ndpi_ethhdr);
     type = ntohs(ethernet->h_proto);
   } else if(_pcap_datalink_type == 113 /* Linux Cooked Capture */) {
-    type = packet[14] << 8 + packet[15];
+    type = (packet[14] << 8) + packet[15];
     ip_offset = 16;
   } else
     return;
 
   if(type == 0x8100 /* VLAN */) {
-    type = packet[ip_offset+2] << 8 + packet[ip_offset+3];
+    type = (packet[ip_offset+2] << 8) + packet[ip_offset+3];
     ip_offset += 4;
   }
 

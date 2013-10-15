@@ -718,6 +718,7 @@ ndpi_protocol_match host_match[] = {
   { ".tuenti.com",       "Tuenti", NDPI_PROTOCOL_TUENTI },
   { ".skype.com",        "Skype", NDPI_PROTOCOL_SKYPE },
   { ".skypeassets.com",  "Skype", NDPI_PROTOCOL_SKYPE },
+  { ".yahoo.",           "Yahoo", NDPI_PROTOCOL_YAHOO },
   { NULL, 0 }
 };
 
