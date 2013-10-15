@@ -607,35 +607,35 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 	char *parent = strchr(ua, '(');
 	
 	if(parent) {
-	  char *token, *w, *end;
+	  char *token, *end;
 
 	  parent++;
 	  end = strchr(parent, ')');
 	  if(end) end[0] = '\0';
 	  
-	  token = strtok_r(parent, ";", &w);
+	  token = strsep(&parent, ";");
 	  if(token) {
 	    if((strcmp(token, "X11") == 0)
 	       || (strcmp(token, "compatible") == 0)
 	       || (strcmp(token, "Linux") == 0)
 	       || (strcmp(token, "Macintosh") == 0)
 	       ) {
-	      token = strtok_r(NULL, ";", &w);
+	      token = strsep(&parent, ";");
 	      if(token && (token[0] == ' ')) token++; /* Skip space */
 	      
 	      if(token 
 		 && ((strcmp(token, "U") == 0)
 		     || (strncmp(token, "MSIE", 4) == 0))) {
-		token = strtok_r(NULL, ";", &w);
+		token = strsep(&parent, ";");
 		if(token && (token[0] == ' ')) token++; /* Skip space */
 
 		if(token && (strncmp(token, "Update", 6)  == 0)) {
-		  token = strtok_r(NULL, ";", &w);
+		  token = strsep(&parent, ";");
 
 		  if(token && (token[0] == ' ')) token++; /* Skip space */
 		  
 		  if(token && (strncmp(token, "AOL", 3)  == 0)) {
-		    token = strtok_r(NULL, ";", &w);
+		    token = strsep(&parent, ";");
 
 		    if(token && (token[0] == ' ')) token++; /* Skip space */
 		  }
