@@ -5159,9 +5159,6 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
-  if(shost && dhost && is_skype_connection(ndpi_struct, shost, dhost))
-    return(NDPI_PROTOCOL_SKYPE);
-
   node.default_port = sport;
   ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
 
@@ -5172,8 +5169,13 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 
   if(ret != NULL) {
     ndpi_default_ports_tree_node_t *found = *(ndpi_default_ports_tree_node_t**)ret;
+
     return(found->proto->protoId);
   }
+
+  /* Use skype as last resort */
+  if(shost && dhost && is_skype_connection(ndpi_struct, shost, dhost))
+    return(NDPI_PROTOCOL_SKYPE);
 
   return(NDPI_PROTOCOL_UNKNOWN);
 }
