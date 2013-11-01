@@ -67,6 +67,16 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
 	return;
       }
 
+      /*
+	Dropbox
+	108.160.160.0/20
+      */
+      if(((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
+	 || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)) {
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DROPBOX, NDPI_REAL_PROTOCOL);
+	return;
+      }
+
       /* 
 	 Skype
 	 157.56.0.0/14, 157.60.0.0/16, 157.54.0.0/15

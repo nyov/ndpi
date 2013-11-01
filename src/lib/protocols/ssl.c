@@ -74,14 +74,30 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
 
 static void stripCertificateTrailer(char *buffer, int buffer_len) {
   int i;
+  
+  //  printf("->%s<-\n", buffer);
 
   for(i=0; i<buffer_len; i++) {
+    // printf("%c [%d]\n", buffer[i], buffer[i]);
+
     if((buffer[i] != '.')
        && (buffer[i] != '-')
+       && (buffer[i] != '*')
        && (!ndpi_isalpha(buffer[i]))
-       && (!ndpi_isdigit(buffer[i])))
+       && (!ndpi_isdigit(buffer[i]))) {
       buffer[i] = '\0';
-    break;
+      break;
+    }
+  }
+
+  if(i > 0) i--;
+
+  while(i > 0) {    
+    if(!ndpi_isalpha(buffer[i])) {
+      buffer[i] = '\0';
+      i--;
+    } else
+      break;
   }
 }
 
@@ -102,13 +118,20 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
       int i;
 
       if(handshake_protocol == 0x02 /* Server Hello */) {
+	u_int num_found = 0;
+	
 	flow->l4.tcp.ssl_seen_server_cert = 1;
 
 	for(i=total_len; i < packet->payload_packet_len-3; i++) {
-	  if((packet->payload[i] == 0x04)
-	     && (packet->payload[i+1] == 0x03)
-	     && (packet->payload[i+2] == 0x0c)) {
+	  if(((packet->payload[i] == 0x04) && (packet->payload[i+1] == 0x03) && (packet->payload[i+2] == 0x0c))
+	     || ((packet->payload[i] == 0x55) && (packet->payload[i+1] == 0x04) && (packet->payload[i+2] == 0x03))) {
 	    u_int8_t server_len = packet->payload[i+3];
+
+	    if(packet->payload[i] == 0x55) {
+	      num_found++;
+
+	      if(num_found != 2) continue;
+	    }
 
 	    if(server_len+i+3 < packet->payload_packet_len) {
 	      char *server_name = (char*)&packet->payload[i+4];
@@ -121,7 +144,8 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 		  break;
 	      }
 
-	      len = ndpi_min(server_len-begin, buffer_len-1);
+	      // len = ndpi_min(server_len-begin, buffer_len-1);
+	      len = buffer_len-1;
 	      strncpy(buffer, &server_name[begin], len);
 	      buffer[len] = '\0';
 
@@ -227,7 +251,7 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
 
     if(rc > 0) {
       packet->ssl_certificate_detected = 1;
-      // printf("***** [SSL] %s\n", certificate);
+      //printf("***** [SSL] %s\n", certificate);
       if(ndpi_match_string_subprotocol(ndpi_struct, flow, certificate, strlen(certificate)) != NDPI_PROTOCOL_UNKNOWN)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     } 
