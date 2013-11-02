@@ -31,15 +31,20 @@ static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *nd
 					 struct ndpi_flow_struct *flow,
 					 u_int32_t protocol)
 {
-  
+  ndpi_search_tcp_or_udp(ndpi_struct, flow);
 
-  if (protocol != NDPI_PROTOCOL_HTTP) {
-    ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_CORRELATED_PROTOCOL);
-  } else {
-    ndpi_int_reset_protocol(flow);
-    ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
+  if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
+    /* This is HTTP and it is not a sub protocol (e.g. skype or dropbox) */
+
+    if (protocol != NDPI_PROTOCOL_HTTP) {
+      ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_CORRELATED_PROTOCOL);
+    } else {
+      ndpi_int_reset_protocol(flow);
+      ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
+    }
+    
+    flow->http_detected = 1;
   }
-  flow->http_detected = 1;
 }
 
 #ifdef NDPI_PROTOCOL_QQ

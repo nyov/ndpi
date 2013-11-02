@@ -70,7 +70,15 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
       /*
 	Dropbox
 	108.160.160.0/20
+	199.47.216.0/22
       */
+      if(((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */) || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
+	 || ((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.240.0 */) == 0xC72FD800 /* 199.47.216.0 */) || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.240.0 */) == 0xC72FD800 /* 199.47.216.0 */)
+	 ) {
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DROPBOX, NDPI_REAL_PROTOCOL);
+	return;
+      }
+
       if(((ntohl(packet->iph->saddr) & 0xFFFFF000 /* 255.255.240.0.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
 	 || ((ntohl(packet->iph->daddr) & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)) {
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DROPBOX, NDPI_REAL_PROTOCOL);
