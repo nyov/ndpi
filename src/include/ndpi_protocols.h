@@ -164,6 +164,11 @@ void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct
 void ndpi_search_vmware(struct ndpi_detection_module_struct
 			*ndpi_struct, struct ndpi_flow_struct *flow);
 
+/* TCP/UDP protocols */
+u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struct, 
+				 u_int8_t protocol,
+				 u_int32_t saddr, u_int32_t daddr, 
+				 u_int16_t sport, u_int16_t dport);
 void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct
 			    *ndpi_struct, struct ndpi_flow_struct *flow);
 

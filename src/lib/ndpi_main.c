@@ -1109,6 +1109,9 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TWITTER, "Twitter",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TWITTER, "Dropbox",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SKYPE, "Skype",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
@@ -5159,25 +5162,27 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
-  node.default_port = sport;
-  ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
-
-  if(ret == NULL) {
-    node.default_port = dport;
+  if(sport && dport) {
+    node.default_port = sport;
     ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
-  }
+    
+    if(ret == NULL) {
+      node.default_port = dport;
+      ret = ndpi_tfind(&node, (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, ndpi_default_ports_tree_node_t_cmp);
+    }
 
-  if(ret != NULL) {
-    ndpi_default_ports_tree_node_t *found = *(ndpi_default_ports_tree_node_t**)ret;
+    if(ret != NULL) {
+      ndpi_default_ports_tree_node_t *found = *(ndpi_default_ports_tree_node_t**)ret;
 
-    return(found->proto->protoId);
+      return(found->proto->protoId);
+    }
   }
 
   /* Use skype as last resort */
   if(shost && dhost && is_skype_connection(ndpi_struct, shost, dhost))
     return(NDPI_PROTOCOL_SKYPE);
 
-  return(NDPI_PROTOCOL_UNKNOWN);
+  return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport));
 }
 
 /* ****************************************************** */
