@@ -56,7 +56,9 @@ typedef struct {
 
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
+#ifndef strtok_r
 #define strtok_r(a,b,c) strtok(a,b)
+#endif
 #endif
 
 #ifdef __KERNEL__

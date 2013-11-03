@@ -34,7 +34,7 @@ static u_int8_t traceLRU = 0;
 
 static u_int32_t get_now(void) {
 #ifndef __KERNEL__
-  return(time(NULL));
+  return((u_int32_t)time(NULL));
 #else
   return(jiffies);
 #endif

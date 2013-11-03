@@ -68,8 +68,12 @@
 #include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
 #include <process.h> /* for getpid() and the exec..() family */
 
-
+#ifndef _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 #define snprintf	_snprintf
+
+extern char* strsep(char **stringp, const char *delim);
 
 #define __attribute__(x)
 #include <stdint.h>

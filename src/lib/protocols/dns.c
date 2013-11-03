@@ -209,7 +209,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	 ) {
 	/* This is a good reply */
 	is_dns = 1;
-	flow->protos.dns.num_queries = header.num_queries, flow->protos.dns.num_answer_rrs = header.answer_rrs;
+	flow->protos.dns.num_queries = (u_int8_t)header.num_queries, flow->protos.dns.num_answer_rrs = (u_int8_t)header.answer_rrs;
       }
     }
 

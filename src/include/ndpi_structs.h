@@ -421,6 +421,7 @@ struct ndpi_flow_udp_struct {
 #define pthread_mutex_t        HANDLE
 #define pthread_rwlock_t       pthread_mutex_t
 
+extern unsigned long waitForNextEvent(unsigned long ulDelay /* ms */);
 #define sleep(a /* sec */) waitForNextEvent(1000*a /* ms */)
 
 #define pthread_rwlock_init                     pthread_mutex_init
