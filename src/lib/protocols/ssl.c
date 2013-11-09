@@ -25,6 +25,8 @@
 
 #include "ndpi_utils.h"
 
+// #define CERTIFICATE_DEBUG 1
+
 #ifdef NDPI_PROTOCOL_SSL
 
 #define NDPI_MAX_SSL_REQUEST_SIZE 10000
@@ -107,22 +109,32 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 		      char *buffer, int buffer_len) {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  /* Nothing matched so far: let's decode the certificate with some heuristics */
+  /*
+    Nothing matched so far: let's decode the certificate with some heuristics 
+    Patches courtesy of Denys Fedoryshchenko <nuclearcat@nuclearcat.com>
+   */
   if(packet->payload[0] == 0x16 /* Handshake */) {
     u_int16_t total_len  = (packet->payload[3] << 8) + packet->payload[4] + 5 /* SSL Header */;
-    u_int8_t handshake_protocol = packet->payload[5];
+    u_int8_t handshake_protocol = packet->payload[5]; /* handshake protocol a bit misleading, it is message type according TLS specs */
 
     memset(buffer, 0, buffer_len);
 
-    if(total_len <= packet->payload_packet_len) {
+
+    /* Truncate total len, search at least in incomplete packet */
+    if (total_len > packet->payload_packet_len)
+	total_len = packet->payload_packet_len;
+
+    /* At least "magic" 3 bytes, null for string end, otherwise no need to waste cpu cycles */
+    if(total_len > 4) {
       int i;
 
-      if(handshake_protocol == 0x02 /* Server Hello */) {
+      if(handshake_protocol == 0x02 || handshake_protocol == 0xb /* Server Hello and Certificate message types are interesting for us */) {
 	u_int num_found = 0;
 	
 	flow->l4.tcp.ssl_seen_server_cert = 1;
 
-	for(i=total_len; i < packet->payload_packet_len-3; i++) {
+	/* Check after handshake protocol header (5 bytes) and message header (4 bytes) */
+	for(i = 9; i < packet->payload_packet_len-3; i++) {
 	  if(((packet->payload[i] == 0x04) && (packet->payload[i+1] == 0x03) && (packet->payload[i+2] == 0x0c))
 	     || ((packet->payload[i] == 0x55) && (packet->payload[i+1] == 0x04) && (packet->payload[i+2] == 0x03))) {
 	    u_int8_t server_len = packet->payload[i+3];
@@ -251,7 +263,9 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
 
     if(rc > 0) {
       packet->ssl_certificate_detected = 1;
-      //printf("***** [SSL] %s\n", certificate);
+#ifdef CERTIFICATE_DEBUG
+      printf("***** [SSL] %s\n", certificate);
+#endif
       if(ndpi_match_string_subprotocol(ndpi_struct, flow, certificate, strlen(certificate)) != NDPI_PROTOCOL_UNKNOWN)
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     } 

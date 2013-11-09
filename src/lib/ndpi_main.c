@@ -721,6 +721,7 @@ ndpi_protocol_match host_match[] = {
   { ".grooveshark.com",  "GrooveShark", NDPI_PROTOCOL_GROOVESHARK },
   { ".tuenti.com",       "Tuenti", NDPI_PROTOCOL_TUENTI },
   { ".skype.com",        "Skype", NDPI_PROTOCOL_SKYPE },
+  { ".whatsapp.net",     "WhatsApp", NDPI_PROTOCOL_WHATSAPP },
   { ".skypeassets.com",  "Skype", NDPI_PROTOCOL_SKYPE },
   { ".yahoo.",           "Yahoo", NDPI_PROTOCOL_YAHOO },
   { NULL, 0 }

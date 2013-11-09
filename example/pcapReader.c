@@ -939,7 +939,7 @@ int main(int argc, char **argv)
 	 "* free to extend it and send us the patches for inclusion\n"
 	 "------------------------------------------------------------\n\n");
 
-  printf("Using nDPI %s (%s)\n", PACKAGE_VERSION, ndpi_revision());
+  printf("Using nDPI %s (%s)\n", "nDPI", ndpi_revision());
 
   for(i=0; i<num_loops; i++)
     test_lib();
