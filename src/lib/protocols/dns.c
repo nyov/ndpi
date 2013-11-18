@@ -216,6 +216,8 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
     if(is_dns) {
       int j = 0;
 
+      flow->protos.dns.ret_code = ret_code;
+
       i = query_offset+1;
 
       while((i < packet->payload_packet_len)
