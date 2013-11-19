@@ -38,23 +38,45 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
   time_t now;
   struct timeval now_tv;
 
-  if((packet->udp != NULL)
-     && (payload_len >= 24)      
-     && (packet->payload[0] == 0)
-     && ((packet->payload[1] == 5)
-	 || (packet->payload[1] == 9)
-	 || (packet->payload[1] == 10 /* IPFIX */))
-     && (packet->payload[3] <= 48 /* Flow count */)) {    
+  if((packet->udp != NULL) && (payload_len >= 24)) {
+    u_int16_t version = (packet->payload[0] << 8) + packet->payload[1], uptime_offset;
     u_int32_t when, *_when;
+    u_int16_t n = (packet->payload[2] << 8) + packet->payload[3];
 
-    _when = (u_int32_t*)&packet->payload[8]; /* Sysuptime */
+    switch(version) {
+    case 1:
+    case 5:
+    case 7:
+    case 9:
+      {      
+	u_int16_t num_flows = n;
 
+	if((num_flows == 0) || (num_flows > 30))
+	  return;
+      }
+      uptime_offset = 8;
+      break;
+    case 10: /* IPFIX */
+      {      
+	u_int16_t ipfix_len = n;
+
+	if(ipfix_len != payload_len)
+	  return;
+      }    
+      uptime_offset = 4;
+      break;
+    default:
+      return;
+    }
+
+    _when = (u_int32_t*)&packet->payload[uptime_offset]; /* Sysuptime */
     when = ntohl(*_when);
 
     do_gettimeofday(&now_tv);
     now = now_tv.tv_sec;
 
-    if((when >= 946684800 /* 1/1/2000 */) && (when <= now)) {
+    if(((version == 1) && (when == 0))
+       || ((when >= 946684800 /* 1/1/2000 */) && (when <= now))) {
       NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
       ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
       return;
