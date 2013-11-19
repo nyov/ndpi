@@ -32,9 +32,13 @@
 #include <machine/endian.h>
 
 #if _BYTE_ORDER == _LITTLE_ENDIAN
+#ifndef __LITTLE_ENDIAN__
 #define __LITTLE_ENDIAN__ 1
+#endif
 #else
+#ifndef __BIG_ENDIAN__
 #define __BIG_ENDIAN__ 1
+#endif
 #endif
 #endif
 
