@@ -676,7 +676,7 @@ typedef struct ndpi_flow_struct {
 
   union {
     struct {
-      u_int8_t num_queries, num_answer_rrs, ret_code;
+      u_int8_t num_queries, num_answers, ret_code;
       u_int16_t query_type, query_class;
     } dns;
   } protos;
