@@ -713,6 +713,8 @@ ndpi_protocol_match host_match[] = {
   { ".gstatic.com",      "Google", NDPI_PROTOCOL_GOOGLE },
   { ".google.com",       "Google", NDPI_PROTOCOL_GOOGLE },
   { ".googlesyndication.com", "Google", NDPI_PROTOCOL_GOOGLE },
+  { ".googletagservices.com", "Google", NDPI_PROTOCOL_GOOGLE },
+  { ".2mdn.net", "Google", NDPI_PROTOCOL_GOOGLE },
   { ".doubleclick.net",       "Google", NDPI_PROTOCOL_GOOGLE }, /* Ads */
   { "youtube.",          "YouTube", NDPI_PROTOCOL_YOUTUBE },
   { ".googlevideo.com",  "YouTube", NDPI_PROTOCOL_YOUTUBE },
