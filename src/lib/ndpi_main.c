@@ -712,7 +712,11 @@ ndpi_protocol_match host_match[] = {
   { "maps.gstatic.com",  "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
   { ".gstatic.com",      "Google", NDPI_PROTOCOL_GOOGLE },
   { ".google.com",       "Google", NDPI_PROTOCOL_GOOGLE },
-  { ".youtube.",         "YouTube", NDPI_PROTOCOL_YOUTUBE },
+  { ".googlesyndication.com", "Google", NDPI_PROTOCOL_GOOGLE },
+  { ".doubleclick.net",       "Google", NDPI_PROTOCOL_GOOGLE }, /* Ads */
+  { "youtube.",          "YouTube", NDPI_PROTOCOL_YOUTUBE },
+  { ".googlevideo.com",  "YouTube", NDPI_PROTOCOL_YOUTUBE },
+  { ".ytimg.com",        "YouTube", NDPI_PROTOCOL_YOUTUBE },
   { "itunes.apple.com",  "AppleiTunes", NDPI_PROTOCOL_APPLE_ITUNES },
   { ".apple.com",        "Apple", NDPI_PROTOCOL_APPLE },
   { ".mzstatic.com",     "Apple", NDPI_PROTOCOL_APPLE },
