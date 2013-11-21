@@ -707,6 +707,7 @@ ndpi_protocol_match host_match[] = {
   { "fbcdn-",            "FaceBook", NDPI_PROTOCOL_FACEBOOK },  /* fbcdn-video-a-akamaihd.net */
   { ".dropbox.com",      "DropBox", NDPI_PROTOCOL_DROPBOX },
   { ".gmail.",           "GoogleGmail", NDPI_PROTOCOL_GMAIL },
+  { "mail.google.com",   "GoogleGmail", NDPI_PROTOCOL_GMAIL },
   { "maps.google.com",   "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
   { "maps.gstatic.com",  "GoogleMaps", NDPI_PROTOCOL_GOOGLE_MAPS },
   { ".gstatic.com",      "Google", NDPI_PROTOCOL_GOOGLE },
@@ -2195,10 +2196,17 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   }
 #endif
 
+#if 0
+  /*
+    We move this function into the ndpi_guess_undetected_protocol() call that gives us
+    the ability to identify subprotocols (e.g. gmail vs. google) instead of 
+    identifying the traffic with the main protocol
+   */
   ndpi_struct->callback_buffer[a].func = ndpi_search_tcp_or_udp;
   ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP;
   NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
   a++;
+#endif
 
 #ifdef NDPI_PROTOCOL_SOPCAST
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SOPCAST) != 0) {
@@ -5164,6 +5172,15 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 					    u_int32_t dhost, u_int16_t dport) {
   const void *ret;
   ndpi_default_ports_tree_node_t node;
+  unsigned int rc;
+  
+  rc = ndpi_search_tcp_or_udp_raw(ndpi_struct,
+				  proto,
+				  shost, dhost,
+				  sport, dport);
+  
+  if(rc != NDPI_PROTOCOL_UNKNOWN)
+    return(rc);
 
   if(sport && dport) {
     node.default_port = sport;

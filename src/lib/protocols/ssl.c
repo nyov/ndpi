@@ -88,6 +88,7 @@ static void stripCertificateTrailer(char *buffer, int buffer_len) {
        && (!ndpi_isalpha(buffer[i]))
        && (!ndpi_isdigit(buffer[i]))) {
       buffer[i] = '\0';
+      buffer_len = i;
       break;
     }
   }
@@ -97,9 +98,16 @@ static void stripCertificateTrailer(char *buffer, int buffer_len) {
   while(i > 0) {    
     if(!ndpi_isalpha(buffer[i])) {
       buffer[i] = '\0';
+      buffer_len = i;
       i--;
     } else
       break;
+  }
+
+  for(i=buffer_len; i>0; i--) {
+    if(buffer[i] == '.') break;
+    else if(ndpi_isdigit(buffer[i]))
+      buffer[i] = '\0', buffer_len = i;    
   }
 }
 
