@@ -531,6 +531,7 @@ typedef struct {
 typedef struct ndpi_proto_defaults {
   char *protoName;
   u_int16_t protoId;
+  void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow);
 } ndpi_proto_defaults_t;
 
 typedef struct ndpi_default_ports_tree_node {
@@ -671,6 +672,8 @@ typedef struct ndpi_flow_struct {
     struct ndpi_flow_udp_struct udp;
   } l4;
 
+  u_int8_t protocol_id_already_guessed;
+  u_int16_t guessed_protocol_id;
   u_char host_server_name[256]; /* HTTP host or DNS query */
   u_char detected_os[32];       /* Via HTTP User-Agent    */
 

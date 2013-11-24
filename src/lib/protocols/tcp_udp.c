@@ -129,7 +129,7 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
   
   if(packet->iph /* IPv4 Only: we need to support packet->iphv6 at some point */) {
     proto = ndpi_search_tcp_or_udp_raw(ndpi_struct,
-				       packet->iph->protocol,
+				       flow->packet.iph ? flow->packet.iph->protocol : flow->packet.iphv6->nexthdr,
 				       ntohl(packet->iph->saddr), 
 				       ntohl(packet->iph->daddr),
 				       sport, dport);
