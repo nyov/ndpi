@@ -1366,8 +1366,7 @@ static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *
 					   u_int32_t dhost, u_int16_t dport) {
   const void *ret;
   ndpi_default_ports_tree_node_t node;
-  unsigned int rc;
-  
+    
   if(sport && dport) {
     node.default_port = sport;
     ret = ndpi_tfind(&node,
@@ -3930,6 +3929,12 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_packet;
   NDPI_PROTOCOL_BITMASK detection_bitmask;
   void *func = NULL;
+  
+  if(flow == NULL)
+    return NDPI_PROTOCOL_UNKNOWN;  
+
+  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
+    return(flow->detected_protocol_stack[0]); /* Stop after detecting the first protocol */
 
   /* need at least 20 bytes for ip header */
   if(packetlen < 20) {
@@ -3983,7 +3988,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   }
 #endif							/* NDPI_DETECTION_SUPPORT_IPV6 */
 
-
   NDPI_SAVE_AS_BITMASK(detection_bitmask, flow->packet.detected_protocol_stack[0]);
 
   if((!flow->protocol_id_already_guessed)
@@ -4009,8 +4013,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     flow->protocol_id_already_guessed = 1;
   }
 
-
-  if((flow != NULL) && (flow->packet.tcp != NULL)) {
+  if(flow->packet.tcp != NULL) {
     if(flow->packet.payload_packet_len != 0) {
       if(NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
 			      ndpi_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
@@ -4026,7 +4029,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 	for (a = 0; a < ndpi_struct->callback_buffer_size_tcp_payload; a++) {
 	  if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	     && (ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask 
-	      & ndpi_selection_packet) == ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask
+		 & ndpi_selection_packet) == ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask
 	     && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
 				     ndpi_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
 	     && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_payload[a].detection_bitmask,
@@ -4065,7 +4068,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 	}
       }
     }
-  } else if(flow != NULL && flow->packet.udp != NULL) {
+  } else if(flow->packet.udp != NULL) {
     if(NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
 			    ndpi_struct->callback_buffer_udp[a].excluded_protocol_bitmask) == 0
        && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_udp[a].detection_bitmask,
