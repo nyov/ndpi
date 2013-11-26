@@ -4080,9 +4080,8 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   if(flow == NULL)
     return NDPI_PROTOCOL_UNKNOWN;
 
-  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN){
-    printf("STOP AFTER DETECTING= %u\t", flow->detected_protocol_stack[0]);
-    return(flow->detected_protocol_stack[0]);} /* Stop after detecting the first protocol */
+  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
+    return(flow->detected_protocol_stack[0]); /* Stop after detecting the first protocol */
 
   /* need at least 20 bytes for ip header */
   if(packetlen < 20) {
@@ -4091,15 +4090,16 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
     return NDPI_PROTOCOL_UNKNOWN;
   }
+
   flow->packet.tick_timestamp = current_tick;
 
   /* parse packet */
   flow->packet.iph = (struct ndpi_iphdr *) packet;
   /* we are interested in ipv4 packet */
 
-  if(ndpi_init_packet_header(ndpi_struct, flow, packetlen) != 0) {
+  if(ndpi_init_packet_header(ndpi_struct, flow, packetlen) != 0)
     return NDPI_PROTOCOL_UNKNOWN;
-  }
+
   /* detect traffic for tcp or udp only */
 
   flow->src = src, flow->dst = dst;
