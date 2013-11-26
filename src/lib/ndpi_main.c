@@ -5269,8 +5269,6 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 					    u_int8_t proto,
 					    u_int32_t shost, u_int16_t sport,
 					    u_int32_t dhost, u_int16_t dport) {
-  const void *ret;
-  ndpi_default_ports_tree_node_t node;
   unsigned int rc;
   
   rc = ndpi_search_tcp_or_udp_raw(ndpi_struct, proto,
