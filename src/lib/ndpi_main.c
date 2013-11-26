@@ -4015,16 +4015,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
   if(flow->packet.tcp != NULL) {
     if(flow->packet.payload_packet_len != 0) {
-      if(NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
-			      ndpi_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
-	 && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_payload[a].detection_bitmask,
-				 detection_bitmask) != 0) {
-	if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
-	   && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
-	  ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow), 
-	    func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
-      }
-
       if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
 	for (a = 0; a < ndpi_struct->callback_buffer_size_tcp_payload; a++) {
 	  if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
@@ -4034,6 +4024,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 				     ndpi_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
 	     && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_payload[a].detection_bitmask,
 				     detection_bitmask) != 0) {
+	    
 	    ndpi_struct->callback_buffer_tcp_payload[a].func(ndpi_struct, flow);
 	    
 	    if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
@@ -4042,16 +4033,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 	}
       }
     } else {				/* no payload */
-      if(NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
-			      ndpi_struct->callback_buffer_tcp_no_payload[a].excluded_protocol_bitmask) == 0
-	 && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_no_payload[a].detection_bitmask,
-				 detection_bitmask) != 0) {
-	if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
-	   && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
-	  ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow), 
-	    func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
-      }
-
       for (a = 0; a < ndpi_struct->callback_buffer_size_tcp_no_payload; a++) {
 	if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	   && (ndpi_struct->callback_buffer_tcp_no_payload[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
@@ -4069,16 +4050,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
       }
     }
   } else if(flow->packet.udp != NULL) {
-    if(NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
-			    ndpi_struct->callback_buffer_udp[a].excluded_protocol_bitmask) == 0
-       && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_udp[a].detection_bitmask,
-			       detection_bitmask) != 0) {
-      if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
-	 && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
-	ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow), 
-	  func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
-    }
-
     for (a = 0; a < ndpi_struct->callback_buffer_size_udp; a++) {
       if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	 && (ndpi_struct->callback_buffer_udp[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
@@ -4094,16 +4065,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
       }
     }
   } else {
-    if(NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
-			    ndpi_struct->callback_buffer_non_tcp_udp[a].excluded_protocol_bitmask) == 0
-       && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_non_tcp_udp[a].detection_bitmask,
-			       detection_bitmask) != 0) {
-      if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
-	 && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
-	ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow), 
-	  func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
-    }
-
     for (a = 0; a < ndpi_struct->callback_buffer_size_non_tcp_udp; a++) {
       if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	 && (ndpi_struct->callback_buffer_non_tcp_udp[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
