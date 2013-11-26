@@ -530,7 +530,7 @@ typedef struct {
 /* ntop extensions */
 typedef struct ndpi_proto_defaults {
   char *protoName;
-  u_int16_t protoId;
+  u_int16_t protoId, protoIdx;
   void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow);
 } ndpi_proto_defaults_t;
 

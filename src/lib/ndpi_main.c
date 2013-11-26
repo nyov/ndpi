@@ -1366,17 +1366,17 @@ static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *
 					   u_int32_t dhost, u_int16_t dport) {
   const void *ret;
   ndpi_default_ports_tree_node_t node;
-    
+
   if(sport && dport) {
     node.default_port = sport;
     ret = ndpi_tfind(&node,
-		     (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, 
+		     (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot,
 		     ndpi_default_ports_tree_node_t_cmp);
 
     if(ret == NULL) {
       node.default_port = dport;
-      ret = ndpi_tfind(&node, 
-		       (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot, 
+      ret = ndpi_tfind(&node,
+		       (proto == IPPROTO_TCP) ? (void*)&ndpi_struct->tcpRoot : (void*)&ndpi_struct->udpRoot,
 		       ndpi_default_ports_tree_node_t_cmp);
     }
 
@@ -1651,24 +1651,41 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_HTTP) != 0) {
 
   hack_do_http_detection:
+
     // ndpi_struct->subprotocol_conf[NDPI_PROTOCOL_HTTP].func = ndpi_http_subprotocol_conf;
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MPEG].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLASH].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QUICKTIME].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_REALMEDIA].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINDOWSMEDIA].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MMS].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OFF].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_XBOX].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINDOWS_UPDATE].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QQ].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_AVI].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OGG].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MOVE].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTSP].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP].func = 
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MPEG].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLASH].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QUICKTIME].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_REALMEDIA].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINDOWSMEDIA].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MMS].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OFF].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_XBOX].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINDOWS_UPDATE].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QQ].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_AVI].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OGG].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MOVE].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTSP].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP].func =
       ndpi_struct->callback_buffer[a].func = ndpi_search_http_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD;
+
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MPEG].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLASH].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QUICKTIME].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_REALMEDIA].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINDOWSMEDIA].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MMS].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OFF].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_XBOX].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINDOWS_UPDATE].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QQ].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_AVI].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OGG].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MOVE].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTSP].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP].protoIdx = a;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_HTTP);
@@ -1749,7 +1766,9 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SSL
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SSL) != 0) {
-     ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSL].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ssl_tcp;
+
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSL].protoIdx = a;
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSL].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ssl_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
@@ -1766,7 +1785,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
       || NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RTP) != 0
 #endif
       ) {
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_STUN].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTP].func = 
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_STUN].protoIdx = ndpi_struct->proto_defaults[NDPI_PROTOCOL_STUN].protoIdx = a;
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_STUN].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTP].func =
        ndpi_struct->callback_buffer[a].func = ndpi_search_stun;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -1779,7 +1799,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_RTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RTP) != 0) {
-     ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_rtp;
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTP].protoIdx = a;
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_rtp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
@@ -1798,6 +1819,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_RDP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RDP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RDP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_RDP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_rdp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1810,7 +1832,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SIP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SIP) != 0) {
-     ndpi_struct->proto_defaults[NDPI_PROTOCOL_SIP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_sip;
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SIP].protoIdx = a;
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SIP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_sip;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD; /* Fix courtesy of Miguel Quesada <mquesadab@gmail.com> */
 
@@ -1824,6 +1847,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_BITTORRENT
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_BITTORRENT) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_BITTORRENT].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_BITTORRENT].func = ndpi_struct->callback_buffer[a].func = ndpi_search_bittorrent;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP;
 
@@ -1837,6 +1861,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_EDONKEY
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_EDONKEY) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_EDONKEY].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_EDONKEY].func = ndpi_struct->callback_buffer[a].func = ndpi_search_edonkey;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP;
 
@@ -1853,6 +1878,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_FASTTRACK
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_FASTTRACK) != 0) {
+     ndpi_struct->proto_defaults[NDPI_PROTOCOL_FASTTRACK].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_FASTTRACK].func = ndpi_struct->callback_buffer[a].func = ndpi_search_fasttrack_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1865,6 +1891,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_GNUTELLA
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_GNUTELLA) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_GNUTELLA].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_GNUTELLA].func = ndpi_struct->callback_buffer[a].func = ndpi_search_gnutella;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1886,6 +1913,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_WINMX
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WINMX) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINMX].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_WINMX].func = ndpi_struct->callback_buffer[a].func = ndpi_search_winmx_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1899,6 +1927,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_DIRECTCONNECT
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DIRECTCONNECT) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DIRECTCONNECT].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DIRECTCONNECT].func = ndpi_struct->callback_buffer[a].func = ndpi_search_directconnect;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1915,6 +1944,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MSN
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MSN) != 0) {
+        ndpi_struct->proto_defaults[NDPI_PROTOCOL_MSN].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MSN].func = ndpi_struct->callback_buffer[a].func = ndpi_search_msn;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1938,6 +1968,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_YAHOO
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_YAHOO) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_YAHOO].protoIdx = a;
+
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_YAHOO].func = ndpi_struct->callback_buffer[a].func = ndpi_search_yahoo;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP;
 
@@ -1960,6 +1992,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_OSCAR
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_OSCAR) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OSCAR].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_OSCAR].func = ndpi_struct->callback_buffer[a].func = ndpi_search_oscar;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1972,6 +2005,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_APPLEJUICE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_APPLEJUICE) != 0) {
+        ndpi_struct->proto_defaults[NDPI_PROTOCOL_APPLEJUICE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_APPLEJUICE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_applejuice_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -1985,6 +2019,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SOULSEEK
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SOULSEEK) != 0) {
+        ndpi_struct->proto_defaults[NDPI_PROTOCOL_SOULSEEK].protoIdx = a;
+
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SOULSEEK].func = ndpi_struct->callback_buffer[a].func = ndpi_search_soulseek_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD;
 
@@ -1999,6 +2035,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_IRC
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_IRC) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IRC].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_IRC].func = ndpi_struct->callback_buffer[a].func = ndpi_search_irc_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2019,6 +2056,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_UNENCRYPED_JABBER) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_UNENCRYPED_JABBER].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_UNENCRYPED_JABBER].func = ndpi_struct->callback_buffer[a].func = ndpi_search_jabber_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITHOUT_RETRANSMISSION;
@@ -2045,6 +2083,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MAIL_POP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MAIL_POP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAIL_POP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAIL_POP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mail_pop_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2058,6 +2097,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MAIL_IMAP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MAIL_IMAP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAIL_IMAP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAIL_IMAP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mail_imap_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2071,6 +2111,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MAIL_SMTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MAIL_SMTP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAIL_SMTP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAIL_SMTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mail_smtp_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2084,7 +2125,9 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_FTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_FTP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FTP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_FTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ftp_tcp;
+
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITHOUT_RETRANSMISSION;
 
@@ -2098,7 +2141,9 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_USENET
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_USENET) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_USENET].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_USENET].func = ndpi_struct->callback_buffer[a].func = ndpi_search_usenet_tcp;
+
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
 
@@ -2111,6 +2156,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_DNS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DNS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DNS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DNS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_dns;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2124,6 +2170,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_FILETOPIA
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_FILETOPIA) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FILETOPIA].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_FILETOPIA].func = ndpi_struct->callback_buffer[a].func = ndpi_search_filetopia_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2137,6 +2184,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_VMWARE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_VMWARE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_VMWARE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_VMWARE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_vmware;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -2148,6 +2196,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_IMESH
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_IMESH) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IMESH].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_IMESH].func = ndpi_struct->callback_buffer[a].func = ndpi_search_imesh_tcp_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2163,6 +2212,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MMS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MMS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MMS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MMS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mms_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2177,12 +2227,20 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #if defined(NDPI_PROTOCOL_IPSEC) || defined(NDPI_PROTOCOL_GRE) || defined(NDPI_PROTOCOL_ICMP) || defined(NDPI_PROTOCOL_IGMP) || defined(NDPI_PROTOCOL_EGP) || defined(NDPI_PROTOCOL_SCTP) || defined(NDPI_PROTOCOL_OSPF) || defined(NDPI_PROTOCOL_IP_IN_IP) || defined(NDPI_PROTOCOL_ICMPV6)
   /* always add non tcp/udp if one protocol is compiled in */
   if(1) {
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IPSEC].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_GRE].func = 
-      ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICMP].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_IGMP].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_EGP].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_SCTP].func = 
-    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OSPF].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_IP_IN_IP].func = 
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IPSEC].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_GRE].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICMP].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_IGMP].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_EGP].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_SCTP].func =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OSPF].func = ndpi_struct->proto_defaults[NDPI_PROTOCOL_IP_IN_IP].func =
     ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICMPV6].func =
        ndpi_struct->callback_buffer[a].func = ndpi_search_in_non_tcp_udp;
+
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IPSEC].protoIdx = ndpi_struct->proto_defaults[NDPI_PROTOCOL_GRE].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICMP].protoIdx = ndpi_struct->proto_defaults[NDPI_PROTOCOL_IGMP].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_EGP].protoIdx = ndpi_struct->proto_defaults[NDPI_PROTOCOL_SCTP].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OSPF].protoIdx = ndpi_struct->proto_defaults[NDPI_PROTOCOL_IP_IN_IP].protoIdx =
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICMPV6].protoIdx = a;
+
+
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_IPV4_OR_IPV6;
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
@@ -2237,6 +2295,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_TVANTS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TVANTS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TVANTS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TVANTS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_tvants_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2251,6 +2310,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SOPCAST
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SOPCAST) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SOPCAST].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SOPCAST].func = ndpi_struct->callback_buffer[a].func = ndpi_search_sopcast;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2264,6 +2324,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_TVUPLAYER
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TVUPLAYER) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TVUPLAYER].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TVUPLAYER].func = ndpi_struct->callback_buffer[a].func = ndpi_search_tvuplayer;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2277,6 +2338,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_PPSTREAM
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_PPSTREAM) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_PPSTREAM].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_PPSTREAM].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ppstream;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2290,6 +2352,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_PPLIVE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_PPLIVE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_PPLIVE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_PPLIVE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_pplive_tcp_udp;
     NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_PPLIVE);
 
@@ -2305,6 +2368,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_IAX
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_IAX) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IAX].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_IAX].func = ndpi_struct->callback_buffer[a].func = ndpi_search_iax;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2319,6 +2383,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MGCP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MGCP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MGCP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MGCP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mgcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2332,6 +2397,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_ZATTOO
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_ZATTOO) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ZATTOO].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_ZATTOO].func = ndpi_struct->callback_buffer[a].func = ndpi_search_zattoo;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2354,6 +2420,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_QQ
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_QQ) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QQ].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_QQ].func = ndpi_struct->callback_buffer[a].func = ndpi_search_qq;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2369,6 +2436,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SSH
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SSH) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSH].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSH].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ssh_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2381,6 +2449,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_POPO
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_POPO) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_POPO].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_POPO].func = ndpi_struct->callback_buffer[a].func = ndpi_search_popo_tcp_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2393,6 +2462,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_THUNDER
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_THUNDER) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_THUNDER].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_THUNDER].func = ndpi_struct->callback_buffer[a].func = ndpi_search_thunder;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2405,6 +2475,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_VNC
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_VNC) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_VNC].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_VNC].func = ndpi_struct->callback_buffer[a].func = ndpi_search_vnc_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2418,6 +2489,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TEAMVIEWER) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TEAMVIEWER].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TEAMVIEWER].func = ndpi_struct->callback_buffer[a].func = ndpi_search_teamview;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2432,6 +2504,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_DHCP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DHCP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DHCP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DHCP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_dhcp_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
 
@@ -2443,6 +2516,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SOCRATES
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SOCRATES) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SOCRATES].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SOCRATES].func = ndpi_struct->callback_buffer[a].func = ndpi_search_socrates;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2456,6 +2530,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_STEAM
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_STEAM) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_STEAM].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_STEAM].func = ndpi_struct->callback_buffer[a].func = ndpi_search_steam;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2469,6 +2544,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_HALFLIFE2
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_HALFLIFE2) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_HALFLIFE2].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_HALFLIFE2].func = ndpi_struct->callback_buffer[a].func = ndpi_search_halflife2;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2481,6 +2557,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_XBOX
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_XBOX) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_XBOX].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_XBOX].func = ndpi_struct->callback_buffer[a].func = ndpi_search_xbox;
 
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
@@ -2494,6 +2571,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC].func = ndpi_struct->callback_buffer[a].func = ndpi_search_activesync;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2505,6 +2583,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SMB
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SMB) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SMB].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SMB].func = ndpi_struct->callback_buffer[a].func = ndpi_search_smb_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2518,6 +2597,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_TELNET
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TELNET) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TELNET].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TELNET].func = ndpi_struct->callback_buffer[a].func = ndpi_search_telnet_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2531,6 +2611,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_NTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_NTP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_NTP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_NTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ntp_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2543,6 +2624,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_NFS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_NFS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_NFS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_NFS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_nfs;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2556,6 +2638,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SSDP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SSDP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSDP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SSDP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ssdp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2568,6 +2651,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_WORLDOFWARCRAFT
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WORLDOFWARCRAFT) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WORLDOFWARCRAFT].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_WORLDOFWARCRAFT].func = ndpi_struct->callback_buffer[a].func = ndpi_search_worldofwarcraft;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2581,6 +2665,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_FLASH
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_FLASH) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLASH].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLASH].func = ndpi_struct->callback_buffer[a].func = ndpi_search_flash;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2595,6 +2680,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_POSTGRES
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_POSTGRES) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_POSTGRES].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_POSTGRES].func = ndpi_struct->callback_buffer[a].func = ndpi_search_postgres_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2608,6 +2694,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_MYSQL
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MYSQL) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MYSQL].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MYSQL].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mysql_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2621,6 +2708,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_BGP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_BGP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_BGP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_BGP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_bgp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2634,6 +2722,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_QUAKE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_QUAKE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_QUAKE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_QUAKE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_quake;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2646,6 +2735,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_BATTLEFIELD
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_BATTLEFIELD) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_BATTLEFIELD].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_BATTLEFIELD].func = ndpi_struct->callback_buffer[a].func = ndpi_search_battlefield;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2659,6 +2749,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_PCANYWHERE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_PCANYWHERE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_PCANYWHERE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_PCANYWHERE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_pcanywhere;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2671,6 +2762,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SNMP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SNMP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SNMP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SNMP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_snmp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2682,6 +2774,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_KONTIKI
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_KONTIKI) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_KONTIKI].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_KONTIKI].func = ndpi_struct->callback_buffer[a].func = ndpi_search_kontiki;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2694,6 +2787,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_ICECAST
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_ICECAST) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICECAST].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_ICECAST].func = ndpi_struct->callback_buffer[a].func = ndpi_search_icecast_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD;
 
@@ -2735,6 +2829,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SHOUTCAST
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SHOUTCAST) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SHOUTCAST].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SHOUTCAST].func = ndpi_struct->callback_buffer[a].func = ndpi_search_shoutcast_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2749,6 +2844,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV].func = ndpi_struct->callback_buffer[a].func = ndpi_search_veohtv_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2766,6 +2862,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_KERBEROS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_KERBEROS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_KERBEROS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_KERBEROS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_kerberos;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2778,6 +2875,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_OPENFT
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_OPENFT) != 0) {
+     ndpi_struct->proto_defaults[NDPI_PROTOCOL_OPENFT].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_OPENFT].func = ndpi_struct->callback_buffer[a].func = ndpi_search_openft_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2790,6 +2888,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_SYSLOG
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SYSLOG) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SYSLOG].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SYSLOG].func = ndpi_struct->callback_buffer[a].func = ndpi_search_syslog;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2804,6 +2903,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_TDS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TDS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TDS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TDS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_tds_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2818,6 +2918,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK].func = ndpi_struct->callback_buffer[a].func = ndpi_search_direct_download_link_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD;
 
@@ -2835,6 +2936,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_NETBIOS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_NETBIOS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_NETBIOS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_NETBIOS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_netbios;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2849,6 +2951,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_MDNS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MDNS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MDNS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MDNS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mdns;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2863,6 +2966,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_IPP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_IPP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_IPP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_IPP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ipp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2877,6 +2981,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_LDAP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_LDAP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_LDAP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_LDAP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ldap;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2891,6 +2996,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_WARCRAFT3
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WARCRAFT3) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WARCRAFT3].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_WARCRAFT3].func = ndpi_struct->callback_buffer[a].func = ndpi_search_warcraft3;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2908,6 +3014,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_XDMCP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_XDMCP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_XDMCP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_XDMCP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_xdmcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -2924,6 +3031,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_TFTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TFTP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TFTP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TFTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_tftp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -2935,6 +3043,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MSSQL
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MSSQL) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MSSQL].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MSSQL].func = ndpi_struct->callback_buffer[a].func = ndpi_search_mssql;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2947,6 +3056,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_PPTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_PPTP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_PPTP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_PPTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_pptp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2959,6 +3069,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_STEALTHNET
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_STEALTHNET) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_STEALTHNET].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_STEALTHNET].func = ndpi_struct->callback_buffer[a].func = ndpi_search_stealthnet;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2971,6 +3082,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_DHCPV6
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DHCPV6) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DHCPV6].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DHCPV6].func = ndpi_struct->callback_buffer[a].func = ndpi_search_dhcpv6_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V6_UDP_WITH_PAYLOAD;
 
@@ -2982,6 +3094,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MEEBO
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MEEBO) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MEEBO].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MEEBO].func = ndpi_struct->callback_buffer[a].func = ndpi_search_meebo;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -2998,6 +3111,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_AFP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_AFP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_AFP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_AFP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_afp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3010,6 +3124,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_AIMINI
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_AIMINI) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_AIMINI].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_AIMINI].func = ndpi_struct->callback_buffer[a].func = ndpi_search_aimini;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3022,6 +3137,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_FLORENSIA
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_FLORENSIA) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLORENSIA].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_FLORENSIA].func = ndpi_struct->callback_buffer[a].func = ndpi_search_florensia;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3034,6 +3150,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_MAPLESTORY
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_MAPLESTORY) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAPLESTORY].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_MAPLESTORY].func = ndpi_struct->callback_buffer[a].func = ndpi_search_maplestory;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3046,6 +3163,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_DOFUS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DOFUS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DOFUS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DOFUS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_dofus;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3058,6 +3176,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_WORLD_OF_KUNG_FU
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WORLD_OF_KUNG_FU) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WORLD_OF_KUNG_FU].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_WORLD_OF_KUNG_FU].func = ndpi_struct->callback_buffer[a].func = ndpi_search_world_of_kung_fu;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3071,6 +3190,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_FIESTA
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_FIESTA) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_FIESTA].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_FIESTA].func = ndpi_struct->callback_buffer[a].func = ndpi_search_fiesta;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3083,6 +3203,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_CROSSFIRE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_CROSSFIRE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_CROSSFIRE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_CROSSFIRE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_crossfire_tcp_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3096,6 +3217,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_GUILDWARS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_GUILDWARS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_GUILDWARS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_GUILDWARS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_guildwars_tcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3109,6 +3231,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 #ifdef NDPI_PROTOCOL_ARMAGETRON
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_ARMAGETRON) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ARMAGETRON].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_ARMAGETRON].func = ndpi_struct->callback_buffer[a].func = ndpi_search_armagetron_udp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask = NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
 
@@ -3122,6 +3245,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_DROPBOX
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DROPBOX) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DROPBOX].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DROPBOX].func = ndpi_struct->callback_buffer[a].func = ndpi_search_dropbox;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -3136,6 +3260,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SPOTIFY
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SPOTIFY) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SPOTIFY].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SPOTIFY].func = ndpi_struct->callback_buffer[a].func = ndpi_search_spotify;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3150,6 +3275,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SKYPE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SKYPE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SKYPE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SKYPE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_skype;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3164,6 +3290,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_RADIUS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RADIUS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RADIUS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_RADIUS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_radius;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -3178,6 +3305,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_CITRIX
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_CITRIX) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_CITRIX].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_CITRIX].func = ndpi_struct->callback_buffer[a].func = ndpi_search_citrix;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3191,6 +3319,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_LOTUS_NOTES
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_LOTUS_NOTES) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_LOTUS_NOTES].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_LOTUS_NOTES].func = ndpi_struct->callback_buffer[a].func = ndpi_search_lotus_notes;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3204,6 +3333,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_GTP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_GTP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_GTP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_GTP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_gtp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD;
@@ -3217,6 +3347,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_DCERPC
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_DCERPC) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_DCERPC].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_DCERPC].func = ndpi_struct->callback_buffer[a].func = ndpi_search_dcerpc;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3230,6 +3361,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_NETFLOW
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_NETFLOW) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_NETFLOW].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_NETFLOW].func = ndpi_struct->callback_buffer[a].func = ndpi_search_netflow;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -3243,6 +3375,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SFLOW
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SFLOW) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SFLOW].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SFLOW].func = ndpi_struct->callback_buffer[a].func = ndpi_search_sflow;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -3256,6 +3389,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_H323
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_H323) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_H323].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_H323].func = ndpi_struct->callback_buffer[a].func = ndpi_search_h323;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3270,6 +3404,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_OPENVPN
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_OPENVPN) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_OPENVPN].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_OPENVPN].func = ndpi_struct->callback_buffer[a].func = ndpi_search_openvpn;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3284,6 +3419,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_NOE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_NOE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_NOE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_NOE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_noe;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3298,6 +3434,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_CISCOVPN
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_CISCOVPN) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_CISCOVPN].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_CISCOVPN].func = ndpi_struct->callback_buffer[a].func = ndpi_search_ciscovpn;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3312,6 +3449,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_TEAMSPEAK
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TEAMSPEAK) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TEAMSPEAK].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TEAMSPEAK].func = ndpi_struct->callback_buffer[a].func = ndpi_search_teamspeak;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD;
@@ -3326,6 +3464,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_VIBER
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_VIBER) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_VIBER].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_VIBER].func = ndpi_struct->callback_buffer[a].func = ndpi_search_viber;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -3340,6 +3479,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_TOR
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_TOR) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_TOR].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_TOR].func = ndpi_struct->callback_buffer[a].func = ndpi_search_tor;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3354,6 +3494,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_SKINNY
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_SKINNY) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_SKINNY].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_SKINNY].func = ndpi_struct->callback_buffer[a].func = ndpi_search_skinny;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3368,6 +3509,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_RTCP
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RTCP) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTCP].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_RTCP].func = ndpi_struct->callback_buffer[a].func = ndpi_search_rtcp;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD;
@@ -3382,6 +3524,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_RSYNC
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_RSYNC) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_RSYNC].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_RSYNC].func = ndpi_struct->callback_buffer[a].func = ndpi_search_rsync;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3396,6 +3539,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_WHOIS_DAS
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_WHOIS_DAS) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_WHOIS_DAS].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_WHOIS_DAS].func = ndpi_struct->callback_buffer[a].func = ndpi_search_whois_das;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3410,6 +3554,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_ORACLE
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_ORACLE) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_ORACLE].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_ORACLE].func = ndpi_struct->callback_buffer[a].func = ndpi_search_oracle;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3424,6 +3569,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_CORBA
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(*detection_bitmask, NDPI_PROTOCOL_CORBA) != 0) {
+    ndpi_struct->proto_defaults[NDPI_PROTOCOL_CORBA].protoIdx = a;
      ndpi_struct->proto_defaults[NDPI_PROTOCOL_CORBA].func = ndpi_struct->callback_buffer[a].func = ndpi_search_corba;
     ndpi_struct->callback_buffer[a].ndpi_selection_bitmask =
       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION;
@@ -3445,7 +3591,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   ndpi_struct->callback_buffer_size_tcp_payload = 0;
   ndpi_struct->callback_buffer_size_tcp_no_payload = 0;
   for (a = 0; a < ndpi_struct->callback_buffer_size; a++) {
-    if((ndpi_struct->callback_buffer[a].ndpi_selection_bitmask 
+    if((ndpi_struct->callback_buffer[a].ndpi_selection_bitmask
 	& (NDPI_SELECTION_BITMASK_PROTOCOL_INT_TCP |
 	   NDPI_SELECTION_BITMASK_PROTOCOL_INT_TCP_OR_UDP |
 	   NDPI_SELECTION_BITMASK_PROTOCOL_COMPLETE_TRAFFIC)) != 0) {
@@ -3929,12 +4075,14 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_packet;
   NDPI_PROTOCOL_BITMASK detection_bitmask;
   void *func = NULL;
-  
-  if(flow == NULL)
-    return NDPI_PROTOCOL_UNKNOWN;  
+  u_int16_t proto_index;
 
-  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
-    return(flow->detected_protocol_stack[0]); /* Stop after detecting the first protocol */
+  if(flow == NULL)
+    return NDPI_PROTOCOL_UNKNOWN;
+
+  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN){
+    printf("STOP AFTER DETECTING= %u\t", flow->detected_protocol_stack[0]);
+    return(flow->detected_protocol_stack[0]);} /* Stop after detecting the first protocol */
 
   /* need at least 20 bytes for ip header */
   if(packetlen < 20) {
@@ -4007,32 +4155,55 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     if(flow->packet.udp) sport = ntohs(flow->packet.udp->source), dport = ntohs(flow->packet.udp->dest);
     else if(flow->packet.tcp) sport = ntohs(flow->packet.tcp->source), dport = ntohs(flow->packet.tcp->dest);
     else sport = dport = 0;
-    
+
     flow->guessed_protocol_id = (int16_t)ndpi_guess_protocol_id(ndpi_struct, protocol,
 								saddr, sport, daddr, dport);
     flow->protocol_id_already_guessed = 1;
   }
 
+  proto_index = ndpi_struct->proto_defaults[flow->guessed_protocol_id].protoId;
+
   if(flow->packet.tcp != NULL) {
     if(flow->packet.payload_packet_len != 0) {
+      if((proto_index != NDPI_PROTOCOL_UNKNOWN)
+	 && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
+				 ndpi_struct->callback_buffer_tcp_payload[proto_index].excluded_protocol_bitmask) == 0
+	 && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_payload[proto_index].detection_bitmask,
+				 detection_bitmask) != 0) {
+	if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
+	   && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
+	  ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow),
+	    func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
+      }
+
       if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
 	for (a = 0; a < ndpi_struct->callback_buffer_size_tcp_payload; a++) {
 	  if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
-	     && (ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask 
+	     && (ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask
 		 & ndpi_selection_packet) == ndpi_struct->callback_buffer_tcp_payload[a].ndpi_selection_bitmask
 	     && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
 				     ndpi_struct->callback_buffer_tcp_payload[a].excluded_protocol_bitmask) == 0
 	     && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_payload[a].detection_bitmask,
 				     detection_bitmask) != 0) {
-	    
 	    ndpi_struct->callback_buffer_tcp_payload[a].func(ndpi_struct, flow);
-	    
+
 	    if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	      break; /* Stop after detecting the first protocol */
 	  }
 	}
       }
     } else {				/* no payload */
+      if((proto_index != NDPI_PROTOCOL_UNKNOWN)
+	 && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
+				 ndpi_struct->callback_buffer_tcp_no_payload[proto_index].excluded_protocol_bitmask) == 0
+	 && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_no_payload[proto_index].detection_bitmask,
+				 detection_bitmask) != 0) {
+	if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
+	   && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
+	  ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow),
+	    func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
+      }
+
       for (a = 0; a < ndpi_struct->callback_buffer_size_tcp_no_payload; a++) {
 	if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	   && (ndpi_struct->callback_buffer_tcp_no_payload[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
@@ -4050,6 +4221,17 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
       }
     }
   } else if(flow->packet.udp != NULL) {
+    if((proto_index != NDPI_PROTOCOL_UNKNOWN)
+       && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
+			       ndpi_struct->callback_buffer_udp[proto_index].excluded_protocol_bitmask) == 0
+       && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_udp[proto_index].detection_bitmask,
+			       detection_bitmask) != 0) {
+      if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
+	 && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
+	ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow),
+	  func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
+    }
+
     for (a = 0; a < ndpi_struct->callback_buffer_size_udp; a++) {
       if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	 && (ndpi_struct->callback_buffer_udp[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
@@ -4065,6 +4247,17 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
       }
     }
   } else {
+    if((proto_index != NDPI_PROTOCOL_UNKNOWN)
+       && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
+			       ndpi_struct->callback_buffer_non_tcp_udp[proto_index].excluded_protocol_bitmask) == 0
+       && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_non_tcp_udp[proto_index].detection_bitmask,
+			       detection_bitmask) != 0) {
+      if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
+	 && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
+	ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow),
+	  func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
+    }
+
     for (a = 0; a < ndpi_struct->callback_buffer_size_non_tcp_udp; a++) {
       if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
 	 && (ndpi_struct->callback_buffer_non_tcp_udp[a].ndpi_selection_bitmask & ndpi_selection_packet) ==
@@ -4093,10 +4286,10 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 }
 
 static u_int8_t ndpi_detection_build_key_internal(struct ndpi_detection_module_struct *ndpi_struct,
-						  const u_int8_t * l3, u_int16_t l3_len, 
-						  const u_int8_t * l4, u_int16_t l4_len, 
+						  const u_int8_t * l3, u_int16_t l3_len,
+						  const u_int8_t * l4, u_int16_t l4_len,
 						  u_int8_t l4_protocol,
-						  struct ndpi_unique_flow_ipv4_and_6_struct *key_return, 
+						  struct ndpi_unique_flow_ipv4_and_6_struct *key_return,
 						  u_int8_t * dir_return,
 						  u_int32_t flags)
 {
@@ -5231,18 +5424,18 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 					    u_int32_t shost, u_int16_t sport,
 					    u_int32_t dhost, u_int16_t dport) {
   unsigned int rc;
-  
+
   rc = ndpi_search_tcp_or_udp_raw(ndpi_struct, proto,
 				  shost, dhost, sport, dport);
 
   if(rc == NDPI_PROTOCOL_UNKNOWN)
     rc = ndpi_guess_protocol_id(ndpi_struct, proto,
 				shost, sport, dhost, dport);
-  
+
   if(rc != NDPI_PROTOCOL_UNKNOWN)
     return(rc);
 
-  return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, 
+  return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto,
 				    shost, dhost, sport, dport));
 }
 
