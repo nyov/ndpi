@@ -404,7 +404,14 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	u_int8_t v1_extension   = packet->payload[1];
 	u_int32_t v1_window_size = *((u_int32_t*)&packet->payload[12]);
 	
-	if(((v1_version & 0x0f) == 1)
+	if((packet->payload[0]== 0x60)
+	   && (packet->payload[1]== 0x0)
+	   && (packet->payload[2]== 0x0)
+	   && (packet->payload[3]== 0x0)
+	   && (packet->payload[4]== 0x0)) {
+	  /* Heuristic */
+	  goto bittorrent_found;
+	} else if(((v1_version & 0x0f) == 1)
 	   && ((v1_version >> 4) < 5 /* ST_NUM_STATES */)
 	   && (v1_extension      < 3 /* EXT_NUM_EXT */)
 	   && (v1_window_size    < 32768 /* 32k */)
