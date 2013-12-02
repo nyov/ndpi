@@ -265,6 +265,31 @@ extern "C" {
   int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct, char *value, int protocol_id, void* automa);
   void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa);
 
+#define ADD_TO_DETECTION_BITMASK            1
+#define NO_ADD_TO_DETECTION_BITMASK         0
+#define SAVE_DETECTION_BITMASK_AS_UNKNOW    1
+#define NO_SAVE_DETECTION_BITMASK_AS_UNKNOW 0
+
+/**
+   * This function sets a single protocol bitmask
+   * @param ndpi_struct the detection module
+   * @param detection_bitmask the protocol bitmask
+   * @param idx the index of the callback_buffer
+   * @param func void function point of the protocol search
+   * @param ndpi_selection_bitmask the protocol selected bitmask
+   * @param b_save_bitmask_unknow set true if you want save the detection bitmask as unknow
+   * @param b_add_detection_bitmask set true if you want add the protocol bitmask to the detection bitmask
+   * NB: this function does not increment the index of the callback_buffer
+   */
+   void ndpi_set_bitmask_protocol_detection(struct ndpi_detection_module_struct *ndpi_struct,
+    const NDPI_PROTOCOL_BITMASK * detection_bitmask,
+    const u_int32_t idx,
+    u_int16_t ndpi_protocol_id,
+    void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow),
+    const NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_bitmask,
+    u_int8_t b_save_bitmask_unknow,
+    u_int8_t b_add_detection_bitmask);
+
 #ifdef __cplusplus
 }
 #endif
