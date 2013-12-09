@@ -150,7 +150,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	      && flow->l4.tcp.seen_syn_ack
 	      && flow->l4.tcp.seen_ack) {
       if((payload_len == 8) || (payload_len == 3)) {
-	printf("[SKYPE] %u/%u\n", ntohs(packet->tcp->source), ntohs(packet->tcp->dest));
+	//printf("[SKYPE] %u/%u\n", ntohs(packet->tcp->source), ntohs(packet->tcp->dest));
 
 	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);

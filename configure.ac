@@ -10,6 +10,11 @@ AC_PROG_INSTALL
 
 LT_INIT
 
+SVN_RELEASE=`svn info . | grep "^Revision"|cut -d " " -f 2`
+AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
+SVN_DATE=`svn info . | grep "^Last Changed Date"|cut -d " " -f 4-`
+AC_DEFINE_UNQUOTED(NDPI_SVN_DATE, "${SVN_DATE}", [Last SVN change])
+
 case "$host:$CC" in
     *darwin* )
         RES=`gcc -Wall -fno-color-diagnostics src/lib/ndpi_main.c 2>&1 | grep "unrecognized command line option "|wc -l`
@@ -29,5 +34,7 @@ AC_CONFIG_FILES([Makefile
 
 AC_CONFIG_HEADERS(config.h)
 AC_SUBST(PLATFORM_DEPENDENT)
+AC_SUBST(SVN_RELEASE)
+AC_SUBST(SVN_DATE)
 
 AC_OUTPUT

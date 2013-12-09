@@ -28,11 +28,12 @@
 #include <errno.h>
 #endif
 
+#include "ahocorasick.h"
 #include "ndpi_main.h"
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
-#include "ahocorasick.h"
+#include "../../config.h"
 
 #undef DEBUG
 
@@ -5373,7 +5374,7 @@ void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* aut
 /* ****************************************************** */
 
 char* ndpi_revision() {
-  return("$Revision$");
+  return(NDPI_SVN_RELEASE);
 }
 
 /* ****************************************************** */

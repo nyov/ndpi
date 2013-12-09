@@ -37,6 +37,12 @@
    */
 #undef LT_OBJDIR
 
+/* Last SVN change */
+#undef NDPI_SVN_DATE
+
+/* SVN Release */
+#undef NDPI_SVN_RELEASE
+
 /* Name of package */
 #undef PACKAGE
 
