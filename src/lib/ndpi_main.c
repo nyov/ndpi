@@ -598,9 +598,25 @@ static void addDefaultPort(ndpi_port_range *range,
       ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
 
       if(ret != node) {
-	printf("[NDPI] %s(): found duplicate for port %u\n", __FUNCTION__, port);
-	ndpi_free(node);
-	break;
+	printf("[NDPI] %s(): found duplicate for port %u: overwriting it with new value\n", __FUNCTION__, port);
+	ret = *(ndpi_default_ports_tree_node_t**)ndpi_tdelete(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
+
+	if(!ret) {
+	  printf("[NDPI] %s(): internal error\n", __FUNCTION__);
+	  ndpi_free(node);
+	  break;
+	}
+
+	ndpi_free(ret);
+
+	/* Now let's add it */
+	ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
+	
+	if(ret != node) {
+	  printf("[NDPI] %s(): internal error\n", __FUNCTION__);
+	  ndpi_free(node);
+	  break;
+	}
       }
     }
   }
