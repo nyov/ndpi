@@ -47,6 +47,7 @@ static void setupDetection(void);
 static char *_pcap_file = NULL;
 static char *_bpf_filter = NULL;
 static char *_protoFilePath = NULL;
+static char *_output_mode = NULL;
 
 // pcap
 static char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
@@ -112,7 +113,7 @@ static u_int32_t ndpi_flow_count = 0;
 
 static void help(u_int long_help) {
   printf("pcapReader -i <file|device> [-f <filter>][-s <duration>]\n"
-	 "           [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n\n"
+	 "           [-p <protos>][-l <loops>[-d][-h][-t][-o <color|plain>][-v <level>]\n\n"
 	 "Usage:\n"
 	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture\n"
 	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
@@ -121,6 +122,7 @@ static void help(u_int long_help) {
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -t                        | Dissect GTP tunnels\n"
+	 "  -o <color|plain>          | Specify the output text format. Default: color\n"
 	 "  -h                        | This help\n"
 	 "  -v <1|2>                  | Verbose 'unknown protocol' packet print. 1=verbose, 2=very verbose\n");
 
@@ -137,7 +139,7 @@ static void parseOptions(int argc, char **argv)
 {
   int opt;
 
-  while ((opt = getopt(argc, argv, "df:i:hp:l:s:tv:")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:i:hp:l:s:to:v:")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -165,6 +167,10 @@ static void parseOptions(int argc, char **argv)
 
     case 't':
       decode_tunnels = 1;
+      break;
+
+    case 'o':
+      _output_mode = optarg;
       break;
 
     case 'v':
@@ -665,37 +671,70 @@ char* formatPackets(float numPkts, char *buf) {
 static void printResults(u_int64_t tot_usec)
 {
   u_int32_t i;
+  int m = 0;			/* Default output mode: color (0) */
+  if (_output_mode != NULL && strcmp(_output_mode, "plain") == 0) {
+    m = 1;			/* Set output mode: plain (0) */
+  }
 
-  printf("\x1b[2K\n");
+  if (m) {
+    printf("\n");
+  } else {
+    printf("\x1b[2K\n");
+  }
   printf("pcap file contains\n");
-  printf("\tIP packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
-	 (long long unsigned int)ip_packet_count,
-	 (long long unsigned int)raw_packet_count);
-  printf("\tIP bytes:     \x1b[34m%-13llu\x1b[0m\n",
-	 (long long unsigned int)total_bytes);
-  printf("\tUnique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
+  if (m) {
+    printf("\tIP packets:   %-13llu of %llu packets total\n",
+	   (long long unsigned int)ip_packet_count,
+	   (long long unsigned int)raw_packet_count);
+    printf("\tIP bytes:     %-13llu\n",
+	   (long long unsigned int)total_bytes);
+    printf("\tUnique flows: %-13u\n", ndpi_flow_count);
+  } else {
+    printf("\tIP packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
+	   (long long unsigned int)ip_packet_count,
+	   (long long unsigned int)raw_packet_count);
+    printf("\tIP bytes:     \x1b[34m%-13llu\x1b[0m\n",
+	   (long long unsigned int)total_bytes);
+    printf("\tUnique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
+  }
 
   if(tot_usec > 0) {
     char buf[32], buf1[32];
     float t = (float)(ip_packet_count*1000000)/(float)tot_usec;
     float b = (float)(total_bytes * 8 *1000000)/(float)tot_usec;
 
-    printf("\tnDPI throughout: \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+    if (m) {
+      printf("\tnDPI throughout: %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+    } else {
+      printf("\tnDPI throughout: \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+    }
   }
 
   for(i=0; i<NUM_ROOTS; i++)
     ndpi_twalk(ndpi_flows_root[i], node_proto_guess_walker, NULL);
 
-  if(enable_protocol_guess)
-    printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
+  if(enable_protocol_guess) {
+    if (m) {
+      printf("\tGuessed flow protocols: %-13u\n", guessed_flow_protocols);
+    } else {
+      printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
+    }
+  }
 
   printf("\n\nDetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
     if(protocol_counter[i] > 0) {
-      printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
-	     "flows: \x1b[36m%-13u\x1b[0m\n",
-	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
-	     (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
+      if (m) {
+        printf("\t\%-20s packets: %-13llu bytes: %-13llu "
+	       "flows: %-13u\n",
+	       ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
+	       (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
+      } else {
+        printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
+	       "flows: \x1b[36m%-13u\x1b[0m\n",
+	       ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
+	       (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
+      }
     }
   }
 
