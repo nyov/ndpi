@@ -1336,12 +1336,14 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 
   ndpi_str->ac_automa = ac_automata_init(ac_match_handler);
 
+#ifdef USE_SKYPE_HEURISTICS
   ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
 
 #ifndef __KERNEL__
   pthread_mutex_init(&ndpi_str->skypeCacheLock, NULL);
 #else
   spin_lock_init(&ndpi_str->skypeCacheLock);
+#endif
 #endif
 
   ndpi_init_protocol_defaults(ndpi_str);
@@ -1367,9 +1369,11 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
     if(ndpi_struct->ac_automa != NULL)
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
 
+#ifdef USE_SKYPE_HEURISTICS
     ndpi_free_lru_cache(&ndpi_struct->skypeCache);
 #ifndef __KERNEL__
     pthread_mutex_destroy(&ndpi_struct->skypeCacheLock);
+#endif
 #endif
     ndpi_free(ndpi_struct);
   }
@@ -1404,9 +1408,11 @@ static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *
     }
   }
 
+#ifdef USE_SKYPE_HEURISTICS
   /* Use skype as last resort */
   if(shost && dhost && is_skype_connection(ndpi_struct, shost, dhost))
     return(NDPI_PROTOCOL_SKYPE);
+#endif
 
   return(NDPI_PROTOCOL_UNKNOWN);
 }

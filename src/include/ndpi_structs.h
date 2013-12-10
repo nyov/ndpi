@@ -626,12 +626,14 @@ typedef struct ndpi_detection_module_struct {
   /* Cache */
   NDPI_REDIS redis;
 
+#ifdef USE_SKYPE_HEURISTICS
   /* Skype (we need a lock as this cache can be accessed concurrently) */
   struct ndpi_LruCache skypeCache;
 #ifndef __KERNEL__
   pthread_mutex_t skypeCacheLock;
 #else
   spinlock_t skypeCacheLock;
+#endif
 #endif
 
   /* ********************* */
