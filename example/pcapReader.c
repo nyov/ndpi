@@ -416,10 +416,10 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
   flow.lower_port = lower_port;
   flow.upper_port = upper_port;
 
-  /*
+
+  if(0)
     printf("[NDPI] [%u][%u:%u <-> %u:%u]\n", 
-    iph->protocol, lower_ip, lower_port, upper_ip, upper_port);
-  */
+	   iph->protocol, lower_ip, ntohs(lower_port), upper_ip, ntohs(upper_port));
 
   idx = (lower_ip + upper_ip + iph->protocol + lower_port + upper_port) % NUM_ROOTS;
   ret = ndpi_tfind(&flow, (void*)&ndpi_flows_root[idx], node_cmp);
@@ -601,7 +601,7 @@ static unsigned int packet_processing(const u_int64_t time,
     if(verbose > 1) {
       char buf1[32], buf2[32];
       
-      printf("%s %s:%u > %s:%u [proto: %u/%s][%s]\n",
+      printf("%s %s:%u <-> %s:%u [proto: %u/%s][%s]\n",
 	     ipProto2Name(flow->protocol),
 	     intoaV4(ntohl(flow->lower_ip), buf1, sizeof(buf1)), ntohs(flow->lower_port),
 	     intoaV4(ntohl(flow->upper_ip), buf2, sizeof(buf2)), ntohs(flow->upper_port),
