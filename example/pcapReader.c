@@ -296,6 +296,20 @@ static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, in
     printFlow(flow);
 }
 
+static unsigned int node_guess_undetected_protocol(struct ndpi_flow *flow) {
+  flow->detected_protocol = ndpi_guess_undetected_protocol(ndpi_struct,
+							   flow->protocol,
+							   ntohl(flow->lower_ip),
+							   ntohs(flow->lower_port),
+							   ntohl(flow->upper_ip),
+							   ntohs(flow->upper_port));
+
+  if(flow->detected_protocol != 0)
+    guessed_flow_protocols++;
+
+  return flow->detected_protocol;
+}
+
 static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
 
@@ -312,16 +326,7 @@ static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int dept
   if((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
     if(enable_protocol_guess) {
       if(flow->detected_protocol == 0 /* UNKNOWN */) {
-	flow->detected_protocol = ndpi_guess_undetected_protocol(ndpi_struct,
-								 flow->protocol,
-								 ntohl(flow->lower_ip),
-								 ntohs(flow->lower_port),
-								 ntohl(flow->upper_ip),
-								 ntohs(flow->upper_port));
-
-	if(flow->detected_protocol != 0)
-	  guessed_flow_protocols++;
-
+        node_guess_undetected_protocol(flow);
 	// printFlow(flow);
       }
     }
@@ -600,6 +605,12 @@ static unsigned int packet_processing(const u_int64_t time,
     
     if(verbose > 1) {
       char buf1[32], buf2[32];
+
+      if(enable_protocol_guess) {
+        if(flow->detected_protocol == 0 /* UNKNOWN */) {
+          protocol = node_guess_undetected_protocol(flow);
+        }
+      }
       
       printf("%s %s:%u <-> %s:%u [proto: %u/%s][%s]\n",
 	     ipProto2Name(flow->protocol),
