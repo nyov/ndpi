@@ -1,8 +1,8 @@
 /*
  * ndpi_main.c
  *
- * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
+ * Copyright (C) 2009-11 - ipoque GmbH
+ * Copyright (C) 2011-14 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -611,7 +611,7 @@ static void addDefaultPort(ndpi_port_range *range,
 
 	/* Now let's add it */
 	ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
-	
+
 	if(ret != node) {
 	  printf("[NDPI] %s(): internal error\n", __FUNCTION__);
 	  ndpi_free(node);
@@ -1253,6 +1253,9 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_WHOIS_DAS, "Whois-DAS",
 			  ndpi_build_default_ports(ports_a, 43, 4343, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_COLLECTD, "Collectd",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 25826, 0, 0, 0, 0) /* UDP */);
 
   init_string_based_protocols(ndpi_mod);
 
@@ -1621,20 +1624,20 @@ void ndpi_set_bitmask_protocol_detection(struct ndpi_detection_module_struct *nd
       and callback_buffer function for DPI protocol detection
     */
     ndpi_struct->proto_defaults[ndpi_protocol_id].protoIdx = idx;
-    
-    ndpi_struct->proto_defaults[ndpi_protocol_id].func = 
+
+    ndpi_struct->proto_defaults[ndpi_protocol_id].func =
       ndpi_struct->callback_buffer[idx].func = func;
     /*
-      Set ndpi_selection_bitmask for protocol 
+      Set ndpi_selection_bitmask for protocol
     */
     ndpi_struct->callback_buffer[idx].ndpi_selection_bitmask = ndpi_selection_bitmask;
 
     /*
-      Reset protocol detection bitmask via NDPI_PROTOCOL_UNKNOW and than add specify protocol bitmast to callback 
-      buffer. 
+      Reset protocol detection bitmask via NDPI_PROTOCOL_UNKNOW and than add specify protocol bitmast to callback
+      buffer.
     */
     if (b_save_bitmask_unknow) NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[idx].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
-        
+
     if (b_add_detection_bitmask) NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_struct->callback_buffer[idx].detection_bitmask, ndpi_protocol_id);
 
     NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[idx].excluded_protocol_bitmask, ndpi_protocol_id);
@@ -2180,7 +2183,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #endif
 
 #if defined(NDPI_PROTOCOL_IPSEC) || defined(NDPI_PROTOCOL_GRE) || defined(NDPI_PROTOCOL_ICMP) || defined(NDPI_PROTOCOL_IGMP) || defined(NDPI_PROTOCOL_EGP) || defined(NDPI_PROTOCOL_SCTP) || defined(NDPI_PROTOCOL_OSPF) || defined(NDPI_PROTOCOL_IP_IN_IP) || defined(NDPI_PROTOCOL_ICMPV6)
-  
+
   /* always add non tcp/udp if one protocol is compiled in */
   NDPI_SAVE_AS_BITMASK(ndpi_struct->callback_buffer[a].detection_bitmask, NDPI_PROTOCOL_UNKNOWN);
 
@@ -3365,6 +3368,19 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   /* Update callback_buffer index */
   a++;
 #endif
+
+#ifdef NDPI_PROTOCOL_COLLECTD
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_COLLECTD,
+				      ndpi_search_collectd,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOW,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
 
   ndpi_struct->callback_buffer_size = a;
 

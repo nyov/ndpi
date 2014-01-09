@@ -1,8 +1,8 @@
 /*
  * ndpi_protocols_osdpi.h
  *
- * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
+ * Copyright (C) 2009-11 - ipoque GmbH
+ * Copyright (C) 2011-14 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -216,10 +216,11 @@ extern "C" {
 #define NDPI_PROTOCOL_CORBA                                     168 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_UBUNTUONE                                 169 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_WHOIS_DAS                                 170
+#define NDPI_PROTOCOL_COLLECTD                                  171
 
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          170
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          171
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)
