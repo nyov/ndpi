@@ -100,7 +100,7 @@ typedef struct ndpi_flow {
   u_int16_t packets, bytes;
   // result only, not used for flow identification
   u_int32_t detected_protocol;
-  char host_server_name[48];
+  char host_server_name[256];
 
   void *src_id, *dst_id;
 } ndpi_flow_t;
