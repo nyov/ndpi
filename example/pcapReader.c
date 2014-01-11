@@ -615,6 +615,9 @@ static unsigned int packet_processing(const u_int64_t time,
       printf("%s\n", flow->ndpi_flow->l4.tcp.host_server_name);
 #endif
 
+    snprintf(flow->host_server_name, sizeof(flow->host_server_name), "%s", flow->ndpi_flow->host_server_name);
+    free_ndpi_flow(flow);
+
     if(verbose > 1) {
       char buf1[32], buf2[32];
 
@@ -626,9 +629,6 @@ static unsigned int packet_processing(const u_int64_t time,
 
       printFlow(flow);
     }
-
-    snprintf(flow->host_server_name, sizeof(flow->host_server_name), "%s", flow->ndpi_flow->host_server_name);
-    free_ndpi_flow(flow);
   }
 
 #if 0
