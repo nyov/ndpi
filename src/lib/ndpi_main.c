@@ -4083,6 +4083,15 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   if(NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, a) == 0)
     a = NDPI_PROTOCOL_UNKNOWN;
 
+  if(a != NDPI_PROTOCOL_UNKNOWN) {
+    int i;
+    
+    for(i=0; (i<sizeof(flow->host_server_name)) && (flow->host_server_name[i] != '\0'); i++)
+      flow->host_server_name[i] = tolower(flow->host_server_name[i]);
+
+    flow->host_server_name[i] ='\0';
+  }
+
   return a;
 }
 
