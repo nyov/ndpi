@@ -265,8 +265,10 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
   if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
      || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL)) {
     char certificate[64];
-    int rc = getSSLcertificate(ndpi_struct, flow, certificate, sizeof(certificate));
-
+    int rc;
+    
+    certificate[0] = '\0';
+    rc = getSSLcertificate(ndpi_struct, flow, certificate, sizeof(certificate));
     packet->ssl_certificate_num_checks++;
 
     if(rc > 0) {
@@ -533,10 +535,14 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 
   {
     /* Check if this is whatsapp first (this proto runs over port 443) */
-    char whatsapp_pattern[] = { 0x57, 0x41, 0x01, 0x01, 0x00 };
-
     if((packet->payload_packet_len > 5)
-       && (memcmp(packet->payload, whatsapp_pattern, sizeof(whatsapp_pattern)) == 0)) {
+       && ((packet->payload[0] == 'W')
+	   && (packet->payload[1] == 'A')
+	   && (packet->payload[4] == 0)
+	   && (packet->payload[2] >= 0)
+	   && (packet->payload[2] <= 9)
+	   && (packet->payload[3] >= 0)
+	   && (packet->payload[3] <= 9))) {
       ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WHATSAPP, NDPI_REAL_PROTOCOL);
       return;
     } else {
