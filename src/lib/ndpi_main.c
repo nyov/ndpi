@@ -33,7 +33,9 @@
 #include "ndpi_protocols.h"
 #include "ndpi_utils.h"
 
+#ifndef __KERNEL__
 #include "../../config.h"
+#endif
 
 #undef DEBUG
 
@@ -63,7 +65,7 @@ typedef struct {
 #endif
 
 #ifdef __KERNEL__
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
 static inline char _tolower(const char c)
 {
   return c | 0x20;
@@ -5421,9 +5423,11 @@ void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* aut
 
 /* ****************************************************** */
 
+#ifndef __KERNEL__
 char* ndpi_revision() {
   return(NDPI_SVN_RELEASE);
 }
+#endif
 
 /* ****************************************************** */
 
