@@ -92,6 +92,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
        (((saddr & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000 /* 157.56.0.0/ */) || ((daddr & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000))
        || (((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3C0000 /* 157.60.0.0/ */) || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3D0000))
        || (((saddr & 0xFF7F0000 /* 255.255.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFF7F0000 /* 255.127.0.0 */) == 0x9D360000))
+       || (((saddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000))
        ) {
       return(NDPI_PROTOCOL_SKYPE);
     }
