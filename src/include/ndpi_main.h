@@ -40,7 +40,7 @@
 #include <sys/time.h>
 #endif
 
-#if !defined __APPLE__ && !defined __FreeBSD__ && !defined __NetBSD__
+#if !defined __APPLE__ && !defined __FreeBSD__ && !defined __NetBSD__ && !defined __OpenBSD__
 
 #ifndef __KERNEL__
 #include <endian.h>
@@ -92,10 +92,13 @@ typedef unsigned __int64 u_int64_t;
 
 #include "linux_compat.h"
 
-#if defined(__FreeBSD__) || defined(__NetBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include <netinet/in.h>
-#if defined(__NetBSD__)
+#if defined(__NetBSD__) || defined(__OpenBSD__)
 #include <netinet/in_systm.h>
+#if defined(__OpenBSD__)
+#include <pthread.h>
+#endif
 #endif
 #endif
 
