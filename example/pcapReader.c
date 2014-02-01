@@ -197,6 +197,9 @@ static void parseOptions(int argc, char **argv)
 static void debug_printf(u_int32_t protocol, void *id_struct,
 			 ndpi_log_level_t log_level,
 			 const char *format, ...) {
+
+ printf("[DEBUG]%s\n",format);
+
 }
 
 static void *malloc_wrapper(unsigned long size)
@@ -606,7 +609,7 @@ static unsigned int packet_processing(const u_int64_t time,
   flow->detected_protocol = protocol;
 
   if((flow->detected_protocol != NDPI_PROTOCOL_UNKNOWN)
-     || (proto == IPPROTO_UDP)
+     || ((proto == IPPROTO_UDP) && (flow->packets > 8))
      || ((proto == IPPROTO_TCP) && (flow->packets > 10))) {
     flow->detection_completed = 1;
 

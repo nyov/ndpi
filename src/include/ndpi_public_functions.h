@@ -134,6 +134,10 @@ extern "C" {
   void  ndpi_free(void *ptr);
   void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size);
   char *ndpi_strdup(const char *s);
+ /*
+ * Find the first occurrence of find in s, where the search is limited to the
+ * first slen characters of s.
+ */
   char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
   /**
