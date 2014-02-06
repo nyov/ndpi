@@ -707,15 +707,18 @@ static void printResults(u_int64_t tot_usec)
     printf("\tIP packets:   %-13llu of %llu packets total\n",
 	   (long long unsigned int)ip_packet_count,
 	   (long long unsigned int)raw_packet_count);
-    printf("\tIP bytes:     %-13llu\n",
-	   (long long unsigned int)total_bytes);
+    if(total_bytes > 0)
+      printf("\tIP bytes:     %-13llu (avg pkt size %u bytes)\n",
+	     (long long unsigned int)total_bytes,
+	     (unsigned int)(total_bytes/raw_packet_count));
     printf("\tUnique flows: %-13u\n", ndpi_flow_count);
   } else {
     printf("\tIP packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
 	   (long long unsigned int)ip_packet_count,
 	   (long long unsigned int)raw_packet_count);
-    printf("\tIP bytes:     \x1b[34m%-13llu\x1b[0m\n",
-	   (long long unsigned int)total_bytes);
+    printf("\tIP bytes:     \x1b[34m%-13llu\x1b[0m (avg pkt size %u bytes)\n",
+	   (long long unsigned int)total_bytes,
+	   (unsigned int)(total_bytes/raw_packet_count));
     printf("\tUnique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
   }
 
