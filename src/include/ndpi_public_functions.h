@@ -269,10 +269,10 @@ extern "C" {
   int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct, char *value, int protocol_id, void* automa);
   void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa);
 
-#define ADD_TO_DETECTION_BITMASK            1
-#define NO_ADD_TO_DETECTION_BITMASK         0
-#define SAVE_DETECTION_BITMASK_AS_UNKNOW    1
-#define NO_SAVE_DETECTION_BITMASK_AS_UNKNOW 0
+#define ADD_TO_DETECTION_BITMASK             1
+#define NO_ADD_TO_DETECTION_BITMASK          0
+#define SAVE_DETECTION_BITMASK_AS_UNKNOWN    1
+#define NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN 0
 
 /**
    * This function sets a single protocol bitmask
