@@ -3996,18 +3996,17 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 	}
       }
     } else {				/* no payload */
-#if 0
       if((proto_index != NDPI_PROTOCOL_UNKNOWN)
 	 && NDPI_BITMASK_COMPARE(flow->excluded_protocol_bitmask,
 				 ndpi_struct->callback_buffer_tcp_no_payload[proto_index].excluded_protocol_bitmask) == 0
 	 && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_tcp_no_payload[proto_index].detection_bitmask,
 				 detection_bitmask) != 0) {
 	if((flow->guessed_protocol_id != NDPI_PROTOCOL_UNKNOWN)
-	   && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL))
+	   && (ndpi_struct->proto_defaults[flow->guessed_protocol_id].func != NULL)
+	   && ((ndpi_struct->callback_buffer[flow->guessed_protocol_id].ndpi_selection_bitmask & NDPI_SELECTION_BITMASK_PROTOCOL_HAS_PAYLOAD) == 0))
 	  ndpi_struct->proto_defaults[flow->guessed_protocol_id].func(ndpi_struct, flow),
 	    func = ndpi_struct->proto_defaults[flow->guessed_protocol_id].func;
       }
-#endif
 
       for (a = 0; a < ndpi_struct->callback_buffer_size_tcp_no_payload; a++) {
 	if((func != ndpi_struct->callback_buffer_tcp_payload[a].func)
