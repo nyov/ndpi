@@ -131,6 +131,17 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	     || ((header.answer_rrs == 0) && (header.authority_rrs == 0)))) {
 	/* This is a good query */
 	is_dns = 1;
+
+	if(header.num_queries > 0) {
+	  while(i < packet->payload_packet_len) {
+	      if(packet->payload[i] == '\0') {
+		i++;
+		flow->protos.dns.query_type = get16(&i, packet->payload);
+		break;
+	      } else
+		i++;
+	    }
+	}
       }
     } else {
       /* DNS Reply */
