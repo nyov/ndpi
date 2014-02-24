@@ -682,7 +682,8 @@ typedef struct ndpi_flow_struct {
   union {
     struct {
       u_int8_t num_queries, num_answers, ret_code;
-      u_int16_t query_type, query_class;
+      u_int8_t bad_packet /* the received packet looks bad */;
+      u_int16_t query_type, query_class, rsp_type;      
     } dns;
   } protos;
   /* ALL protocol specific 64 bit variables here */
