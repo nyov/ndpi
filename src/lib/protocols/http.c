@@ -426,19 +426,6 @@ static void teamviewer_check_http_payload(struct ndpi_detection_module_struct *n
 }
 #endif
 
-#ifdef NDPI_PROTOCOL_OFF
-static void off_parse_packet_contentline(struct ndpi_detection_module_struct
-					 *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-  struct ndpi_packet_struct *packet = &flow->packet;
-
-  if (packet->content_line.len >= 4 && memcmp(packet->content_line.ptr, "off/", 4) == 0) {
-    NDPI_LOG(NDPI_PROTOCOL_OFF, ndpi_struct, NDPI_LOG_DEBUG, "off: Content-Type: off/ found\n");
-    ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_OFF);
-  }
-}
-#endif
-
 #ifdef NDPI_PROTOCOL_MOVE
 static void move_parse_packet_contentline(struct ndpi_detection_module_struct
 					  *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -578,10 +565,6 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 #ifdef NDPI_PROTOCOL_MMS
     if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_MMS) != 0)
       mms_parse_packet_contentline(ndpi_struct, flow);
-#endif
-#ifdef NDPI_PROTOCOL_OFF
-    if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_OFF) != 0)
-      off_parse_packet_contentline(ndpi_struct, flow);
 #endif
 #ifdef NDPI_PROTOCOL_OGG
     if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_OGG) != 0)
@@ -814,9 +797,6 @@ static void http_bitmask_exclude(struct ndpi_flow_struct *flow)
 #endif
 #ifdef NDPI_PROTOCOL_MOVE
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MOVE);
-#endif
-#ifdef NDPI_PROTOCOL_OFF
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_OFF);
 #endif
 #ifdef NDPI_PROTOCOL_XBOX
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_XBOX);
