@@ -28,6 +28,7 @@ libndpi_la_SOURCES = \
 			protocols/aimini.c \
 			protocols/applejuice.c \
 			protocols/armagetron.c \
+			protocols/ayiya.c \
 			protocols/battlefield.c \
 			protocols/bgp.c \
 			protocols/bittorrent.c \
@@ -79,7 +80,6 @@ libndpi_la_SOURCES = \
 			protocols/openft.c \
 			protocols/oscar.c \
 			protocols/pcanywhere.c \
-			protocols/popo.c \
 			protocols/postgres.c \
 			protocols/pplive.c \
 			protocols/ppstream.c \

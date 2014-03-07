@@ -385,7 +385,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
     }
     else if(packet->udp != NULL) {
       if((ntohs(packet->udp->source) < 1024) 
-	 || (ntohs(packet->udp->dest) < 1024)) /* High ports only */
+	 || (ntohs(packet->udp->dest) < 1024) /* High ports only */)
 	return;
 
       /*
@@ -446,9 +446,9 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	  if(ndpi_strnstr((const char *)packet->payload, ":target20:", packet->payload_packet_len)
 	     || ndpi_strnstr((const char *)packet->payload, ":find_node1:", packet->payload_packet_len)
 	     || ndpi_strnstr((const char *)packet->payload, "d1:ad2:id20:", packet->payload_packet_len)
-         || ndpi_strnstr((const char *)packet->payload, ":info_hash20:", packet->payload_packet_len)
-         || ndpi_strnstr((const char *)packet->payload, ":filter64", packet->payload_packet_len)
-         || ndpi_strnstr((const char *)packet->payload, "d1:rd2:id20:", packet->payload_packet_len)) {
+	     || ndpi_strnstr((const char *)packet->payload, ":info_hash20:", packet->payload_packet_len)
+	     || ndpi_strnstr((const char *)packet->payload, ":filter64", packet->payload_packet_len)
+	     || ndpi_strnstr((const char *)packet->payload, "d1:rd2:id20:", packet->payload_packet_len)) {
 	  bittorrent_found:
 	    NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT,
 			       ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
