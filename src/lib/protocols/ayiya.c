@@ -21,37 +21,48 @@
  *
  */
 
-/* http://en.wikipedia.org/wiki/Anything_In_Anything */
+/*
+  http://en.wikipedia.org/wiki/Anything_In_Anything 
+  http://tools.ietf.org/html/rfc4891
+*/
+
 
 #include "ndpi_protocols.h"
 #ifdef NDPI_PROTOCOL_AYIYA
 
-static void ndpi_search_setup_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-  struct ndpi_packet_struct *packet = &flow->packet;
-  u_int8_t i;
-  u_int16_t packet_len;
-
-  /* 1. ayiya is udp based, port 5072 */
-  if ((packet->udp->source == htons(5072) || packet->udp->dest == htons(5072))
-      /* check for ayiya new packet */
-      && (packet->payload_packet_len > 44)) {
-    /* FINISH */
-
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_AYIYA, NDPI_REAL_PROTOCOL);
-  } else
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_AYIYA);
-}
+struct ayiya {
+  u_int8_t flags[3];
+  u_int8_t next_header;
+  u_int32_t epoch;
+  u_int8_t identity[16];
+  u_int8_t signature[20];  
+};
 
 void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  //      struct ndpi_flow_struct       *flow=ndpi_struct->flow;
-  //      struct ndpi_id_struct         *src=ndpi_struct->src;
-  //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-  if(packet->udp
-     && (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN))
-    ndpi_search_setup_ayiya(ndpi_struct, flow);
+  if(packet->udp && (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)) {
+    u_int8_t i;
+    u_int16_t packet_len;
+    
+    /* Ayiya is udp based, port 5072 */
+    if ((packet->udp->source == htons(5072) || packet->udp->dest == htons(5072))
+	/* check for ayiya new packet */
+	&& (packet->payload_packet_len > 44)
+	) {
+      /* FINISH */
+      struct ayiya *a = (struct ayiya*)packet->payload;
+      u_int32_t epoch = ntohl(a->epoch), now = (u_int32_t)time(NULL);
+      u_int32_t fireyears = 86400 * 365 * 5;
+      
+      if((epoch >= (now - fireyears)) && (epoch <= (now+86400 /* 1 day */)))      
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_AYIYA, NDPI_REAL_PROTOCOL);
+
+      return;
+    }
+
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_AYIYA);
+  }
 }
 #endif
