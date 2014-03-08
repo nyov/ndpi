@@ -142,8 +142,8 @@ typedef struct node_t {
 /* Least recently used cache */
 
 struct ndpi_LruCacheNumEntry {
-  u_int32_t key;
-  u_int32_t value;
+  u_int64_t key;
+  u_int64_t value;
 };
 
 struct ndpi_LruCacheStrEntry {
@@ -171,8 +171,8 @@ struct ndpi_LruCache {
 };
 
 
-u_int32_t ndpi_find_lru_cache_num(struct ndpi_LruCache *cache, u_int32_t key);
-int ndpi_add_to_lru_cache_num(struct ndpi_LruCache *cache, u_int32_t key, u_int32_t value);
+u_int32_t ndpi_find_lru_cache_num(struct ndpi_LruCache *cache, u_int64_t key);
+int ndpi_add_to_lru_cache_num(struct ndpi_LruCache *cache, u_int64_t key, u_int64_t value);
 
 u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 

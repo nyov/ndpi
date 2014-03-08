@@ -170,7 +170,7 @@ static int lru_node_key_entry_compare(struct ndpi_LruCacheEntry *a,
 
 /* ********************************************* */
 
-struct ndpi_LruCacheEntry* lru_allocCacheNumericNode(struct ndpi_LruCache *cache, u_int32_t key, u_int32_t value) {
+struct ndpi_LruCacheEntry* lru_allocCacheNumericNode(struct ndpi_LruCache *cache, u_int64_t key, u_int64_t value) {
   struct ndpi_LruCacheEntry *node = (struct ndpi_LruCacheEntry*)ndpi_calloc(1, sizeof(struct ndpi_LruCacheEntry));
 
   if(unlikely(traceLRU))
@@ -264,7 +264,7 @@ static void validate_unit_len(struct ndpi_LruCache *cache, u_int32_t hash_id) {
 /* ************************************ */
 
 int ndpi_add_to_lru_cache_num(struct ndpi_LruCache *cache,
-			     u_int32_t key, u_int32_t value) {
+			      u_int64_t key, u_int64_t value) {
   if(cache->hash_size == 0)
     return(0);
   else {
@@ -410,7 +410,7 @@ int ndpi_add_to_lru_cache_str(struct ndpi_LruCache *cache, char *key, char *valu
 
 /* ************************************ */
 
-u_int32_t ndpi_find_lru_cache_num(struct ndpi_LruCache *cache, u_int32_t key) {
+u_int32_t ndpi_find_lru_cache_num(struct ndpi_LruCache *cache, u_int64_t key) {
   if(cache->hash_size == 0)
     return(0);
   else {
