@@ -394,8 +394,8 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 }
 
 
-static u_int8_t ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+static u_int8_t ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct *ndpi_struct, 
+					     struct ndpi_flow_struct *flow) {
 
   struct ndpi_packet_struct *packet = &flow->packet;
   //
@@ -403,8 +403,14 @@ static u_int8_t ndpi_search_sslv3_direction1(struct ndpi_detection_module_struct
   //      struct ndpi_id_struct         *dst=flow->dst;
 
 
-  if (packet->payload_packet_len >= 5 && packet->payload[0] == 0x16 && packet->payload[1] == 0x03
-      && (packet->payload[2] == 0x00 || packet->payload[2] == 0x01 || packet->payload[2] == 0x02)) {
+  if ((packet->payload_packet_len >= 5)
+      && (packet->payload[0] == 0x16)
+      && (packet->payload[1] == 0x03)
+      && ((packet->payload[2] == 0x00)
+	  || (packet->payload[2] == 0x01)
+	  || (packet->payload[2] == 0x02)
+	  || (packet->payload[2] == 0x03)
+	  )) {
     u_int32_t temp;
     NDPI_LOG(NDPI_PROTOCOL_SSL, ndpi_struct, NDPI_LOG_DEBUG, "search sslv3\n");
     // SSLv3 Record
