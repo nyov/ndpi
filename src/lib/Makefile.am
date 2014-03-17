@@ -43,7 +43,7 @@ libndpi_la_SOURCES = \
 			protocols/fasttrack.c \
 			protocols/fiesta.c \
 			protocols/filetopia.c \
-			protocols/flash.c \
+			protocols/rtmp.c \
 			protocols/florensia.c \
 			protocols/ftp.c \
 			protocols/gnutella.c \
@@ -144,6 +144,8 @@ libndpi_la_SOURCES = \
 			protocols/skinny.c \
 			protocols/tor.c \
 			protocols/whoisdas.c \
-			protocols/collectd.c
+			protocols/collectd.c \
+			protocols/socks5.c \
+			protocols/socks4.c
 
 # NTOP protocols are at the end

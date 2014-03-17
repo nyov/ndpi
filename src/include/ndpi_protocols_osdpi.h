@@ -211,10 +211,12 @@ extern "C" {
 #define NDPI_PROTOCOL_UBUNTUONE                                 169 /* Remy Mudingay <mudingay@ill.fr> */
 #define NDPI_PROTOCOL_WHOIS_DAS                                 170
 #define NDPI_PROTOCOL_COLLECTD                                  171
-
+#define NDPI_PROTOCOL_SOCKS5                                    172 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_PROTOCOL_SOCKS4                                    173 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_PROTOCOL_RTMP                                      174 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          171
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          174
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)

@@ -169,151 +169,63 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
 				 u_int8_t protocol,
 				 u_int32_t saddr, u_int32_t daddr, 
 				 u_int16_t sport, u_int16_t dport);
-void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
 
-/* imesh entry */
-void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct
-			       *ndpi_struct, struct ndpi_flow_struct *flow);
-
-/* SSL entry */
-void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-/* flash entry */
-void ndpi_search_flash(struct ndpi_detection_module_struct
-		       *ndpi_struct, struct ndpi_flow_struct *flow);
-
-/* mms entry */
-void ndpi_search_mms_tcp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-/* icecast entry */
+void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_mms_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_icecast_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-
-/* shoutcast entry */
-void ndpi_search_shoutcast_tcp(struct ndpi_detection_module_struct
-			       *ndpi_struct, struct ndpi_flow_struct *flow);
-
-/* veohtv entry */
-void ndpi_search_veohtv_tcp(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
-/* openft entry */
-void ndpi_search_openft_tcp(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
-/* stun entry */
-void ndpi_search_stun(struct ndpi_detection_module_struct
-		      *ndpi_struct, struct ndpi_flow_struct *flow);
-/* Pando entry */
-void ndpi_search_pando_tcp_udp(struct ndpi_detection_module_struct
-			       *ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_tvants_udp(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_sopcast(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_tvuplayer(struct ndpi_detection_module_struct
-			   *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_ppstream(struct ndpi_detection_module_struct
-			  *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_pplive_tcp_udp(struct ndpi_detection_module_struct
-				*ndpi_struct, struct ndpi_flow_struct *flow);
-
+void ndpi_search_shoutcast_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_veohtv_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_openft_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_pando_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_tvants_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_sopcast(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_tvuplayer(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ppstream(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_pplive_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_iax(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_mgcp(struct ndpi_detection_module_struct
-		      *ndpi_struct, struct ndpi_flow_struct *flow);
-
+void ndpi_search_mgcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_zattoo(struct ndpi_detection_module_struct*ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_qq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_feidian(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_ayiya(struct ndpi_detection_module_struct
-		       *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_thunder(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_feidian(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_thunder(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_activesync(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_in_non_tcp_udp(struct ndpi_detection_module_struct
-				*ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_vnc_tcp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_dhcp_udp(struct ndpi_detection_module_struct
-			  *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_steam(struct ndpi_detection_module_struct
-		       *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_halflife2(struct ndpi_detection_module_struct
-			   *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_xbox(struct ndpi_detection_module_struct
-		      *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_smb_tcp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_telnet_tcp(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_ntp_udp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
-
+void ndpi_search_in_non_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_vnc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_dhcp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_steam(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_halflife2(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_xbox(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_smb_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_telnet_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ntp_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_nfs(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_rtp(struct ndpi_detection_module_struct
-		     *ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_ssdp(struct ndpi_detection_module_struct
-		      *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_worldofwarcraft(struct ndpi_detection_module_struct
-				 *ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct
-			      *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct
-			   *ndpi_struct, struct ndpi_flow_struct *flow);
-
+void ndpi_search_rtp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_ssdp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_worldofwarcraft(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_bgp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_quake(struct ndpi_detection_module_struct
-		       *ndpi_struct, struct ndpi_flow_struct *flow);
-
+void ndpi_search_quake(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_battlefield(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_secondlife(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_pcanywhere(struct ndpi_detection_module_struct
-			    *ndpi_struct, struct ndpi_flow_struct *flow);
-
+void ndpi_search_secondlife(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_pcanywhere(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_rdp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_snmp(struct ndpi_detection_module_struct
-		      *ndpi_struct, struct ndpi_flow_struct *flow);
-
-void ndpi_search_kontiki(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_snmp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_kontiki(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_syslog(struct ndpi_detection_module_struct*ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
-			 *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_tds_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_netbios(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_mdns(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_ipp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_ldap(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_warcraft3(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_kerberos(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-void ndpi_search_xdmcp(struct ndpi_detection_module_struct
-		       *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_xdmcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_tftp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_mssql(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_pptp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
@@ -356,6 +268,10 @@ void ndpi_search_rtcp(struct ndpi_detection_module_struct *ndpi_struct, struct n
 void ndpi_search_skinny(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_tor(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_socks5(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_socks4(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_rtmp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+
 #ifdef USE_SKYPE_HEURISTICS
 u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
 			     u_int32_t src_host, u_int32_t dst_host);

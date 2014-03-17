@@ -1259,6 +1259,15 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_COLLECTD, "Collectd",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 25826, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SOCKS5, "SOCKS5",
+			  ndpi_build_default_ports(ports_a, 1080, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 1080, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SOCKS4, "SOCKS4",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_RTMP, "RTMP",
+			  ndpi_build_default_ports(ports_a, 1935, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
 
   init_string_based_protocols(ndpi_mod);
 
@@ -1771,8 +1780,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 #ifdef NDPI_PROTOCOL_RTSP
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_PROTOCOL_RTSP,
-				      ndpi_search_http_tcp,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      ndpi_search_rtsp_tcp_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
 				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 #endif
@@ -2602,17 +2611,6 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   /* Update callback_buffer index */
   a++;
 #endif
-#ifdef NDPI_PROTOCOL_FLASH
-  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
-				      NDPI_PROTOCOL_FLASH,
-				      ndpi_search_flash,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
-				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
-				      ADD_TO_DETECTION_BITMASK);
-
-  /* Update callback_buffer index */
-  a++;
-#endif
 #ifdef NDPI_PROTOCOL_POSTGRES
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_PROTOCOL_POSTGRES,
@@ -3362,7 +3360,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   /* Update callback_buffer index */
   a++;
-#endif
+#endif 
 
 #ifdef NDPI_PROTOCOL_COLLECTD
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
@@ -3376,7 +3374,42 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   a++;
 #endif
 
+#ifdef NDPI_PROTOCOL_SOCKS5
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_SOCKS5,
+				      ndpi_search_socks5,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
 
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_PROTOCOL_SOCKS4
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_SOCKS4,
+				      ndpi_search_socks4,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_PROTOCOL_RTMP
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_RTMP,
+				      ndpi_search_rtmp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+  
   ndpi_struct->callback_buffer_size = a;
 
   NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_DEBUG,

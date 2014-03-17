@@ -83,7 +83,7 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-directconnect.lo libndpi_la-directdownloadlink.lo \
 	libndpi_la-dns.lo libndpi_la-dofus.lo libndpi_la-edonkey.lo \
 	libndpi_la-fasttrack.lo libndpi_la-fiesta.lo \
-	libndpi_la-filetopia.lo libndpi_la-flash.lo \
+	libndpi_la-filetopia.lo libndpi_la-rtmp.lo \
 	libndpi_la-florensia.lo libndpi_la-ftp.lo \
 	libndpi_la-gnutella.lo libndpi_la-guildwars.lo \
 	libndpi_la-halflife2_and_mods.lo libndpi_la-http_activesync.lo \
@@ -124,7 +124,8 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-viber.lo libndpi_la-openvpn.lo libndpi_la-corba.lo \
 	libndpi_la-oracle.lo libndpi_la-rsync.lo libndpi_la-rtcp.lo \
 	libndpi_la-skinny.lo libndpi_la-tor.lo libndpi_la-whoisdas.lo \
-	libndpi_la-collectd.lo
+	libndpi_la-collectd.lo libndpi_la-socks5.lo \
+	libndpi_la-socks4.lo
 libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
 libndpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -303,7 +304,7 @@ libndpi_la_SOURCES = \
 			protocols/fasttrack.c \
 			protocols/fiesta.c \
 			protocols/filetopia.c \
-			protocols/flash.c \
+			protocols/rtmp.c \
 			protocols/florensia.c \
 			protocols/ftp.c \
 			protocols/gnutella.c \
@@ -404,7 +405,9 @@ libndpi_la_SOURCES = \
 			protocols/skinny.c \
 			protocols/tor.c \
 			protocols/whoisdas.c \
-			protocols/collectd.c
+			protocols/collectd.c \
+			protocols/socks5.c \
+			protocols/socks4.c
 
 all: all-am
 
@@ -506,7 +509,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-fasttrack.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-fiesta.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-filetopia.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-flash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-florensia.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-ftp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-gnutella.Plo@am__quote@
@@ -560,6 +562,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rdp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rsync.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rtcp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rtmp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-rtsp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-sflow.Plo@am__quote@
@@ -569,6 +572,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-skype.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-smb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-snmp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-socks4.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-socks5.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-socrates.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-sopcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-sort.Plo@am__quote@
@@ -788,12 +793,12 @@ libndpi_la-filetopia.lo: protocols/filetopia.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-filetopia.lo `test -f 'protocols/filetopia.c' || echo '$(srcdir)/'`protocols/filetopia.c
 
-libndpi_la-flash.lo: protocols/flash.c
-@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-flash.lo -MD -MP -MF $(DEPDIR)/libndpi_la-flash.Tpo -c -o libndpi_la-flash.lo `test -f 'protocols/flash.c' || echo '$(srcdir)/'`protocols/flash.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-flash.Tpo $(DEPDIR)/libndpi_la-flash.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/flash.c' object='libndpi_la-flash.lo' libtool=yes @AMDEPBACKSLASH@
+libndpi_la-rtmp.lo: protocols/rtmp.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-rtmp.lo -MD -MP -MF $(DEPDIR)/libndpi_la-rtmp.Tpo -c -o libndpi_la-rtmp.lo `test -f 'protocols/rtmp.c' || echo '$(srcdir)/'`protocols/rtmp.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-rtmp.Tpo $(DEPDIR)/libndpi_la-rtmp.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/rtmp.c' object='libndpi_la-rtmp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-flash.lo `test -f 'protocols/flash.c' || echo '$(srcdir)/'`protocols/flash.c
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-rtmp.lo `test -f 'protocols/rtmp.c' || echo '$(srcdir)/'`protocols/rtmp.c
 
 libndpi_la-florensia.lo: protocols/florensia.c
 @am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-florensia.lo -MD -MP -MF $(DEPDIR)/libndpi_la-florensia.Tpo -c -o libndpi_la-florensia.lo `test -f 'protocols/florensia.c' || echo '$(srcdir)/'`protocols/florensia.c
@@ -1501,6 +1506,20 @@ libndpi_la-collectd.lo: protocols/collectd.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/collectd.c' object='libndpi_la-collectd.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-collectd.lo `test -f 'protocols/collectd.c' || echo '$(srcdir)/'`protocols/collectd.c
+
+libndpi_la-socks5.lo: protocols/socks5.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-socks5.lo -MD -MP -MF $(DEPDIR)/libndpi_la-socks5.Tpo -c -o libndpi_la-socks5.lo `test -f 'protocols/socks5.c' || echo '$(srcdir)/'`protocols/socks5.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-socks5.Tpo $(DEPDIR)/libndpi_la-socks5.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/socks5.c' object='libndpi_la-socks5.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-socks5.lo `test -f 'protocols/socks5.c' || echo '$(srcdir)/'`protocols/socks5.c
+
+libndpi_la-socks4.lo: protocols/socks4.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-socks4.lo -MD -MP -MF $(DEPDIR)/libndpi_la-socks4.Tpo -c -o libndpi_la-socks4.lo `test -f 'protocols/socks4.c' || echo '$(srcdir)/'`protocols/socks4.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-socks4.Tpo $(DEPDIR)/libndpi_la-socks4.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/socks4.c' object='libndpi_la-socks4.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-socks4.lo `test -f 'protocols/socks4.c' || echo '$(srcdir)/'`protocols/socks4.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

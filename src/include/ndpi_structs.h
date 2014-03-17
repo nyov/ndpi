@@ -209,9 +209,6 @@ typedef struct ndpi_id_struct {
 /* ************************************************** */ 
 
 struct ndpi_flow_tcp_struct {
-#ifdef NDPI_PROTOCOL_FLASH
-  u_int16_t flash_bytes;
-#endif
 #ifdef NDPI_PROTOCOL_MAIL_SMTP
   u_int16_t smtp_command_bitmask;
 #endif
@@ -271,9 +268,6 @@ struct ndpi_flow_tcp_struct {
   u_int32_t http_empty_line_seen:1;
   u_int32_t http_wait_for_retransmission:1;
 #endif							// NDPI_PROTOCOL_HTTP
-#ifdef NDPI_PROTOCOL_FLASH
-  u_int32_t flash_stage:3;
-#endif
 #ifdef NDPI_PROTOCOL_GNUTELLA
   u_int32_t gnutella_stage:2;		//0-2
 #endif
@@ -354,6 +348,10 @@ struct ndpi_flow_tcp_struct {
 
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
+#endif
+  
+#ifdef NDPI_PROTOCOL_RTMP
+  u_int32_t rtmp_stage:2;
 #endif
 }
 
@@ -750,6 +748,12 @@ typedef struct ndpi_flow_struct {
 #endif
 #ifdef NDPI_PROTOCOL_FLORENSIA
   u_int32_t florensia_stage:1;
+#endif
+#ifdef NDPI_PROTOCOL_SOCKS5
+  u_int32_t socks5_stage:2;	// 0-3
+#endif
+#ifdef NDPI_PROTOCOL_SOCKS4
+  u_int32_t socks4_stage:2;	// 0-3
 #endif
 
   /* internal structures to save functions calls */
