@@ -84,7 +84,7 @@ void ndpi_search_ipp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 			}
 		}
 
-		if (ndpi_mem_cmp(&packet->payload[i], " ipp://", 7) != 0) {
+		if (memcmp(&packet->payload[i], " ipp://", 7) != 0) {
 			NDPI_LOG(NDPI_PROTOCOL_IPP, ndpi_struct, NDPI_LOG_DEBUG, "the string ' ipp://' does not follow.\n");
 			goto search_for_next_pattern;
 		}

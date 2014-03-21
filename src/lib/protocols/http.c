@@ -244,40 +244,40 @@ static void windowsmedia_parse_packet_contentline(struct ndpi_detection_module_s
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  if (packet->content_line.len >= 14 && ndpi_mem_cmp(packet->content_line.ptr, "video/x-ms-", 11) == 0) {
-    if (ndpi_mem_cmp(&packet->content_line.ptr[11], "wmv", 3) == 0) {
+  if (packet->content_line.len >= 14 && memcmp(packet->content_line.ptr, "video/x-ms-", 11) == 0) {
+    if (memcmp(&packet->content_line.ptr[11], "wmv", 3) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	      "WINDOWSMEDIA: Content-Type: video/x-ms-wmv found.\n");
       ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWSMEDIA);
       return;
     }
-    if (ndpi_mem_cmp(&packet->content_line.ptr[11], "asf", 3) == 0) {
+    if (memcmp(&packet->content_line.ptr[11], "asf", 3) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	      "WINDOWSMEDIA: Content-Type: video/x-ms-asf found.\n");
       ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWSMEDIA);
       return;
     }
-    if (ndpi_mem_cmp(&packet->content_line.ptr[11], "asx", 3) == 0) {
+    if (memcmp(&packet->content_line.ptr[11], "asx", 3) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	      "WINDOWSMEDIA: Content-Type: video/x-ms-asx found.\n");
       ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWSMEDIA);
       return;
     }
   }
-  if (packet->content_line.len >= 24 && ndpi_mem_cmp(packet->content_line.ptr, "video/x-msvideo", 15) == 0) {
+  if (packet->content_line.len >= 24 && memcmp(packet->content_line.ptr, "video/x-msvideo", 15) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	    "WINDOWSMEDIA: Content-Type: video/x-msvideo found.\n");
     ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWSMEDIA);
     return;
   }
-  if (packet->content_line.len >= 24 && ndpi_mem_cmp(packet->content_line.ptr, "audio/x-wav", 11) == 0) {
+  if (packet->content_line.len >= 24 && memcmp(packet->content_line.ptr, "audio/x-wav", 11) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	    "WINDOWSMEDIA: Content-Type: audio/x-wav found.\n");
     ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWSMEDIA);
     return;
   }
   if (packet->content_line.len >= 32
-      && ndpi_mem_cmp(packet->content_line.ptr, "application/vnd.ms.wms-hdr.asfv1", 32) == 0) {
+      && memcmp(packet->content_line.ptr, "application/vnd.ms.wms-hdr.asfv1", 32) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_WINDOWSMEDIA, ndpi_struct, NDPI_LOG_DEBUG,
 	    "WINDOWSMEDIA: Content-Type: application/vnd.ms.wms-hdr.asfv1 found.\n");
     ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WINDOWSMEDIA);
@@ -303,7 +303,7 @@ static void mms_parse_packet_contentline(struct ndpi_detection_module_struct
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  if (packet->content_line.len >= 24 && ndpi_mem_cmp(packet->content_line.ptr, "application/x-mms-framed", 24) == 0) {
+  if (packet->content_line.len >= 24 && memcmp(packet->content_line.ptr, "application/x-mms-framed", 24) == 0) {
     NDPI_LOG(NDPI_PROTOCOL_MMS, ndpi_struct, NDPI_LOG_DEBUG,
 	    "MMS: Content-Type: application/x-mms-framed found\n");
     ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MMS);

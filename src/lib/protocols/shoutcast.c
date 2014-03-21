@@ -83,16 +83,16 @@ void ndpi_search_shoutcast_tcp(struct ndpi_detection_module_struct
 		if (packet->payload_packet_len == 2 && memcmp(packet->payload, "\x0d\x0a", 2) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_SHOUTCAST, ndpi_struct, NDPI_LOG_DEBUG, "Shoutcast stage 1 continuation.\n");
 			return;
-		} else if (packet->payload_packet_len > 3 && ndpi_mem_cmp(&packet->payload[0], "OK2", 3) == 0) {
+		} else if (packet->payload_packet_len > 3 && memcmp(&packet->payload[0], "OK2", 3) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_SHOUTCAST, ndpi_struct, NDPI_LOG_DEBUG, "Shoutcast stage 2, OK2 found.\n");
 			return;
 		} else
 			goto exclude_shoutcast;
 	} else if (flow->packet_counter == 3 || flow->packet_counter == 4) {
-		if (packet->payload_packet_len > 3 && ndpi_mem_cmp(&packet->payload[0], "OK2", 3) == 0) {
+		if (packet->payload_packet_len > 3 && memcmp(&packet->payload[0], "OK2", 3) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_SHOUTCAST, ndpi_struct, NDPI_LOG_DEBUG, "Shoutcast stage 2, OK2 found.\n");
 			return;
-		} else if (packet->payload_packet_len > 4 && ndpi_mem_cmp(&packet->payload[0], "icy-", 4) == 0) {
+		} else if (packet->payload_packet_len > 4 && memcmp(&packet->payload[0], "icy-", 4) == 0) {
 			NDPI_LOG(NDPI_PROTOCOL_SHOUTCAST, ndpi_struct, NDPI_LOG_DEBUG, "Shoutcast detected.\n");
 			ndpi_int_shoutcast_add_connection(ndpi_struct, flow);
 			return;

@@ -40,7 +40,7 @@ extern "C" {
 #define NDPI_PROTOCOL_HISTORY_SIZE				3
 
 #define NDPI_PROTOCOL_UNKNOWN					0
-#define NDPI_PROTOCOL_FTP					1
+#define NDPI_PROTOCOL_FTP_CONTROL				1 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_MAIL_POP					2
 #define NDPI_PROTOCOL_MAIL_SMTP					3
 #define NDPI_PROTOCOL_MAIL_IMAP					4
@@ -214,9 +214,10 @@ extern "C" {
 #define NDPI_PROTOCOL_SOCKS5                                    172 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_SOCKS4                                    173 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_RTMP                                      174 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_PROTOCOL_FTP_DATA					175 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          174
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL                          175
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                           (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)

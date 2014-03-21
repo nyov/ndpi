@@ -169,15 +169,15 @@ static void ndpi_search_yahoo_tcp(struct ndpi_detection_module_struct *ndpi_stru
 	  && packet->parsed_lines > 5
 	  && memcmp(&packet->payload[5], "/Messenger.", 11) == 0
 	  && packet->line[1].len >= 17
-	  && ndpi_mem_cmp(packet->line[1].ptr, "Connection: Close",
+	  && memcmp(packet->line[1].ptr, "Connection: Close",
 			  17) == 0 && packet->line[2].len >= 6
-	  && ndpi_mem_cmp(packet->line[2].ptr, "Host: ", 6) == 0
+	  && memcmp(packet->line[2].ptr, "Host: ", 6) == 0
 	  && packet->line[3].len >= 16
-	  && ndpi_mem_cmp(packet->line[3].ptr, "Content-Length: ",
+	  && memcmp(packet->line[3].ptr, "Content-Length: ",
 			  16) == 0 && packet->line[4].len >= 23
-	  && ndpi_mem_cmp(packet->line[4].ptr, "User-Agent: Mozilla/5.0",
+	  && memcmp(packet->line[4].ptr, "User-Agent: Mozilla/5.0",
 			  23) == 0 && packet->line[5].len >= 23
-	  && ndpi_mem_cmp(packet->line[5].ptr, "Cache-Control: no-cache", 23) == 0) {
+	  && memcmp(packet->line[5].ptr, "Cache-Control: no-cache", 23) == 0) {
 	NDPI_LOG(NDPI_PROTOCOL_YAHOO, ndpi_struct, NDPI_LOG_TRACE,
 		 "YAHOO HTTP POST P2P FILETRANSFER FOUND\n");
 	NDPI_LOG(NDPI_PROTOCOL_YAHOO, ndpi_struct, NDPI_LOG_DEBUG, "found YAHOO");
@@ -186,7 +186,7 @@ static void ndpi_search_yahoo_tcp(struct ndpi_detection_module_struct *ndpi_stru
       }
 
       if (packet->host_line.ptr != NULL && packet->host_line.len >= 26 &&
-	  ndpi_mem_cmp(packet->host_line.ptr, "filetransfer.msg.yahoo.com", 26) == 0) {
+	  memcmp(packet->host_line.ptr, "filetransfer.msg.yahoo.com", 26) == 0) {
 	NDPI_LOG(NDPI_PROTOCOL_YAHOO, ndpi_struct, NDPI_LOG_TRACE, "YAHOO HTTP POST FILETRANSFER FOUND\n");
 	NDPI_LOG(NDPI_PROTOCOL_YAHOO, ndpi_struct, NDPI_LOG_DEBUG, "found YAHOO");
 	ndpi_int_yahoo_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
@@ -194,7 +194,7 @@ static void ndpi_search_yahoo_tcp(struct ndpi_detection_module_struct *ndpi_stru
       }
       /* now check every line */
       for (a = 0; a < packet->parsed_lines; a++) {
-	if (packet->line[a].len >= 4 && ndpi_mem_cmp(packet->line[a].ptr, "YMSG", 4) == 0) {
+	if (packet->line[a].len >= 4 && memcmp(packet->line[a].ptr, "YMSG", 4) == 0) {
 	  NDPI_LOG(NDPI_PROTOCOL_YAHOO, ndpi_struct,
 		   NDPI_LOG_TRACE,
 		   "YAHOO HTTP POST FOUND, line is: %.*s\n", packet->line[a].len, packet->line[a].ptr);

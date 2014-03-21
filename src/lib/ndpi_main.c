@@ -714,9 +714,9 @@ ndpi_protocol_match host_match[] = {
   { ".twitter.com",      "Twitter", NDPI_PROTOCOL_TWITTER },
   { ".twttr.com",        "Twitter", NDPI_PROTOCOL_TWITTER },
   { ".netflix.com",      "NetFlix", NDPI_PROTOCOL_NETFLIX },
-  { ".facebook.com",     "FaceBook", NDPI_PROTOCOL_FACEBOOK },
-  { ".fbcdn.net",        "FaceBook", NDPI_PROTOCOL_FACEBOOK },
-  { "fbcdn-",            "FaceBook", NDPI_PROTOCOL_FACEBOOK },  /* fbcdn-video-a-akamaihd.net */
+  { ".facebook.com",     "Facebook", NDPI_PROTOCOL_FACEBOOK },
+  { ".fbcdn.net",        "Facebook", NDPI_PROTOCOL_FACEBOOK },
+  { "fbcdn-",            "Facebook", NDPI_PROTOCOL_FACEBOOK },  /* fbcdn-video-a-akamaihd.net */
   { ".dropbox.com",      "DropBox", NDPI_PROTOCOL_DROPBOX },
   { ".gmail.",           "GoogleGmail", NDPI_PROTOCOL_GMAIL },
   { "mail.google.",      "GoogleGmail", NDPI_PROTOCOL_GMAIL },
@@ -774,10 +774,13 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_UNKNOWN, "Unknown",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FTP, "FTP",
-			  ndpi_build_default_ports(ports_a, 20, 21, 0, 0, 0) /* TCP */,
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FTP_CONTROL, "FTP_CONTROL",
+			  ndpi_build_default_ports(ports_a, 21, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MAIL_POP, "POP",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FTP_DATA, "FTP_DATA",
+			  ndpi_build_default_ports(ports_a, 20, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MAIL_POP, "POP3",
 			  ndpi_build_default_ports(ports_a, 110, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_MAIL_POPS, "POPS",
@@ -894,7 +897,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_AVI, "AVI",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FLASH, "AdobeFlash",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FLASH, "Flash",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_OGG, "OggVorbis",
@@ -930,10 +933,10 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ICECAST, "IceCast",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_PPLIVE, "PPlive",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_PPLIVE, "PPLive",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_PPSTREAM, "PPstream",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_PPSTREAM, "PPStream",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ZATTOO, "Zattoo",
@@ -954,7 +957,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV, "HTTP_APPLICATION_VEOHTV",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_QQLIVE, "QQlive",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_QQLIVE, "QQLive",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_THUNDER, "Thunder",
@@ -1029,7 +1032,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_OSPF, "OSPF",
 			  ndpi_build_default_ports(ports_a, 2604, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_IP_IN_IP, "IPinIP",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_IP_IN_IP, "IP_in_IP",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_RTP, "RTP",
@@ -1232,7 +1235,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TEAMSPEAK, "TeamSpeak",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TOR, "Tor",
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TOR, "TOR",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_SKINNY, "CiscoSkinny",
@@ -1326,7 +1329,6 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
     NDPI_DIRECTCONNECT_CONNECTION_IP_TICK_TIMEOUT * ticks_per_second;
 
   ndpi_str->edonkey_upper_ports_only = NDPI_EDONKEY_UPPER_PORTS_ONLY;
-  ndpi_str->ftp_connection_timeout = NDPI_FTP_CONNECTION_TIMEOUT * ticks_per_second;
 
   ndpi_str->pplive_connection_timeout = NDPI_PPLIVE_CONNECTION_TIMEOUT * ticks_per_second;
 
@@ -2102,17 +2104,6 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 				      NDPI_PROTOCOL_MAIL_SMTP,
 				      ndpi_search_mail_smtp_tcp,
 				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
-				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
-				      ADD_TO_DETECTION_BITMASK);
-
-  /* Update callback_buffer index */
-  a++;
-#endif
-#ifdef NDPI_PROTOCOL_FTP
-  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
-				      NDPI_PROTOCOL_FTP,
-				      ndpi_search_ftp_tcp,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITHOUT_RETRANSMISSION,
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 
@@ -3216,8 +3207,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   /* Update callback_buffer index */
   a++;
-#endif
-
+#endif 
+  
 #ifdef NDPI_PROTOCOL_OPENVPN
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_PROTOCOL_OPENVPN,
@@ -3378,7 +3369,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_PROTOCOL_SOCKS5,
 				      ndpi_search_socks5,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 
@@ -3390,7 +3381,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_PROTOCOL_SOCKS4,
 				      ndpi_search_socks4,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITHOUT_RETRANSMISSION,
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 
@@ -3403,6 +3394,30 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 				      NDPI_PROTOCOL_RTMP,
 				      ndpi_search_rtmp,
 				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif 
+  
+#ifdef NDPI_PROTOCOL_FTP_CONTROL
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_FTP_CONTROL,
+				      ndpi_search_ftp_control,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_PROTOCOL_FTP_DATA
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_FTP_DATA,
+				      ndpi_search_ftp_data,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITHOUT_RETRANSMISSION,
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 

@@ -90,9 +90,6 @@ typedef struct ndpi_id_struct {
    * }
    */
   NDPI_PROTOCOL_BITMASK detected_protocol_bitmask;
-#ifdef NDPI_PROTOCOL_FTP
-  ndpi_ip_addr_t ftp_ip;
-#endif
 #ifdef NDPI_PROTOCOL_RTSP
   ndpi_ip_addr_t rtsp_ip_address;
 #endif
@@ -106,9 +103,6 @@ typedef struct ndpi_id_struct {
 #endif
 #ifdef NDPI_PROTOCOL_IRC
   u_int32_t last_time_port_used[16];
-#endif
-#ifdef NDPI_PROTOCOL_FTP
-  u_int32_t ftp_timer;
 #endif
 #ifdef NDPI_PROTOCOL_IRC
   u_int32_t irc_ts;
@@ -195,9 +189,6 @@ typedef struct ndpi_id_struct {
   u_int32_t yahoo_conf_logged_in:1;
   u_int32_t yahoo_voice_conf_logged_in:1;
 #endif
-#ifdef NDPI_PROTOCOL_FTP
-  u_int32_t ftp_timer_set:1;
-#endif
 #ifdef NDPI_PROTOCOL_RTSP
   u_int32_t rtsp_ts_set:1;
 #endif
@@ -258,9 +249,11 @@ struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_IMESH
   u_int32_t imesh_stage:4;
 #endif
-#ifdef NDPI_PROTOCOL_FTP
-  u_int32_t ftp_codes_seen:5;
-  u_int32_t ftp_client_direction:1;
+#ifdef NDPI_PROTOCOL_FTP_CONTROL
+  u_int32_t ftp_control_stage:2;
+#endif
+#ifdef NDPI_PROTOCOL_FTP_DATA
+  u_int32_t ftp_data_stage:2;
 #endif
 #ifdef NDPI_PROTOCOL_HTTP
   u_int32_t http_setup_dir:2;
@@ -591,8 +584,6 @@ typedef struct ndpi_detection_module_struct {
 
   /* pplive params */
   u_int32_t pplive_connection_timeout;
-  /* ftp parameters */
-  u_int32_t ftp_connection_timeout;
   /* irc parameters */
   u_int32_t irc_timeout;
   /* gnutella parameters */

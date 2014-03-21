@@ -139,29 +139,29 @@ static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module
     if ((packet->parsed_lines == 10 || (packet->parsed_lines == 11 && packet->line[11].len == 0))
 	&& packet->user_agent_line.ptr != NULL
 	&& packet->user_agent_line.len > 12
-	&& ndpi_mem_cmp(packet->user_agent_line.ptr, "Mozilla/4.0 ",
+	&& memcmp(packet->user_agent_line.ptr, "Mozilla/4.0 ",
 		       12) == 0
 	&& packet->host_line.ptr != NULL
 	&& packet->host_line.len >= 7
 	&& packet->line[2].ptr != NULL
 	&& packet->line[2].len > 14
-	&& ndpi_mem_cmp(packet->line[2].ptr, "Keep-Alive: 300", 15) == 0
+	&& memcmp(packet->line[2].ptr, "Keep-Alive: 300", 15) == 0
 	&& packet->line[3].ptr != NULL
 	&& packet->line[3].len > 21
-	&& ndpi_mem_cmp(packet->line[3].ptr, "Connection: Keep-alive", 22) == 0
+	&& memcmp(packet->line[3].ptr, "Connection: Keep-alive", 22) == 0
 	&& packet->line[4].ptr != NULL
 	&& packet->line[4].len > 10
-	&& (ndpi_mem_cmp(packet->line[4].ptr, "Accpet: */*", 11) == 0
-	    || ndpi_mem_cmp(packet->line[4].ptr, "Accept: */*", 11) == 0)
+	&& (memcmp(packet->line[4].ptr, "Accpet: */*", 11) == 0
+	    || memcmp(packet->line[4].ptr, "Accept: */*", 11) == 0)
 
 	&& packet->line[5].ptr != NULL
 	&& packet->line[5].len > 12
-	&& ndpi_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
+	&& memcmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
 	&& packet->line[7].ptr != NULL
 	&& packet->line[7].len > 15
-	&& ndpi_mem_cmp(packet->line[7].ptr, "Pragma: no-cache", 16) == 0
+	&& memcmp(packet->line[7].ptr, "Pragma: no-cache", 16) == 0
 	&& packet->line[8].ptr != NULL
-	&& packet->line[8].len > 22 && ndpi_mem_cmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0) {
+	&& packet->line[8].len > 22 && memcmp(packet->line[8].ptr, "Cache-Control: no-cache", 23) == 0) {
 
       NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "Bitcomet LTS detected\n");
       ndpi_add_connection_as_bittorrent(ndpi_struct, flow,
@@ -183,12 +183,12 @@ static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module
 	&& packet->line[2].len == 11
 	&& memcmp(packet->line[2].ptr, "Accept: */*", 11) == 0
 	&& packet->line[3].ptr != NULL && packet->line[3].len >= (sizeof("Referer: ") - 1)
-	&& ndpi_mem_cmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
+	&& memcmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
 	&& packet->line[5].ptr != NULL
 	&& packet->line[5].len > 13
-	&& ndpi_mem_cmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
+	&& memcmp(packet->line[5].ptr, "Range: bytes=", 13) == 0
 	&& packet->line[6].ptr != NULL
-	&& packet->line[6].len > 21 && ndpi_mem_cmp(packet->line[6].ptr, "Connection: Keep-Alive", 22) == 0) {
+	&& packet->line[6].len > 21 && memcmp(packet->line[6].ptr, "Connection: Keep-Alive", 22) == 0) {
 
       NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "FlashGet detected\n");
       ndpi_add_connection_as_bittorrent(ndpi_struct, flow,
@@ -208,9 +208,9 @@ static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module
 	&& packet->line[2].len == 11
 	&& memcmp(packet->line[2].ptr, "Accept: */*", 11) == 0
 	&& packet->line[3].ptr != NULL && packet->line[3].len >= (sizeof("Referer: ") - 1)
-	&& ndpi_mem_cmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
+	&& memcmp(packet->line[3].ptr, "Referer: ", sizeof("Referer: ") - 1) == 0
 	&& packet->line[5].ptr != NULL
-	&& packet->line[5].len > 21 && ndpi_mem_cmp(packet->line[5].ptr, "Connection: Keep-Alive", 22) == 0) {
+	&& packet->line[5].len > 21 && memcmp(packet->line[5].ptr, "Connection: Keep-Alive", 22) == 0) {
 
       NDPI_LOG_BITTORRENT(NDPI_PROTOCOL_BITTORRENT, ndpi_struct, NDPI_LOG_TRACE, "FlashGet detected\n");
       ndpi_add_connection_as_bittorrent(ndpi_struct, flow,

@@ -572,7 +572,7 @@ void ndpi_search_qq_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct
 
 
   if (packet->payload_packet_len > 100
-      && ((ndpi_mem_cmp(packet->payload, "GET", 3) == 0) || (ndpi_mem_cmp(packet->payload, "POST", 4) == 0))) {
+      && ((memcmp(packet->payload, "GET", 3) == 0) || (memcmp(packet->payload, "POST", 4) == 0))) {
     NDPI_LOG(NDPI_PROTOCOL_QQ, ndpi_struct, NDPI_LOG_DEBUG, "found GET or POST.\n");
     if (memcmp(packet->payload, "GET /qqfile/qq", 14) == 0) {
       NDPI_LOG(NDPI_PROTOCOL_QQ, ndpi_struct, NDPI_LOG_DEBUG, "found qq over tcp GET /qqfile/qq.\n");

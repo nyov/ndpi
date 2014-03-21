@@ -107,7 +107,7 @@ void ndpi_search_zattoo(struct ndpi_detection_module_struct *ndpi_struct, struct
 	    || memcmp(packet->payload, "GET /epg/query", 14) == 0)) {
       ndpi_parse_packet_line_info(ndpi_struct, flow);
       for (i = 0; i < packet->parsed_lines; i++) {
-	if (packet->line[i].len >= 18 && (ndpi_mem_cmp(packet->line[i].ptr, "User-Agent: Zattoo", 18) == 0)) {
+	if (packet->line[i].len >= 18 && (memcmp(packet->line[i].ptr, "User-Agent: Zattoo", 18) == 0)) {
 	  NDPI_LOG(NDPI_PROTOCOL_ZATTOO, ndpi_struct,
 		   NDPI_LOG_DEBUG,
 		   "add connection over tcp with pattern POST /channelserver/player/channel/update HTTP/1.1\n");

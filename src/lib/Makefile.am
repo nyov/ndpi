@@ -45,7 +45,8 @@ libndpi_la_SOURCES = \
 			protocols/filetopia.c \
 			protocols/rtmp.c \
 			protocols/florensia.c \
-			protocols/ftp.c \
+			protocols/ftp_control.c \
+			protocols/ftp_data.c \
 			protocols/gnutella.c \
 			protocols/guildwars.c \
 			protocols/halflife2_and_mods.c \
