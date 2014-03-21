@@ -528,6 +528,11 @@ typedef struct ndpi_default_ports_tree_node {
   u_int16_t default_port;
 } ndpi_default_ports_tree_node_t;
 
+typedef struct _ndpi_automa {
+  void *ac_automa; /* Real type is AC_AUTOMATA_t */
+  u_int8_t ac_automa_finalized;
+} ndpi_automa;
+
 typedef struct ndpi_detection_module_struct {
   NDPI_PROTOCOL_BITMASK detection_bitmask;
   NDPI_PROTOCOL_BITMASK generic_http_packet_bitmask;
@@ -575,8 +580,7 @@ typedef struct ndpi_detection_module_struct {
   u_int ndpi_num_custom_protocols;
 
   /* HTTP (and soon DNS) host matching */
-  void *ac_automa; /* Real type is AC_AUTOMATA_t */
-  u_int8_t ac_automa_finalized;
+  ndpi_automa host_automa, content_automa;
 
   /* irc parameters */
   u_int32_t irc_timeout;

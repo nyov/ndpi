@@ -51,11 +51,7 @@
 
 // #include "ndpi_credis.c"
 #include "ndpi_cache.c"
-
-typedef struct {
-  char *string_to_match, *proto_name;
-  int protocol_id;
-} ndpi_protocol_match;
+#include "ndpi_content_match.c"
 
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
@@ -656,20 +652,34 @@ static int removeDefaultPort(ndpi_port_range *range,
 
 /* ****************************************************** */
 
-static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-					 char *attr, char *value, int protocol_id) {
+static int ndpi_string_to_automa(struct ndpi_detection_module_struct *ndpi_struct,
+				 ndpi_automa *automa,
+				 char *value, int protocol_id) {
   AC_PATTERN_t ac_pattern;
 
+  if(protocol_id >= (NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS)) {
+    printf("[NDPI] %s(protoId=%d): INTERNAL ERROR\n", __FUNCTION__, protocol_id);
+    return(-1);
+  }
+
+  if(automa->ac_automa == NULL) return(-2);
+  ac_pattern.astring = value;
+  ac_pattern.rep.number = protocol_id;
+  ac_pattern.length = strlen(ac_pattern.astring);
+  ac_automata_add(((AC_AUTOMATA_t*)automa->ac_automa), &ac_pattern);
+
+  return(0);
+}
+
+/* ****************************************************** */
+
+static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+					 char *attr, char *value, int protocol_id) {
   /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_RESULT_SERVICE_FACEBOOK */
 
 #ifdef DEBUG
   printf("[NDPI] ndpi_add_host_url_subprotocol(%s, %s, %d)\n", attr, value, protocol_id);
 #endif
-
-  if(protocol_id >= NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS) {
-    printf("[NDPI] %s(protoId=%d): INTERNAL ERROR\n", __FUNCTION__, protocol_id);
-    return(-1);
-  }
 
   /* The attribute is added here for future use */
   if(strcmp(attr, "host") != 0) {
@@ -679,18 +689,19 @@ static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *nd
     return(-1);
   }
 
-  if(ndpi_struct->ac_automa == NULL) return(-2);
-
-  ac_pattern.astring = value;
-  ac_pattern.rep.number = protocol_id;
-  ac_pattern.length = strlen(ac_pattern.astring);
-  ac_automata_add(((AC_AUTOMATA_t*)ndpi_struct->ac_automa), &ac_pattern);
-
 #ifdef DEBUG
-  printf("[NTOP] new subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
+  printf("[NTOP] Adding new subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
 #endif
 
-  return(0);
+  return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->host_automa,
+			       value, protocol_id));
+}
+
+/* ****************************************************** */
+
+int ndpi_add_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+				 char *value, int protocol_id) {
+  return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->content_automa, value, protocol_id));
 }
 
 /* ****************************************************** */
@@ -710,64 +721,6 @@ static int ndpi_remove_host_url_subprotocol(struct ndpi_detection_module_struct 
 
 /* ******************************************************************** */
 
-ndpi_protocol_match host_match[] = {
-  { "amazon.com",			"Amazon",		NDPI_RESULT_SERVICE_AMAZON },
-  { "amazonaws.com",			"Amazon",		NDPI_RESULT_SERVICE_AMAZON },
-  { "amazon-adsystem.com",		"Amazon",		NDPI_RESULT_SERVICE_AMAZON },
-  { ".apple.com",			"Apple",		NDPI_RESULT_SERVICE_APPLE },
-  { ".mzstatic.com",			"Apple",		NDPI_RESULT_SERVICE_APPLE },
-  { ".icloud.com",			"AppleiCloud",		NDPI_RESULT_SERVICE_APPLE_ICLOUD },
-  { "itunes.apple.com",			"AppleiTunes",		NDPI_RESULT_SERVICE_APPLE_ITUNES },
-  { ".cnn.c",				"CNN",			NDPI_RESULT_SERVICE_CNN },
-  { ".cnn.net",				"CNN",			NDPI_RESULT_SERVICE_CNN },
-  { ".dropbox.com",			"DropBox",		NDPI_RESULT_SERVICE_DROPBOX },
-  { ".ebay.com",			"eBay",			NDPI_RESULT_SERVICE_EBAY },
-  { ".ebaystatic.com",			"eBay",			NDPI_RESULT_SERVICE_EBAY },
-  { ".ebaydesc.com",			"eBay",			NDPI_RESULT_SERVICE_EBAY },
-  { ".ebayrtm.com",			"eBay",			NDPI_RESULT_SERVICE_EBAY },
-  { ".facebook.com",			"Facebook",		NDPI_RESULT_SERVICE_FACEBOOK },
-  { ".fbcdn.net",			"Facebook",		NDPI_RESULT_SERVICE_FACEBOOK },
-  { "fbcdn-",				"Facebook",		NDPI_RESULT_SERVICE_FACEBOOK },  /* fbcdn-video-a-akamaihd.net */
-  { ".gstatic.com",			"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { ".googlesyndication.com",		"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { ".googletagservices.com",		"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { ".2mdn.net",			"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { ".doubleclick.net",			"Google",		NDPI_RESULT_SERVICE_GOOGLE }, /* Ads */
-  { "googleads.",			"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { "google-analytics.",		"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { "googleusercontent.",		"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { "googleadservices.",		"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { "maps.google.",			"GoogleMaps",		NDPI_RESULT_SERVICE_GOOGLE_MAPS },
-  { "maps.gstatic.com",			"GoogleMaps",		NDPI_RESULT_SERVICE_GOOGLE_MAPS },
-  { ".gmail.",				"GMail",		NDPI_RESULT_SERVICE_GMAIL },
-  { "mail.google.",			"GMail",		NDPI_RESULT_SERVICE_GMAIL },
-  { ".grooveshark.com",			"GrooveShark",		NDPI_RESULT_SERVICE_GROOVESHARK },
-  { ".last.fm",				"LastFM",		NDPI_RESULT_SERVICE_LASTFM },
-  { "msn.com",				"MSN",			NDPI_RESULT_SERVICE_MSN },
-  { ".netflix.com",			"NetFlix",		NDPI_RESULT_SERVICE_NETFLIX },
-  { ".skype.com",			"Skype",		NDPI_RESULT_SERVICE_SKYPE },
-  { ".skypeassets.com",			"Skype",		NDPI_RESULT_SERVICE_SKYPE },
-  { ".tuenti.com",			"Tuenti",		NDPI_RESULT_SERVICE_TUENTI },
-  { ".twttr.com",			"Twitter",		NDPI_RESULT_SERVICE_TWITTER },
-  { "twitter.",				"Twitter",		NDPI_RESULT_SERVICE_TWITTER },
-  { "twimg.com",			"Twitter",		NDPI_RESULT_SERVICE_TWITTER },
-  { ".viber.com",			"Viber",		NDPI_RESULT_SERVICE_VIBER },
-  { "wikipedia.",			"Wikipedia",		NDPI_RESULT_SERVICE_WIKIPEDIA },
-  { "wikimedia.",			"Wikipedia",		NDPI_RESULT_SERVICE_WIKIPEDIA },
-  { "mediawiki.",			"Wikipedia",		NDPI_RESULT_SERVICE_WIKIPEDIA },
-  { "wikimediafoundation.",		"Wikipedia",		NDPI_RESULT_SERVICE_WIKIPEDIA },
-  { ".whatsapp.net",			"WhatsApp",		NDPI_RESULT_SERVICE_WHATSAPP },
-  { ".yahoo.",				"Yahoo",		NDPI_RESULT_SERVICE_YAHOO },
-  { "yimg.com",				"Yahoo",		NDPI_RESULT_SERVICE_YAHOO },
-  { "yahooapis.",			"Yahoo",		NDPI_RESULT_SERVICE_YAHOO },
-  { "youtube.",				"YouTube",		NDPI_RESULT_SERVICE_YOUTUBE },
-  { ".googlevideo.com",			"YouTube",		NDPI_RESULT_SERVICE_YOUTUBE },
-  { ".ytimg.com",			"YouTube",		NDPI_RESULT_SERVICE_YOUTUBE },
-  { "youtube-nocookie.",		"YouTube",		NDPI_RESULT_SERVICE_YOUTUBE },
-  { ".google.",				"Google",		NDPI_RESULT_SERVICE_GOOGLE },
-  { NULL, 0 }
-};
-
 static void init_string_based_protocols(struct ndpi_detection_module_struct *ndpi_mod) {
   int i;
 
@@ -779,13 +732,17 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
       ndpi_mod->proto_defaults[host_match[i].protocol_id].protoId = host_match[i].protocol_id;
     }
   }
+
+  for(i=0; content_match[i].string_to_match != NULL; i++) {
+    ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match, content_match[i].protocol_id);
+  }
 }
 
 /* ******************************************************************** */
 
 /* This function is used to map protocol name and default ports and it MUST
    be updated whenever a new protocol is added to NDPI.
-   
+
    Do NOT add web services (NDPI_RESULT_SERVICE_xxx) here.
 */
 static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndpi_mod) {
@@ -1286,7 +1243,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_RESULT_APP_VIBER, "Viber",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
-  
+
   init_string_based_protocols(ndpi_mod);
 
   for(i=0; i<(int)ndpi_mod->ndpi_num_supported_protocols; i++) {
@@ -1362,7 +1319,8 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_str->ndpi_num_supported_protocols = NDPI_MAX_SUPPORTED_PROTOCOLS;
   ndpi_str->ndpi_num_custom_protocols = 0;
 
-  ndpi_str->ac_automa = ac_automata_init(ac_match_handler);
+  ndpi_str->host_automa.ac_automa = ac_automata_init(ac_match_handler);
+  ndpi_str->content_automa.ac_automa = ac_automata_init(ac_match_handler);
 
 #ifdef USE_SKYPE_HEURISTICS
   ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
@@ -1394,8 +1352,11 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
     ndpi_tdestroy(ndpi_struct->udpRoot, ndpi_free);
     ndpi_tdestroy(ndpi_struct->tcpRoot, ndpi_free);
 
-    if(ndpi_struct->ac_automa != NULL)
-      ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
+    if(ndpi_struct->host_automa.ac_automa != NULL)
+      ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->host_automa.ac_automa);
+
+    if(ndpi_struct->content_automa.ac_automa != NULL)
+      ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->content_automa.ac_automa);
 
 #ifdef USE_SKYPE_HEURISTICS
     ndpi_free_lru_cache(&ndpi_struct->skypeCache);
@@ -3218,8 +3179,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   /* Update callback_buffer index */
   a++;
-#endif 
-  
+#endif
+
 #ifdef NDPI_RESULT_APP_OPENVPN
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_RESULT_APP_OPENVPN,
@@ -3362,7 +3323,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   /* Update callback_buffer index */
   a++;
-#endif 
+#endif
 
 #ifdef NDPI_RESULT_APP_COLLECTD
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
@@ -3410,8 +3371,8 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
   /* Update callback_buffer index */
   a++;
-#endif 
-  
+#endif
+
 #ifdef NDPI_RESULT_APP_FTP_CONTROL
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_RESULT_APP_FTP_CONTROL,
@@ -3435,7 +3396,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   /* Update callback_buffer index */
   a++;
 #endif
-  
+
 #ifdef NDPI_RESULT_APP_PANDO
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_RESULT_APP_PANDO,
@@ -3447,7 +3408,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   /* Update callback_buffer index */
   a++;
 #endif
-  
+
   ndpi_struct->callback_buffer_size = a;
 
   NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_DEBUG,
@@ -4151,7 +4112,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
   if(a != NDPI_PROTOCOL_UNKNOWN) {
     int i;
-    
+
     for(i=0; (i<sizeof(flow->host_server_name)) && (flow->host_server_name[i] != '\0'); i++)
       flow->host_server_name[i] = tolower(flow->host_server_name[i]);
 
@@ -5374,26 +5335,27 @@ char* ndpi_strnstr(const char *s, const char *find, size_t slen) {
 
 /* ****************************************************** */
 
-int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-				  struct ndpi_flow_struct *flow,
-				  char *string_to_match, u_int string_to_match_len) {
+static int ndpi_automa_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+						ndpi_automa *automa,
+						struct ndpi_flow_struct *flow,
+						char *string_to_match, u_int string_to_match_len) {
   int matching_protocol_id;
   struct ndpi_packet_struct *packet = &flow->packet;
   AC_TEXT_t ac_input_text;
 
-  if((ndpi_struct->ac_automa == NULL) || (string_to_match_len== 0)) return(NDPI_PROTOCOL_UNKNOWN);
+  if((automa->ac_automa == NULL) || (string_to_match_len== 0)) return(NDPI_PROTOCOL_UNKNOWN);
 
-  if(!ndpi_struct->ac_automa_finalized) {
-    ac_automata_finalize((AC_AUTOMATA_t*)ndpi_struct->ac_automa);
-    ndpi_struct->ac_automa_finalized = 1;
+  if(!automa->ac_automa_finalized) {
+    ac_automata_finalize((AC_AUTOMATA_t*)automa->ac_automa);
+    automa->ac_automa_finalized = 1;
   }
 
   matching_protocol_id = NDPI_PROTOCOL_UNKNOWN;
 
   ac_input_text.astring = string_to_match, ac_input_text.length = string_to_match_len;
-  ac_automata_search (((AC_AUTOMATA_t*)ndpi_struct->ac_automa), &ac_input_text, (void*)&matching_protocol_id);
+  ac_automata_search (((AC_AUTOMATA_t*)automa->ac_automa), &ac_input_text, (void*)&matching_protocol_id);
 
-  ac_automata_reset(((AC_AUTOMATA_t*)ndpi_struct->ac_automa));
+  ac_automata_reset(((AC_AUTOMATA_t*)automa->ac_automa));
 
 #ifdef DEBUG
   {
@@ -5422,7 +5384,17 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 
 /* ****************************************************** */
 
-void* ndpi_create_empty_automa(struct ndpi_detection_module_struct *ndpi_struct) {
+int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+				  struct ndpi_flow_struct *flow,
+				  char *string_to_match, u_int string_to_match_len) {
+  return(ndpi_automa_match_string_subprotocol(ndpi_struct, &ndpi_struct->host_automa,
+					      flow, string_to_match, string_to_match_len));
+}
+
+/* ****************************************************** */
+
+#if 0
+void* ndpi_create_empty_host_automa(struct ndpi_detection_module_struct *ndpi_struct) {
   int i;
   void *automa = ac_automata_init(ac_match_handler);
 
@@ -5436,7 +5408,8 @@ void* ndpi_create_empty_automa(struct ndpi_detection_module_struct *ndpi_struct)
 
 /* ****************************************************** */
 
-int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct, char *value, int protocol_id, void* automa) {
+int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct,
+					    char *value, int protocol_id, void* automa) {
   AC_PATTERN_t ac_pattern;
 
   /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_RESULT_SERVICE_FACEBOOK */
@@ -5466,15 +5439,15 @@ int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct 
 
 /* ****************************************************** */
 
-void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa) {
+void ndpi_set_host_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa) {
   void *old_automa;
 
   ac_automata_finalize((AC_AUTOMATA_t*)automa);
-  ndpi_struct->ac_automa_finalized = 1;
+  ndpi_struct->host_automa.ac_automa_finalized = 1;
 
-  old_automa = ndpi_struct->ac_automa;
+  old_automa = ndpi_struct->host_automa.ac_automa;
 
-  ndpi_struct->ac_automa = automa;
+  ndpi_struct->host_automa.ac_automa = automa;
 
   if(old_automa != NULL) {
 #ifndef __KERNEL__
@@ -5483,7 +5456,7 @@ void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* aut
     ac_automata_release((AC_AUTOMATA_t*)old_automa);
   }
 }
-
+#endif
 
 /* ****************************************************** */
 
