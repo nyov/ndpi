@@ -674,25 +674,7 @@ static int ndpi_string_to_automa(struct ndpi_detection_module_struct *ndpi_struc
 /* ****************************************************** */
 
 static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-					 char *attr, char *value, int protocol_id) {
-  /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_SERVICE_FACEBOOK */
-
-#ifdef DEBUG
-  printf("[NDPI] ndpi_add_host_url_subprotocol(%s, %s, %d)\n", attr, value, protocol_id);
-#endif
-
-  /* The attribute is added here for future use */
-  if(strcmp(attr, "host") != 0) {
-#ifdef DEBUG
-    printf("[NTOP] attribute %s not supported\n", attr);
-#endif
-    return(-1);
-  }
-
-#ifdef DEBUG
-  printf("[NTOP] Adding new subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
-#endif
-
+					 char *value, int protocol_id) {
   return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->host_automa,
 			       value, protocol_id));
 }
@@ -713,7 +695,7 @@ int ndpi_add_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struc
   changing the datastrutures while using them
 */
 static int ndpi_remove_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-					    char *attr, char *value, int protocol_id) {
+					    char *value, int protocol_id) {
 
   printf("[NDPI] Missing implementation of %s()\n", __FUNCTION__);
   return(-1);
@@ -725,7 +707,7 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
   int i;
 
   for(i=0; host_match[i].string_to_match != NULL; i++) {
-    ndpi_add_host_url_subprotocol(ndpi_mod, "host", host_match[i].string_to_match, host_match[i].protocol_id);
+    ndpi_add_host_url_subprotocol(ndpi_mod, host_match[i].string_to_match, host_match[i].protocol_id);
 
     if(ndpi_mod->proto_defaults[host_match[i].protocol_id].protoName == NULL) {
       ndpi_mod->proto_defaults[host_match[i].protocol_id].protoName = ndpi_strdup(host_match[i].proto_name);
@@ -733,9 +715,8 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
     }
   }
 
-  for(i=0; content_match[i].string_to_match != NULL; i++) {
+  for(i=0; content_match[i].string_to_match != NULL; i++)
     ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match, content_match[i].protocol_id);
-  }
 }
 
 /* ******************************************************************** */
@@ -1528,9 +1509,9 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
 	removeDefaultPort(&range, def, is_tcp ? &ndpi_mod->tcpRoot : &ndpi_mod->udpRoot);
     } else {
       if(do_add)
-	ndpi_add_host_url_subprotocol(ndpi_mod, "host", value, subprotocol_id);
+	ndpi_add_host_url_subprotocol(ndpi_mod, value, subprotocol_id);
       else
-	ndpi_remove_host_url_subprotocol(ndpi_mod, "host", value, subprotocol_id);
+	ndpi_remove_host_url_subprotocol(ndpi_mod, value, subprotocol_id);
     }
   }
 
@@ -5393,70 +5374,12 @@ int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_stru
 
 /* ****************************************************** */
 
-#if 0
-void* ndpi_create_empty_host_automa(struct ndpi_detection_module_struct *ndpi_struct) {
-  int i;
-  void *automa = ac_automata_init(ac_match_handler);
-
-  for(i=0; host_match[i].string_to_match != NULL; i++)
-    ndpi_add_host_url_subprotocol_to_automa(ndpi_struct,
-					    host_match[i].string_to_match,
-					    host_match[i].protocol_id, automa);
-
-  return(automa);
+int ndpi_match_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+				   struct ndpi_flow_struct *flow,
+				   char *string_to_match, u_int string_to_match_len) {
+  return(ndpi_automa_match_string_subprotocol(ndpi_struct, &ndpi_struct->content_automa,
+					      flow, string_to_match, string_to_match_len));
 }
-
-/* ****************************************************** */
-
-int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct,
-					    char *value, int protocol_id, void* automa) {
-  AC_PATTERN_t ac_pattern;
-
-  /* e.g attr = "host" value = ".facebook.com" protocol_id = NDPI_PROTOCOL_SERVICE_FACEBOOK */
-
-#ifdef DEBUG
-  printf("[NDPI] ndpi_add_host_url_subprotocol(%s, %s, %d)\n", attr, value, protocol_id);
-#endif
-
-  if(protocol_id >= NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS) {
-    printf("[NDPI] %s(protoId=%d): INTERNAL ERROR\n", __FUNCTION__, protocol_id);
-    return(-1);
-  }
-
-  if(automa == NULL) return(-2);
-
-  ac_pattern.astring = value;
-  ac_pattern.rep.number = protocol_id;
-  ac_pattern.length = strlen(ac_pattern.astring);
-  ac_automata_add(((AC_AUTOMATA_t*)automa), &ac_pattern);
-
-#ifdef DEBUG
-  printf("[NTOP] new subprotocol: %s = %s -> %d\n", attr, value, protocol_id);
-#endif
-
-  return(0);
-}
-
-/* ****************************************************** */
-
-void ndpi_set_host_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa) {
-  void *old_automa;
-
-  ac_automata_finalize((AC_AUTOMATA_t*)automa);
-  ndpi_struct->host_automa.ac_automa_finalized = 1;
-
-  old_automa = ndpi_struct->host_automa.ac_automa;
-
-  ndpi_struct->host_automa.ac_automa = automa;
-
-  if(old_automa != NULL) {
-#ifndef __KERNEL__
-    sleep(1); /* Make sure nobody is using it */
-#endif
-    ac_automata_release((AC_AUTOMATA_t*)old_automa);
-  }
-}
-#endif
 
 /* ****************************************************** */
 

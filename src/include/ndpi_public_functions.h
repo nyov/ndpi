@@ -254,7 +254,9 @@ extern "C" {
 					      u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);
   int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
 				    struct ndpi_flow_struct *flow, char *string_to_match, u_int string_to_match_len);
-
+  int ndpi_match_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
+				     struct ndpi_flow_struct *flow,
+				     char *string_to_match, u_int string_to_match_len);
   char* ndpi_get_proto_name(struct ndpi_detection_module_struct *mod, u_int16_t proto_id);
   int ndpi_get_protocol_id(struct ndpi_detection_module_struct *ndpi_mod, char *proto);
   void ndpi_dump_protocols(struct ndpi_detection_module_struct *mod);
