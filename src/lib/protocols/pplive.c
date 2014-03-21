@@ -26,9 +26,9 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_RESULT_APP_PPLIVE
+#ifdef NDPI_PROTOCOL_PPLIVE
 static void ndpi_int_pplive_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_PPLIVE, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_PPLIVE, NDPI_REAL_PROTOCOL);
 }
 
 static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
@@ -37,10 +37,10 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 	
 	/* Check if we so far detected the protocol in the request or not. */
 	if (flow->l4.udp.pplive_stage1 == 0) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
 		
 		if (match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
 			flow->l4.udp.pplive_stage1 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
@@ -48,7 +48,7 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 		}
 		
 		if (match_first_bytes(packet->payload, "\xe9\x03\x42\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
 			flow->l4.udp.pplive_stage1 = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
@@ -56,7 +56,7 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 		}
 		
 		if (match_first_bytes(packet->payload, "\x1c\x1c\x32\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
 			flow->l4.udp.pplive_stage1 = packet->packet_direction + 5; // packet_direction 0: stage 5, packet_direction 1: stage 6
@@ -64,7 +64,7 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 		}			
 
 	} else if ((flow->l4.udp.pplive_stage1 == 1) || (flow->l4.udp.pplive_stage1 == 2)) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
 		if ((flow->l4.udp.pplive_stage1 - packet->packet_direction) == 1) {
@@ -73,15 +73,15 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 
 		/* This is a packet in another direction. Check if we find the proper response. */
 		if (match_first_bytes(packet->payload, "\xe9\x03\x42\x01") || match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
 			flow->l4.udp.pplive_stage1 = 0;
 		}
 		
 	} else if ((flow->l4.udp.pplive_stage1 == 3) || (flow->l4.udp.pplive_stage1 == 4)) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
 		if ((flow->l4.udp.pplive_stage1 - packet->packet_direction) == 3) {
@@ -90,14 +90,14 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 
 		/* This is a packet in another direction. Check if we find the proper response. */
 		if (match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
 			flow->l4.udp.pplive_stage1 = 0;
 		}
 	} else if ((flow->l4.udp.pplive_stage1 == 5) || (flow->l4.udp.pplive_stage1 == 6)) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
 		if ((flow->l4.udp.pplive_stage1 - packet->packet_direction) == 5) {
@@ -106,10 +106,10 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 
 		/* This is a packet in another direction. Check if we find the proper response. */
 		if (match_first_bytes(packet->payload, "\x1c\x1c\x32\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
 			flow->l4.udp.pplive_stage1 = 0;
 		}
 	}
@@ -122,17 +122,17 @@ static void ndpi_check_pplive_udp2(struct ndpi_detection_module_struct *ndpi_str
 
 	/* Check if we so far detected the protocol in the request or not. */
 	if (flow->l4.udp.pplive_stage2 == 0) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
 		
 		if ((payload_len == 57) && match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
 			flow->l4.udp.pplive_stage2 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 		}
 
 	} else {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage2);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage2);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
 		if ((flow->l4.udp.pplive_stage2 - packet->packet_direction) == 1) {
@@ -141,10 +141,10 @@ static void ndpi_check_pplive_udp2(struct ndpi_detection_module_struct *ndpi_str
 
 		/* This is a packet in another direction. Check if we find the proper response. */
 		if (payload_len == 0) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
 			flow->l4.udp.pplive_stage2 = 0;
 		}
 		
@@ -157,10 +157,10 @@ static void ndpi_check_pplive_udp3(struct ndpi_detection_module_struct *ndpi_str
 	
 	/* Check if we so far detected the protocol in the request or not. */
 	if (flow->l4.udp.pplive_stage3 == 0) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
 		
 		if ((payload_len == 94) && (packet->udp->dest == htons(5041) || packet->udp->source == htons(5041) || packet->udp->dest == htons(8303) || packet->udp->source == htons(8303))) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
 			flow->l4.udp.pplive_stage3 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
@@ -168,7 +168,7 @@ static void ndpi_check_pplive_udp3(struct ndpi_detection_module_struct *ndpi_str
 		}	
 
 	} else {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage3);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage3);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
 		if ((flow->l4.udp.pplive_stage3 - packet->packet_direction) == 1) {
@@ -177,10 +177,10 @@ static void ndpi_check_pplive_udp3(struct ndpi_detection_module_struct *ndpi_str
 
 		/* This is a packet in another direction. Check if we find the proper response. */
 		if ((payload_len == 0) || (payload_len == 49) ||(payload_len == 94)) {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
-			NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
+			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
 			flow->l4.udp.pplive_stage3 = 0;
 		}
 	}
@@ -192,25 +192,25 @@ void ndpi_search_pplive(struct ndpi_detection_module_struct *ndpi_struct, struct
 	
 	/* Break after 20 packets. */
 	if (flow->packet_counter > 20) {
-		NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Exclude PPLIVE.\n");
-		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_PPLIVE);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Exclude PPLIVE.\n");
+		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_PPLIVE);
 		return;
 	}
 
-	if (packet->detected_protocol_stack[0] == NDPI_RESULT_APP_PPLIVE) {
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_PPLIVE) {
 		return;
 	}
 
-	NDPI_LOG(NDPI_RESULT_APP_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE detection...\n");
+	NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE detection...\n");
 	ndpi_check_pplive_udp1(ndpi_struct, flow);
 	
-	if (packet->detected_protocol_stack[0] == NDPI_RESULT_APP_PPLIVE) {
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_PPLIVE) {
 	    return;
 	}
 	
 	ndpi_check_pplive_udp2(ndpi_struct, flow);
 	
-	if (packet->detected_protocol_stack[0] == NDPI_RESULT_APP_PPLIVE) {
+	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_PPLIVE) {
 	    return;
 	}
 	

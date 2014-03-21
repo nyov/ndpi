@@ -20,7 +20,7 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_WHOIS_DAS
+#ifdef NDPI_PROTOCOL_WHOIS_DAS
 
 void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
@@ -45,13 +45,13 @@ void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, str
 
       flow->host_server_name[i] = '\0';
 
-      NDPI_LOG(NDPI_RESULT_APP_WHOIS_DAS, ndpi_struct, NDPI_LOG_DEBUG, "{WHOIS/DAS] %s\n", flow->host_server_name);
+      NDPI_LOG(NDPI_PROTOCOL_WHOIS_DAS, ndpi_struct, NDPI_LOG_DEBUG, "{WHOIS/DAS] %s\n", flow->host_server_name);
     }
 
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_WHOIS_DAS, NDPI_REAL_PROTOCOL);      
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WHOIS_DAS, NDPI_REAL_PROTOCOL);      
   } else {
-    NDPI_LOG(NDPI_RESULT_APP_WHOIS_DAS, ndpi_struct, NDPI_LOG_DEBUG, "excluding whois_das at stage %d\n", flow->l4.tcp.whois_das_stage);
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_WHOIS_DAS);
+    NDPI_LOG(NDPI_PROTOCOL_WHOIS_DAS, ndpi_struct, NDPI_LOG_DEBUG, "excluding whois_das at stage %d\n", flow->l4.tcp.whois_das_stage);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_WHOIS_DAS);
   }
 }
 

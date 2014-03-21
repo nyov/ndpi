@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_TDS
+#ifdef NDPI_PROTOCOL_TDS
 
 static void ndpi_int_tds_add_connection(struct ndpi_detection_module_struct
 										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_TDS, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TDS, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
@@ -70,7 +70,7 @@ void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
 			switch (flow->l4.tcp.tds_login_version) {
 			case 0x12:
 				if (packet->payload[0] == 0x12) {
-					NDPI_LOG(NDPI_RESULT_APP_TDS, ndpi_struct, NDPI_LOG_DEBUG, "TDS detected\n");
+					NDPI_LOG(NDPI_PROTOCOL_TDS, ndpi_struct, NDPI_LOG_DEBUG, "TDS detected\n");
 					ndpi_int_tds_add_connection(ndpi_struct, flow);
 					return;
 				} else {
@@ -85,7 +85,7 @@ void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
 
   exclude_tds:
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_TDS);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_TDS);
 }
 
 #endif

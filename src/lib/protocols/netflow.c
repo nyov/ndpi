@@ -21,7 +21,7 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_RESULT_APP_NETFLOW
+#ifdef NDPI_PROTOCOL_NETFLOW
 
 #ifndef __KERNEL__
 #ifdef WIN32
@@ -77,8 +77,8 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
 
     if(((version == 1) && (when == 0))
        || ((when >= 946684800 /* 1/1/2000 */) && (when <= now))) {
-      NDPI_LOG(NDPI_RESULT_APP_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_NETFLOW, NDPI_REAL_PROTOCOL);
+      NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_NETFLOW, NDPI_REAL_PROTOCOL);
       return;
     }
   }
@@ -86,7 +86,7 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
 
 void ndpi_search_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  NDPI_LOG(NDPI_RESULT_APP_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
+  NDPI_LOG(NDPI_PROTOCOL_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
   ndpi_check_netflow(ndpi_struct, flow);
 }
 

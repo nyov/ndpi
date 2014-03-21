@@ -25,11 +25,11 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_AFP
+#ifdef NDPI_PROTOCOL_AFP
 
 static void ndpi_int_afp_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_AFP, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_AFP, NDPI_REAL_PROTOCOL);
 }
 
 
@@ -49,7 +49,7 @@ void ndpi_search_afp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 		get_u_int32_t(packet->payload, 8) == htonl(packet->payload_packet_len - 16) &&
 		get_u_int32_t(packet->payload, 12) == 0 && get_u_int16_t(packet->payload, 16) == htons(0x0104)) {
 
-		NDPI_LOG(NDPI_RESULT_APP_AFP, ndpi_struct, NDPI_LOG_DEBUG, "AFP: DSI OpenSession detected.\n");
+		NDPI_LOG(NDPI_PROTOCOL_AFP, ndpi_struct, NDPI_LOG_DEBUG, "AFP: DSI OpenSession detected.\n");
 		ndpi_int_afp_add_connection(ndpi_struct, flow);
 		return;
 	}
@@ -62,14 +62,14 @@ void ndpi_search_afp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 		get_u_int32_t(packet->payload, 8) == htonl(packet->payload_packet_len - 16) &&
 		get_u_int32_t(packet->payload, 12) == 0 && get_u_int16_t(packet->payload, 16) == htons(0x0f00)) {
 
-		NDPI_LOG(NDPI_RESULT_APP_AFP, ndpi_struct, NDPI_LOG_DEBUG, "AFP: DSI GetStatus detected.\n");
+		NDPI_LOG(NDPI_PROTOCOL_AFP, ndpi_struct, NDPI_LOG_DEBUG, "AFP: DSI GetStatus detected.\n");
 		ndpi_int_afp_add_connection(ndpi_struct, flow);
 		return;
 	}
 
 
-	NDPI_LOG(NDPI_RESULT_APP_AFP, ndpi_struct, NDPI_LOG_DEBUG, "AFP excluded.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_AFP);
+	NDPI_LOG(NDPI_PROTOCOL_AFP, ndpi_struct, NDPI_LOG_DEBUG, "AFP excluded.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_AFP);
 }
 
 #endif

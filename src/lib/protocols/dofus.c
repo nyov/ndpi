@@ -25,12 +25,12 @@
 
 
 #include "ndpi_utils.h"
-#ifdef NDPI_RESULT_APP_DOFUS
+#ifdef NDPI_PROTOCOL_DOFUS
 
 
 static void ndpi_dofus_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_DOFUS, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DOFUS, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -45,44 +45,44 @@ void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	if (packet->payload_packet_len == 13 && get_u_int16_t(packet->payload, 1) == ntohs(0x0508)
 		&& get_u_int16_t(packet->payload, 5) == ntohs(0x04a0)
 		&& get_u_int16_t(packet->payload, packet->payload_packet_len - 2) == ntohs(0x0194)) {
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
 		ndpi_dofus_add_connection(ndpi_struct, flow);
 		return;
 	}
 	if (flow->l4.tcp.dofus_stage == 0 && packet->payload_packet_len == 3 && memcmp(packet->payload, "HG", 2) == 0
 		&& packet->payload[packet->payload_packet_len - 1] == 0) {
 		flow->l4.tcp.dofus_stage = 1;
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
 		return;
 	}
 	if (flow->l4.tcp.dofus_stage == 0 && packet->payload_packet_len == 35 && memcmp(packet->payload, "HC", 2) == 0
 		&& packet->payload[packet->payload_packet_len - 1] == 0) {
 		flow->l4.tcp.dofus_stage = 1;
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
 		return;
 	}
 	if (flow->l4.tcp.dofus_stage == 0 && packet->payload_packet_len > 2 && packet->payload[0] == 'A'
 		&& (packet->payload[1] == 'x' || packet->payload[1] == 'X')
 		&& packet->payload[packet->payload_packet_len - 1] == 0) {
 		flow->l4.tcp.dofus_stage = 1;
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
 		return;
 	}
 	if (flow->l4.tcp.dofus_stage == 0 && packet->payload_packet_len == 12 && memcmp(packet->payload, "Af", 2) == 0
 		&& packet->payload[packet->payload_packet_len - 1] == 0) {
 		flow->l4.tcp.dofus_stage = 1;
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
 		return;
 	}
 	if (flow->l4.tcp.dofus_stage == 0 && packet->payload_packet_len > 2 && memcmp(packet->payload, "Ad", 2)
 		&& packet->payload[packet->payload_packet_len - 1] == 0) {
 		flow->l4.tcp.dofus_stage = 1;
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "maybe dofus.\n");
 		return;
 	}
 	if (packet->payload_packet_len == 11 && memcmp(packet->payload, "AT", 2) == 0 && packet->payload[10] == 0x00) {
 		if (flow->l4.tcp.dofus_stage == 1) {
-			NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
+			NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
 			ndpi_dofus_add_connection(ndpi_struct, flow);
 			return;
 		}
@@ -90,7 +90,7 @@ void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	if (flow->l4.tcp.dofus_stage == 1 && packet->payload_packet_len == 5
 		&& packet->payload[0] == 'A' && packet->payload[4] == 0x00 && (packet->payload[1] == 'T'
 																	   || packet->payload[1] == 'k')) {
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus asym.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus asym.\n");
 		ndpi_dofus_add_connection(ndpi_struct, flow);
 		return;
 	}
@@ -110,7 +110,7 @@ void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct, struct 
 		if (packet->payload_packet_len == 49 && ntohs(get_u_int16_t(packet->payload, 15)) + 17 != packet->payload_packet_len) {
 			goto exclude;
 		}
-		NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
+		NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
 		ndpi_dofus_add_connection(ndpi_struct, flow);
 		return;
 	}
@@ -121,7 +121,7 @@ void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct, struct 
 			goto exclude;
 		len2 = ntohs(get_u_int16_t(packet->payload, 5 + len));
 		if (5 + len + 2 + len2 == packet->payload_packet_len) {
-			NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
+			NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
 			ndpi_dofus_add_connection(ndpi_struct, flow);
 			return;
 		}
@@ -136,14 +136,14 @@ void ndpi_search_dofus(struct ndpi_detection_module_struct *ndpi_struct, struct 
 		if ((12 + len + 2 + len2 + 1) > packet->payload_packet_len)
 			goto exclude;
 		if (12 + len + 2 + len2 + 1 == packet->payload_packet_len && packet->payload[12 + len + 2 + len2] == 0x01) {
-			NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
+			NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "found dofus.\n");
 			ndpi_dofus_add_connection(ndpi_struct, flow);
 			return;
 		}
 	}
   exclude:
-	NDPI_LOG(NDPI_RESULT_APP_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "exclude dofus.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_DOFUS);
+	NDPI_LOG(NDPI_PROTOCOL_DOFUS, ndpi_struct, NDPI_LOG_DEBUG, "exclude dofus.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DOFUS);
 }
 
 #endif

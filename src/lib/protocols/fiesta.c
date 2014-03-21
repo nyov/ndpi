@@ -26,12 +26,12 @@
 
 /* include files */
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_FIESTA
+#ifdef NDPI_PROTOCOL_FIESTA
 
 
 static void ndpi_int_fiesta_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_FIESTA, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FIESTA, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_fiesta(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -41,14 +41,14 @@ void ndpi_search_fiesta(struct ndpi_detection_module_struct *ndpi_struct, struct
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	NDPI_LOG(NDPI_RESULT_APP_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "search fiesta.\n");
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "search fiesta.\n");
 
 	if (flow->l4.tcp.fiesta_stage == 0 && packet->payload_packet_len == 5
 		&& get_u_int16_t(packet->payload, 0) == ntohs(0x0407)
 		&& (packet->payload[2] == 0x08)
 		&& (packet->payload[4] == 0x00 || packet->payload[4] == 0x01)) {
 
-		NDPI_LOG(NDPI_RESULT_APP_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "maybe fiesta symmetric, first packet.\n");
+		NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "maybe fiesta symmetric, first packet.\n");
 		flow->l4.tcp.fiesta_stage = 1 + packet->packet_direction;
 		goto maybe_fiesta;
 	}
@@ -56,7 +56,7 @@ void ndpi_search_fiesta(struct ndpi_detection_module_struct *ndpi_struct, struct
 		&& ((packet->payload_packet_len > 1 && packet->payload_packet_len - 1 == packet->payload[0])
 			|| (packet->payload_packet_len > 3 && packet->payload[0] == 0
 				&& get_l16(packet->payload, 1) == packet->payload_packet_len - 3))) {
-		NDPI_LOG(NDPI_RESULT_APP_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "Maybe fiesta.\n");
+		NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "Maybe fiesta.\n");
 		goto maybe_fiesta;
 	}
 	if (flow->l4.tcp.fiesta_stage == (1 + packet->packet_direction)) {
@@ -81,16 +81,16 @@ void ndpi_search_fiesta(struct ndpi_detection_module_struct *ndpi_struct, struct
 		}
 	}
 
-	NDPI_LOG(NDPI_RESULT_APP_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "exclude fiesta.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_FIESTA);
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "exclude fiesta.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FIESTA);
 	return;
 
   maybe_fiesta:
-	NDPI_LOG(NDPI_RESULT_APP_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "Stage is set to %d.\n", flow->l4.tcp.fiesta_stage);
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "Stage is set to %d.\n", flow->l4.tcp.fiesta_stage);
 	return;
 
   add_fiesta:
-	NDPI_LOG(NDPI_RESULT_APP_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "detected fiesta.\n");
+	NDPI_LOG(NDPI_PROTOCOL_FIESTA, ndpi_struct, NDPI_LOG_DEBUG, "detected fiesta.\n");
 	ndpi_int_fiesta_add_connection(ndpi_struct, flow);
 	return;
 }

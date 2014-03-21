@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_NFS
+#ifdef NDPI_PROTOCOL_NFS
 
 static void ndpi_int_nfs_add_connection(struct ndpi_detection_module_struct
 										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_NFS, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_NFS, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_nfs(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -46,41 +46,41 @@ void ndpi_search_nfs(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	if (packet->payload_packet_len < (40 + offset))
 		goto exclude_nfs;
 
-	NDPI_LOG(NDPI_RESULT_APP_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS user match stage 1\n");
+	NDPI_LOG(NDPI_PROTOCOL_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS user match stage 1\n");
 
 
 	if (offset != 0 && get_u_int32_t(packet->payload, 0) != htonl(0x80000000 + packet->payload_packet_len - 4))
 		goto exclude_nfs;
 
-	NDPI_LOG(NDPI_RESULT_APP_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS user match stage 2\n");
+	NDPI_LOG(NDPI_PROTOCOL_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS user match stage 2\n");
 
 	if (get_u_int32_t(packet->payload, 4 + offset) != 0)
 		goto exclude_nfs;
 
-	NDPI_LOG(NDPI_RESULT_APP_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS user match stage 3\n");
+	NDPI_LOG(NDPI_PROTOCOL_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS user match stage 3\n");
 
 	if (get_u_int32_t(packet->payload, 8 + offset) != htonl(0x02))
 		goto exclude_nfs;
 
-	NDPI_LOG(NDPI_RESULT_APP_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS match stage 3\n");
+	NDPI_LOG(NDPI_PROTOCOL_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS match stage 3\n");
 
 	if (get_u_int32_t(packet->payload, 12 + offset) != htonl(0x000186a5)
 		&& get_u_int32_t(packet->payload, 12 + offset) != htonl(0x000186a3)
 		&& get_u_int32_t(packet->payload, 12 + offset) != htonl(0x000186a0))
 		goto exclude_nfs;
 
-	NDPI_LOG(NDPI_RESULT_APP_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS match stage 4\n");
+	NDPI_LOG(NDPI_PROTOCOL_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS match stage 4\n");
 
 	if (ntohl(get_u_int32_t(packet->payload, 16 + offset)) > 4)
 		goto exclude_nfs;
 
-	NDPI_LOG(NDPI_RESULT_APP_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS match\n");
+	NDPI_LOG(NDPI_PROTOCOL_NFS, ndpi_struct, NDPI_LOG_DEBUG, "NFS match\n");
 
 	ndpi_int_nfs_add_connection(ndpi_struct, flow);
 	return;
 
   exclude_nfs:
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_NFS);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_NFS);
 }
 
 #endif

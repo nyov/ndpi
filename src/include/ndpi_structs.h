@@ -90,100 +90,100 @@ typedef struct ndpi_id_struct {
    * }
    */
   NDPI_PROTOCOL_BITMASK detected_protocol_bitmask;
-#ifdef NDPI_RESULT_APP_RTSP
+#ifdef NDPI_PROTOCOL_RTSP
   ndpi_ip_addr_t rtsp_ip_address;
 #endif
-#ifdef NDPI_RESULT_APP_SIP
-#ifdef NDPI_RESULT_APP_YAHOO
+#ifdef NDPI_PROTOCOL_SIP
+#ifdef NDPI_PROTOCOL_YAHOO
   u_int32_t yahoo_video_lan_timer;
 #endif
 #endif
-#ifdef NDPI_RESULT_APP_IRC
+#ifdef NDPI_PROTOCOL_IRC
   u_int32_t last_time_port_used[16];
 #endif
-#ifdef NDPI_RESULT_APP_IRC
+#ifdef NDPI_PROTOCOL_IRC
   u_int32_t irc_ts;
 #endif
-#ifdef NDPI_RESULT_APP_GNUTELLA
+#ifdef NDPI_PROTOCOL_GNUTELLA
   u_int32_t gnutella_ts;
 #endif
-#ifdef NDPI_RESULT_APP_BATTLEFIELD
+#ifdef NDPI_PROTOCOL_BATTLEFIELD
   u_int32_t battlefield_ts;
 #endif
-#ifdef NDPI_RESULT_APP_THUNDER
+#ifdef NDPI_PROTOCOL_THUNDER
   u_int32_t thunder_ts;
 #endif
-#ifdef NDPI_RESULT_APP_RTSP
+#ifdef NDPI_PROTOCOL_RTSP
   u_int32_t rtsp_timer;
 #endif
-#ifdef NDPI_RESULT_APP_OSCAR
+#ifdef NDPI_PROTOCOL_OSCAR
   u_int32_t oscar_last_safe_access_time;
 #endif
 #ifdef NDPI_PROTOCOL_GADUGADU
   u_int32_t gg_ft_ip_address;
   u_int32_t gg_timeout;
 #endif
-#ifdef NDPI_RESULT_APP_ZATTOO
+#ifdef NDPI_PROTOCOL_ZATTOO
   u_int32_t zattoo_ts;
 #endif
-#ifdef NDPI_RESULT_APP_UNENCRYPED_JABBER
+#ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
   u_int32_t jabber_stun_or_ft_ts;
 #endif
-#ifdef NDPI_RESULT_APP_DIRECTCONNECT
+#ifdef NDPI_PROTOCOL_DIRECTCONNECT
   u_int32_t directconnect_last_safe_access_time;
 #endif
-#ifdef NDPI_RESULT_APP_SOULSEEK
+#ifdef NDPI_PROTOCOL_SOULSEEK
   u_int32_t soulseek_last_safe_access_time;
 #endif
-#ifdef NDPI_RESULT_APP_DIRECTCONNECT
+#ifdef NDPI_PROTOCOL_DIRECTCONNECT
   u_int16_t detected_directconnect_port;
   u_int16_t detected_directconnect_udp_port;
   u_int16_t detected_directconnect_ssl_port;
 #endif
-#ifdef NDPI_RESULT_APP_IRC
+#ifdef NDPI_PROTOCOL_IRC
   u_int16_t irc_port[16];
 #endif
 #ifdef NDPI_PROTOCOL_GADUGADU
   u_int16_t gg_ft_port;
 #endif
-#ifdef NDPI_RESULT_APP_UNENCRYPED_JABBER
+#ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
 #define JABBER_MAX_STUN_PORTS 6
   u_int16_t jabber_voice_stun_port[JABBER_MAX_STUN_PORTS];
   u_int16_t jabber_file_transfer_port[2];
 #endif
-#ifdef NDPI_RESULT_APP_GNUTELLA
+#ifdef NDPI_PROTOCOL_GNUTELLA
   u_int16_t detected_gnutella_port;
 #endif
-#ifdef NDPI_RESULT_APP_GNUTELLA
+#ifdef NDPI_PROTOCOL_GNUTELLA
   u_int16_t detected_gnutella_udp_port1;
   u_int16_t detected_gnutella_udp_port2;
 #endif
-#ifdef NDPI_RESULT_APP_SOULSEEK
+#ifdef NDPI_PROTOCOL_SOULSEEK
   u_int16_t soulseek_listen_port;
 #endif
-#ifdef NDPI_RESULT_APP_IRC
+#ifdef NDPI_PROTOCOL_IRC
   u_int8_t irc_number_of_port;
 #endif
-#ifdef NDPI_RESULT_APP_OSCAR
+#ifdef NDPI_PROTOCOL_OSCAR
   u_int8_t oscar_ssl_session_id[33];
 #endif
 #ifdef NDPI_PROTOCOL_GADUGADU
   u_int8_t gg_call_id[2][7];
   u_int8_t gg_fmnumber[8];
 #endif
-#ifdef NDPI_RESULT_APP_UNENCRYPED_JABBER
+#ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
   u_int8_t jabber_voice_stun_used_ports;
 #endif
-#ifdef NDPI_RESULT_APP_SIP
-#ifdef NDPI_RESULT_APP_YAHOO
+#ifdef NDPI_PROTOCOL_SIP
+#ifdef NDPI_PROTOCOL_YAHOO
   u_int32_t yahoo_video_lan_dir:1;
 #endif
 #endif
-#ifdef NDPI_RESULT_APP_YAHOO
+#ifdef NDPI_PROTOCOL_YAHOO
   u_int32_t yahoo_conf_logged_in:1;
   u_int32_t yahoo_voice_conf_logged_in:1;
 #endif
-#ifdef NDPI_RESULT_APP_RTSP
+#ifdef NDPI_PROTOCOL_RTSP
   u_int32_t rtsp_ts_set:1;
 #endif
 } ndpi_id_struct;
@@ -191,144 +191,144 @@ typedef struct ndpi_id_struct {
 /* ************************************************** */ 
 
 struct ndpi_flow_tcp_struct {
-#ifdef NDPI_RESULT_APP_MAIL_SMTP
+#ifdef NDPI_PROTOCOL_MAIL_SMTP
   u_int16_t smtp_command_bitmask;
 #endif
-#ifdef NDPI_RESULT_APP_MAIL_POP
+#ifdef NDPI_PROTOCOL_MAIL_POP
   u_int16_t pop_command_bitmask;
 #endif
-#ifdef NDPI_RESULT_APP_QQ
+#ifdef NDPI_PROTOCOL_QQ
   u_int16_t qq_nxt_len;
 #endif
-#ifdef NDPI_RESULT_APP_TDS
+#ifdef NDPI_PROTOCOL_TDS
   u_int8_t tds_login_version;
 #endif
-#ifdef NDPI_RESULT_APP_IRC
+#ifdef NDPI_PROTOCOL_IRC
   u_int8_t irc_stage;
   u_int8_t irc_port;
 #endif
-#ifdef NDPI_RESULT_APP_GNUTELLA
+#ifdef NDPI_PROTOCOL_GNUTELLA
   u_int8_t gnutella_msg_id[3];
 #endif
-#ifdef NDPI_RESULT_APP_IRC
+#ifdef NDPI_PROTOCOL_IRC
   u_int32_t irc_3a_counter:3;
   u_int32_t irc_stage2:5;
   u_int32_t irc_direction:2;
   u_int32_t irc_0x1000_full:1;
 #endif
-#ifdef NDPI_RESULT_APP_WINMX
+#ifdef NDPI_PROTOCOL_WINMX
   u_int32_t winmx_stage:1;			// 0-1
 #endif
-#ifdef NDPI_RESULT_APP_SOULSEEK
+#ifdef NDPI_PROTOCOL_SOULSEEK
   u_int32_t soulseek_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_FILETOPIA
+#ifdef NDPI_PROTOCOL_FILETOPIA
   u_int32_t filetopia_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_TDS
+#ifdef NDPI_PROTOCOL_TDS
   u_int32_t tds_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_USENET
+#ifdef NDPI_PROTOCOL_USENET
   u_int32_t usenet_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_IMESH
+#ifdef NDPI_PROTOCOL_IMESH
   u_int32_t imesh_stage:4;
 #endif
-#ifdef NDPI_RESULT_APP_FTP_CONTROL
+#ifdef NDPI_PROTOCOL_FTP_CONTROL
   u_int32_t ftp_control_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_FTP_DATA
+#ifdef NDPI_PROTOCOL_FTP_DATA
   u_int32_t ftp_data_stage:2;
 #endif
-#ifdef NDPI_RESULT_BASE_HTTP
+#ifdef NDPI_PROTOCOL_HTTP
   u_int32_t http_setup_dir:2;
   u_int32_t http_stage:2;
   u_int32_t http_empty_line_seen:1;
   u_int32_t http_wait_for_retransmission:1;
-#endif							// NDPI_RESULT_BASE_HTTP
-#ifdef NDPI_RESULT_APP_GNUTELLA
+#endif							// NDPI_PROTOCOL_HTTP
+#ifdef NDPI_PROTOCOL_GNUTELLA
   u_int32_t gnutella_stage:2;		//0-2
 #endif
-#ifdef NDPI_RESULT_CONTENT_MMS
+#ifdef NDPI_CONTENT_MMS
   u_int32_t mms_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_YAHOO
+#ifdef NDPI_PROTOCOL_YAHOO
   u_int32_t yahoo_sip_comm:1;
   u_int32_t yahoo_http_proxy_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_MSN
+#ifdef NDPI_PROTOCOL_MSN
   u_int32_t msn_stage:3;
   u_int32_t msn_ssl_ft:2;
 #endif
-#ifdef NDPI_RESULT_APP_SSH
+#ifdef NDPI_PROTOCOL_SSH
   u_int32_t ssh_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_VNC
+#ifdef NDPI_PROTOCOL_VNC
   u_int32_t vnc_stage:2;			// 0 - 3
 #endif
-#ifdef NDPI_RESULT_APP_STEAM
+#ifdef NDPI_PROTOCOL_STEAM
   u_int32_t steam_stage:3;			// 0 - 4
 #endif
-#ifdef NDPI_RESULT_APP_TELNET
+#ifdef NDPI_PROTOCOL_TELNET
   u_int32_t telnet_stage:2;			// 0 - 2
 #endif
-#ifdef NDPI_RESULT_BASE_SSL
+#ifdef NDPI_PROTOCOL_SSL
   u_int8_t ssl_stage:2, ssl_seen_client_cert:1, ssl_seen_server_cert:1; // 0 - 5
 #endif
-#ifdef NDPI_RESULT_APP_POSTGRES
+#ifdef NDPI_PROTOCOL_POSTGRES
   u_int32_t postgres_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK
+#ifdef NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK
   u_int32_t ddlink_server_direction:1;
 #endif
   u_int32_t seen_syn:1;
   u_int32_t seen_syn_ack:1;
   u_int32_t seen_ack:1;
-#ifdef NDPI_RESULT_APP_ICECAST
+#ifdef NDPI_PROTOCOL_ICECAST
   u_int32_t icecast_stage:1;
 #endif
-#ifdef NDPI_RESULT_APP_DOFUS
+#ifdef NDPI_PROTOCOL_DOFUS
   u_int32_t dofus_stage:1;
 #endif
-#ifdef NDPI_RESULT_APP_FIESTA
+#ifdef NDPI_PROTOCOL_FIESTA
   u_int32_t fiesta_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_WORLDOFWARCRAFT
+#ifdef NDPI_PROTOCOL_WORLDOFWARCRAFT
   u_int32_t wow_stage:2;
 #endif
-#ifdef NDPI_RESULT_BASE_HTTP_APPLICATION_VEOHTV
+#ifdef NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV
   u_int32_t veoh_tv_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_SHOUTCAST
+#ifdef NDPI_PROTOCOL_SHOUTCAST
   u_int32_t shoutcast_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_RTP
+#ifdef NDPI_PROTOCOL_RTP
   u_int32_t rtp_special_packets_seen:1;
 #endif
-#ifdef NDPI_RESULT_APP_MAIL_POP
+#ifdef NDPI_PROTOCOL_MAIL_POP
   u_int32_t mail_pop_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_MAIL_IMAP
+#ifdef NDPI_PROTOCOL_MAIL_IMAP
   u_int32_t mail_imap_stage:3;
 #endif
 
-#ifdef NDPI_RESULT_APP_SKYPE
+#ifdef NDPI_PROTOCOL_SKYPE
   u_int8_t skype_packet_id;
 #endif
 
-#ifdef NDPI_RESULT_APP_CITRIX
+#ifdef NDPI_PROTOCOL_CITRIX
   u_int8_t citrix_packet_id;
 #endif
 
-#ifdef NDPI_RESULT_APP_LOTUS_NOTES
+#ifdef NDPI_PROTOCOL_LOTUS_NOTES
   u_int8_t lotus_notes_packet_id;
 #endif
 
-#ifdef NDPI_RESULT_APP_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
   
-#ifdef NDPI_RESULT_APP_RTMP
+#ifdef NDPI_PROTOCOL_RTMP
   u_int32_t rtmp_stage:2;
 #endif
 }
@@ -347,51 +347,51 @@ struct ndpi_flow_tcp_struct {
 #endif
 
 struct ndpi_flow_udp_struct {
-#ifdef NDPI_RESULT_APP_BATTLEFIELD
+#ifdef NDPI_PROTOCOL_BATTLEFIELD
   u_int32_t battlefield_msg_id;
 #endif
-#ifdef NDPI_RESULT_APP_SNMP
+#ifdef NDPI_PROTOCOL_SNMP
   u_int32_t snmp_msg_id;
 #endif
-#ifdef NDPI_RESULT_APP_BATTLEFIELD
+#ifdef NDPI_PROTOCOL_BATTLEFIELD
   u_int32_t battlefield_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_SNMP
+#ifdef NDPI_PROTOCOL_SNMP
   u_int32_t snmp_stage:2;
 #endif
-#ifdef NDPI_RESULT_APP_PPSTREAM
+#ifdef NDPI_PROTOCOL_PPSTREAM
   u_int32_t ppstream_stage:3;		// 0-7
 #endif
-#ifdef NDPI_RESULT_APP_HALFLIFE2
+#ifdef NDPI_PROTOCOL_HALFLIFE2
   u_int32_t halflife2_stage:2;		// 0 - 2
 #endif
-#ifdef NDPI_RESULT_APP_TFTP
+#ifdef NDPI_PROTOCOL_TFTP
   u_int32_t tftp_stage:1;
 #endif
-#ifdef NDPI_RESULT_APP_AIMINI
+#ifdef NDPI_PROTOCOL_AIMINI
   u_int32_t aimini_stage:5;
 #endif
-#ifdef NDPI_RESULT_APP_XBOX
+#ifdef NDPI_PROTOCOL_XBOX
   u_int32_t xbox_stage:1;
 #endif
-#ifdef NDPI_RESULT_APP_WINDOWS_UPDATE
+#ifdef NDPI_PROTOCOL_WINDOWS_UPDATE
   u_int32_t wsus_stage:1;
 #endif
-#ifdef NDPI_RESULT_APP_SKYPE
+#ifdef NDPI_PROTOCOL_SKYPE
   u_int8_t skype_packet_id;
 #endif
-#ifdef NDPI_RESULT_APP_TEAMVIEWER
+#ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
-#ifdef NDPI_RESULT_APP_PANDO
+#ifdef NDPI_PROTOCOL_PANDO
   u_int32_t pando_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_STEAM
+#ifdef NDPI_PROTOCOL_STEAM
   u_int32_t steam_stage1:3;			// 0 - 4
   u_int32_t steam_stage2:2;			// 0 - 2
   u_int32_t steam_stage3:2;			// 0 - 2
 #endif
-#ifdef NDPI_RESULT_APP_PPLIVE
+#ifdef NDPI_PROTOCOL_PPLIVE
   u_int32_t pplive_stage1:3;			// 0-6
   u_int32_t pplive_stage2:2;			// 0-2
   u_int32_t pplive_stage3:2;			// 0-2    
@@ -679,7 +679,7 @@ typedef struct ndpi_flow_struct {
   NDPI_PROTOCOL_BITMASK excluded_protocol_bitmask;
 
 #if 0
-#ifdef NDPI_RESULT_APP_RTP
+#ifdef NDPI_PROTOCOL_RTP
   u_int32_t rtp_ssid[2];
   u_int16_t rtp_seqnum[2];			/* current highest sequence number (only goes forwards, is not decreased by retransmissions) */
   /* tcp and udp */
@@ -693,51 +693,51 @@ typedef struct ndpi_flow_struct {
   u_int16_t packet_direction_counter[2];
   u_int16_t byte_counter[2];
 
-#ifdef NDPI_RESULT_APP_BITTORRENT
+#ifdef NDPI_PROTOCOL_BITTORRENT
   u_int8_t bittorrent_stage;		// can be 0-255
 #endif
-#ifdef NDPI_RESULT_APP_DIRECTCONNECT
+#ifdef NDPI_PROTOCOL_DIRECTCONNECT
   u_int32_t directconnect_stage:2;	// 0-1
 #endif
-#ifdef NDPI_RESULT_APP_SIP
-#ifdef NDPI_RESULT_APP_YAHOO
+#ifdef NDPI_PROTOCOL_SIP
+#ifdef NDPI_PROTOCOL_YAHOO
   u_int32_t sip_yahoo_voice:1;
 #endif
 #endif
-#ifdef NDPI_RESULT_BASE_HTTP
+#ifdef NDPI_PROTOCOL_HTTP
   u_int32_t http_detected:1;
-#endif							// NDPI_RESULT_BASE_HTTP
-#ifdef NDPI_RESULT_APP_RTSP
+#endif							// NDPI_PROTOCOL_HTTP
+#ifdef NDPI_PROTOCOL_RTSP
   u_int32_t rtsprdt_stage:2;
   u_int32_t rtsp_control_flow:1;
 #endif
 
-#ifdef NDPI_RESULT_APP_YAHOO
+#ifdef NDPI_PROTOCOL_YAHOO
   u_int32_t yahoo_detection_finished:2;
 #endif
-#ifdef NDPI_RESULT_APP_ZATTOO
+#ifdef NDPI_PROTOCOL_ZATTOO
   u_int32_t zattoo_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_QQ
+#ifdef NDPI_PROTOCOL_QQ
   u_int32_t qq_stage:3;
 #endif
-#ifdef NDPI_RESULT_APP_THUNDER
+#ifdef NDPI_PROTOCOL_THUNDER
   u_int32_t thunder_stage:2;		// 0-3
 #endif
-#ifdef NDPI_RESULT_APP_OSCAR
+#ifdef NDPI_PROTOCOL_OSCAR
   u_int32_t oscar_ssl_voice_stage:3;
   u_int32_t oscar_video_voice:1;
 #endif
-#ifdef NDPI_RESULT_APP_FLORENSIA
+#ifdef NDPI_PROTOCOL_FLORENSIA
   u_int32_t florensia_stage:1;
 #endif
-#ifdef NDPI_RESULT_BASE_SOCKS5
+#ifdef NDPI_PROTOCOL_SOCKS5
   u_int32_t socks5_stage:2;	// 0-3
 #endif
-#ifdef NDPI_RESULT_BASE_SOCKS4
+#ifdef NDPI_PROTOCOL_SOCKS4
   u_int32_t socks4_stage:2;	// 0-3
 #endif
-#ifdef NDPI_RESULT_APP_EDONKEY
+#ifdef NDPI_PROTOCOL_EDONKEY
   u_int32_t edonkey_stage:2;	// 0-3
 #endif
 

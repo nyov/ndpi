@@ -22,11 +22,11 @@
 #include "ndpi_utils.h"
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_RESULT_APP_RSYNC
+#ifdef NDPI_PROTOCOL_RSYNC
 static void ndpi_int_rsync_add_connection(struct ndpi_detection_module_struct
 					  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_RSYNC, NDPI_CORRELATED_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_RSYNC, NDPI_CORRELATED_PROTOCOL);
 }
 
 void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -34,11 +34,11 @@ void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct 
   struct ndpi_packet_struct *packet = &flow->packet;
   u_int16_t dport = 0, sport = 0;
 
-  NDPI_LOG(NDPI_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "search for RSYNC.\n");
+  NDPI_LOG(NDPI_PROTOCOL_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "search for RSYNC.\n");
 
   if(packet->tcp != NULL) {
     sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
-    NDPI_LOG(NDPI_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "calculating RSYNC over tcp.\n");
+    NDPI_LOG(NDPI_PROTOCOL_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "calculating RSYNC over tcp.\n");
     /*
      * Should match: memcmp(packet->payload, "@RSYN NCD: 28", 14) == 0)
      */
@@ -47,12 +47,12 @@ void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	packet->payload[3] == 0x59 && packet->payload[4] == 0x4e &&
 	packet->payload[5] == 0x43 && packet->payload[6] == 0x44 &&
 	packet->payload[7] == 0x3a ) {
-      NDPI_LOG(NDPI_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "found rsync.\n");
+      NDPI_LOG(NDPI_PROTOCOL_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "found rsync.\n");
       ndpi_int_rsync_add_connection(ndpi_struct, flow);
     }
   } else {
-    NDPI_LOG(NDPI_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "exclude RSYNC.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_RSYNC);
+    NDPI_LOG(NDPI_PROTOCOL_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "exclude RSYNC.\n");
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_RSYNC);
   }
 }
 #endif

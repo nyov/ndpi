@@ -10,7 +10,7 @@
 #include "ndpi_utils.h"
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_RESULT_APP_OPENVPN
+#ifdef NDPI_PROTOCOL_OPENVPN
 
 void ndpi_search_openvpn(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
@@ -22,8 +22,8 @@ void ndpi_search_openvpn(struct ndpi_detection_module_struct *ndpi_struct, struc
     if ((packet->payload_packet_len >= 25) && (sport == 443 || dport == 443) &&
 	(packet->payload[0] == 0x17 && packet->payload[1] == 0x01 &&
 	 packet->payload[2] == 0x00 && packet->payload[3] == 0x00)) {
-      NDPI_LOG(NDPI_RESULT_APP_OPENVPN, ndpi_struct, NDPI_LOG_DEBUG, "found openvpn udp 443.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_OPENVPN, NDPI_REAL_PROTOCOL);
+      NDPI_LOG(NDPI_PROTOCOL_OPENVPN, ndpi_struct, NDPI_LOG_DEBUG, "found openvpn udp 443.\n");
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_OPENVPN, NDPI_REAL_PROTOCOL);
       return;
     }
     
@@ -31,13 +31,13 @@ void ndpi_search_openvpn(struct ndpi_detection_module_struct *ndpi_struct, struc
 	(sport == 1194 || dport == 1194) &&
 	  (packet->payload[0] == 0x30 || packet->payload[0] == 0x31 || packet->payload[0] == 0x32 || packet->payload[0] == 0x33 || packet->payload[0] == 0x34 ||
 	   packet->payload[0] == 0x35 || packet->payload[0] == 0x36 || packet->payload[0] == 0x37 || packet->payload[0] == 0x38 || packet->payload[0] == 0x39))	{
-      NDPI_LOG(NDPI_RESULT_APP_OPENVPN, ndpi_struct, NDPI_LOG_DEBUG, "found openvpn broadcast udp STD.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_OPENVPN, NDPI_REAL_PROTOCOL);
+      NDPI_LOG(NDPI_PROTOCOL_OPENVPN, ndpi_struct, NDPI_LOG_DEBUG, "found openvpn broadcast udp STD.\n");
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_OPENVPN, NDPI_REAL_PROTOCOL);
       return;
     }
   }
   
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_OPENVPN);
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_OPENVPN);
 }
 
 #endif

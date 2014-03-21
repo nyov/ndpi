@@ -24,13 +24,13 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_RESULT_APP_SPOTIFY
+#ifdef NDPI_PROTOCOL_SPOTIFY
 static void ndpi_int_spotify_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					    struct ndpi_flow_struct *flow,
 					    u_int8_t due_to_correlation)
 {
   ndpi_int_add_connection(ndpi_struct, flow,
-			  NDPI_RESULT_APP_SPOTIFY,
+			  NDPI_PROTOCOL_SPOTIFY,
 			  due_to_correlation ? NDPI_CORRELATED_PROTOCOL : NDPI_REAL_PROTOCOL);
 }
 
@@ -48,7 +48,7 @@ static void ndpi_check_spotify(struct ndpi_detection_module_struct *ndpi_struct,
        && (packet->udp->dest == spotify_port)) {
       if(payload_len > 2) {
 	if(memcmp(packet->payload, "SpotUdp", 7) == 0) {
-	  NDPI_LOG(NDPI_RESULT_APP_SPOTIFY, ndpi_struct, NDPI_LOG_DEBUG, "Found spotify.\n");
+	  NDPI_LOG(NDPI_PROTOCOL_SPOTIFY, ndpi_struct, NDPI_LOG_DEBUG, "Found spotify.\n");
 	  ndpi_int_spotify_add_connection(ndpi_struct, flow, 0);
 	  return;
 	}
@@ -74,25 +74,25 @@ static void ndpi_check_spotify(struct ndpi_detection_module_struct *ndpi_struct,
 	   || ((ntohl(packet->iph->saddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC1EBE800 /* 193.235.232.0 */)
 	   || ((ntohl(packet->iph->daddr) & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC1EBE800 /* 193.235.232.0 */)
 	   ) {
-	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_SPOTIFY, NDPI_REAL_PROTOCOL);
+	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SPOTIFY, NDPI_REAL_PROTOCOL);
 	  return;
 	}
       }
     }
   }
 	  
-  NDPI_LOG(NDPI_RESULT_APP_SPOTIFY, ndpi_struct, NDPI_LOG_DEBUG, "exclude spotify.\n");
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_SPOTIFY);
+  NDPI_LOG(NDPI_PROTOCOL_SPOTIFY, ndpi_struct, NDPI_LOG_DEBUG, "exclude spotify.\n");
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SPOTIFY);
 }
 
 void ndpi_search_spotify(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_RESULT_APP_SPOTIFY, ndpi_struct, NDPI_LOG_DEBUG, "spotify detection...\n");
+  NDPI_LOG(NDPI_PROTOCOL_SPOTIFY, ndpi_struct, NDPI_LOG_DEBUG, "spotify detection...\n");
 
   /* skip marked packets */
-  if (packet->detected_protocol_stack[0] != NDPI_RESULT_APP_SPOTIFY) {
+  if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_SPOTIFY) {
     if (packet->tcp_retransmission == 0) {
       ndpi_check_spotify(ndpi_struct, flow);
     }

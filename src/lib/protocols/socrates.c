@@ -24,13 +24,13 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_SOCRATES
+#ifdef NDPI_PROTOCOL_SOCRATES
 
 
 static void ndpi_socrates_add_connection(struct ndpi_detection_module_struct
 										   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_SOCRATES, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SOCRATES, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_socrates(struct ndpi_detection_module_struct
@@ -43,15 +43,15 @@ void ndpi_search_socrates(struct ndpi_detection_module_struct
 
 
 
-	NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "search socrates.\n");
+	NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "search socrates.\n");
 	if (packet->udp != NULL) {
 		if (packet->payload_packet_len > 9 && packet->payload[0] == 0xfe
 			&& packet->payload[packet->payload_packet_len - 1] == 0x05) {
-			NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found fe.\n");
+			NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found fe.\n");
 
-			NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "len match.\n");
+			NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "len match.\n");
 			if (memcmp(&packet->payload[2], "socrates", 8) == 0) {
-				NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found socrates udp.\n");
+				NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found socrates udp.\n");
 				ndpi_socrates_add_connection(ndpi_struct, flow);
 			}
 
@@ -59,11 +59,11 @@ void ndpi_search_socrates(struct ndpi_detection_module_struct
 	} else if (packet->tcp != NULL) {
 		if (packet->payload_packet_len > 13 && packet->payload[0] == 0xfe
 			&& packet->payload[packet->payload_packet_len - 1] == 0x05) {
-			NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found fe.\n");
+			NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found fe.\n");
 			if (packet->payload_packet_len == ntohl(get_u_int32_t(packet->payload, 2))) {
-				NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "len match.\n");
+				NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "len match.\n");
 				if (memcmp(&packet->payload[6], "socrates", 8) == 0) {
-					NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found socrates tcp.\n");
+					NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "found socrates tcp.\n");
 					ndpi_socrates_add_connection(ndpi_struct, flow);
 				}
 			}
@@ -73,8 +73,8 @@ void ndpi_search_socrates(struct ndpi_detection_module_struct
 
 
 
-	NDPI_LOG(NDPI_RESULT_APP_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "exclude socrates.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_SOCRATES);
+	NDPI_LOG(NDPI_PROTOCOL_SOCRATES, ndpi_struct, NDPI_LOG_DEBUG, "exclude socrates.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SOCRATES);
 }
 
 #endif

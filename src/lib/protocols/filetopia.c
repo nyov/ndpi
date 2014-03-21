@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_FILETOPIA
+#ifdef NDPI_PROTOCOL_FILETOPIA
 
 
 static void ndpi_int_filetopia_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_FILETOPIA, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FILETOPIA, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -43,7 +43,7 @@ void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 		if (packet->payload_packet_len >= 50 && packet->payload_packet_len <= 70
 			&& packet->payload[0] == 0x03 && packet->payload[1] == 0x9a
 			&& packet->payload[3] == 0x22 && packet->payload[packet->payload_packet_len - 1] == 0x2b) {
-			NDPI_LOG(NDPI_RESULT_APP_FILETOPIA, ndpi_struct, NDPI_LOG_DEBUG, "Filetopia stage 1 detected\n");
+			NDPI_LOG(NDPI_PROTOCOL_FILETOPIA, ndpi_struct, NDPI_LOG_DEBUG, "Filetopia stage 1 detected\n");
 			flow->l4.tcp.filetopia_stage = 1;
 			return;
 		}
@@ -59,7 +59,7 @@ void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 				}
 			}
 
-			NDPI_LOG(NDPI_RESULT_APP_FILETOPIA, ndpi_struct, NDPI_LOG_DEBUG, "Filetopia stage 2 detected\n");
+			NDPI_LOG(NDPI_PROTOCOL_FILETOPIA, ndpi_struct, NDPI_LOG_DEBUG, "Filetopia stage 2 detected\n");
 			flow->l4.tcp.filetopia_stage = 2;
 			return;
 		}
@@ -69,7 +69,7 @@ void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 		if (packet->payload_packet_len >= 4 && packet->payload_packet_len <= 100
 			&& packet->payload[0] == 0x03 && packet->payload[1] == 0x9a
 			&& (packet->payload[3] == 0x22 || packet->payload[3] == 0x23)) {
-			NDPI_LOG(NDPI_RESULT_APP_FILETOPIA, ndpi_struct, NDPI_LOG_DEBUG, "Filetopia detected\n");
+			NDPI_LOG(NDPI_PROTOCOL_FILETOPIA, ndpi_struct, NDPI_LOG_DEBUG, "Filetopia detected\n");
 			ndpi_int_filetopia_add_connection(ndpi_struct, flow);
 			return;
 		}
@@ -77,7 +77,7 @@ void ndpi_search_filetopia_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 	}
 
   end_filetopia_nothing_found:
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_FILETOPIA);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FILETOPIA);
 }
 
 #endif

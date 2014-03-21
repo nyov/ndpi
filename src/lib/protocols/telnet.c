@@ -24,14 +24,14 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_TELNET
+#ifdef NDPI_PROTOCOL_TELNET
 
 
 
 static void ndpi_int_telnet_add_connection(struct ndpi_detection_module_struct
 											 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_TELNET, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TELNET, NDPI_REAL_PROTOCOL);
 }
 
 	
@@ -81,25 +81,25 @@ void ndpi_search_telnet_tcp(struct ndpi_detection_module_struct
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	NDPI_LOG(NDPI_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "search telnet.\n");
+	NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "search telnet.\n");
 
 	if (search_iac(ndpi_struct, flow) == 1) {
 
 		if (flow->l4.tcp.telnet_stage == 2) {
-			NDPI_LOG(NDPI_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet identified.\n");
+			NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet identified.\n");
 			ndpi_int_telnet_add_connection(ndpi_struct, flow);
 			return;
 		}
 		flow->l4.tcp.telnet_stage++;
-		NDPI_LOG(NDPI_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet stage %u.\n", flow->l4.tcp.telnet_stage);
+		NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet stage %u.\n", flow->l4.tcp.telnet_stage);
 		return;
 	}
 
 	if ((flow->packet_counter < 12 && flow->l4.tcp.telnet_stage > 0) || flow->packet_counter < 6) {
 		return;
 	} else {
-		NDPI_LOG(NDPI_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet excluded.\n");
-		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_TELNET);
+		NDPI_LOG(NDPI_PROTOCOL_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet excluded.\n");
+		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_TELNET);
 	}
 	return;
 }

@@ -24,7 +24,7 @@
 
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_RESULT_APP_DNS
+#ifdef NDPI_PROTOCOL_DNS
 
 static u_int getNameLength(u_int i, const u_int8_t *payload, u_int payloadLen) {
   if(payload[i] == 0x00)
@@ -96,14 +96,14 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
   
 #define NDPI_MAX_DNS_REQUESTS			16
 
-  NDPI_LOG(NDPI_RESULT_APP_DNS, ndpi_struct, NDPI_LOG_DEBUG, "search DNS.\n");
+  NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "search DNS.\n");
   
   if (packet->udp != NULL) {
     sport = ntohs(packet->udp->source),  dport = ntohs(packet->udp->dest);
-    NDPI_LOG(NDPI_RESULT_APP_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over UDP.\n");
+    NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over UDP.\n");
   } else  if(packet->tcp != NULL) {
     sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
-    NDPI_LOG(NDPI_RESULT_APP_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over tcp.\n");
+    NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over tcp.\n");
   }
 
   if(((dport == 53) || (sport == 53) || (dport == 5355))
@@ -282,13 +282,13 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	   Do not set the protocol with DNS if ndpi_match_string_subprotocol() has
 	   matched a subprotocol
 	*/
-	NDPI_LOG(NDPI_RESULT_APP_DNS, ndpi_struct, NDPI_LOG_DEBUG, "found DNS.\n");      
-	ndpi_int_add_connection(ndpi_struct, flow, (dport == 5355) ? NDPI_RESULT_APP_LLMNR : NDPI_RESULT_APP_DNS, NDPI_REAL_PROTOCOL);
+	NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "found DNS.\n");      
+	ndpi_int_add_connection(ndpi_struct, flow, (dport == 5355) ? NDPI_PROTOCOL_LLMNR : NDPI_PROTOCOL_DNS, NDPI_REAL_PROTOCOL);
       }
     } else {
       flow->protos.dns.bad_packet = 1;
-      NDPI_LOG(NDPI_RESULT_APP_DNS, ndpi_struct, NDPI_LOG_DEBUG, "exclude DNS.\n");
-      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_DNS);
+      NDPI_LOG(NDPI_PROTOCOL_DNS, ndpi_struct, NDPI_LOG_DEBUG, "exclude DNS.\n");
+      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DNS);
     }
   }
 }

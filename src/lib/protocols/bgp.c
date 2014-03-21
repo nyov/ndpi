@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_RESULT_APP_BGP
+#ifdef NDPI_PROTOCOL_BGP
 
 
 static void ndpi_int_bgp_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_BGP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_BGP, NDPI_REAL_PROTOCOL);
 }
 
 /* this detection also works asymmetrically */
@@ -46,12 +46,12 @@ void ndpi_search_bgp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 		ntohs(get_u_int16_t(packet->payload, 16)) <= packet->payload_packet_len &&
 		(packet->tcp->dest == htons(179) || packet->tcp->source == htons(179))
 		&& packet->payload[18] < 5) {
-		NDPI_LOG(NDPI_RESULT_APP_BGP, ndpi_struct, NDPI_LOG_DEBUG, "BGP detected.\n");
+		NDPI_LOG(NDPI_PROTOCOL_BGP, ndpi_struct, NDPI_LOG_DEBUG, "BGP detected.\n");
 		ndpi_int_bgp_add_connection(ndpi_struct, flow);
 		return;
 	}
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_BGP);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_BGP);
 }
 
 #endif

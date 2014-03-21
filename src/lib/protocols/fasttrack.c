@@ -25,13 +25,13 @@
 
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_RESULT_APP_FASTTRACK
+#ifdef NDPI_PROTOCOL_FASTTRACK
 
 
 
 static void ndpi_int_fasttrack_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_FASTTRACK, NDPI_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FASTTRACK, NDPI_CORRELATED_PROTOCOL);
 }
 
 
@@ -43,7 +43,7 @@ void ndpi_search_fasttrack_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 6 && ntohs(get_u_int16_t(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
-		NDPI_LOG(NDPI_RESULT_APP_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected 0d0a at the end of the packet.\n");
+		NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected 0d0a at the end of the packet.\n");
 
 		if (memcmp(packet->payload, "GIVE ", 5) == 0 && packet->payload_packet_len >= 8) {
 			u_int16_t i;
@@ -54,19 +54,19 @@ void ndpi_search_fasttrack_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 				}
 			}
 
-			NDPI_LOG(NDPI_RESULT_APP_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "FASTTRACK GIVE DETECTED\n");
+			NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "FASTTRACK GIVE DETECTED\n");
 			ndpi_int_fasttrack_add_connection(ndpi_struct, flow);
 			return;
 		}
 
 		if (packet->payload_packet_len > 50 && memcmp(packet->payload, "GET /", 5) == 0) {
 			u_int8_t a = 0;
-			NDPI_LOG(NDPI_RESULT_APP_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected GET /. \n");
+			NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "detected GET /. \n");
 			ndpi_parse_packet_line_info(ndpi_struct, flow);
 			for (a = 0; a < packet->parsed_lines; a++) {
 				if ((packet->line[a].len > 17 && memcmp(packet->line[a].ptr, "X-Kazaa-Username: ", 18) == 0)
 					|| (packet->line[a].len > 23 && memcmp(packet->line[a].ptr, "User-Agent: PeerEnabler/", 24) == 0)) {
-					NDPI_LOG(NDPI_RESULT_APP_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE,
+					NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE,
 							"detected X-Kazaa-Username: || User-Agent: PeerEnabler/\n");
 					ndpi_int_fasttrack_add_connection(ndpi_struct, flow);
 					return;
@@ -76,7 +76,7 @@ void ndpi_search_fasttrack_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 	}
 
   exclude_fasttrack:
-	NDPI_LOG(NDPI_RESULT_APP_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "fasttrack/kazaa excluded.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_FASTTRACK);
+	NDPI_LOG(NDPI_PROTOCOL_FASTTRACK, ndpi_struct, NDPI_LOG_TRACE, "fasttrack/kazaa excluded.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FASTTRACK);
 }
 #endif

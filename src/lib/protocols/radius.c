@@ -21,7 +21,7 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_RESULT_APP_RADIUS
+#ifdef NDPI_PROTOCOL_RADIUS
 
 struct radius_header {
   u_int8_t code;
@@ -51,13 +51,13 @@ static void ndpi_check_radius(struct ndpi_detection_module_struct *ndpi_struct, 
        && (h->code > 0)
        && (h->code <= 5)
        && (len == payload_len)) {
-      NDPI_LOG(NDPI_RESULT_APP_RADIUS, ndpi_struct, NDPI_LOG_DEBUG, "Found radius.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_RADIUS, NDPI_REAL_PROTOCOL);	
+      NDPI_LOG(NDPI_PROTOCOL_RADIUS, ndpi_struct, NDPI_LOG_DEBUG, "Found radius.\n");
+      ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_RADIUS, NDPI_REAL_PROTOCOL);	
       
       return;
     }
     
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_RADIUS);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_RADIUS);
     return;
   }
 }
@@ -66,10 +66,10 @@ void ndpi_search_radius(struct ndpi_detection_module_struct *ndpi_struct, struct
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_RESULT_APP_RADIUS, ndpi_struct, NDPI_LOG_DEBUG, "radius detection...\n");
+  NDPI_LOG(NDPI_PROTOCOL_RADIUS, ndpi_struct, NDPI_LOG_DEBUG, "radius detection...\n");
 
   /* skip marked packets */
-  if(packet->detected_protocol_stack[0] != NDPI_RESULT_APP_RADIUS)
+  if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_RADIUS)
     ndpi_check_radius(ndpi_struct, flow);
 }
 
