@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_STUN
+#ifdef NDPI_RESULT_APP_STUN
 
 
 static void ndpi_int_stun_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_STUN, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_STUN, NDPI_REAL_PROTOCOL);
 }
 
 
@@ -67,10 +67,10 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 		u_int8_t mod;
 		u_int8_t old = 1;
 		u_int8_t padding = 0;
-		NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "len and type match.\n");
+		NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "len and type match.\n");
 
 		if (payload_length == 20) {
-			NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
+			NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
 			return NDPI_IS_STUN;
 		}
 
@@ -91,7 +91,7 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 						 || payload[a + 1] == 0x2a || payload[a + 1] == 0x29 || payload[a + 1] == 0x50
 						 || payload[a + 1] == 0x54 || payload[a + 1] == 0x55)))) {
 
-				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "attribute match.\n");
+				NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "attribute match.\n");
 
 				a += ((payload[a + 2] << 8) + payload[a + 3] + 4);
 				mod = a % 4;
@@ -99,7 +99,7 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 					padding = 4 - mod;
 				}
 				if (a == payload_length || (padding && (a + padding) == payload_length)) {
-					NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
+					NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
 					return NDPI_IS_STUN;
 				}
 
@@ -119,7 +119,7 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 								|| payload[a + 1 + padding] == 0x29 || payload[a + 1 + padding] == 0x50
 								|| payload[a + 1 + padding] == 0x54 || payload[a + 1 + padding] == 0x55)))) {
 
-				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "New STUN - attribute match.\n");
+				NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "New STUN - attribute match.\n");
 
 				old = 0;
 				a += ((payload[a + 2 + padding] << 8) + payload[a + 3 + padding] + 4);
@@ -129,7 +129,7 @@ static ndpi_int_stun_result_t ndpi_int_check_stun(struct ndpi_detection_module_s
 					a += 4 - mod;
 				}
 				if (a == payload_length) {
-					NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
+					NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found stun.\n");
 					return NDPI_IS_STUN;
 				}
 			} else {
@@ -146,7 +146,7 @@ void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct, struct n
 	struct ndpi_packet_struct *packet = &flow->packet;
 	
 
-	NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "search stun.\n");
+	NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "search stun.\n");
 
 
 	if (packet->tcp) {
@@ -161,20 +161,20 @@ void ndpi_search_stun(struct ndpi_detection_module_struct *ndpi_struct, struct n
 
 			if (ndpi_int_check_stun(ndpi_struct, packet->payload + 2, packet->payload_packet_len - 2) ==
 				NDPI_IS_STUN) {
-				NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found TCP stun.\n");
+				NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found TCP stun.\n");
 				ndpi_int_stun_add_connection(ndpi_struct, flow);
 				return;
 			}
 		}
 	}
 	if (ndpi_int_check_stun(ndpi_struct, packet->payload, packet->payload_packet_len) == NDPI_IS_STUN) {
-		NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found UDP stun.\n");
+		NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "found UDP stun.\n");
 		ndpi_int_stun_add_connection(ndpi_struct, flow);
 		return;
 	}
 
-	NDPI_LOG(NDPI_PROTOCOL_STUN, ndpi_struct, NDPI_LOG_DEBUG, "exclude stun.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_STUN);
+	NDPI_LOG(NDPI_RESULT_APP_STUN, ndpi_struct, NDPI_LOG_DEBUG, "exclude stun.\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_STUN);
 }
 
 #endif

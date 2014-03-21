@@ -30,7 +30,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
 {
   if(protocol == IPPROTO_UDP) {
     if((sport == dport) && (sport == 17500)) {
-      return(NDPI_PROTOCOL_DROPBOX);
+      return(NDPI_RESULT_APP_DROPBOX);
     }
   }
 
@@ -47,7 +47,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
        || ((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
        ) {
-      return(NDPI_PROTOCOL_CITRIX_ONLINE);
+      return(NDPI_RESULT_APP_CITRIX_ONLINE);
     }
 
     /*
@@ -56,7 +56,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
     */
     if(((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x4272A000 /* 66.114.160.0 */)
        || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) ==0x4272A000 /* 66.114.160.0 */)) {
-      return(NDPI_PROTOCOL_WEBEX);
+      return(NDPI_RESULT_APP_WEBEX);
     }
 
     /*
@@ -65,7 +65,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
     */
     if(((saddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
        || ((daddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
-      return(NDPI_PROTOCOL_APPLE);
+      return(NDPI_RESULT_SERVICE_APPLE);
     }
 
     /*
@@ -76,12 +76,12 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
     if(((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */) || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
        || ((saddr & 0xFFFFFC00 /* 255.255.240.0 */) == 0xC72FD800 /* 199.47.216.0 */) || ((daddr & 0xFFFFFC00 /* 255.255.240.0 */) == 0xC72FD800 /* 199.47.216.0 */)
        ) {
-      return(NDPI_PROTOCOL_DROPBOX);
+      return(NDPI_RESULT_APP_DROPBOX);
     }
 
     if(((saddr & 0xFFFFF000 /* 255.255.240.0.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
        || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)) {
-      return(NDPI_PROTOCOL_DROPBOX);
+      return(NDPI_RESULT_APP_DROPBOX);
     }
 
     /* 
@@ -94,7 +94,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
        || (((saddr & 0xFF7F0000 /* 255.255.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFF7F0000 /* 255.127.0.0 */) == 0x9D360000))
        || (((saddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000))
        ) {
-      return(NDPI_PROTOCOL_SKYPE);
+      return(NDPI_RESULT_APP_SKYPE);
     }
   
     /*
@@ -103,7 +103,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
     */
     if(((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
        || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 173.194.0.0 */)) {
-      return(NDPI_PROTOCOL_GOOGLE);
+      return(NDPI_RESULT_SERVICE_GOOGLE);
     }
 
     /*
@@ -112,7 +112,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
     */
     if(((saddr & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0 */)
        || ((daddr & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0 */)) {
-      return(NDPI_PROTOCOL_UBUNTUONE);
+      return(NDPI_RESULT_APP_UBUNTUONE);
     }    
 
   return(NDPI_PROTOCOL_UNKNOWN);

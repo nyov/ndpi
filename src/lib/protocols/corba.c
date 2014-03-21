@@ -22,28 +22,28 @@
 #include "ndpi_utils.h"
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_PROTOCOL_CORBA
+#ifdef NDPI_RESULT_APP_CORBA
 static void ndpi_int_corba_add_connection(struct ndpi_detection_module_struct
 					  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_CORBA, NDPI_CORRELATED_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_CORBA, NDPI_CORRELATED_PROTOCOL);
 }
 void ndpi_search_corba(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_PROTOCOL_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "search for CORBA.\n");
+  NDPI_LOG(NDPI_RESULT_APP_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "search for CORBA.\n");
   if(packet->tcp != NULL) {
-    NDPI_LOG(NDPI_PROTOCOL_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "calculating CORBA over tcp.\n");
+    NDPI_LOG(NDPI_RESULT_APP_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "calculating CORBA over tcp.\n");
     /* Corba General Inter-ORB Protocol -> GIOP */
     if ((packet->payload_packet_len >= 24 && packet->payload_packet_len <= 144) &&
         memcmp(packet->payload, "GIOP", 4) == 0) {
-      NDPI_LOG(NDPI_PROTOCOL_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "found corba.\n");
+      NDPI_LOG(NDPI_RESULT_APP_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "found corba.\n");
       ndpi_int_corba_add_connection(ndpi_struct, flow);
     }
   } else {
-    NDPI_LOG(NDPI_PROTOCOL_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "exclude CORBA.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_CORBA);
+    NDPI_LOG(NDPI_RESULT_APP_CORBA, ndpi_struct, NDPI_LOG_DEBUG, "exclude CORBA.\n");
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_CORBA);
   }
 }
 #endif

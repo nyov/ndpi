@@ -21,7 +21,7 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_PROTOCOL_GTP
+#ifdef NDPI_RESULT_APP_GTP
 
 struct gtp_header_generic {
   u_int8_t flags, message_type;
@@ -56,15 +56,15 @@ static void ndpi_check_gtp(struct ndpi_detection_module_struct *ndpi_struct, str
 	u_int16_t message_len = ntohs(gtp->message_len);
 	
 	if(message_len <= (payload_len-sizeof(struct gtp_header_generic))) {
-	  NDPI_LOG(NDPI_PROTOCOL_GTP, ndpi_struct, NDPI_LOG_DEBUG, "Found gtp.\n");
-	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_GTP, NDPI_REAL_PROTOCOL);
+	  NDPI_LOG(NDPI_RESULT_APP_GTP, ndpi_struct, NDPI_LOG_DEBUG, "Found gtp.\n");
+	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_GTP, NDPI_REAL_PROTOCOL);
 	  return;
 	}
       }
     }
   }
 
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_GTP);
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_GTP);
   return;
 }
 
@@ -72,10 +72,10 @@ void ndpi_search_gtp(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_PROTOCOL_GTP, ndpi_struct, NDPI_LOG_DEBUG, "gtp detection...\n");
+  NDPI_LOG(NDPI_RESULT_APP_GTP, ndpi_struct, NDPI_LOG_DEBUG, "gtp detection...\n");
 
   /* skip marked packets */
-  if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_GTP)
+  if(packet->detected_protocol_stack[0] != NDPI_RESULT_APP_GTP)
     ndpi_check_gtp(ndpi_struct, flow);
 }
 

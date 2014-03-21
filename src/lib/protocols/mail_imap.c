@@ -24,11 +24,11 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_MAIL_IMAP
+#ifdef NDPI_RESULT_APP_MAIL_IMAP
 
 static void ndpi_int_mail_imap_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MAIL_IMAP, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_MAIL_IMAP, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -40,7 +40,7 @@ void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct *ndpi_struct,
   u_int8_t saw_command = 0;
   const u_int8_t *command = 0;
 
-  NDPI_LOG(NDPI_PROTOCOL_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG, "search IMAP.\n");
+  NDPI_LOG(NDPI_RESULT_APP_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG, "search IMAP.\n");
 
   if (packet->payload_packet_len >= 4 && ntohs(get_u_int16_t(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a) {
     // the DONE command appears without a tag
@@ -262,7 +262,7 @@ void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 
     if (saw_command == 1) {
       if (flow->l4.tcp.mail_imap_stage == 3 || flow->l4.tcp.mail_imap_stage == 5) {
-	NDPI_LOG(NDPI_PROTOCOL_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG, "mail imap identified\n");
+	NDPI_LOG(NDPI_RESULT_APP_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG, "mail imap identified\n");
 	ndpi_int_mail_imap_add_connection(ndpi_struct, flow);
 	return;
       }
@@ -270,7 +270,7 @@ void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct *ndpi_struct,
   }
 
   if (packet->payload_packet_len > 1 && packet->payload[packet->payload_packet_len - 1] == ' ') {
-    NDPI_LOG(NDPI_PROTOCOL_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG,
+    NDPI_LOG(NDPI_RESULT_APP_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG,
 	     "maybe a split imap command -> need next packet and imap_stage is set to 4.\n");
     flow->l4.tcp.mail_imap_stage = 4;
     return;
@@ -282,12 +282,12 @@ void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct *ndpi_struct,
   // if the packet count is low enough and at least one command or response was seen before
   if ((packet->payload_packet_len >= 2 && ntohs(get_u_int16_t(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a)
       && flow->packet_counter < 6 && flow->l4.tcp.mail_imap_stage >= 1) {
-    NDPI_LOG(NDPI_PROTOCOL_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG,
+    NDPI_LOG(NDPI_RESULT_APP_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG,
 	     "no imap command or response but packet count < 6 and imap stage >= 1 -> skip\n");
     return;
   }
 
-  NDPI_LOG(NDPI_PROTOCOL_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG, "exclude IMAP.\n");
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MAIL_IMAP);
+  NDPI_LOG(NDPI_RESULT_APP_MAIL_IMAP, ndpi_struct, NDPI_LOG_DEBUG, "exclude IMAP.\n");
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_MAIL_IMAP);
 }
 #endif

@@ -20,7 +20,7 @@
 
 
 #include "ndpi_utils.h"
-#ifdef NDPI_PROTOCOL_VMWARE
+#ifdef NDPI_RESULT_APP_VMWARE
 
 
 void ndpi_search_vmware(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -31,14 +31,14 @@ void ndpi_search_vmware(struct ndpi_detection_module_struct *ndpi_struct, struct
   if((packet->payload_packet_len == 66)
      && (ntohs(packet->udp->dest) == 902)
      && ((packet->payload[0] & 0xFF) == 0xA4)) {
-    NDPI_LOG(NDPI_PROTOCOL_VMWARE, ndpi_struct, NDPI_LOG_DEBUG, "Found vmware.\n");
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_VMWARE, NDPI_REAL_PROTOCOL);	
+    NDPI_LOG(NDPI_RESULT_APP_VMWARE, ndpi_struct, NDPI_LOG_DEBUG, "Found vmware.\n");
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_VMWARE, NDPI_REAL_PROTOCOL);	
   } else {
-    NDPI_LOG(NDPI_PROTOCOL_VMWARE, ndpi_struct, NDPI_LOG_DEBUG, "exclude vmware.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_VMWARE);
+    NDPI_LOG(NDPI_RESULT_APP_VMWARE, ndpi_struct, NDPI_LOG_DEBUG, "exclude vmware.\n");
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_VMWARE);
   }
 }
 
 
-#endif /* NDPI_PROTOCOL_VMWARE */
+#endif /* NDPI_RESULT_APP_VMWARE */
 

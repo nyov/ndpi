@@ -24,7 +24,7 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_THUNDER
+#ifdef NDPI_RESULT_APP_THUNDER
 
 static void ndpi_int_thunder_add_connection(struct ndpi_detection_module_struct *ndpi_struct, 
 					    struct ndpi_flow_struct *flow, ndpi_protocol_type_t protocol_type)
@@ -33,7 +33,7 @@ static void ndpi_int_thunder_add_connection(struct ndpi_detection_module_struct 
 	struct ndpi_id_struct *src = flow->src;
 	struct ndpi_id_struct *dst = flow->dst;
 
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_THUNDER, protocol_type);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_THUNDER, protocol_type);
 
 	if (src != NULL) {
 		src->thunder_ts = packet->tick_timestamp;
@@ -61,21 +61,21 @@ __forceinline static
 	if (packet->payload_packet_len > 8 && packet->payload[0] >= 0x30
 		&& packet->payload[0] < 0x40 && packet->payload[1] == 0 && packet->payload[2] == 0 && packet->payload[3] == 0) {
 		if (flow->thunder_stage == 3) {
-			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "THUNDER udp detected\n");
+			NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "THUNDER udp detected\n");
 			ndpi_int_thunder_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
 		flow->thunder_stage++;
-		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+		NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder udp packet detected, stage increased to %u\n", flow->thunder_stage);
 		return;
 	}
 
-	NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+	NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 			"excluding thunder udp at stage %u\n", flow->thunder_stage);
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_THUNDER);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_THUNDER);
 }
 
 	
@@ -95,13 +95,13 @@ __forceinline static
 	if (packet->payload_packet_len > 8 && packet->payload[0] >= 0x30
 		&& packet->payload[0] < 0x40 && packet->payload[1] == 0 && packet->payload[2] == 0 && packet->payload[3] == 0) {
 		if (flow->thunder_stage == 3) {
-			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "THUNDER tcp detected\n");
+			NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "THUNDER tcp detected\n");
 			ndpi_int_thunder_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 			return;
 		}
 
 		flow->thunder_stage++;
-		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+		NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder tcp packet detected, stage increased to %u\n", flow->thunder_stage);
 		return;
 	}
@@ -110,7 +110,7 @@ __forceinline static
 		&& memcmp(packet->payload, "POST / HTTP/1.1\r\n", 17) == 0) {
 		ndpi_parse_packet_line_info(ndpi_struct, flow);
 
-		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+		NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe thunder http POST packet detected, parsed packet lines: %u, empty line set %u (at: %u)\n",
 				packet->parsed_lines, packet->empty_line_position_set, packet->empty_line_position);
 
@@ -124,16 +124,16 @@ __forceinline static
 			&& packet->payload[packet->empty_line_position + 3] == 0x00
 			&& packet->payload[packet->empty_line_position + 4] == 0x00
 			&& packet->payload[packet->empty_line_position + 5] == 0x00) {
-			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+			NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"maybe thunder http POST packet application does match\n");
 			ndpi_int_thunder_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 			return;
 		}
 	}
-	NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+	NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 			"excluding thunder tcp at stage %u\n", flow->thunder_stage);
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_THUNDER);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_THUNDER);
 }
 
 	
@@ -150,15 +150,15 @@ __forceinline static
 	struct ndpi_id_struct *dst = flow->dst;
 
 
-	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_THUNDER) {
+	if (packet->detected_protocol_stack[0] == NDPI_RESULT_APP_THUNDER) {
 		if (src != NULL && ((u_int32_t)
 							(packet->tick_timestamp - src->thunder_ts) < ndpi_struct->thunder_timeout)) {
-			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+			NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"thunder : save src connection packet detected\n");
 			src->thunder_ts = packet->tick_timestamp;
 		} else if (dst != NULL && ((u_int32_t)
 								   (packet->tick_timestamp - dst->thunder_ts) < ndpi_struct->thunder_timeout)) {
-			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+			NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"thunder : save dst connection packet detected\n");
 			dst->thunder_ts = packet->tick_timestamp;
 		}
@@ -166,8 +166,8 @@ __forceinline static
 	}
 
 	if (packet->payload_packet_len > 5
-		&& memcmp(packet->payload, "GET /", 5) == 0 && NDPI_SRC_OR_DST_HAS_PROTOCOL(src, dst, NDPI_PROTOCOL_THUNDER)) {
-		NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "HTTP packet detected.\n");
+		&& memcmp(packet->payload, "GET /", 5) == 0 && NDPI_SRC_OR_DST_HAS_PROTOCOL(src, dst, NDPI_RESULT_APP_THUNDER)) {
+		NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG, "HTTP packet detected.\n");
 		ndpi_parse_packet_line_info(ndpi_struct, flow);
 
 		if (packet->parsed_lines > 7
@@ -186,7 +186,7 @@ __forceinline static
 			&& packet->user_agent_line.len > 49
 			&& memcmp(packet->user_agent_line.ptr,
 						   "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0)", 50) == 0) {
-			NDPI_LOG(NDPI_PROTOCOL_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
+			NDPI_LOG(NDPI_RESULT_APP_THUNDER, ndpi_struct, NDPI_LOG_DEBUG,
 					"Thunder HTTP download detected, adding flow.\n");
 			ndpi_int_thunder_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 		}

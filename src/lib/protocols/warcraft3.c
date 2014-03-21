@@ -27,12 +27,12 @@
 /* include files */
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_WARCRAFT3
+#ifdef NDPI_RESULT_APP_WARCRAFT3
 
 static void ndpi_int_warcraft3_add_connection(struct ndpi_detection_module_struct
 					      *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WARCRAFT3, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_WARCRAFT3, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_warcraft3(struct ndpi_detection_module_struct
@@ -48,44 +48,44 @@ void ndpi_search_warcraft3(struct ndpi_detection_module_struct
 		  might overflood it and thus generate an infinite loop
 	       */
 
-  NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "search WARCRAFT3\n");
+  NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "search WARCRAFT3\n");
 
 
   if (flow->packet_counter == 1 && packet->payload_packet_len == 1 && packet->payload[0] == 0x01) {
-    NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "maybe warcraft3: packet_len == 1\n");
+    NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "maybe warcraft3: packet_len == 1\n");
     return;
   } else if (packet->payload_packet_len >= 4 && (packet->payload[0] == 0xf7 || packet->payload[0] == 0xff)) {
 
-    NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "packet_payload begins with 0xf7 or 0xff\n");
+    NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "packet_payload begins with 0xf7 or 0xff\n");
 
     l = packet->payload[2] + (packet->payload[3] << 8);	// similar to ntohs
 
-    NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "l = %u \n", l);
+    NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "l = %u \n", l);
 
     while (l <= (packet->payload_packet_len - 4)) {
       if (packet->payload[l] == 0xf7) {
 	u_int16_t temp = (packet->payload[l + 2 + 1] << 8) + packet->payload[l + 2];
-	NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "another f7 visited.\n");
+	NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "another f7 visited.\n");
 
 	if((temp <= 2) || (temp > 1500)) {
-	  NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "break\n");
+	  NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "break\n");
 	  break;
 	} else {
 	  l += temp;
-	  NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "l = %u \n", l);
+	  NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "l = %u \n", l);
 	}
       } else {
-	NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "break\n");
+	NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "break\n");
 	break;
       }
     }
 
     if (l == packet->payload_packet_len) {
-      NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "maybe WARCRAFT3\n");
-      NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "flow->packet_counter = %u \n",
+      NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "maybe WARCRAFT3\n");
+      NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "flow->packet_counter = %u \n",
 	       flow->packet_counter);
       if (flow->packet_counter > 2) {
-	NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "detected WARCRAFT3\n");
+	NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "detected WARCRAFT3\n");
 	ndpi_int_warcraft3_add_connection(ndpi_struct, flow);
 	return;
       }
@@ -93,8 +93,8 @@ void ndpi_search_warcraft3(struct ndpi_detection_module_struct
     }
   }
 
-  NDPI_LOG(NDPI_PROTOCOL_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "no warcraft3 detected.\n");
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_WARCRAFT3);
+  NDPI_LOG(NDPI_RESULT_APP_WARCRAFT3, ndpi_struct, NDPI_LOG_DEBUG, "no warcraft3 detected.\n");
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_WARCRAFT3);
 }
 
 #endif

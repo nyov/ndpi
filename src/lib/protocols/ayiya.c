@@ -28,7 +28,7 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_AYIYA
+#ifdef NDPI_RESULT_APP_AYIYA
 
 struct ayiya {
   u_int8_t flags[3];
@@ -57,12 +57,12 @@ void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct 
       u_int32_t fireyears = 86400 * 365 * 5;
       
       if((epoch >= (now - fireyears)) && (epoch <= (now+86400 /* 1 day */)))      
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_AYIYA, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_AYIYA, NDPI_REAL_PROTOCOL);
 
       return;
     }
 
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_AYIYA);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_AYIYA);
   }
 }
 #endif

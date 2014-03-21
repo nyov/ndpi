@@ -21,7 +21,7 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_PROTOCOL_SKYPE
+#ifdef NDPI_RESULT_APP_SKYPE
 
 static u_int is_private_addr(u_int32_t addr) {
   addr = ntohl(addr);
@@ -118,7 +118,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
      || ((ntohl(packet->iph->daddr) & 0xFFFFFF00 /* 255.255.255.0 */) == 0xD4A10800 /* 212.161.8.0 */)
      /* || is_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr) */
      ) {
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_SKYPE, NDPI_REAL_PROTOCOL);
     return;
   }
 
@@ -131,8 +131,8 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 	 || ((payload_len >= 16)
 	     && (packet->payload[0] != 0x30) /* Avoid invalid SNMP detection */
 	     && (packet->payload[2] == 0x02))) {
-	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	NDPI_LOG(NDPI_RESULT_APP_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_SKYPE, NDPI_REAL_PROTOCOL);
 #ifdef USE_SKYPE_HEURISTICS
 	add_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr);
 #endif
@@ -141,7 +141,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
       return;
     }
 
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SKYPE);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_SKYPE);
     return;
   } else if(packet->tcp != NULL) {
     flow->l4.tcp.skype_packet_id++;
@@ -156,8 +156,8 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
       if((payload_len == 8) || (payload_len == 3)) {
 	//printf("[SKYPE] %u/%u\n", ntohs(packet->tcp->source), ntohs(packet->tcp->dest));
 
-	NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SKYPE, NDPI_REAL_PROTOCOL);
+	NDPI_LOG(NDPI_RESULT_APP_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "Found skype.\n");
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_SKYPE, NDPI_REAL_PROTOCOL);
 #ifdef USE_SKYPE_HEURISTICS
 	add_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr);
 #endif
@@ -165,7 +165,7 @@ static void ndpi_check_skype(struct ndpi_detection_module_struct *ndpi_struct, s
 
       /* printf("[SKYPE] [id: %u][len: %d]\n", flow->l4.tcp.skype_packet_id, payload_len);  */
     } else
-      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SKYPE);
+      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_SKYPE);
 
     return;
   }
@@ -175,10 +175,10 @@ void ndpi_search_skype(struct ndpi_detection_module_struct *ndpi_struct, struct 
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_PROTOCOL_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "skype detection...\n");
+  NDPI_LOG(NDPI_RESULT_APP_SKYPE, ndpi_struct, NDPI_LOG_DEBUG, "skype detection...\n");
 
   /* skip marked packets */
-  if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_SKYPE)
+  if(packet->detected_protocol_stack[0] != NDPI_RESULT_APP_SKYPE)
     ndpi_check_skype(ndpi_struct, flow);
 }
 

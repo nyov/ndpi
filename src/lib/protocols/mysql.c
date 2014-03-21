@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_MYSQL
+#ifdef NDPI_RESULT_APP_MYSQL
 
 static void ndpi_int_mysql_add_connection(struct ndpi_detection_module_struct
 											*ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MYSQL, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_MYSQL, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -54,7 +54,7 @@ void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, str
 					&& get_u_int64_t(packet->payload, a + 19) == 0x0ULL	//13 more
 					&& get_u_int32_t(packet->payload, a + 27) == 0x0	//filler bytes
 					&& get_u_int8_t(packet->payload, a + 31) == 0x0) {
-					NDPI_LOG(NDPI_PROTOCOL_MYSQL, ndpi_struct, NDPI_LOG_DEBUG, "MySQL detected.\n");
+					NDPI_LOG(NDPI_RESULT_APP_MYSQL, ndpi_struct, NDPI_LOG_DEBUG, "MySQL detected.\n");
 					ndpi_int_mysql_add_connection(ndpi_struct, flow);
 					return;
 				}
@@ -63,7 +63,7 @@ void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, str
 		}
 	}
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MYSQL);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_MYSQL);
 
 }
 

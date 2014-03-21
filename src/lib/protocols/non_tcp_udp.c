@@ -25,7 +25,7 @@
 
 #include "ndpi_protocols.h"
 
-#if defined(NDPI_PROTOCOL_IPSEC) || defined(NDPI_PROTOCOL_GRE) || defined(NDPI_PROTOCOL_ICMP)  || defined(NDPI_PROTOCOL_IGMP) || defined(NDPI_PROTOCOL_EGP) || defined(NDPI_PROTOCOL_SCTP) || defined(NDPI_PROTOCOL_OSPF) || defined(NDPI_PROTOCOL_IP_IN_IP)
+#if defined(NDPI_RESULT_IP_IPSEC) || defined(NDPI_RESULT_IP_GRE) || defined(NDPI_RESULT_IP_ICMP)  || defined(NDPI_RESULT_IP_IGMP) || defined(NDPI_RESULT_IP_EGP) || defined(NDPI_RESULT_IP_SCTP) || defined(NDPI_RESULT_IP_OSPF) || defined(NDPI_RESULT_IP_IP_IN_IP)
 
 
 #define NDPI_IPSEC_PROTOCOL_ESP	50
@@ -71,57 +71,57 @@ void ndpi_search_in_non_tcp_udp(struct ndpi_detection_module_struct
   }
 
   switch (packet->l4_protocol) {
-#ifdef NDPI_PROTOCOL_IPSEC
+#ifdef NDPI_RESULT_IP_IPSEC
   case NDPI_IPSEC_PROTOCOL_ESP:
   case NDPI_IPSEC_PROTOCOL_AH:
-    set_protocol_and_bmask(NDPI_PROTOCOL_IPSEC);
+    set_protocol_and_bmask(NDPI_RESULT_IP_IPSEC);
     break;
-#endif							/* NDPI_PROTOCOL_IPSEC */
-#ifdef NDPI_PROTOCOL_GRE
+#endif							/* NDPI_RESULT_IP_IPSEC */
+#ifdef NDPI_RESULT_IP_GRE
   case NDPI_GRE_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_GRE);
+    set_protocol_and_bmask(NDPI_RESULT_IP_GRE);
     break;
-#endif							/* NDPI_PROTOCOL_GRE */
-#ifdef NDPI_PROTOCOL_ICMP
+#endif							/* NDPI_RESULT_IP_GRE */
+#ifdef NDPI_RESULT_IP_ICMP
   case NDPI_ICMP_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_ICMP);
+    set_protocol_and_bmask(NDPI_RESULT_IP_ICMP);
     break;
-#endif							/* NDPI_PROTOCOL_ICMP */
-#ifdef NDPI_PROTOCOL_IGMP
+#endif							/* NDPI_RESULT_IP_ICMP */
+#ifdef NDPI_RESULT_IP_IGMP
   case NDPI_IGMP_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_IGMP);
+    set_protocol_and_bmask(NDPI_RESULT_IP_IGMP);
     break;
-#endif							/* NDPI_PROTOCOL_IGMP */
-#ifdef NDPI_PROTOCOL_EGP
+#endif							/* NDPI_RESULT_IP_IGMP */
+#ifdef NDPI_RESULT_IP_EGP
   case NDPI_EGP_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_EGP);
+    set_protocol_and_bmask(NDPI_RESULT_IP_EGP);
     break;
-#endif							/* NDPI_PROTOCOL_EGP */
-#ifdef NDPI_PROTOCOL_SCTP
+#endif							/* NDPI_RESULT_IP_EGP */
+#ifdef NDPI_RESULT_IP_SCTP
   case NDPI_SCTP_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_SCTP);
+    set_protocol_and_bmask(NDPI_RESULT_IP_SCTP);
     break;
-#endif							/* NDPI_PROTOCOL_SCTP */
-#ifdef NDPI_PROTOCOL_OSPF
+#endif							/* NDPI_RESULT_IP_SCTP */
+#ifdef NDPI_RESULT_IP_OSPF
   case NDPI_OSPF_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_OSPF);
+    set_protocol_and_bmask(NDPI_RESULT_IP_OSPF);
     break;
-#endif							/* NDPI_PROTOCOL_OSPF */
-#ifdef NDPI_PROTOCOL_IP_IN_IP
+#endif							/* NDPI_RESULT_IP_OSPF */
+#ifdef NDPI_RESULT_IP_IP_IN_IP
   case NDPI_IPIP_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_IP_IN_IP);
+    set_protocol_and_bmask(NDPI_RESULT_IP_IP_IN_IP);
     break;
-#endif							/* NDPI_PROTOCOL_IP_IN_IP */
-#ifdef NDPI_PROTOCOL_ICMPV6
+#endif							/* NDPI_RESULT_IP_IP_IN_IP */
+#ifdef NDPI_RESULT_IP_ICMPV6
   case NDPI_ICMPV6_PROTOCOL_TYPE:
-    set_protocol_and_bmask(NDPI_PROTOCOL_ICMPV6);
+    set_protocol_and_bmask(NDPI_RESULT_IP_ICMPV6);
     break;
-#endif							/* NDPI_PROTOCOL_ICMPV6 */
-#ifdef NDPI_PROTOCOL_VRRP
+#endif							/* NDPI_RESULT_IP_ICMPV6 */
+#ifdef NDPI_RESULT_IP_VRRP
   case 112:
-    set_protocol_and_bmask(NDPI_PROTOCOL_VRRP);
+    set_protocol_and_bmask(NDPI_RESULT_IP_VRRP);
     break;
-#endif							/* NDPI_PROTOCOL_VRRP */
+#endif							/* NDPI_RESULT_IP_VRRP */
   }
 }
 

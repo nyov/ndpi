@@ -25,7 +25,7 @@
 
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_PROTOCOL_MAIL_POP
+#ifdef NDPI_RESULT_APP_MAIL_POP
 
 #define POP_BIT_AUTH		0x0001
 #define POP_BIT_APOP		0x0002
@@ -43,7 +43,7 @@
 static void ndpi_int_mail_pop_add_connection(struct ndpi_detection_module_struct
 											   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MAIL_POP, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_MAIL_POP, NDPI_REAL_PROTOCOL);
 }
 
 
@@ -148,7 +148,7 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 	dport = ntohs(packet->tcp->dest);
 
 
-	NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "search mail_pop\n");
+	NDPI_LOG(NDPI_RESULT_APP_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "search mail_pop\n");
 
 
 
@@ -174,12 +174,12 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 			}
 		}
 
-		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
+		NDPI_LOG(NDPI_RESULT_APP_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
 				"mail_pop +OK/-ERR responses: %u, unique commands: %u\n", flow->l4.tcp.mail_pop_stage, bit_count);
 
 		if ((bit_count + flow->l4.tcp.mail_pop_stage) >= 3) {
 			if (flow->l4.tcp.mail_pop_stage > 0) {
-				NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "mail_pop identified\n");
+				NDPI_LOG(NDPI_RESULT_APP_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "mail_pop identified\n");
 				ndpi_int_mail_pop_add_connection(ndpi_struct, flow);
 				return;
 			} else {
@@ -191,7 +191,7 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 
 	} else {
 		// first part of a split packet
-		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
+		NDPI_LOG(NDPI_RESULT_APP_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
 				"mail_pop command without line ending -> skip\n");
 		return;
 	}
@@ -202,12 +202,12 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 	if (((packet->payload_packet_len > 2 && ntohs(get_u_int16_t(packet->payload, packet->payload_packet_len - 2)) == 0x0d0a)
 		 || flow->l4.tcp.pop_command_bitmask != 0 || flow->l4.tcp.mail_pop_stage != 0) && flow->packet_counter < 12) {
 		// maybe part of a split pop packet
-		NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
+		NDPI_LOG(NDPI_RESULT_APP_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG,
 				"maybe part of split mail_pop packet -> skip\n");
 		return;
 	}
 
-	NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "exclude mail_pop\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MAIL_POP);
+	NDPI_LOG(NDPI_RESULT_APP_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "exclude mail_pop\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_MAIL_POP);
 }
 #endif

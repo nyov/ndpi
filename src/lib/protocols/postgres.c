@@ -24,13 +24,13 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_POSTGRES
+#ifdef NDPI_RESULT_APP_POSTGRES
 
 
 static void ndpi_int_postgres_add_connection(struct ndpi_detection_module_struct
 											   *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_POSTGRES, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_POSTGRES, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct
@@ -65,13 +65,13 @@ void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct
 		if (flow->l4.tcp.postgres_stage == 2 - packet->packet_direction) {
 			//SSL accepted
 			if (packet->payload_packet_len == 1 && packet->payload[0] == 'S') {
-				NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "PostgreSQL detected, SSL accepted.\n");
+				NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "PostgreSQL detected, SSL accepted.\n");
 				ndpi_int_postgres_add_connection(ndpi_struct, flow);
 				return;
 			}
 			//SSL denied
 			if (packet->payload_packet_len == 1 && packet->payload[0] == 'N') {
-				NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "PostgreSQL detected, SSL denied.\n");
+				NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "PostgreSQL detected, SSL denied.\n");
 				ndpi_int_postgres_add_connection(ndpi_struct, flow);
 				return;
 			}
@@ -81,40 +81,40 @@ void ndpi_search_postgres_tcp(struct ndpi_detection_module_struct
 			if (packet->payload_packet_len > 8 &&
 				ntohl(get_u_int32_t(packet->payload, 5)) < 10 &&
 				ntohl(get_u_int32_t(packet->payload, 1)) == packet->payload_packet_len - 1 && packet->payload[0] == 0x52) {
-				NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "PostgreSQL detected, no SSL.\n");
+				NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "PostgreSQL detected, no SSL.\n");
 				ndpi_int_postgres_add_connection(ndpi_struct, flow);
 				return;
 			}
 		if (flow->l4.tcp.postgres_stage == 6
 			&& ntohl(get_u_int32_t(packet->payload, 1)) == packet->payload_packet_len - 1 && packet->payload[0] == 'p') {
-			NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
+			NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
 			ndpi_int_postgres_add_connection(ndpi_struct, flow);
 			return;
 		}
 		if (flow->l4.tcp.postgres_stage == 5 && packet->payload[0] == 'R') {
 			if (ntohl(get_u_int32_t(packet->payload, 1)) == packet->payload_packet_len - 1) {
-				NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
+				NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
 				ndpi_int_postgres_add_connection(ndpi_struct, flow);
 				return;
 			}
 			size = (u_int16_t)ntohl(get_u_int32_t(packet->payload, 1)) + 1;
 			if (packet->payload[size - 1] == 'S') {
 				if ((size + get_u_int32_t(packet->payload, (size + 1))) == packet->payload_packet_len) {
-					NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
+					NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
 					ndpi_int_postgres_add_connection(ndpi_struct, flow);
 					return;
 				}
 			}
 			size += get_u_int32_t(packet->payload, (size + 1)) + 1;
 			if (packet->payload[size - 1] == 'S') {
-				NDPI_LOG(NDPI_PROTOCOL_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
+				NDPI_LOG(NDPI_RESULT_APP_POSTGRES, ndpi_struct, NDPI_LOG_DEBUG, "found postgres asymmetrically.\n");
 				ndpi_int_postgres_add_connection(ndpi_struct, flow);
 				return;
 			}
 		}
 	}
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_POSTGRES);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_POSTGRES);
 }
 
 #endif

@@ -25,13 +25,13 @@
 
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_PROTOCOL_USENET
+#ifdef NDPI_RESULT_APP_USENET
 
 
 static void ndpi_int_usenet_add_connection(struct ndpi_detection_module_struct
 											 *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_USENET, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_USENET, NDPI_REAL_PROTOCOL);
 }
 
 
@@ -44,13 +44,13 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: search usenet.\n");
+	NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: search usenet.\n");
 
 
 
 
 
-	NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: STAGE IS %u.\n", flow->l4.tcp.usenet_stage);
+	NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: STAGE IS %u.\n", flow->l4.tcp.usenet_stage);
 
 
 	// check for the first server replay
@@ -62,10 +62,10 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 		&& ((memcmp(packet->payload, "200 ", 4) == 0)
 			|| (memcmp(packet->payload, "201 ", 4) == 0))) {
 
-		NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found 200 or 201.\n");
+		NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found 200 or 201.\n");
 		flow->l4.tcp.usenet_stage = 1 + packet->packet_direction;
 
-		NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: maybe hit.\n");
+		NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: maybe hit.\n");
 		return;
 	}
 
@@ -78,17 +78,17 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 	// check for client username
 	if (flow->l4.tcp.usenet_stage == 2 - packet->packet_direction) {
 		if (packet->payload_packet_len > 20 && (memcmp(packet->payload, "AUTHINFO USER ", 14) == 0)) {
-			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: username found\n");
+			NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: username found\n");
 			flow->l4.tcp.usenet_stage = 3 + packet->packet_direction;
 
-			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
+			NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
 			ndpi_int_usenet_add_connection(ndpi_struct, flow);
 			return;
 		} else if (packet->payload_packet_len == 13 && (memcmp(packet->payload, "MODE READER\r\n", 13) == 0)) {
-			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG,
+			NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG,
 					"USENET: no login necessary but we are a client.\n");
 
-			NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
+			NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: found usenet.\n");
 			ndpi_int_usenet_add_connection(ndpi_struct, flow);
 			return;
 		}
@@ -96,9 +96,9 @@ void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct
 
 
 
-	NDPI_LOG(NDPI_PROTOCOL_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: exclude usenet.\n");
+	NDPI_LOG(NDPI_RESULT_APP_USENET, ndpi_struct, NDPI_LOG_DEBUG, "USENET: exclude usenet.\n");
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_USENET);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_USENET);
 
 }
 

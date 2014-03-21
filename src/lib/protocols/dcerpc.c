@@ -24,12 +24,12 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_PROTOCOL_DCERPC
+#ifdef NDPI_RESULT_APP_DCERPC
 
 static void ndpi_int_dcerpc_add_connection(struct ndpi_detection_module_struct
 					     *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DCERPC, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_DCERPC, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -43,12 +43,12 @@ void ndpi_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct, struct
      && (packet->payload[0] == 0x05) /* version 5 */
      && (packet->payload[2] < 16) /* Packet type */
      ) {	 
-    NDPI_LOG(NDPI_PROTOCOL_DCERPC, ndpi_struct, NDPI_LOG_DEBUG, "DCERPC match\n");	  
+    NDPI_LOG(NDPI_RESULT_APP_DCERPC, ndpi_struct, NDPI_LOG_DEBUG, "DCERPC match\n");	  
     ndpi_int_dcerpc_add_connection(ndpi_struct, flow);
     return;
   }
 
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DCERPC);
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_DCERPC);
 }
 
 #endif

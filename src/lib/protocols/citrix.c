@@ -24,7 +24,7 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_PROTOCOL_CITRIX
+#ifdef NDPI_RESULT_APP_CITRIX
 
 /* ************************************ */
 
@@ -53,8 +53,8 @@ static void ndpi_check_citrix(struct ndpi_detection_module_struct *ndpi_struct, 
 	char citrix_header[] = { 0x07, 0x07, 0x49, 0x43, 0x41, 0x00 };
 	
 	if(memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0) {
-	  NDPI_LOG(NDPI_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
-	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
+	  NDPI_LOG(NDPI_RESULT_APP_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
+	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_CITRIX, NDPI_REAL_PROTOCOL);
 	}
 
 	return;
@@ -63,17 +63,17 @@ static void ndpi_check_citrix(struct ndpi_detection_module_struct *ndpi_struct, 
 	
 	if((memcmp(packet->payload, citrix_header, sizeof(citrix_header)) == 0)
 	   || (ndpi_strnstr((const char *)packet->payload, "Citrix.TcpProxyService", payload_len) != NULL)) {
-	  NDPI_LOG(NDPI_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
-	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_CITRIX, NDPI_REAL_PROTOCOL);
+	  NDPI_LOG(NDPI_RESULT_APP_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "Found citrix.\n");
+	  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_CITRIX, NDPI_REAL_PROTOCOL);
 	}
 
 	return;	
       }
       
       
-      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_CITRIX);
+      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_CITRIX);
     } else if(flow->l4.tcp.citrix_packet_id > 3)
-      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_CITRIX);
+      NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_CITRIX);
     
     return;
   }
@@ -83,10 +83,10 @@ void ndpi_search_citrix(struct ndpi_detection_module_struct *ndpi_struct, struct
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_PROTOCOL_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "citrix detection...\n");
+  NDPI_LOG(NDPI_RESULT_APP_CITRIX, ndpi_struct, NDPI_LOG_DEBUG, "citrix detection...\n");
 
   /* skip marked packets */
-  if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_CITRIX)
+  if(packet->detected_protocol_stack[0] != NDPI_RESULT_APP_CITRIX)
     ndpi_check_citrix(ndpi_struct, flow);
 }
 

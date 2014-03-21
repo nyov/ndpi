@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_KONTIKI
+#ifdef NDPI_RESULT_APP_KONTIKI
 
 static void ndpi_int_kontiki_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					    struct ndpi_flow_struct *flow)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_KONTIKI, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_KONTIKI, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_kontiki(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -41,25 +41,25 @@ void ndpi_search_kontiki(struct ndpi_detection_module_struct *ndpi_struct, struc
 
 
 	if (packet->payload_packet_len == 4 && (get_u_int32_t(packet->payload, 0) == htonl(0x02010100))) {
-		NDPI_LOG(NDPI_PROTOCOL_KONTIKI, ndpi_struct, NDPI_LOG_DEBUG, "Kontiki UDP detected.\n");
+		NDPI_LOG(NDPI_RESULT_APP_KONTIKI, ndpi_struct, NDPI_LOG_DEBUG, "Kontiki UDP detected.\n");
 		ndpi_int_kontiki_add_connection(ndpi_struct, flow);
 		return;
 	}
 	if (packet->payload_packet_len > 0 && packet->payload[0] == 0x02) {
 
 		if (packet->payload_packet_len == 20 && (get_u_int32_t(packet->payload, 16) == htonl(0x02040100))) {
-			NDPI_LOG(NDPI_PROTOCOL_KONTIKI, ndpi_struct, NDPI_LOG_DEBUG, "Kontiki UDP detected.\n");
+			NDPI_LOG(NDPI_RESULT_APP_KONTIKI, ndpi_struct, NDPI_LOG_DEBUG, "Kontiki UDP detected.\n");
 			ndpi_int_kontiki_add_connection(ndpi_struct, flow);
 			return;
 		}
 		if (packet->payload_packet_len == 16 && (get_u_int32_t(packet->payload, 12) == htonl(0x000004e4))) {
-			NDPI_LOG(NDPI_PROTOCOL_KONTIKI, ndpi_struct, NDPI_LOG_DEBUG, "Kontiki UDP detected.\n");
+			NDPI_LOG(NDPI_RESULT_APP_KONTIKI, ndpi_struct, NDPI_LOG_DEBUG, "Kontiki UDP detected.\n");
 			ndpi_int_kontiki_add_connection(ndpi_struct, flow);
 			return;
 		}
 	}
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_KONTIKI);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_KONTIKI);
 }
 
 #endif

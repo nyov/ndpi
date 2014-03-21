@@ -25,10 +25,10 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC
+#ifdef NDPI_RESULT_BASE_HTTP_APPLICATION_ACTIVESYNC
 static void ndpi_int_activesync_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, NDPI_CORRELATED_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_BASE_HTTP_APPLICATION_ACTIVESYNC, NDPI_CORRELATED_PROTOCOL);
 }
 
 void ndpi_search_activesync(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -41,14 +41,14 @@ void ndpi_search_activesync(struct ndpi_detection_module_struct *ndpi_struct, st
 			&& ((memcmp(packet->payload, "OPTIONS /Microsoft-Server-ActiveSync?", 37) == 0)
 				|| (memcmp(packet->payload, "POST /Microsoft-Server-ActiveSync?", 34) == 0))) {
 			ndpi_int_activesync_add_connection(ndpi_struct, flow);
-			NDPI_LOG(NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, ndpi_struct, NDPI_LOG_DEBUG,
+			NDPI_LOG(NDPI_RESULT_BASE_HTTP_APPLICATION_ACTIVESYNC, ndpi_struct, NDPI_LOG_DEBUG,
 					" flow marked as ActiveSync \n");
 			return;
 		}
 	}
 
-	NDPI_LOG(NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC, ndpi_struct, NDPI_LOG_DEBUG, "exclude activesync\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC);
+	NDPI_LOG(NDPI_RESULT_BASE_HTTP_APPLICATION_ACTIVESYNC, ndpi_struct, NDPI_LOG_DEBUG, "exclude activesync\n");
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_BASE_HTTP_APPLICATION_ACTIVESYNC);
 
 }
 #endif

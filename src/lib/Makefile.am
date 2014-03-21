@@ -147,6 +147,7 @@ libndpi_la_SOURCES = \
 			protocols/whoisdas.c \
 			protocols/collectd.c \
 			protocols/socks5.c \
-			protocols/socks4.c
+			protocols/socks4.c \
+			protocols/pando.c
 
 # NTOP protocols are at the end

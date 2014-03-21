@@ -24,10 +24,10 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_PROTOCOL_FTP_CONTROL
+#ifdef NDPI_RESULT_APP_FTP_CONTROL
 
 static void ndpi_int_ftp_control_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_FTP_CONTROL, NDPI_REAL_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_FTP_CONTROL, NDPI_REAL_PROTOCOL);
 }
 
 static int ndpi_ftp_control_check_request(const u_int8_t *payload) {
@@ -940,31 +940,31 @@ static void ndpi_check_ftp_control(struct ndpi_detection_module_struct *ndpi_str
   
   /* Exclude SMTP, which uses similar commands. */
   if (packet->tcp->dest == htons(25) || packet->tcp->source == htons(25)) {
-    NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Exclude FTP_CONTROL.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FTP_CONTROL);
+    NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Exclude FTP_CONTROL.\n");
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_FTP_CONTROL);
     return;
   }
   
   /* Break after 20 packets. */
   if (flow->packet_counter > 20) {
-    NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Exclude FTP_CONTROL.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_FTP_CONTROL);
+    NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Exclude FTP_CONTROL.\n");
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_FTP_CONTROL);
     return;
   }
   
   /* Check if we so far detected the protocol in the request or not. */
   if (flow->l4.tcp.ftp_control_stage == 0) {
-     NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage 0: \n");
+     NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage 0: \n");
      
      if (ndpi_ftp_control_check_request(packet->payload)) {
-       NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Possible FTP_CONTROL request detected, we will look further for the response...\n");
+       NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Possible FTP_CONTROL request detected, we will look further for the response...\n");
        
        /* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
        flow->l4.tcp.ftp_control_stage = packet->packet_direction + 1;
      }
      
   } else {
-    NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage %u: \n", flow->l4.tcp.ftp_control_stage);
+    NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage %u: \n", flow->l4.tcp.ftp_control_stage);
     
     /* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
     if ((flow->l4.tcp.ftp_control_stage - packet->packet_direction) == 1) {
@@ -973,10 +973,10 @@ static void ndpi_check_ftp_control(struct ndpi_detection_module_struct *ndpi_str
     
     /* This is a packet in another direction. Check if we find the proper response. */
     if (ndpi_ftp_control_check_response(packet->payload)) {
-      NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Found FTP_CONTROL.\n");
+      NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Found FTP_CONTROL.\n");
       ndpi_int_ftp_control_add_connection(ndpi_struct, flow);
     } else {
-      NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to FTP_CONTROL, resetting the stage to 0...\n");
+      NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to FTP_CONTROL, resetting the stage to 0...\n");
       flow->l4.tcp.ftp_control_stage = 0;
     }
     
@@ -986,10 +986,10 @@ static void ndpi_check_ftp_control(struct ndpi_detection_module_struct *ndpi_str
 void ndpi_search_ftp_control(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL detection...\n");
+  NDPI_LOG(NDPI_RESULT_APP_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL detection...\n");
 
   /* skip marked packets */
-  if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_FTP_CONTROL) {
+  if (packet->detected_protocol_stack[0] != NDPI_RESULT_APP_FTP_CONTROL) {
     if (packet->tcp_retransmission == 0) {
       ndpi_check_ftp_control(ndpi_struct, flow);
     }

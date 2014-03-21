@@ -24,7 +24,7 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK
+#ifdef NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK
 
 
 #ifdef NDPI_DEBUG_DIRECT_DOWNLOAD_LINK
@@ -38,7 +38,7 @@ static void ndpi_int_direct_download_link_add_connection(struct ndpi_detection_m
 {
   struct ndpi_packet_struct *packet = &flow->packet;
 	
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, NDPI_CORRELATED_PROTOCOL);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, NDPI_CORRELATED_PROTOCOL);
 
   flow->l4.tcp.ddlink_server_direction = packet->packet_direction;
 }
@@ -60,7 +60,7 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
   u_int16_t host_line_len_without_port;
 
   if (packet->payload_packet_len < 100) {
-    NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: Packet too small.\n");
+    NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: Packet too small.\n");
     goto end_ddl_nothing_found;
   }
 
@@ -68,10 +68,10 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
 
   if (memcmp(packet->payload, "POST ", 5) == 0) {
     filename_start = 5;		// POST
-    NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: POST FOUND\n");
+    NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: POST FOUND\n");
   } else if (memcmp(packet->payload, "GET ", 4) == 0) {
     filename_start = 4;		// GET
-    NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: GET FOUND\n");
+    NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: GET FOUND\n");
   } else {
     goto end_ddl_nothing_found;
   }
@@ -79,15 +79,15 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
   ndpi_parse_packet_line_info(ndpi_struct, flow);
 
   if (packet->host_line.ptr == NULL) {
-    NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: NO HOST FOUND\n");
+    NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: NO HOST FOUND\n");
     goto end_ddl_nothing_found;
   }
 
-  NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: Host: found\n");
+  NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: Host: found\n");
 
   if (packet->line[0].len < 9 + filename_start
       || memcmp(&packet->line[0].ptr[packet->line[0].len - 9], " HTTP/1.", 8) != 0) {
-    NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct,
+    NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct,
 	     NDPI_LOG_DEBUG, "DDL: PACKET NOT HTTP CONFORM.\nXXX%.*sXXX\n",
 	     8, &packet->line[0].ptr[packet->line[0].len - 9]);
     goto end_ddl_nothing_found;
@@ -100,11 +100,11 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
     i = 2;
     while (host_line_len_without_port >= i && packet->host_line.ptr[host_line_len_without_port - i] >= '0'
 	   && packet->host_line.ptr[host_line_len_without_port - i] <= '9') {
-      NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: number found\n");
+      NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: number found\n");
       i++;
     }
     if (host_line_len_without_port >= i && packet->host_line.ptr[host_line_len_without_port - i] == ':') {
-      NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: ':' found\n");
+      NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: ':' found\n");
       host_line_len_without_port = host_line_len_without_port - i;
     }
   }
@@ -694,12 +694,12 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
   */
 
  end_ddl_nothing_found:
-  NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG,
+  NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG,
 	   "Nothing Found\n%.*s\n", packet->payload_packet_len, packet->payload);
   return 0;
 
  end_ddl_found:
-  NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: DIRECT DOWNLOAD LINK FOUND\n");
+  NDPI_LOG(NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG, "DDL: DIRECT DOWNLOAD LINK FOUND\n");
   ndpi_int_direct_download_link_add_connection(ndpi_struct, flow);
   return 1;
 }
@@ -713,7 +713,7 @@ void ndpi_search_direct_download_link_tcp(struct ndpi_detection_module_struct *n
   //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 #if 0
   if (ndpi_struct->direct_download_link_counter_callback != NULL) {
-    if (packet->detected_protocol == NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
+    if (packet->detected_protocol == NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK) {
       /* skip packets not requests from the client to the server */
       if (packet->packet_direction == flow->l4.tcp.ddlink_server_direction) {
 	search_ddl_domains(ndpi_struct, flow);	// do the detection again in order to get the URL in keep alive streams
@@ -726,11 +726,11 @@ void ndpi_search_direct_download_link_tcp(struct ndpi_detection_module_struct *n
   }
 #endif
   // do not detect again if it is already ddl
-  if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK) {
+  if (packet->detected_protocol_stack[0] != NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK) {
     if (search_ddl_domains(ndpi_struct, flow) != 0) {
       return;
     }
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK);
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_DIRECT_DOWNLOAD_LINK);
   }
 
 }

@@ -143,10 +143,6 @@
 #define NDPI_SELECT_DETECTION_WITH_REAL_PROTOCOL ( 1 << 0 )
 
 #define NDPI_DIRECTCONNECT_CONNECTION_IP_TICK_TIMEOUT          600
-#define NDPI_GADGADU_PEER_CONNECTION_TIMEOUT        	       120
-#define NDPI_EDONKEY_UPPER_PORTS_ONLY                          0
-#define NDPI_FTP_CONNECTION_TIMEOUT                            10
-#define NDPI_PPLIVE_CONNECTION_TIMEOUT                         120
 #define NDPI_IRC_CONNECTION_TIMEOUT                            120
 #define NDPI_GNUTELLA_CONNECTION_TIMEOUT                       60
 #define NDPI_BATTLEFIELD_CONNECTION_TIMEOUT                    60
@@ -160,18 +156,9 @@
 #define NDPI_JABBER_STUN_TIMEOUT                               30
 #define NDPI_JABBER_FT_TIMEOUT				       5
 #define NDPI_SOULSEEK_CONNECTION_IP_TICK_TIMEOUT               600
-#define NDPI_MANOLITO_SUBSCRIBER_TIMEOUT                       120
 
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
 
-#define NDPI_LOG_BITTORRENT(proto, mod, log_level, args...)	\
-  NDPI_LOG(proto,mod,log_level,args)
-
-#define NDPI_LOG_GNUTELLA(proto, mod, log_level, args...)	\
-  NDPI_LOG(proto,mod,log_level,args)
-
-#define NDPI_LOG_EDONKEY(proto, mod, log_level, args...)	\
-  NDPI_LOG(proto,mod,log_level,args)
 #define NDPI_LOG(proto, mod, log_level, args...)		\
   {								\
     if(mod != NULL) {						\
@@ -181,19 +168,15 @@
       mod->ndpi_debug_printf(proto, mod, log_level, args);      \
     }								\
   }
+
 #else							/* NDPI_ENABLE_DEBUG_MESSAGES */
 
 #if defined(WIN32)
-#define NDPI_LOG_BITTORRENT(...) {}
-#define NDPI_LOG_GNUTELLA(...) {}
-#define NDPI_LOG_EDONKEY(...) {}
 #define NDPI_LOG(...) {}
 #else
-#define NDPI_LOG_BITTORRENT(proto, mod, log_level, args...) {}
-#define NDPI_LOG_GNUTELLA(proto, mod, log_level, args...) {}
-#define NDPI_LOG_EDONKEY(proto, mod, log_level, args...) {}
 #define NDPI_LOG(proto, mod, log_level, args...) {}
 #endif
+
 #endif							/* NDPI_ENABLE_DEBUG_MESSAGES */
 
 /**

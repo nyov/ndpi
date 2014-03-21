@@ -24,12 +24,12 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_PROTOCOL_SSH
+#ifdef NDPI_RESULT_APP_SSH
 
 static void ndpi_int_ssh_add_connection(struct ndpi_detection_module_struct
 										  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSH, NDPI_REAL_PROTOCOL);
+	ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_SSH, NDPI_REAL_PROTOCOL);
 }
 
 void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -44,14 +44,14 @@ void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 	if (flow->l4.tcp.ssh_stage == 0) {
 		if (packet->payload_packet_len > 7 && packet->payload_packet_len < 100
 			&& memcmp(packet->payload, "SSH-", 4) == 0) {
-			NDPI_LOG(NDPI_PROTOCOL_SSH, ndpi_struct, NDPI_LOG_DEBUG, "ssh stage 0 passed\n");
+			NDPI_LOG(NDPI_RESULT_APP_SSH, ndpi_struct, NDPI_LOG_DEBUG, "ssh stage 0 passed\n");
 			flow->l4.tcp.ssh_stage = 1 + packet->packet_direction;
 			return;
 		}
 	} else if (flow->l4.tcp.ssh_stage == (2 - packet->packet_direction)) {
 		if (packet->payload_packet_len > 7 && packet->payload_packet_len < 100
 			&& memcmp(packet->payload, "SSH-", 4) == 0) {
-			NDPI_LOG(NDPI_PROTOCOL_SSH, ndpi_struct, NDPI_LOG_DEBUG, "found ssh\n");
+			NDPI_LOG(NDPI_RESULT_APP_SSH, ndpi_struct, NDPI_LOG_DEBUG, "found ssh\n");
 			ndpi_int_ssh_add_connection(ndpi_struct, flow);
 			return;
 
@@ -60,9 +60,9 @@ void ndpi_search_ssh_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 
 	}
 
-	NDPI_LOG(NDPI_PROTOCOL_SSH, ndpi_struct, NDPI_LOG_DEBUG, "excluding ssh at stage %d\n", flow->l4.tcp.ssh_stage);
+	NDPI_LOG(NDPI_RESULT_APP_SSH, ndpi_struct, NDPI_LOG_DEBUG, "excluding ssh at stage %d\n", flow->l4.tcp.ssh_stage);
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_SSH);
+	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_SSH);
 }
 
 #endif

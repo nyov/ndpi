@@ -25,13 +25,13 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_PROTOCOL_MSN
+#ifdef NDPI_RESULT_APP_MSN
 
 #define MAX_PACKETS_FOR_MSN 100
 static void ndpi_int_msn_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
 					ndpi_protocol_type_t protocol_type)
 {
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_MSN, protocol_type);
+  ndpi_int_add_connection(ndpi_struct, flow, NDPI_RESULT_APP_MSN, protocol_type);
 }
 
 static u_int8_t ndpi_int_find_xmsn(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -61,17 +61,17 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
   u_int16_t plen;
   u_int16_t status = 0;
 
-  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "search msn tcp.\n");
-#ifdef NDPI_PROTOCOL_SSL
-  if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
-    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn ssl ft test\n");
+  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "search msn tcp.\n");
+#ifdef NDPI_RESULT_BASE_SSL
+  if (packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_SSL) {
+    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn ssl ft test\n");
     if (flow->packet_counter < 10) {
     }
 
     if (flow->packet_counter == 7 && packet->payload_packet_len > 300) {
       if (memcmp(packet->payload + 24, "MSNSLP", 6) == 0
 	  || (get_u_int32_t(packet->payload, 0) == htonl(0x30000000) && get_u_int32_t(packet->payload, 4) == 0x00000000)) {
-	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "detected MSN File Transfer, ifdef ssl.\n");
+	NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "detected MSN File Transfer, ifdef ssl.\n");
 	ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 	return;
       }
@@ -79,11 +79,11 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     if (flow->packet_counter >= 5 && flow->packet_counter <= 10 && (get_u_int32_t(packet->payload, 0) == htonl(0x18000000)
 								    && get_u_int32_t(packet->payload, 4) == 0x00000000)) {
       flow->l4.tcp.msn_ssl_ft++;
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 	       "increased msn ft ssl stage to: %u at packet nr: %u\n", flow->l4.tcp.msn_ssl_ft,
 	       flow->packet_counter);
       if (flow->l4.tcp.msn_ssl_ft == 2) {
-	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		 "detected MSN File Transfer, ifdef ssl 2.\n");
 	ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
       }
@@ -101,8 +101,8 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
    */
   /* now we have a look at the first packet only. */
   if (flow->packet_counter == 1
-#ifdef NDPI_PROTOCOL_SSL
-      || ((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) && flow->packet_counter <= 3)
+#ifdef NDPI_RESULT_BASE_SSL
+      || ((packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_SSL) && flow->packet_counter <= 3)
 #endif
       ) {
 
@@ -112,7 +112,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	&& ((ntohl(get_u_int32_t(packet->payload, 24)) == 0x000f0004 && ntohl(get_u_int32_t(packet->payload, 28)) == 0x72c64bc6)
 	    || (ntohl(get_u_int32_t(packet->payload, 20)) == 0x000f0004
 		&& ntohl(get_u_int32_t(packet->payload, 24)) == 0x72c64bc6))) {
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 	       "found MSN in packets that also contain voice.messenger.live.com.\n");
 
       /* TODO this is an alternative pattern for video detection */
@@ -136,13 +136,13 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 
 	  if (memcmp(&packet->payload[packet->payload_packet_len - 6], "CVR",
 		     3) == 0 || memcmp(&packet->payload[packet->payload_packet_len - 8], "MSNP", 4) == 0) {
-	    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		     "found MSN by pattern VER...CVR/MSNP ODOA.\n");
 	    ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 	    return;
 	  }
 	  if (memcmp(&packet->payload[4], "MSNFT", 5) == 0) {
-	    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		     "found MSN FT by pattern VER MSNFT...0d0a.\n");
 	    ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 	    return;
@@ -152,8 +152,8 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     }
 
     if (
-#ifdef NDPI_PROTOCOL_HTTP
-	packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP ||
+#ifdef NDPI_RESULT_BASE_HTTP
+	packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP ||
 #endif
 	memcmp(packet->payload, "GET ", NDPI_STATICSTRING_LEN("GET ")) == 0 ||
 	memcmp(packet->payload, "POST ", NDPI_STATICSTRING_LEN("POST ")) == 0) {
@@ -165,17 +165,17 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	return;
       }
     }
-#ifdef NDPI_PROTOCOL_HTTP
+#ifdef NDPI_RESULT_BASE_HTTP
     /* we have to examine two http packets */
-    if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP) {
+    if (packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP) {
     }
 #endif
     /* not seen this pattern in any trace */
     /* now test for http login, at least 100 a bytes packet */
     if (packet->payload_packet_len > 100) {
       if (
-#ifdef NDPI_PROTOCOL_HTTP
-	  packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP ||
+#ifdef NDPI_RESULT_BASE_HTTP
+	  packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP ||
 #endif
 	  memcmp(packet->payload, "POST http://", 12) == 0) {
 	/* scan packet if not already done... */
@@ -188,7 +188,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	     (packet->content_line.len >= NDPI_STATICSTRING_LEN("text/x-msnmsgr") &&
 	      memcmp(packet->content_line.ptr, "text/x-msnmsgr",
 		     NDPI_STATICSTRING_LEN("text/x-msnmsgr")) == 0))) {
-	  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		   "found MSN by pattern POST http:// .... application/x-msn-messenger.\n");
 	  ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	  return;
@@ -200,8 +200,8 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     /* for this case the asymmetric detection is asym (1) */
     if (packet->payload_packet_len > 400) {
       if ((
-#ifdef NDPI_PROTOCOL_HTTP
-	   packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP ||
+#ifdef NDPI_RESULT_BASE_HTTP
+	   packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP ||
 #endif
 	   (memcmp(packet->payload, "POST ", 5) == 0))) {
 	u_int16_t c;
@@ -214,7 +214,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	  for (c = 13; c < 50; c++) {
 	    if (memcmp(&packet->payload[c], "/", 1) == 0) {
 	      if (memcmp(&packet->payload[c], "/gateway/gateway.dll", 20) == 0) {
-		NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+		NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 			 "found  pattern http://.../gateway/gateway.ddl.\n");
 		status = 1;
 		break;
@@ -222,7 +222,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	    }
 	  }
 	} else if ((memcmp(&packet->payload[5], "/gateway/gateway.dll", 20) == 0)) {
-	  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		   "found  pattern http://.../gateway/gateway.ddl.\n");
 	  status = 1;
 	}
@@ -244,12 +244,12 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	      && memcmp(packet->content_line.ptr, "application/x-www-form-urlencoded", 33) == 0)
 	     )) {
 	  if ((src != NULL
-	       && NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_PROTOCOL_MSN)
+	       && NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_RESULT_APP_MSN)
 	       != 0) || (dst != NULL
 			 && NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask,
-							     NDPI_PROTOCOL_MSN)
+							     NDPI_RESULT_APP_MSN)
 			 != 0)) {
-	    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		     "found MSN with pattern text/xml; charset=utf-8.\n");
 	    ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	    return;
@@ -259,9 +259,9 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 		(memcmp(packet->line[a].ptr, "CVR ", 4) == 0
 		 || memcmp(packet->line[a].ptr, "VER ",
 			   4) == 0 || memcmp(packet->line[a].ptr, "ANS ", 4) == 0)) {
-	      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		       "found MSN with pattern text/sml; charset0utf-8.\n");
-	      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct,
+	      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct,
 		       NDPI_LOG_TRACE, "MSN xml CVS / VER / ANS found\n");
 	      ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	      return;
@@ -276,8 +276,8 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	&& packet->payload_packet_len > 100) {
       /* not necessary to check the length, because this has been done : >400. */
       if (
-#ifdef NDPI_PROTOCOL_HTTP
-	  packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP ||
+#ifdef NDPI_RESULT_BASE_HTTP
+	  packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP ||
 #endif
 	  (memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0) ||
 	  (memcmp(packet->payload, "HTTP/1.1 200 OK", 15) == 0)
@@ -292,13 +292,13 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	     (packet->content_line.len >= NDPI_STATICSTRING_LEN("text/x-msnmsgr") &&
 	      memcmp(packet->content_line.ptr, "text/x-msnmsgr",
 		     NDPI_STATICSTRING_LEN("text/x-msnmsgr")) == 0))) {
-	  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		   "HTTP/1.0 200 OK .... application/x-msn-messenger.\n");
 	  ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	  return;
 	}
 	if (ndpi_int_find_xmsn(ndpi_struct, flow) == 1) {
-	  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "HTTP/1.0 200 OK .... X-MSN.\n");
+	  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "HTTP/1.0 200 OK .... X-MSN.\n");
 	  ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	  return;
 	}
@@ -310,7 +310,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     /* now block proxy connection */
     if (packet->payload_packet_len >= 42) {
       if (memcmp(packet->payload, "CONNECT messenger.hotmail.com:1863 HTTP/1.", 42) == 0) {
-	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		 "found MSN  with pattern CONNECT messenger.hotmail.com:1863 HTTP/1..\n");
 	ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	return;
@@ -338,7 +338,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 
 	while (plen < endlen) {
 	  if (ndpi_check_for_email_address(ndpi_struct, flow, plen) != 0) {
-	    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "found mail address\n");
+	    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "found mail address\n");
 	    break;
 	  }
 	  if (packet->payload_packet_len > plen + 1
@@ -351,7 +351,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	  }
 
 	}
-	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		 "found MSN  with pattern USR/ANS ...mail_address.\n");
 	ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 	return;
@@ -368,8 +368,8 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
       packet->payload_packet_len > 100) {
     /* not necessary to check the length, because this has been done : >400. */
     if (
-#ifdef NDPI_PROTOCOL_HTTP
-	packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP ||
+#ifdef NDPI_RESULT_BASE_HTTP
+	packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP ||
 #endif
 	(memcmp(packet->payload, "HTTP/1.0 200 OK", 15) == 0) ||
 	(memcmp(packet->payload, "HTTP/1.1 200 OK", 15) == 0)
@@ -383,13 +383,13 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 		   NDPI_STATICSTRING_LEN("application/x-msn-messenger")) == 0) ||
 	   (packet->content_line.len >= NDPI_STATICSTRING_LEN("text/x-msnmsgr") &&
 	    memcmp(packet->content_line.ptr, "text/x-msnmsgr", NDPI_STATICSTRING_LEN("text/x-msnmsgr")) == 0))) {
-	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE,
+	NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE,
 		 "HTTP/1.0 200 OK .... application/x-msn-messenger.\n");
 	ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	return;
       }
       if (ndpi_int_find_xmsn(ndpi_struct, flow) == 1) {
-	NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "HTTP/1.0 200 OK .... X-MSN.\n");
+	NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "HTTP/1.0 200 OK .... X-MSN.\n");
 	ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);
 	return;
       }
@@ -402,12 +402,12 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
   /* finished examining the secone packet only */
   /* direct user connection (file transfer,...) */
 
-  if ((src != NULL && NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_PROTOCOL_MSN) != 0)
+  if ((src != NULL && NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_RESULT_APP_MSN) != 0)
       || (dst != NULL
-	  && NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, NDPI_PROTOCOL_MSN) != 0)) {
+	  && NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, NDPI_RESULT_APP_MSN) != 0)) {
     if (flow->packet_counter == 1 &&
 	packet->payload_packet_len > 12 && memcmp(packet->payload, "recipientid=", 12) == 0) {
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_DEBUG, "detected file transfer.\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_DEBUG, "detected file transfer.\n");
       ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
       return;
     }
@@ -422,7 +422,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     /* asymmetric detection to this pattern is asym (2) */
     if ((packet->payload_packet_len == 4 || packet->payload_packet_len == 8)
 	&& get_u_int32_t(packet->payload, 0) == htonl(0x04000000)) {
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_DEBUG, "maybe first TCP MSN detected\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_DEBUG, "maybe first TCP MSN detected\n");
 
       if (packet->payload_packet_len == 8 && get_u_int32_t(packet->payload, 4) == htonl(0x666f6f00)) {
 	flow->l4.tcp.msn_stage = 5 + packet->packet_direction;
@@ -436,12 +436,12 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
   } else if (flow->l4.tcp.msn_stage == 1 + packet->packet_direction) {
     if (packet->payload_packet_len > 10 && get_u_int32_t(packet->payload, 0) == htonl(0x666f6f00)) {
       ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 1\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 1\n");
       return;
     }
     /* did not see this pattern in any trace */
     if (packet->payload_packet_len == 56 && get_u_int32_t(packet->payload, 16) == 0) {
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_DEBUG, "maybe Second TCP MSN detected\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_DEBUG, "maybe Second TCP MSN detected\n");
       flow->l4.tcp.msn_stage = 3 + packet->packet_direction;
       return;
     }
@@ -450,30 +450,30 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
   } else if (flow->l4.tcp.msn_stage == 2 - packet->packet_direction
 	     && packet->payload_packet_len == 4 && get_u_int32_t(packet->payload, 0) == htonl(0x30000000)) {
     ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
-    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 2\n");
+    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 2\n");
     return;
   } else if ((flow->l4.tcp.msn_stage == 3 + packet->packet_direction)
 	     || (flow->l4.tcp.msn_stage == 4 - packet->packet_direction)) {
     if (packet->payload_packet_len == 4 && get_u_int32_t(packet->payload, 0) == htonl(0x30000000)) {
       ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 2\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 2\n");
       return;
     }
   } else if (flow->l4.tcp.msn_stage == 6 - packet->packet_direction) {
     if ((packet->payload_packet_len == 4) &&
 	(get_u_int32_t(packet->payload, 0) == htonl(0x10000000) || get_u_int32_t(packet->payload, 0) == htonl(0x30000000))) {
       ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 3\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 3\n");
       return;
     }
   } else if (flow->l4.tcp.msn_stage == 5 + packet->packet_direction) {
     if ((packet->payload_packet_len == 20) && get_u_int32_t(packet->payload, 0) == htonl(0x10000000)) {
       ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
-      NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 3\n");
+      NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 3\n");
       return;
     }
   }
-  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn 7.\n");
+  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn 7.\n");
   if (flow->packet_counter <= MAX_PACKETS_FOR_MSN) {
     if (packet->tcp->source == htons(443)
 	|| packet->tcp->dest == htons(443)) {
@@ -483,7 +483,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	    || memcmp(&packet->payload[172], "INVITE MSNMSGR", 14) == 0) {
 	  ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
 
-	  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 3\n");
+	  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN File Transfer detected 3\n");
 	  return;
 	}
       }
@@ -492,9 +492,9 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     /* For no
        n port 443 flows exclude flow bitmask after first packet itself */
   }
-  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "exclude msn.\n");
+  NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "exclude msn.\n");
  ndpi_msn_exclude:
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MSN);
+  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_MSN);
 }
 
 
@@ -509,10 +509,10 @@ static void ndpi_search_udp_msn_misc(struct ndpi_detection_module_struct
 
 
   /* do we have an msn login ? */
-  if ((src == NULL || NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_PROTOCOL_MSN) == 0)
+  if ((src == NULL || NDPI_COMPARE_PROTOCOL_TO_BITMASK(src->detected_protocol_bitmask, NDPI_RESULT_APP_MSN) == 0)
       && (dst == NULL
-	  || NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, NDPI_PROTOCOL_MSN) == 0)) {
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MSN);
+	  || NDPI_COMPARE_PROTOCOL_TO_BITMASK(dst->detected_protocol_bitmask, NDPI_RESULT_APP_MSN) == 0)) {
+    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_MSN);
     return;
   }
 
@@ -520,7 +520,7 @@ static void ndpi_search_udp_msn_misc(struct ndpi_detection_module_struct
   if (packet->payload_packet_len == 20
       && get_u_int32_t(packet->payload, 4) == 0 && packet->payload[9] == 0
       && get_u_int16_t(packet->payload, 10) == htons(0x0100)) {
-    NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn udp misc data connection detected\n");
+    NDPI_LOG(NDPI_RESULT_APP_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn udp misc data connection detected\n");
     ndpi_int_msn_add_connection(ndpi_struct, flow, NDPI_REAL_PROTOCOL);
   }
 
@@ -535,21 +535,21 @@ void ndpi_search_msn(struct ndpi_detection_module_struct *ndpi_struct, struct nd
   struct ndpi_packet_struct *packet = &flow->packet;
 	
   /* this if request should always be true */
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MSN) == 0) {
+  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_RESULT_APP_MSN) == 0) {
     /* we deal with tcp now */
     if (packet->tcp != NULL) {
       /* msn can use http or ssl for connection. That's why every http, ssl and ukn packet must enter in the msn detection */
       /* the detection can swich out the http or the ssl detection. In this case we need not check those protocols */
       // need to do the ceck when protocol == http too (POST /gateway ...)
       if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN
-#if defined(NDPI_PROTOCOL_HTTP)
-	  || packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP
+#if defined(NDPI_RESULT_BASE_HTTP)
+	  || packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_HTTP
 #endif
-#if defined(NDPI_PROTOCOL_SSL)
-	  || packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL
+#if defined(NDPI_RESULT_BASE_SSL)
+	  || packet->detected_protocol_stack[0] == NDPI_RESULT_BASE_SSL
 #endif
-#if defined(NDPI_PROTOCOL_STUN)
-	  || packet->detected_protocol_stack[0] == NDPI_PROTOCOL_STUN
+#if defined(NDPI_RESULT_APP_STUN)
+	  || packet->detected_protocol_stack[0] == NDPI_RESULT_APP_STUN
 #endif
 	  ) {
 	ndpi_search_msn_tcp(ndpi_struct, flow);
