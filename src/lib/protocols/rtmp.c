@@ -45,21 +45,21 @@ static void ndpi_check_rtmp(struct ndpi_detection_module_struct *ndpi_struct, st
   }
   
   /* Check if we so far detected the protocol in the request or not. */
-  if (flow->l4.tcp.rtmp_stage == 0) {
+  if (flow->rtmp_stage == 0) {
      NDPI_LOG(NDPI_PROTOCOL_RTMP, ndpi_struct, NDPI_LOG_DEBUG, "RTMP stage 0: \n");
      
      if ((payload_len >= 4) && ((packet->payload[0] == 0x03) || (packet->payload[0] == 0x06))) {
        NDPI_LOG(NDPI_PROTOCOL_RTMP, ndpi_struct, NDPI_LOG_DEBUG, "Possible RTMP request detected, we will look further for the response...\n");
        
        /* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-       flow->l4.tcp.rtmp_stage = packet->packet_direction + 1;
+       flow->rtmp_stage = packet->packet_direction + 1;
      }
      
   } else {
-    NDPI_LOG(NDPI_PROTOCOL_RTMP, ndpi_struct, NDPI_LOG_DEBUG, "RTMP stage %u: \n", flow->l4.tcp.rtmp_stage);
+    NDPI_LOG(NDPI_PROTOCOL_RTMP, ndpi_struct, NDPI_LOG_DEBUG, "RTMP stage %u: \n", flow->rtmp_stage);
     
     /* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-    if ((flow->l4.tcp.rtmp_stage - packet->packet_direction) == 1) {
+    if ((flow->rtmp_stage - packet->packet_direction) == 1) {
       return;
     }
     
@@ -69,7 +69,7 @@ static void ndpi_check_rtmp(struct ndpi_detection_module_struct *ndpi_struct, st
       ndpi_int_rtmp_add_connection(ndpi_struct, flow);
     } else {
       NDPI_LOG(NDPI_PROTOCOL_RTMP, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to RTMP, resetting the stage to 0...\n");
-      flow->l4.tcp.rtmp_stage = 0;
+      flow->rtmp_stage = 0;
     }
     
   }

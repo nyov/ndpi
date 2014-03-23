@@ -953,31 +953,31 @@ static void ndpi_check_ftp_control(struct ndpi_detection_module_struct *ndpi_str
   }
   
   /* Check if we so far detected the protocol in the request or not. */
-  if (flow->l4.tcp.ftp_control_stage == 0) {
+  if (flow->ftp_control_stage == 0) {
      NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage 0: \n");
      
-     if (ndpi_ftp_control_check_request(packet->payload)) {
+     if ((payload_len > 0) && ndpi_ftp_control_check_request(packet->payload)) {
        NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Possible FTP_CONTROL request detected, we will look further for the response...\n");
        
        /* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-       flow->l4.tcp.ftp_control_stage = packet->packet_direction + 1;
+       flow->ftp_control_stage = packet->packet_direction + 1;
      }
      
   } else {
-    NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage %u: \n", flow->l4.tcp.ftp_control_stage);
+    NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "FTP_CONTROL stage %u: \n", flow->ftp_control_stage);
     
     /* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-    if ((flow->l4.tcp.ftp_control_stage - packet->packet_direction) == 1) {
+    if ((flow->ftp_control_stage - packet->packet_direction) == 1) {
       return;
     }
     
     /* This is a packet in another direction. Check if we find the proper response. */
-    if (ndpi_ftp_control_check_response(packet->payload)) {
+    if ((payload_len > 0) && ndpi_ftp_control_check_response(packet->payload)) {
       NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "Found FTP_CONTROL.\n");
       ndpi_int_ftp_control_add_connection(ndpi_struct, flow);
     } else {
       NDPI_LOG(NDPI_PROTOCOL_FTP_CONTROL, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to FTP_CONTROL, resetting the stage to 0...\n");
-      flow->l4.tcp.ftp_control_stage = 0;
+      flow->ftp_control_stage = 0;
     }
     
   }

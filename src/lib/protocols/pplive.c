@@ -36,81 +36,81 @@ static void ndpi_check_pplive_udp1(struct ndpi_detection_module_struct *ndpi_str
 	u_int32_t payload_len = packet->payload_packet_len;
 	
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.udp.pplive_stage1 == 0) {
+	if (flow->pplive_stage1 == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
 		
-		if (match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.pplive_stage1 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->pplive_stage1 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 			return;
 		}
 		
-		if (match_first_bytes(packet->payload, "\xe9\x03\x42\x01")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\xe9\x03\x42\x01")) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.pplive_stage1 = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
+			flow->pplive_stage1 = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
 			return;
 		}
 		
-		if (match_first_bytes(packet->payload, "\x1c\x1c\x32\x01")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\x1c\x1c\x32\x01")) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.pplive_stage1 = packet->packet_direction + 5; // packet_direction 0: stage 5, packet_direction 1: stage 6
+			flow->pplive_stage1 = packet->packet_direction + 5; // packet_direction 0: stage 5, packet_direction 1: stage 6
 			return;
 		}			
 
-	} else if ((flow->l4.udp.pplive_stage1 == 1) || (flow->l4.udp.pplive_stage1 == 2)) {
-		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
+	} else if ((flow->pplive_stage1 == 1) || (flow->pplive_stage1 == 2)) {
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->pplive_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.pplive_stage1 - packet->packet_direction) == 1) {
+		if ((flow->pplive_stage1 - packet->packet_direction) == 1) {
 			return;
 		}
 
 		/* This is a packet in another direction. Check if we find the proper response. */
-		if (match_first_bytes(packet->payload, "\xe9\x03\x42\x01") || match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
+		if ((payload_len > 0) && (match_first_bytes(packet->payload, "\xe9\x03\x42\x01") || match_first_bytes(packet->payload, "\xe9\x03\x41\x01"))) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
-			flow->l4.udp.pplive_stage1 = 0;
+			flow->pplive_stage1 = 0;
 		}
 		
-	} else if ((flow->l4.udp.pplive_stage1 == 3) || (flow->l4.udp.pplive_stage1 == 4)) {
-		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
+	} else if ((flow->pplive_stage1 == 3) || (flow->pplive_stage1 == 4)) {
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->pplive_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.pplive_stage1 - packet->packet_direction) == 3) {
+		if ((flow->pplive_stage1 - packet->packet_direction) == 3) {
 			return;
 		}
 
 		/* This is a packet in another direction. Check if we find the proper response. */
-		if (match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
-			flow->l4.udp.pplive_stage1 = 0;
+			flow->pplive_stage1 = 0;
 		}
-	} else if ((flow->l4.udp.pplive_stage1 == 5) || (flow->l4.udp.pplive_stage1 == 6)) {
-		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage1);
+	} else if ((flow->pplive_stage1 == 5) || (flow->pplive_stage1 == 6)) {
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->pplive_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.pplive_stage1 - packet->packet_direction) == 5) {
+		if ((flow->pplive_stage1 - packet->packet_direction) == 5) {
 			return;
 		}
 
 		/* This is a packet in another direction. Check if we find the proper response. */
-		if (match_first_bytes(packet->payload, "\x1c\x1c\x32\x01")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\x1c\x1c\x32\x01")) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Found PPLIVE.\n");
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
-			flow->l4.udp.pplive_stage1 = 0;
+			flow->pplive_stage1 = 0;
 		}
 	}
 		
@@ -121,21 +121,21 @@ static void ndpi_check_pplive_udp2(struct ndpi_detection_module_struct *ndpi_str
 	u_int32_t payload_len = packet->payload_packet_len;
 
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.udp.pplive_stage2 == 0) {
+	if (flow->pplive_stage2 == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
 		
 		if ((payload_len == 57) && match_first_bytes(packet->payload, "\xe9\x03\x41\x01")) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.pplive_stage2 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->pplive_stage2 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 		}
 
 	} else {
-		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage2);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->pplive_stage2);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.pplive_stage2 - packet->packet_direction) == 1) {
+		if ((flow->pplive_stage2 - packet->packet_direction) == 1) {
 			return;
 		}
 
@@ -145,7 +145,7 @@ static void ndpi_check_pplive_udp2(struct ndpi_detection_module_struct *ndpi_str
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
-			flow->l4.udp.pplive_stage2 = 0;
+			flow->pplive_stage2 = 0;
 		}
 		
 	}
@@ -156,22 +156,22 @@ static void ndpi_check_pplive_udp3(struct ndpi_detection_module_struct *ndpi_str
 	u_int32_t payload_len = packet->payload_packet_len;
 	
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.udp.pplive_stage3 == 0) {
+	if (flow->pplive_stage3 == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage 0: \n");
 		
 		if ((payload_len == 94) && (packet->udp->dest == htons(5041) || packet->udp->source == htons(5041) || packet->udp->dest == htons(8303) || packet->udp->source == htons(8303))) {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "Possible PPLIVE request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.pplive_stage3 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->pplive_stage3 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 			return;
 		}	
 
 	} else {
-		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->l4.udp.pplive_stage3);
+		NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "PPLIVE stage %u: \n", flow->pplive_stage3);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.pplive_stage3 - packet->packet_direction) == 1) {
+		if ((flow->pplive_stage3 - packet->packet_direction) == 1) {
 			return;
 		}
 
@@ -181,7 +181,7 @@ static void ndpi_check_pplive_udp3(struct ndpi_detection_module_struct *ndpi_str
 			ndpi_int_pplive_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_PPLIVE, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PPLIVE, resetting the stage to 0...\n");
-			flow->l4.udp.pplive_stage3 = 0;
+			flow->pplive_stage3 = 0;
 		}
 	}
 		

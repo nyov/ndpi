@@ -234,12 +234,6 @@ struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_IMESH
   u_int32_t imesh_stage:4;
 #endif
-#ifdef NDPI_PROTOCOL_FTP_CONTROL
-  u_int32_t ftp_control_stage:2;
-#endif
-#ifdef NDPI_PROTOCOL_FTP_DATA
-  u_int32_t ftp_data_stage:2;
-#endif
 #ifdef NDPI_PROTOCOL_HTTP
   u_int32_t http_setup_dir:2;
   u_int32_t http_stage:2;
@@ -265,9 +259,6 @@ struct ndpi_flow_tcp_struct {
 #endif
 #ifdef NDPI_PROTOCOL_VNC
   u_int32_t vnc_stage:2;			// 0 - 3
-#endif
-#ifdef NDPI_PROTOCOL_STEAM
-  u_int32_t steam_stage:3;			// 0 - 4
 #endif
 #ifdef NDPI_PROTOCOL_TELNET
   u_int32_t telnet_stage:2;			// 0 - 2
@@ -327,10 +318,6 @@ struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
-  
-#ifdef NDPI_PROTOCOL_RTMP
-  u_int32_t rtmp_stage:2;
-#endif
 }
 
 /* ************************************************** */ 
@@ -382,19 +369,6 @@ struct ndpi_flow_udp_struct {
 #endif
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
-#endif
-#ifdef NDPI_PROTOCOL_PANDO
-  u_int32_t pando_stage:3;
-#endif
-#ifdef NDPI_PROTOCOL_STEAM
-  u_int32_t steam_stage1:3;			// 0 - 4
-  u_int32_t steam_stage2:2;			// 0 - 2
-  u_int32_t steam_stage3:2;			// 0 - 2
-#endif
-#ifdef NDPI_PROTOCOL_PPLIVE
-  u_int32_t pplive_stage1:3;			// 0-6
-  u_int32_t pplive_stage2:2;			// 0-2
-  u_int32_t pplive_stage3:2;			// 0-2    
 #endif
 }
 
@@ -739,6 +713,29 @@ typedef struct ndpi_flow_struct {
 #endif
 #ifdef NDPI_PROTOCOL_EDONKEY
   u_int32_t edonkey_stage:2;	// 0-3
+#endif
+#ifdef NDPI_PROTOCOL_FTP_CONTROL
+  u_int32_t ftp_control_stage:2;
+#endif
+#ifdef NDPI_PROTOCOL_FTP_DATA
+  u_int32_t ftp_data_stage:2;
+#endif
+#ifdef NDPI_PROTOCOL_RTMP
+  u_int32_t rtmp_stage:2;
+#endif
+#ifdef NDPI_PROTOCOL_PANDO
+  u_int32_t pando_stage:3;
+#endif
+#ifdef NDPI_PROTOCOL_STEAM
+  u_int32_t steam_stage:3;
+  u_int32_t steam_stage1:3;			// 0 - 4
+  u_int32_t steam_stage2:2;			// 0 - 2
+  u_int32_t steam_stage3:2;			// 0 - 2
+#endif
+#ifdef NDPI_PROTOCOL_PPLIVE
+  u_int32_t pplive_stage1:3;			// 0-6
+  u_int32_t pplive_stage2:2;			// 0-2
+  u_int32_t pplive_stage3:2;			// 0-2    
 #endif
 
   /* internal structures to save functions calls */

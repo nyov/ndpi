@@ -215,21 +215,21 @@ static void ndpi_check_ftp_data(struct ndpi_detection_module_struct *ndpi_struct
 	u_int32_t payload_len = packet->payload_packet_len;
 
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.tcp.ftp_data_stage == 0) {
+	if (flow->ftp_data_stage == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_FTP_DATA, ndpi_struct, NDPI_LOG_DEBUG, "FTP_DATA stage 0: \n");
 
-		if (ndpi_match_file_header(ndpi_struct, flow) || ndpi_match_ftp_data_directory(ndpi_struct, flow) || ndpi_match_ftp_data_port(ndpi_struct, flow)) {
+		if ((payload_len > 0) && (ndpi_match_file_header(ndpi_struct, flow) || ndpi_match_ftp_data_directory(ndpi_struct, flow) || ndpi_match_ftp_data_port(ndpi_struct, flow))) {
 			NDPI_LOG(NDPI_PROTOCOL_FTP_DATA, ndpi_struct, NDPI_LOG_DEBUG, "Possible FTP_DATA request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.tcp.ftp_data_stage = packet->packet_direction + 1;
+			flow->ftp_data_stage = packet->packet_direction + 1;
 		}
 
 	} else {
-		NDPI_LOG(NDPI_PROTOCOL_FTP_DATA, ndpi_struct, NDPI_LOG_DEBUG, "FTP_DATA stage %u: \n", flow->l4.tcp.ftp_data_stage);
+		NDPI_LOG(NDPI_PROTOCOL_FTP_DATA, ndpi_struct, NDPI_LOG_DEBUG, "FTP_DATA stage %u: \n", flow->ftp_data_stage);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.tcp.ftp_data_stage - packet->packet_direction) == 1) {
+		if ((flow->ftp_data_stage - packet->packet_direction) == 1) {
 			return;
 		}
 
@@ -239,7 +239,7 @@ static void ndpi_check_ftp_data(struct ndpi_detection_module_struct *ndpi_struct
 			ndpi_int_ftp_data_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_FTP_DATA, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to FTP_DATA, resetting the stage to 0...\n");
-			flow->l4.tcp.ftp_data_stage = 0;
+			flow->ftp_data_stage = 0;
 		}
 
 	}

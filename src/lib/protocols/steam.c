@@ -46,14 +46,14 @@ static void ndpi_check_steam_tcp(struct ndpi_detection_module_struct *ndpi_struc
 	struct ndpi_packet_struct *packet = &flow->packet;
 	u_int32_t payload_len = packet->payload_packet_len;
 	
-	if (flow->l4.tcp.steam_stage == 0) {
+	if (flow->steam_stage == 0) {
 	    NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage 0: \n");
 	    
 	    	if (((payload_len == 1) || (payload_len == 4) || (payload_len == 5)) && match_first_bytes(packet->payload, "\x01\x00\x00\x00")) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Possible STEAM request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.tcp.steam_stage = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->steam_stage = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 			return;
 		}
 		
@@ -61,14 +61,14 @@ static void ndpi_check_steam_tcp(struct ndpi_detection_module_struct *ndpi_struc
 		  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Possible STEAM request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.tcp.steam_stage = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
+			flow->steam_stage = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
 			return;
 		}
-	} else if ((flow->l4.tcp.steam_stage == 1) || (flow->l4.tcp.steam_stage == 2)) {
-	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->l4.tcp.steam_stage);
+	} else if ((flow->steam_stage == 1) || (flow->steam_stage == 2)) {
+	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->steam_stage);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.tcp.steam_stage - packet->packet_direction) == 1) {
+		if ((flow->steam_stage - packet->packet_direction) == 1) {
 			return;
 		}
 
@@ -78,13 +78,13 @@ static void ndpi_check_steam_tcp(struct ndpi_detection_module_struct *ndpi_struc
 			ndpi_int_steam_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to STEAM, resetting the stage to 0...\n");
-			flow->l4.tcp.steam_stage = 0;
+			flow->steam_stage = 0;
 		}
-	} else if ((flow->l4.tcp.steam_stage == 3) || (flow->l4.tcp.steam_stage == 4)) {
-	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->l4.tcp.steam_stage);
+	} else if ((flow->steam_stage == 3) || (flow->steam_stage == 4)) {
+	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->steam_stage);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.tcp.steam_stage - packet->packet_direction) == 3) {
+		if ((flow->steam_stage - packet->packet_direction) == 3) {
 			return;
 		}
 
@@ -94,7 +94,7 @@ static void ndpi_check_steam_tcp(struct ndpi_detection_module_struct *ndpi_struc
 			ndpi_int_steam_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to STEAM, resetting the stage to 0...\n");
-			flow->l4.tcp.steam_stage = 0;
+			flow->steam_stage = 0;
 		}
 	}
 }
@@ -103,64 +103,64 @@ static void ndpi_check_steam_udp1(struct ndpi_detection_module_struct *ndpi_stru
 	struct ndpi_packet_struct *packet = &flow->packet;
 	u_int32_t payload_len = packet->payload_packet_len;
 	
-	if (match_first_bytes(packet->payload, "VS01")) {
+	if ((payload_len > 0) && match_first_bytes(packet->payload, "VS01")) {
 	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Found STEAM.\n");
 		ndpi_int_steam_add_connection(ndpi_struct, flow);
 		return;
 	}
 
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.udp.steam_stage1 == 0) {
+	if (flow->steam_stage1 == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage 0: \n");
 		
-		if (match_first_bytes(packet->payload, "\x31\xff\x30\x2e")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\x31\xff\x30\x2e")) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Possible STEAM request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.steam_stage1 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->steam_stage1 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 			return;
 		}
 		
-		if (match_first_bytes(packet->payload, "\xff\xff\xff\xff")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\xff\xff\xff\xff")) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Possible STEAM request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.steam_stage1 = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
+			flow->steam_stage1 = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
 			return;
 		}
 
-	} else if ((flow->l4.udp.steam_stage1 == 1) || (flow->l4.udp.steam_stage1 == 2)) {
-		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->l4.udp.steam_stage1);
+	} else if ((flow->steam_stage1 == 1) || (flow->steam_stage1 == 2)) {
+		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->steam_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.steam_stage1 - packet->packet_direction) == 1) {
+		if ((flow->steam_stage1 - packet->packet_direction) == 1) {
 			return;
 		}
 
 		/* This is a packet in another direction. Check if we find the proper response. */
-		if (match_first_bytes(packet->payload, "\xff\xff\xff\xff")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\xff\xff\xff\xff")) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Found STEAM.\n");
 			ndpi_int_steam_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to STEAM, resetting the stage to 0...\n");
-			flow->l4.udp.steam_stage1 = 0;
+			flow->steam_stage1 = 0;
 		}
 		
-	} else if ((flow->l4.udp.steam_stage1 == 3) || (flow->l4.udp.steam_stage1 == 4)) {
-		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->l4.udp.steam_stage1);
+	} else if ((flow->steam_stage1 == 3) || (flow->steam_stage1 == 4)) {
+		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->steam_stage1);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.steam_stage1 - packet->packet_direction) == 3) {
+		if ((flow->steam_stage1 - packet->packet_direction) == 3) {
 			return;
 		}
 
 		/* This is a packet in another direction. Check if we find the proper response. */
-		if (match_first_bytes(packet->payload, "\x31\xff\x30\x2e")) {
+		if ((payload_len > 0) && match_first_bytes(packet->payload, "\x31\xff\x30\x2e")) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Found STEAM.\n");
 			ndpi_int_steam_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to STEAM, resetting the stage to 0...\n");
-			flow->l4.udp.steam_stage1 = 0;
+			flow->steam_stage1 = 0;
 		}
 		
 	}
@@ -169,29 +169,23 @@ static void ndpi_check_steam_udp1(struct ndpi_detection_module_struct *ndpi_stru
 static void ndpi_check_steam_udp2(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
 	u_int32_t payload_len = packet->payload_packet_len;
-	
-	if (match_first_bytes(packet->payload, "VS01")) {
-	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Found STEAM.\n");
-		ndpi_int_steam_add_connection(ndpi_struct, flow);
-		return;
-	}
 
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.udp.steam_stage2 == 0) {
+	if (flow->steam_stage2 == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage 0: \n");
 		
 		if ((payload_len == 25) && match_first_bytes(packet->payload, "\xff\xff\xff\xff")) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Possible STEAM request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.steam_stage2 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->steam_stage2 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 		}
 
 	} else {
-		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->l4.udp.steam_stage2);
+		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->steam_stage2);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.steam_stage2 - packet->packet_direction) == 1) {
+		if ((flow->steam_stage2 - packet->packet_direction) == 1) {
 			return;
 		}
 
@@ -201,7 +195,7 @@ static void ndpi_check_steam_udp2(struct ndpi_detection_module_struct *ndpi_stru
 			ndpi_int_steam_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to STEAM, resetting the stage to 0...\n");
-			flow->l4.udp.steam_stage2 = 0;
+			flow->steam_stage2 = 0;
 		}
 		
 	}
@@ -210,29 +204,23 @@ static void ndpi_check_steam_udp2(struct ndpi_detection_module_struct *ndpi_stru
 static void ndpi_check_steam_udp3(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
 	u_int32_t payload_len = packet->payload_packet_len;
-	
-	if (match_first_bytes(packet->payload, "VS01")) {
-	  	NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Found STEAM.\n");
-		ndpi_int_steam_add_connection(ndpi_struct, flow);
-		return;
-	}
 
 	/* Check if we so far detected the protocol in the request or not. */
-	if (flow->l4.udp.steam_stage3 == 0) {
+	if (flow->steam_stage3 == 0) {
 		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage 0: \n");
 		
 		if ((payload_len == 4) && (packet->payload[0] == 0x39) && (packet->payload[1] == 0x18) && (packet->payload[2] == 0x00) && (packet->payload[3] == 0x00)) {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "Possible STEAM request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
-			flow->l4.udp.steam_stage3 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+			flow->steam_stage3 = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 		}
 
 	} else {
-		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->l4.udp.steam_stage3);
+		NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "STEAM stage %u: \n", flow->steam_stage3);
 
 		/* At first check, if this is for sure a response packet (in another direction. If not, do nothing now and return. */
-		if ((flow->l4.udp.steam_stage3 - packet->packet_direction) == 1) {
+		if ((flow->steam_stage3 - packet->packet_direction) == 1) {
 			return;
 		}
 
@@ -242,7 +230,7 @@ static void ndpi_check_steam_udp3(struct ndpi_detection_module_struct *ndpi_stru
 			ndpi_int_steam_add_connection(ndpi_struct, flow);
 		} else {
 			NDPI_LOG(NDPI_PROTOCOL_STEAM, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to STEAM, resetting the stage to 0...\n");
-			flow->l4.udp.steam_stage3 = 0;
+			flow->steam_stage3 = 0;
 		}
 		
 	}
