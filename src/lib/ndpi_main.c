@@ -1636,6 +1636,13 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 
+  ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
+				      NDPI_PROTOCOL_HTTP_PROXY,
+				      ndpi_search_http_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
 #ifdef NDPI_CONTENT_MPEG
   ndpi_set_bitmask_protocol_detection(ndpi_struct,detection_bitmask,a,
 				      NDPI_CONTENT_MPEG,
@@ -4456,6 +4463,18 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
 	} else {
 	  packet->host_line.ptr = &packet->line[packet->parsed_lines].ptr[5];
 	  packet->host_line.len = packet->line[packet->parsed_lines].len - 5;
+	}
+      }
+
+      if(packet->line[packet->parsed_lines].len > 17
+	 && memcmp(packet->line[packet->parsed_lines].ptr, "X-Forwarded-For:", 16) == 0) {
+	// some stupid clients omit a space and place the hostname directly after the colon
+	if(packet->line[packet->parsed_lines].ptr[16] == ' ') {
+	  packet->forwarded_line.ptr = &packet->line[packet->parsed_lines].ptr[17];
+	  packet->forwarded_line.len = packet->line[packet->parsed_lines].len - 17;
+	} else {
+	  packet->forwarded_line.ptr = &packet->line[packet->parsed_lines].ptr[16];
+	  packet->forwarded_line.len = packet->line[packet->parsed_lines].len - 16;
 	}
       }
 

@@ -436,6 +436,7 @@ typedef struct ndpi_packet_struct {
   struct ndpi_int_one_line_struct line[NDPI_MAX_PARSE_LINES_PER_PACKET];
   struct ndpi_int_one_line_struct unix_line[NDPI_MAX_PARSE_LINES_PER_PACKET];
   struct ndpi_int_one_line_struct host_line;
+  struct ndpi_int_one_line_struct forwarded_line;
   struct ndpi_int_one_line_struct referer_line;
   struct ndpi_int_one_line_struct content_line;
   struct ndpi_int_one_line_struct accept_line;
@@ -637,8 +638,9 @@ typedef struct ndpi_flow_struct {
 
   u_int8_t protocol_id_already_guessed;
   u_int16_t guessed_protocol_id;
-  u_char host_server_name[256]; /* HTTP host or DNS query */
-  u_char detected_os[32];       /* Via HTTP User-Agent    */
+  u_char host_server_name[256]; /* HTTP host or DNS query   */
+  u_char detected_os[32];       /* Via HTTP User-Agent      */
+  u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
 
   union {
     struct {

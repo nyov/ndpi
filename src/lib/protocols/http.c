@@ -189,7 +189,9 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
     }
   }
     
-  if(packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP) {
+  if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP)
+     || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP_PROXY))
+    {
     /* Try matching subprotocols */
     // ndpi_match_string_subprotocol(ndpi_struct, flow, (char*)packet->host_line.ptr, packet->host_line.len);
     ndpi_match_string_subprotocol(ndpi_struct, flow, (char *)flow->host_server_name, strlen((const char *)flow->host_server_name));
@@ -300,6 +302,10 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     len = ndpi_min(packet->host_line.len, sizeof(flow->host_server_name)-1);
     strncpy((char*)flow->host_server_name, (char*)packet->host_line.ptr, len);
     flow->host_server_name[len] = '\0';
+
+    len = ndpi_min(packet->forwarded_line.len, sizeof(flow->nat_ip)-1);
+    strncpy((char*)flow->nat_ip, (char*)packet->forwarded_line.ptr, len);
+    flow->nat_ip[len] = '\0';
 
     parseHttpSubprotocol(ndpi_struct, flow);
     
@@ -500,6 +506,8 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
       // parsed_lines > 1 here
       if (packet->line[0].len >= (9 + filename_start)
 	  && memcmp(&packet->line[0].ptr[packet->line[0].len - 9], " HTTP/1.", 8) == 0) {
+	u_int16_t proto_id;
+
 	packet->http_url_name.ptr = &packet->payload[filename_start];
 	packet->http_url_name.len = packet->line[0].len - (filename_start + 9);
 
@@ -508,7 +516,16 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
 
 	NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "http structure detected, adding\n");
 
-	ndpi_int_http_add_connection(ndpi_struct, flow, (filename_start == 8) ? NDPI_PROTOCOL_HTTP_CONNECT : NDPI_PROTOCOL_HTTP);
+	if(filename_start == 8) 
+	  proto_id = NDPI_PROTOCOL_HTTP_CONNECT;
+	else {
+	  if((packet->http_url_name.len > 7) && (!strncmp((const char*)packet->http_url_name.ptr, "http://", 7)))
+	    proto_id = NDPI_PROTOCOL_HTTP_PROXY;
+	  else
+	    proto_id = NDPI_PROTOCOL_HTTP;
+	}
+
+	ndpi_int_http_add_connection(ndpi_struct, flow, proto_id);
 	check_content_type_and_change_protocol(ndpi_struct, flow);
 	/* HTTP found, look for host... */
 	if (packet->host_line.ptr != NULL) {
