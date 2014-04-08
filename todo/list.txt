@@ -1,0 +1,24 @@
+
+1. Missing function to select (or exclude) protocols from the search.
+
+2. Missing function to guess a protocol based on the port number, when no protocol was found.
+
+3. Missing "first guess" to start examinating packets from a protocol, which fits regarding the port numbers.
+
+4. Debug functions do not work so far.
+
+5. Invoke dissectors only when needed in a tree.
+
+6. All the processing functions from original .c files in this directory.
+
+7. Add ability to include user-defined protocols without prior re-compilation of the software.
+
+8. Include all protocols from OpenDPI.
+
+9. Umieścić w hierarchii HTTPS, być może kompletnie zmienić strukturę robiąc jeden "poziom aplikacji" i wrzucając tam kolejne rzeczy, np:
+SSL->HTTPS->Dropbox
+SSL->POPS
+
+10. Poprawić certyfikaty dla TOR'a i innych aplikacji.
+
+11. Multiple contents / services per flow.

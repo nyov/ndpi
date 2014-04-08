@@ -1,0 +1,1086 @@
+
+#ifdef NDPI_OLD_RESULT_APP_XBOX
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_XBOX,
+				      ndpi_search_http_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_WINDOWS_UPDATE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_WINDOWS_UPDATE,
+				      ndpi_search_http_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_QQ
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_QQ,
+				      ndpi_search_http_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_MOVE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MOVE,
+				      ndpi_search_http_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_RTSP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_RTSP,
+				      ndpi_search_rtsp_tcp_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_STUN
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_STUN,
+				      ndpi_search_stun,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_RTP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_RTP,
+				      ndpi_search_rtp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+  /* Add protocol bitmask dependencies to detected bitmask*/
+#ifdef NDPI_OLD_RESULT_APP_STUN
+  NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_mod->callback_buffer[a].detection_bitmask, NDPI_OLD_RESULT_APP_STUN);
+#endif
+  /* consider also real protocol for detection select in main loop */
+  ndpi_mod->callback_buffer[a].detection_feature = NDPI_SELECT_DETECTION_WITH_REAL_PROTOCOL;
+  /* Update callback_buffer index */
+  a++;
+
+#endif
+
+
+#ifdef NDPI_OLD_RESULT_APP_SIP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SIP,
+				      ndpi_search_sip,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,/* Fix courtesy of Miguel Quesada <mquesadab@gmail.com> */
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_FASTTRACK
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_FASTTRACK,
+				      ndpi_search_fasttrack_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_GNUTELLA
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_GNUTELLA,
+				      ndpi_search_gnutella,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+  /* Add protocol bitmask dependencies to detected bitmask*/
+#ifdef NDPI_OLD_RESULT_APP_XBOX
+  NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_mod->callback_buffer[a].detection_bitmask, NDPI_OLD_RESULT_APP_XBOX);
+
+#endif
+#ifdef NDPI_OLD_RESULT_APP_WINDOWS_UPDATE
+  NDPI_ADD_PROTOCOL_TO_BITMASK(ndpi_mod->callback_buffer[a].detection_bitmask, NDPI_OLD_RESULT_APP_WINDOWS_UPDATE);
+#endif
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_WINMX
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_WINMX,
+				      ndpi_search_winmx_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_DIRECTCONNECT
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_DIRECTCONNECT,
+				      ndpi_search_directconnect,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_MSN
+
+  NDPI_BITMASK_RESET(ndpi_mod->callback_buffer[a].excluded_protocol_bitmask);
+
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MSN,
+				      ndpi_search_msn,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+#ifdef NDPI_OLD_RESULT_APP_YAHOO
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_YAHOO,
+				      ndpi_search_yahoo,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+
+#ifdef NDPI_OLD_RESULT_APP_OSCAR
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_OSCAR,
+				      ndpi_search_oscar,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_APPLEJUICE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_APPLEJUICE,
+				      ndpi_search_applejuice_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_SOULSEEK
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SOULSEEK,
+				      ndpi_search_soulseek_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_IRC
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_IRC,
+				      ndpi_search_irc_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+#ifdef NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER,
+				      ndpi_search_jabber_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#ifdef NDPI_OLD_RESULT_APP_USENET
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_USENET,
+				      ndpi_search_usenet_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_FILETOPIA
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_FILETOPIA,
+				      ndpi_search_filetopia_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_VMWARE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_VMWARE,
+				      ndpi_search_vmware,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_IMESH
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_IMESH,
+				      ndpi_search_imesh_tcp_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_CONTENT_MMS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_CONTENT_MMS,
+				      ndpi_search_mms_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TVANTS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TVANTS,
+				      ndpi_search_tvants_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TVUPLAYER
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TVUPLAYER,
+				      ndpi_search_tvuplayer,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_IAX
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_IAX,
+				      ndpi_search_iax,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_MGCP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MGCP,
+				      ndpi_search_mgcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_ZATTOO
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_ZATTOO,
+				      ndpi_search_zattoo,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+
+#ifdef NDPI_OLD_RESULT_APP_QQ
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_QQ,
+				      ndpi_search_qq,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_AYIYA
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_AYIYA,
+				      ndpi_search_ayiya,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_THUNDER
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_THUNDER,
+				      ndpi_search_thunder,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_VNC
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_VNC,
+				      ndpi_search_vnc_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TEAMVIEWER
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TEAMVIEWER,
+				      ndpi_search_teamview,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_DHCP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_DHCP,
+				      ndpi_search_dhcp_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_SOCRATES
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SOCRATES,
+				      ndpi_search_socrates,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_HALFLIFE2
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_HALFLIFE2,
+				      ndpi_search_halflife2,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_XBOX
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_XBOX,
+				      ndpi_search_xbox,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_ACTIVESYNC
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_ACTIVESYNC,
+				      ndpi_search_activesync,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TELNET
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TELNET,
+				      ndpi_search_telnet_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_NFS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_NFS,
+				      ndpi_search_nfs,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_SSDP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SSDP,
+				      ndpi_search_ssdp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_POSTGRES
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_POSTGRES,
+				      ndpi_search_postgres_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_MYSQL
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MYSQL,
+				      ndpi_search_mysql_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_BGP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_BGP,
+				      ndpi_search_bgp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_QUAKE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_QUAKE,
+				      ndpi_search_quake,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_BATTLEFIELD
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_BATTLEFIELD,
+				      ndpi_search_battlefield,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_PCANYWHERE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_PCANYWHERE,
+				      ndpi_search_pcanywhere,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_SNMP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SNMP,
+				      ndpi_search_snmp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_KONTIKI
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_KONTIKI,
+				      ndpi_search_kontiki,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_ICECAST
+
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_ICECAST,
+				      ndpi_search_icecast_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+#ifdef NDPI_OLD_RESULT_APP_SHOUTCAST
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SHOUTCAST,
+				      ndpi_search_shoutcast_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+#ifdef NDPI_OLD_RESULT_APP_VEOHTV
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_VEOHTV,
+				      ndpi_search_veohtv_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+#ifdef NDPI_OLD_RESULT_APP_KERBEROS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_KERBEROS,
+				      ndpi_search_kerberos,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_OPENFT
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_OPENFT,
+				      ndpi_search_openft_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+#endif
+#ifdef NDPI_OLD_RESULT_APP_SYSLOG
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SYSLOG,
+				      ndpi_search_syslog,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TDS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TDS,
+				      ndpi_search_tds_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_MDNS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MDNS,
+				      ndpi_search_mdns,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_IPP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_IPP,
+				      ndpi_search_ipp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_LDAP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_LDAP,
+				      ndpi_search_ldap,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_WARCRAFT3
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_WARCRAFT3,
+				      ndpi_search_warcraft3,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_XDMCP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_XDMCP,
+				      ndpi_search_xdmcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TFTP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TFTP,
+				      ndpi_search_tftp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_MSSQL
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MSSQL,
+				      ndpi_search_mssql,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_PPTP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_PPTP,
+				      ndpi_search_pptp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_STEALTHNET
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_STEALTHNET,
+				      ndpi_search_stealthnet,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_DHCPV6
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_DHCPV6,
+				      ndpi_search_dhcpv6_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_MEEBO
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MEEBO,
+				      ndpi_search_meebo,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+  /* Add protocol bitmask dependencies to detected bitmask*/
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_AFP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_AFP,
+				      ndpi_search_afp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_AIMINI
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_AIMINI,
+				      ndpi_search_aimini,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_FLORENSIA
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_FLORENSIA,
+				      ndpi_search_florensia,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_MAPLESTORY
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_MAPLESTORY,
+				      ndpi_search_maplestory,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_DOFUS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_DOFUS,
+				      ndpi_search_dofus,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_WORLD_OF_KUNG_FU
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_WORLD_OF_KUNG_FU,
+				      ndpi_search_world_of_kung_fu,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_FIESTA
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_FIESTA,
+				      ndpi_search_fiesta,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_CROSSFIRE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_CROSSFIRE,
+				      ndpi_search_crossfire_tcp_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_GUILDWARS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_GUILDWARS,
+				      ndpi_search_guildwars_tcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+#ifdef NDPI_OLD_RESULT_APP_ARMAGETRON
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_ARMAGETRON,
+				      ndpi_search_armagetron_udp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_RADIUS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_RADIUS,
+				      ndpi_search_radius,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_CITRIX
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_CITRIX,
+				      ndpi_search_citrix,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_LOTUS_NOTES
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_LOTUS_NOTES,
+				      ndpi_search_lotus_notes,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_GTP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_GTP,
+				      ndpi_search_gtp,_FUNCTION_
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_DCERPC
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_DCERPC,
+				      ndpi_search_dcerpc,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_NETFLOW
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_NETFLOW,
+				      ndpi_search_netflow,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_SFLOW
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SFLOW,
+				      ndpi_search_sflow,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_H323
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_H323,
+				      ndpi_search_h323,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_NOE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_NOE,
+				      ndpi_search_noe,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_TEAMSPEAK
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_TEAMSPEAK,
+				      ndpi_search_teamspeak,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_VIBER
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_VIBER,
+				      ndpi_search_viber,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_SKINNY
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_SKINNY,
+				      ndpi_search_skinny,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_RTCP
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_RTCP,
+				      ndpi_search_rtcp,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_RSYNC
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_RSYNC,
+				      ndpi_search_rsync,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_WHOIS_DAS
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_WHOIS_DAS,
+				      ndpi_search_whois_das,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_ORACLE
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_ORACLE,
+				      ndpi_search_oracle,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_CORBA
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_CORBA,
+				      ndpi_search_corba,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
+
+#ifdef NDPI_OLD_RESULT_APP_COLLECTD
+  ndpi_set_bitmask_protocol_detection(ndpi_mod,detection_bitmask,a,
+				      NDPI_OLD_RESULT_APP_COLLECTD,
+				      ndpi_search_collectd,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+
+  /* Update callback_buffer index */
+  a++;
+#endif
