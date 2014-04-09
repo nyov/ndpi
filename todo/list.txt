@@ -22,3 +22,8 @@ SSL->POPS
 10. Poprawić certyfikaty dla TOR'a i innych aplikacji.
 
 11. Multiple contents / services per flow.
+
+12. Content and service providers
+
+13. Custom content types and providers for non defined domsins and fields.
+
