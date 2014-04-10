@@ -41,6 +41,10 @@
 #include "linux_compat.h"
 #include "ndpi_main.h"
 
+#if defined(__OpenBSD__)
+#include <sys/socket.h>
+#endif
+
 static void setupDetection(void);
 
 // cli options
