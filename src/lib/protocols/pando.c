@@ -64,7 +64,7 @@ static void ndpi_check_pando_udp(struct ndpi_detection_module_struct *ndpi_struc
 			return;
 		}
 		
-		if ((payload_len > 0) && match_first_bytes(packet->payload, "UDPR") || match_first_bytes(packet->payload, "UDPE")) {
+		if ((payload_len > 0) && (match_first_bytes(packet->payload, "UDPR") || match_first_bytes(packet->payload, "UDPE"))) {
 			NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "Possible PANDO request detected, we will look further for the response...\n");
 
 			/* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
