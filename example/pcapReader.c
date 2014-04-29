@@ -71,7 +71,7 @@ static time_t capture_until = 0;
 // results
 static u_int64_t raw_packet_count = 0;
 static u_int64_t ip_packet_count = 0;
-static u_int64_t total_bytes = 0;
+static u_int64_t total_wire_bytes = 0, total_ip_bytes = 0;
 static u_int64_t protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1];
 static u_int64_t protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1];
 static u_int32_t protocol_flows[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1] = { 0 };
@@ -547,7 +547,7 @@ static void setupDetection(void)
   if(_protoFilePath != NULL)
     ndpi_load_protocols_file(ndpi_struct, _protoFilePath);
 
-  raw_packet_count = ip_packet_count = total_bytes = 0;
+  raw_packet_count = ip_packet_count = total_ip_bytes = total_wire_bytes = 0;
   ndpi_flow_count = 0;
 }
 
@@ -602,7 +602,7 @@ static unsigned int packet_processing(const u_int64_t time,
     return(0);
 
   ip_packet_count++;
-  total_bytes += rawsize + 24 /* CRC etc */;
+  total_wire_bytes += rawsize + 24 /* CRC etc */, total_ip_bytes += rawsize;
 
   if(flow->detection_completed) return(0);
 
@@ -696,6 +696,8 @@ char* formatPackets(float numPkts, char *buf) {
 static void printResults(u_int64_t tot_usec)
 {
   u_int32_t i;
+  u_int64_t total_flow_bytes = 0;
+
   int m = 0;			/* Default output mode: color (0) */
   if (_output_mode != NULL && strcmp(_output_mode, "plain") == 0) {
     m = 1;			/* Set output mode: plain (0) */
@@ -707,34 +709,43 @@ static void printResults(u_int64_t tot_usec)
     printf("\x1b[2K\n");
   }
   printf("pcap file contains\n");
+
   if (m) {
-    printf("\tIP packets:   %-13llu of %llu packets total\n",
-	   (long long unsigned int)ip_packet_count,
-	   (long long unsigned int)raw_packet_count);
-    if(total_bytes > 0)
-      printf("\tIP bytes:     %-13llu (avg pkt size %u bytes)\n",
-	     (long long unsigned int)total_bytes,
-	     (unsigned int)(total_bytes/raw_packet_count));
-    printf("\tUnique flows: %-13u\n", ndpi_flow_count);
+    printf("\tEthernet bytes:     %-13llu (includes ethernet CRC/IFC/trailer)\n",
+	   (long long unsigned int)total_wire_bytes);
   } else {
-    printf("\tIP packets:   \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
+    printf("\tEthernet bytes:     \x1b[33m%-13llu\x1b[0m (includes ethernet CRC/IFC/trailer)\n",
+	   (long long unsigned int)total_wire_bytes);
+  }
+
+  if (m) {
+    printf("\tIP packets:         %-13llu of %llu packets total\n",
 	   (long long unsigned int)ip_packet_count,
 	   (long long unsigned int)raw_packet_count);
-    printf("\tIP bytes:     \x1b[34m%-13llu\x1b[0m (avg pkt size %u bytes)\n",
-	   (long long unsigned int)total_bytes,
-	   (unsigned int)(total_bytes/raw_packet_count));
-    printf("\tUnique flows: \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
+    if(total_ip_bytes > 0)
+      printf("\tIP bytes:         %-13llu (avg pkt size %u bytes)\n",
+	     (long long unsigned int)total_ip_bytes,
+	     (unsigned int)(total_ip_bytes/raw_packet_count));
+    printf("\tUnique flows:       %-13u\n", ndpi_flow_count);
+  } else {
+    printf("\tIP packets:         \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
+	   (long long unsigned int)ip_packet_count,
+	   (long long unsigned int)raw_packet_count);
+    printf("\tIP bytes:           \x1b[34m%-13llu\x1b[0m (avg pkt size %u bytes)\n",
+	   (long long unsigned int)total_ip_bytes,
+	   (unsigned int)(total_ip_bytes/raw_packet_count));
+    printf("\tUnique flows:       \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
   }
 
   if(tot_usec > 0) {
     char buf[32], buf1[32];
     float t = (float)(ip_packet_count*1000000)/(float)tot_usec;
-    float b = (float)(total_bytes * 8 *1000000)/(float)tot_usec;
+    float b = (float)(total_wire_bytes * 8 *1000000)/(float)tot_usec;
 
     if (m) {
-      printf("\tnDPI throughout: %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+      printf("\tnDPI throughout:    %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
     } else {
-      printf("\tnDPI throughout: \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+      printf("\tnDPI throughout:    \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
     }
   }
 
@@ -763,6 +774,8 @@ static void printResults(u_int64_t tot_usec)
 	       ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
 	       (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
       }
+
+      total_flow_bytes += protocol_counter_bytes[i];
     }
   }
 
@@ -776,8 +789,6 @@ static void printResults(u_int64_t tot_usec)
     for(i=0; i<NUM_ROOTS; i++)
       ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker, NULL);
   }
-
-  printf("\n\n");
 }
 
 static void closePcapFile(void)
@@ -882,9 +893,21 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   } else
     return;
 
-  if(type == 0x8100 /* VLAN */) {
-    type = (packet[ip_offset+2] << 8) + packet[ip_offset+3];
-    ip_offset += 4;
+  while(1) {
+    if(type == 0x8100 /* VLAN */) {
+      type = (packet[ip_offset+2] << 8) + packet[ip_offset+3];
+      ip_offset += 4;
+    } else if(type == 0x8847 /* MPLS */) {
+      u_int32_t label = ntohl(*((u_int32_t*)&packet[ip_offset]));
+
+      type = 0x800, ip_offset += 4;
+
+      while((label & 0x100) != 0x100) {
+	ip_offset += 4;
+	label = ntohl(*((u_int32_t*)&packet[ip_offset]));
+      }
+    } else
+      break;
   }
 
   iph = (struct ndpi_iphdr *) &packet[ip_offset];
