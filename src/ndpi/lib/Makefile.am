@@ -58,4 +58,24 @@ libndpi_la_SOURCES = \
 			scanners/proto_world_of_warcraft.c \
 			scanners/content_raw.c \
 			scanners/content_http.c \
-			scanners/service_parser.c
+			scanners/service_parser.c \
+			scanners/proto_bgp.c \
+			scanners/proto_dhcp.c \
+			scanners/proto_dhcpv6.c \
+			scanners/proto_directconnect.c \
+			scanners/proto_fasttrack.c \
+			scanners/proto_gnutella.c \
+			scanners/proto_imesh.c \
+			scanners/proto_netflow.c \
+			scanners/proto_nfs.c \
+			scanners/proto_rtp.c \
+			scanners/proto_sip.c \
+			scanners/proto_snmp.c \
+			scanners/proto_teamviewer.c \
+			scanners/proto_telnet.c \
+			scanners/proto_tftp.c \
+			scanners/proto_usenet.c \
+			scanners/proto_vmware.c \
+			scanners/proto_vnc.c \
+			scanners/proto_warcraft3.c \
+			scanners/proto_yahoo_messenger.c

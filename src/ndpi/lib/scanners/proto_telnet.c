@@ -1,5 +1,5 @@
 /*
- * telnet.c
+ * proto_telnet.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
@@ -24,17 +24,7 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_OLD_RESULT_APP_TELNET
 
-
-
-static void ndpi_int_telnet_add_connection(struct ndpi_detection_module_struct
-											 *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_TELNET, NDPI_REAL_PROTOCOL);
-}
-
-	
 #if !defined(WIN32)
  static inline
 #else
@@ -76,32 +66,34 @@ __forceinline static
 void ndpi_search_telnet_tcp(struct ndpi_detection_module_struct
 							  *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-//  struct ndpi_packet_struct *packet = &flow->packet;
-	
-//      struct ndpi_id_struct         *src=ndpi_struct->src;
-//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
-
-	NDPI_LOG(NDPI_OLD_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "search telnet.\n");
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search telnet.\n");
 
 	if (search_iac(ndpi_struct, flow) == 1) {
 
 		if (flow->l4.tcp.telnet_stage == 2) {
-			NDPI_LOG(NDPI_OLD_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet identified.\n");
-			ndpi_int_telnet_add_connection(ndpi_struct, flow);
+			NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "telnet identified.\n");
+			flow->ndpi_result_app = NDPI_RESULT_APP_TELNET;
+			flow->ndpi_excluded_app[NDPI_RESULT_APP_TELNET] = 1;
 			return;
 		}
 		flow->l4.tcp.telnet_stage++;
-		NDPI_LOG(NDPI_OLD_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet stage %u.\n", flow->l4.tcp.telnet_stage);
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "telnet stage %u.\n", flow->l4.tcp.telnet_stage);
 		return;
 	}
 
 	if ((flow->packet_counter < 12 && flow->l4.tcp.telnet_stage > 0) || flow->packet_counter < 6) {
 		return;
 	} else {
-		NDPI_LOG(NDPI_OLD_RESULT_APP_TELNET, ndpi_struct, NDPI_LOG_DEBUG, "telnet excluded.\n");
-		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_TELNET);
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "telnet excluded.\n");
+		flow->ndpi_excluded_app[NDPI_RESULT_APP_TELNET] = 1;
 	}
 	return;
 }
 
-#endif
+void ndpi_register_proto_telnet (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {23, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_TELNET, "Telnet", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_telnet_tcp);
+}

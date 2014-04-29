@@ -1,5 +1,5 @@
 /*
- * vmware.c
+ * proto_vmware.c
  *
  * Copyright (C) 2011-13 - ntop.org
  *
@@ -20,8 +20,6 @@
 
 
 #include "ndpi_utils.h"
-#ifdef NDPI_OLD_RESULT_APP_VMWARE
-
 
 void ndpi_search_vmware(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
@@ -31,14 +29,19 @@ void ndpi_search_vmware(struct ndpi_detection_module_struct *ndpi_struct, struct
   if((packet->payload_packet_len == 66)
      && (ntohs(packet->udp->dest) == 902)
      && ((packet->payload[0] & 0xFF) == 0xA4)) {
-    NDPI_LOG(NDPI_OLD_RESULT_APP_VMWARE, ndpi_struct, NDPI_LOG_DEBUG, "Found vmware.\n");
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_VMWARE, NDPI_REAL_PROTOCOL);	
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Found vmware.\n");
+    flow->ndpi_result_app = NDPI_RESULT_APP_VMWARE;
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_VMWARE] = 1;
   } else {
-    NDPI_LOG(NDPI_OLD_RESULT_APP_VMWARE, ndpi_struct, NDPI_LOG_DEBUG, "exclude vmware.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_VMWARE);
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "exclude vmware.\n");
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_VMWARE] = 1;
   }
 }
 
+void ndpi_register_proto_vmware (struct ndpi_detection_module_struct *ndpi_mod) {
 
-#endif /* NDPI_OLD_RESULT_APP_VMWARE */
+  int tcp_ports[5] = {903, 0, 0, 0, 0};
+  int udp_ports[5] = {902, 903, 0, 0, 0};
 
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_VMWARE, "VMware", NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_vmware);
+}

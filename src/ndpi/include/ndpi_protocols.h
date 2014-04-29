@@ -94,9 +94,32 @@ void ndpi_register_proto_ppstream (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_spotify (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_various_directdownloadlink (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_world_of_warcraft (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_bgp (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_dhcp (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_dhcpv6 (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_directconnect (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_fasttrack (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_gnutella (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_imesh (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_netflow (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_nfs (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_rtp (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_sip (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_snmp (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_teamviewer (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_telnet (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_tftp (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_usenet (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_vmware (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_vnc (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_warcraft3 (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_yahoo_messenger (struct ndpi_detection_module_struct *mod);
+
 void ndpi_register_content_raw (struct ndpi_detection_module_struct *mod);
+
 void ndpi_register_content_http (struct ndpi_detection_module_struct *mod);
 void ndpi_unregister_content_http (struct ndpi_detection_module_struct *mod);
+
 void ndpi_register_service_parser (struct ndpi_detection_module_struct *mod);
 void ndpi_unregister_service_parser (struct ndpi_detection_module_struct *mod);
 

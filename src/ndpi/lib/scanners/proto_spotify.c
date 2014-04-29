@@ -47,7 +47,7 @@ void ndpi_search_spotify(struct ndpi_detection_module_struct *ndpi_struct, struc
     }
   } else if(packet->tcp != NULL) {
     if(packet->iph /* IPv4 Only: we need to support packet->iphv6 at some point */) {
-      /* if(packet->detected_protocol_stack[0] == NDPI_OLD_RESULT_UNKNOWN) */ {
+       {
 	/*
 	Spotify
 

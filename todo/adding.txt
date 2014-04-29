@@ -12,19 +12,19 @@ ndpi_main.c : ndpi_init_detection_module, just before: void ndpi_exit_detection_
 
 4. Edit the particular scanners and add the registration function as follows (template):
 
-void ndpi_register_proto_various_directdownloadlink (struct ndpi_detection_module_struct *ndpi_mod) {
+void ndpi_register_proto_name (struct ndpi_detection_module_struct *ndpi_mod) {
 
   int tcp_ports[5] = {0, 0, 0, 0, 0};
   int udp_ports[5] = {0, 0, 0, 0, 0};
 
-  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_DIRECT_DOWNLOAD, "Direct_Download", _MASK_, tcp_ports, udp_ports, _FUNCTION_);
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_NAME, "AppName", _MASK_, tcp_ports, udp_ports, _FUNCTION_);
 }
 
 5. Set the discovery (or exclusion) of the particular protocols:
 
-flow->ndpi_result_app = NDPI_RESULT_APP_DIRECT_DOWNLOAD;
-flow->ndpi_excluded_app[NDPI_RESULT_APP_DIRECT_DOWNLOAD] = 1;
+flow->ndpi_result_app = NDPI_RESULT_APP_NAME;
+flow->ndpi_excluded_app[NDPI_RESULT_APP_NAME] = 1;
 
 OR
 
-flow->ndpi_excluded_app[NDPI_RESULT_APP_DIRECT_DOWNLOAD] = 1;
+flow->ndpi_excluded_app[NDPI_RESULT_APP_NAME] = 1;

@@ -1,5 +1,5 @@
 /*
- * tftp.c
+ * proto_tftp.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
@@ -24,47 +24,44 @@
 
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_OLD_RESULT_APP_TFTP
-
-static void ndpi_int_tftp_add_connection(struct ndpi_detection_module_struct
-										   *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_TFTP, NDPI_REAL_PROTOCOL);
-}
 
 void ndpi_search_tftp(struct ndpi_detection_module_struct
 						*ndpi_struct, struct ndpi_flow_struct *flow)
 {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	
-
-
-
-	NDPI_LOG(NDPI_OLD_RESULT_APP_TFTP, ndpi_struct, NDPI_LOG_DEBUG, "search TFTP.\n");
-
-
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search TFTP.\n");
 
 	if (packet->payload_packet_len > 3 && flow->l4.udp.tftp_stage == 0
 		&& ntohl(get_u_int32_t(packet->payload, 0)) == 0x00030001) {
-		NDPI_LOG(NDPI_OLD_RESULT_APP_TFTP, ndpi_struct, NDPI_LOG_DEBUG, "maybe tftp. need next packet.\n");
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "maybe tftp. need next packet.\n");
 		flow->l4.udp.tftp_stage = 1;
 		return;
 	}
+	
 	if (packet->payload_packet_len > 3 && (flow->l4.udp.tftp_stage == 1)
 		&& ntohl(get_u_int32_t(packet->payload, 0)) == 0x00040001) {
 
-		NDPI_LOG(NDPI_OLD_RESULT_APP_TFTP, ndpi_struct, NDPI_LOG_DEBUG, "found tftp.\n");
-		ndpi_int_tftp_add_connection(ndpi_struct, flow);
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found tftp.\n");
+		flow->ndpi_result_app = NDPI_RESULT_APP_TFTP;
+		flow->ndpi_excluded_app[NDPI_RESULT_APP_TFTP] = 1;
 		return;
 	}
+	
 	if (packet->payload_packet_len > 1
 		&& ((packet->payload[0] == 0 && packet->payload[packet->payload_packet_len - 1] == 0)
 			|| (packet->payload_packet_len == 4 && ntohl(get_u_int32_t(packet->payload, 0)) == 0x00040000))) {
-		NDPI_LOG(NDPI_OLD_RESULT_APP_TFTP, ndpi_struct, NDPI_LOG_DEBUG, "skip initial packet.\n");
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "skip initial packet.\n");
 		return;
 	}
 
-	NDPI_LOG(NDPI_OLD_RESULT_APP_TFTP, ndpi_struct, NDPI_LOG_DEBUG, "exclude TFTP.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_TFTP);
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "exclude TFTP.\n");
+	flow->ndpi_excluded_app[NDPI_RESULT_APP_TFTP] = 1;
 }
-#endif
+
+void ndpi_register_proto_tftp (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_TFTP, "TFTP", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_tftp);
+}

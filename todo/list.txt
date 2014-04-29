@@ -15,11 +15,11 @@
 
 8. Include all protocols from OpenDPI.
 
-9. Umieścić w hierarchii HTTPS, być może kompletnie zmienić strukturę robiąc jeden "poziom aplikacji" i wrzucając tam kolejne rzeczy, np:
+9. Change the structure to include HTTPS as well:
 SSL->HTTPS->Dropbox
 SSL->POPS
 
-10. Poprawić certyfikaty dla TOR'a i innych aplikacji.
+10. Add proper certificates for TOR and other applications.
 
 11. Multiple contents / services per flow.
 
@@ -27,3 +27,8 @@ SSL->POPS
 
 13. Custom content types and providers for non defined domsins and fields.
 
+14. Excluding protocols by a bitmask.
+
+15. Copyright notices.
+
+16. Make it working in Windows / Linux kernel.

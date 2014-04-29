@@ -1,5 +1,5 @@
 /*
- * teamviewer.c
+ * proto_teamviewer.c
  *
  * Copyright (C) 2012 by Gianluca Costa xplico.org
  * Copyright (C) 2012-13 - ntop.org
@@ -25,15 +25,6 @@
 
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_OLD_RESULT_APP_TEAMVIEWER
-
-static void ndpi_int_teamview_add_connection(struct ndpi_detection_module_struct
-                                             *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_TEAMVIEWER, NDPI_REAL_PROTOCOL);
-}
-
-
 void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
     struct ndpi_packet_struct *packet = &flow->packet;
@@ -45,7 +36,8 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
                 flow->l4.udp.teamviewer_stage++;
                 if (flow->l4.udp.teamviewer_stage == 4 || 
                     packet->udp->dest == ntohs(5938) || packet->udp->source == ntohs(5938)) {
-                    ndpi_int_teamview_add_connection(ndpi_struct, flow);
+                    flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+		    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
                 }
                 return;
             }
@@ -57,7 +49,8 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
                 flow->l4.udp.teamviewer_stage++;
                 if (flow->l4.udp.teamviewer_stage == 4 || 
                     packet->tcp->dest == ntohs(5938) || packet->tcp->source == ntohs(5938)) {
-                    ndpi_int_teamview_add_connection(ndpi_struct, flow);
+                    flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+		    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
                 }
                 return;
             }
@@ -65,13 +58,21 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
                 if (packet->payload[0] == 0x11 && packet->payload[1] == 0x30) {
                     flow->l4.udp.teamviewer_stage++;
                     if (flow->l4.udp.teamviewer_stage == 4)
-                        ndpi_int_teamview_add_connection(ndpi_struct, flow);
+                        flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+			flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
                 }
                 return;
             }
         }
     }
     
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_TEAMVIEWER);
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
 }
-#endif
+
+void ndpi_register_proto_teamviewer (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_TEAMVIEWER, "TeamViewer", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_teamview);
+}

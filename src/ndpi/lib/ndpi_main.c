@@ -239,8 +239,30 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_register_proto_spotify (ndpi_mod);
   ndpi_register_proto_various_directdownloadlink (ndpi_mod);
   ndpi_register_proto_world_of_warcraft (ndpi_mod);
+  ndpi_register_proto_bgp (ndpi_mod);
+  ndpi_register_proto_dhcp (ndpi_mod);
+  ndpi_register_proto_dhcpv6 (ndpi_mod);
+  ndpi_register_proto_directconnect (ndpi_mod);
+  ndpi_register_proto_fasttrack (ndpi_mod);
+  ndpi_register_proto_gnutella (ndpi_mod);
+  ndpi_register_proto_imesh (ndpi_mod);
+  ndpi_register_proto_netflow (ndpi_mod);
+  ndpi_register_proto_nfs (ndpi_mod);
+  ndpi_register_proto_rtp (ndpi_mod);
+  ndpi_register_proto_sip (ndpi_mod);
+  ndpi_register_proto_snmp (ndpi_mod);
+  ndpi_register_proto_teamviewer (ndpi_mod);
+  ndpi_register_proto_telnet (ndpi_mod);
+  ndpi_register_proto_tftp (ndpi_mod);
+  ndpi_register_proto_usenet (ndpi_mod);
+  ndpi_register_proto_vmware (ndpi_mod);
+  ndpi_register_proto_vnc (ndpi_mod);
+  ndpi_register_proto_warcraft3 (ndpi_mod);
+  ndpi_register_proto_yahoo_messenger (ndpi_mod);
+  
   ndpi_register_content_raw (ndpi_mod);
   ndpi_register_content_http (ndpi_mod);
+  
   ndpi_register_service_parser (ndpi_mod);
 
   return ndpi_mod;

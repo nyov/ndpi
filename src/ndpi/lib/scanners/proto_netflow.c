@@ -1,5 +1,5 @@
 /*
- * netflow.c
+ * proto_netflow.c
  *
  * Copyright (C) 2011-13 - ntop.org
  *
@@ -21,8 +21,6 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_OLD_RESULT_APP_NETFLOW
-
 #ifndef __KERNEL__
 #ifdef WIN32
 extern int gettimeofday(struct timeval * tp, struct timezone * tzp);
@@ -30,13 +28,21 @@ extern int gettimeofday(struct timeval * tp, struct timezone * tzp);
 #define do_gettimeofday(a) gettimeofday(a, NULL)
 #endif
 
-static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+void ndpi_search_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
+  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
+  
   struct ndpi_packet_struct *packet = &flow->packet;
-  // const u_int8_t *packet_payload = packet->payload;
   u_int32_t payload_len = packet->payload_packet_len;
   time_t now;
   struct timeval now_tv;
+  
+    /* Break after 20 packets. */
+  if (flow->packet_counter > 20) {
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Exclude netflow.\n");
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_NETFLOW] = 1;
+    return;
+  }
 
   if((packet->udp != NULL) && (payload_len >= 24)) {
     u_int16_t version = (packet->payload[0] << 8) + packet->payload[1], uptime_offset;
@@ -77,17 +83,18 @@ static void ndpi_check_netflow(struct ndpi_detection_module_struct *ndpi_struct,
 
     if(((version == 1) && (when == 0))
        || ((when >= 946684800 /* 1/1/2000 */) && (when <= now))) {
-      NDPI_LOG(NDPI_OLD_RESULT_APP_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_NETFLOW, NDPI_REAL_PROTOCOL);
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Found netflow.\n");
+      flow->ndpi_result_app = NDPI_RESULT_APP_NETFLOW;
+      flow->ndpi_excluded_app[NDPI_RESULT_APP_NETFLOW] = 1;
       return;
     }
   }
 }
 
-void ndpi_search_netflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-  NDPI_LOG(NDPI_OLD_RESULT_APP_NETFLOW, ndpi_struct, NDPI_LOG_DEBUG, "netflow detection...\n");
-  ndpi_check_netflow(ndpi_struct, flow);
-}
+void ndpi_register_proto_netflow (struct ndpi_detection_module_struct *ndpi_mod) {
 
-#endif
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {2055, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_NETFLOW, "NetFlow", NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_netflow);
+}
