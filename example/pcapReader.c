@@ -51,7 +51,6 @@ static void setupDetection(void);
 static char *_pcap_file = NULL;
 static char *_bpf_filter = NULL;
 static char *_protoFilePath = NULL;
-static char *_output_mode = NULL;
 
 // pcap
 static char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
@@ -71,7 +70,7 @@ static time_t capture_until = 0;
 // results
 static u_int64_t raw_packet_count = 0;
 static u_int64_t ip_packet_count = 0;
-static u_int64_t total_wire_bytes = 0, total_ip_bytes = 0;
+static u_int64_t total_wire_bytes = 0, total_ip_bytes = 0, total_discarded_bytes = 0;
 static u_int64_t protocol_counter[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1];
 static u_int64_t protocol_counter_bytes[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1];
 static u_int32_t protocol_flows[NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1] = { 0 };
@@ -101,7 +100,7 @@ typedef struct ndpi_flow {
   struct ndpi_flow_struct *ndpi_flow;
   char lower_name[32], upper_name[32];
 
-  u_int16_t packets, bytes;
+  u_int32_t packets, bytes;
   // result only, not used for flow identification
   u_int32_t detected_protocol;
   char host_server_name[256];
@@ -118,7 +117,7 @@ static u_int32_t ndpi_flow_count = 0;
 
 static void help(u_int long_help) {
   printf("pcapReader -i <file|device> [-f <filter>][-s <duration>]\n"
-	 "           [-p <protos>][-l <loops>[-d][-h][-t][-o <color|plain>][-v <level>]\n\n"
+	 "           [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n\n"
 	 "Usage:\n"
 	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture\n"
 	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
@@ -127,7 +126,6 @@ static void help(u_int long_help) {
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -t                        | Dissect GTP tunnels\n"
-	 "  -o <color|plain>          | Specify the output text format. Default: color\n"
 	 "  -h                        | This help\n"
 	 "  -v <1|2>                  | Verbose 'unknown protocol' packet print. 1=verbose, 2=very verbose\n");
 
@@ -144,7 +142,7 @@ static void parseOptions(int argc, char **argv)
 {
   int opt;
 
-  while ((opt = getopt(argc, argv, "df:i:hp:l:s:to:v:")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:i:hp:l:s:tv:")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -172,10 +170,6 @@ static void parseOptions(int argc, char **argv)
 
     case 't':
       decode_tunnels = 1;
-      break;
-
-    case 'o':
-      _output_mode = optarg;
       break;
 
     case 'v':
@@ -596,13 +590,13 @@ static unsigned int packet_processing(const u_int64_t time,
     flow = get_ndpi_flow6(iph6, ip_offset, &src, &dst, &proto);
 
   if(flow != NULL) {
+    ip_packet_count++;
+    total_wire_bytes += rawsize + 24 /* CRC etc */, total_ip_bytes += rawsize;
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
-  } else
+  } else {
     return(0);
-
-  ip_packet_count++;
-  total_wire_bytes += rawsize + 24 /* CRC etc */, total_ip_bytes += rawsize;
+  }
 
   if(flow->detection_completed) return(0);
 
@@ -698,86 +692,48 @@ static void printResults(u_int64_t tot_usec)
   u_int32_t i;
   u_int64_t total_flow_bytes = 0;
 
-  int m = 0;			/* Default output mode: color (0) */
-  if (_output_mode != NULL && strcmp(_output_mode, "plain") == 0) {
-    m = 1;			/* Set output mode: plain (0) */
-  }
-
-  if (m) {
-    printf("\n");
-  } else {
-    printf("\x1b[2K\n");
-  }
+  printf("\x1b[2K\n");
   printf("pcap file contains\n");
-
-  if (m) {
-    printf("\tEthernet bytes:     %-13llu (includes ethernet CRC/IFC/trailer)\n",
-	   (long long unsigned int)total_wire_bytes);
-  } else {
-    printf("\tEthernet bytes:     \x1b[33m%-13llu\x1b[0m (includes ethernet CRC/IFC/trailer)\n",
-	   (long long unsigned int)total_wire_bytes);
-  }
-
-  if (m) {
-    printf("\tIP packets:         %-13llu of %llu packets total\n",
-	   (long long unsigned int)ip_packet_count,
-	   (long long unsigned int)raw_packet_count);
-    if(total_ip_bytes > 0)
-      printf("\tIP bytes:         %-13llu (avg pkt size %u bytes)\n",
-	     (long long unsigned int)total_ip_bytes,
-	     (unsigned int)(total_ip_bytes/raw_packet_count));
-    printf("\tUnique flows:       %-13u\n", ndpi_flow_count);
-  } else {
-    printf("\tIP packets:         \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
-	   (long long unsigned int)ip_packet_count,
-	   (long long unsigned int)raw_packet_count);
-    printf("\tIP bytes:           \x1b[34m%-13llu\x1b[0m (avg pkt size %u bytes)\n",
-	   (long long unsigned int)total_ip_bytes,
-	   (unsigned int)(total_ip_bytes/raw_packet_count));
-    printf("\tUnique flows:       \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
-  }
+  printf("\tEthernet bytes:     \x1b[33m%-13llu\x1b[0m (includes ethernet CRC/IFC/trailer)\n",
+	 (long long unsigned int)total_wire_bytes);
+  printf("\tDiscarded bytes:    \x1b[33m%-13llu\x1b[0m\n",
+	 (long long unsigned int)total_discarded_bytes);
+  printf("\tIP packets:         \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
+	 (long long unsigned int)ip_packet_count,
+	 (long long unsigned int)raw_packet_count);
+  printf("\tIP bytes:           \x1b[34m%-13llu\x1b[0m (avg pkt size %u bytes)\n",
+	 (long long unsigned int)total_ip_bytes,
+	 (unsigned int)(total_ip_bytes/raw_packet_count));
+  printf("\tUnique flows:       \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
 
   if(tot_usec > 0) {
     char buf[32], buf1[32];
     float t = (float)(ip_packet_count*1000000)/(float)tot_usec;
     float b = (float)(total_wire_bytes * 8 *1000000)/(float)tot_usec;
 
-    if (m) {
-      printf("\tnDPI throughout:    %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
-    } else {
-      printf("\tnDPI throughout:    \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
-    }
+    printf("\tnDPI throughput:    \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
   }
 
   for(i=0; i<NUM_ROOTS; i++)
     ndpi_twalk(ndpi_flows_root[i], node_proto_guess_walker, NULL);
 
   if(enable_protocol_guess) {
-    if (m) {
-      printf("\tGuessed flow protocols: %-13u\n", guessed_flow_protocols);
-    } else {
-      printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
-    }
+    printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
   }
 
   printf("\n\nDetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
     if(protocol_counter[i] > 0) {
-      if (m) {
-        printf("\t\%-20s packets: %-13llu bytes: %-13llu "
-	       "flows: %-13u\n",
-	       ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
-	       (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
-      } else {
-        printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
-	       "flows: \x1b[36m%-13u\x1b[0m\n",
-	       ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
-	       (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
-      }
+      printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
+	     "flows: \x1b[36m%-13u\x1b[0m\n",
+	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
+	     (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
 
       total_flow_bytes += protocol_counter_bytes[i];
     }
   }
+
+  // printf("\n\nTotal Flow Traffic: %llu (diff: %llu)\n", total_flow_bytes, total_ip_bytes-total_flow_bytes);
 
   if(verbose && (protocol_counter[0] > 0)) {
     printf("\n");
@@ -938,10 +894,10 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 	printf("\n\nWARNING: IPv4 fragments are not handled by this demo (nDPI supports them)\n");
 	ipv4_frags_warning_used = 1;
       }
-
+      
+      total_discarded_bytes +=  header->len;
       return;
     }
-
   } else if(iph->version == 6) {
     iph6 = (struct ndpi_ip6_hdr *)&packet[ip_offset];
     proto = iph6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
@@ -956,6 +912,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
       ipv4_warning_used = 1;
     }
 
+    total_discarded_bytes +=  header->len;
     return;
   }
 
@@ -992,8 +949,6 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 
 static void runPcapLoop(void)
 {
-
-
   if((!shutdown_app) && (_pcap_handle != NULL))
     pcap_loop(_pcap_handle, -1, &pcap_packet_callback, NULL);
 }
