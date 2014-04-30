@@ -1,4 +1,4 @@
-AC_INIT([nDPI], [1.4.0])
+AC_INIT([nDPIng], [2.0])
 AC_CONFIG_SRCDIR([src/ndpi/include/ndpi_protocols.h])
 
 AM_INIT_AUTOMAKE([-Wall])

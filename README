@@ -1,57 +1,82 @@
-This directory contains a modified version of OpenDPI which
-includes ntop extensions. I have tried to push them into the
-OpenDPI source tree but nobody in answering emails so I have
-decided to create my own source tree
 
-==========
+Welcome to nDPIng!
 
-In order to compile this library do
+The aim of this unique project is to bring new quality to the field
+of traffic classification by providing the results on many levels.
+The clear, unambiguous identification of network flows is meant to be
+ensured by various classification techniques combined into a single
+tool. The following information is intended to be given for each flow
+inspected by the classifier:
+- transport layer protocol
+- all the application-layer protocols
+- type of the content
+- service provider
+- content provider
 
-./configure
-make
+The project is now in an early development alpha stage. That means that
+NOTHING works besides the features pointed out below. However, every week
+the library is enhanced by including new fatures and supporting more
+protocols and applications.
 
-==========
+1. The code of the library compiles on Linux as a stand-alone library.
+Linux kernel version and Windows versions are not officially supported
+They can work, but they do not need to. The code is not tested against
+those purposes.
 
-In case you want to add new protocols or / and if you happen
-to change .am files (e.g. Makefile.am) remember to do:
+2. The library provides accurate results for the supported protocols and
+applications. The number of applications currently supported is very
+limited and it is much lower than the number of applications supported
+originally by nDPI.
 
-# autoreconf -ivf
-# ./configure
-# make
+3. The current format of the obtained results is not the final one.
+However, it demonstrates various new techniques used by nDPIng. The results
+obtained from nDPIng are easy to account and they are given as:
+a) protocol - beginning from TCP/UDP, then going into higher levels;
+b) content (when it could be detected);
+c) service (when it could be detected). The service is defined as the
+well-known name of the remote host. So, for example, it could be "Facebook"
+for web browser flows from Facebook. The only exception is DNS - service is
+defined as the queried host name, not the name of the DNS server itself.
 
-The entire procedure of adding new protocols in detail:
+For now, the "service" is a mix of "service providers" and "content
+providers". That is going to be fixed in new versions, so these two values
+will beseparated from each other. Direct domain names will be provided in
+case if the matching to the pre-defines provider names is not successful.
 
-1. Add new protocol together with its unique ID to:
-src/include/ndpi_protocols_osdpi.h
+Few examples of the currently obtained results:
 
-2. Create a new protocol in:
-src/lib/protocols/
+- "proto: TCP->SSL_with_certificate->POP3S, service: Google" means that it
+is an encrypted POP3 session with a Google mail server.
+- "proto: TCP->SSL_with_certificate, service: Twitter" means that it is an
+encrypted connection to a Twitter server.
+- "proto: TCP->FTP_Data, content: JPG" means that it is file-transfer FTP
+session, which carries a JPG image.
+- "proto: TCP->SSL_with_certificate->Dropbox, service: Dropbox" means that
+this is an encrypted Dropbox session (the application is Dropbox) with the
+Dropbox server, while "proto: TCP->SSL_with_certificate, service: Dropbox"
+informs about an encrypted session with a Dropbox server, while the
+application is unknown (it can be a web browser connection).
+- "proto: TCP->HTTP, content: WebM, service: YouTube" informs about a flow
+from YouTube, which transports WebM movie.
 
-3. Variables to be kept for the duration of the entire flow (as state variables) needs to be placed in:
-/include/ndpi_structs.h
-in ndpi_flow_tcp_struct (for TCP only), ndpi_flow_udp_struct (for UDP only), or ndpi_flow_struct (for both).
+4. No extensions available in nDPI (as excluding specific protocols,
+user-defined protocols, etc) are available.
 
-4. Add a new entry for the search function for the new protocol in:
-src/include/ndpi_protocols.h
+5. The documentation built for nDPI is no longer valid, as the nDPIng API is
+different. No documentation for nDPIng will be provided unless nDPIng reaches
+the first realease stage.
 
-5. Choose (do not change anything) a selection bitmask from:
-src/include/ndpi_define.h
+6. The applications / code designed to work with nDPI will not work with
+nDPIng without changing the way how the library is used. Moreover, the
+current design and API of nDPIng is provisional. That means that in any
+revision it can (and many times will) change without any prior notice.
 
-6. Add a new entry in ndpi_set_protocol_detection_bitmask2 in:
-src/lib/ndpi_main.c
+7. An example Linux application using nDPIng is included in the "example"
+folder. The compilation instructions and the documentation is contained in
+the folder. The code of the example application compiles on Linux as a
+stand-alone application.
 
-7. Set protocol default ports in ndpi_init_protocol_defaults in:
-src/lib/ndpi_main.c
+8. No change log will be provided unless nDPIng reaches the first realease
+stage.
 
-8. Add the new protocol file to:
-src/lib/Makefile.am
-
-9. autoreconf -ivf
-
-10. ./configure -with-pic
-
-11. make
-
---------------------------
-Luca Deri <deri@ntop.org>
 Tomasz Bujlow <tomasz@skatnet.dk>
