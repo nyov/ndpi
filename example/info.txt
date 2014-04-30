@@ -1,0 +1,16 @@
+
+This is an example Linux application, which demonstrates how to use the nDPIng
+library.
+
+In order to compile the example application, type "make".
+
+The application uses the "flows" directory, which contains flows generated
+by various applications and representing various protocols, types of the
+content, and services. Each PCAP file contain exactly one flow. The flows are
+truncated after the 30th packet.
+
+In the real-life scenario, when capturing the traffic from the network, the
+user's application is responsible for building the flows using the 5-tuple
+and providing the flows to the nDPIng library (the situation was exactly the
+same with original nDPI). Therefore, here, to simplify the scenario, each flow
+is contained by a separate PCAP file.
