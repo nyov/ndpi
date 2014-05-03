@@ -694,38 +694,38 @@ static void printResults(u_int64_t tot_usec)
 
   printf("\x1b[2K\n");
   printf("pcap file contains\n");
-  printf("\tEthernet bytes:     \x1b[33m%-13llu\x1b[0m (includes ethernet CRC/IFC/trailer)\n",
+  printf("\tEthernet bytes:     %-13llu (includes ethernet CRC/IFC/trailer)\n",
 	 (long long unsigned int)total_wire_bytes);
-  printf("\tDiscarded bytes:    \x1b[33m%-13llu\x1b[0m\n",
+  printf("\tDiscarded bytes:    %-13llu\n",
 	 (long long unsigned int)total_discarded_bytes);
-  printf("\tIP packets:         \x1b[33m%-13llu\x1b[0m of %llu packets total\n",
+  printf("\tIP packets:         %-13llu of %llu packets total\n",
 	 (long long unsigned int)ip_packet_count,
 	 (long long unsigned int)raw_packet_count);
-  printf("\tIP bytes:           \x1b[34m%-13llu\x1b[0m (avg pkt size %u bytes)\n",
+  printf("\tIP bytes:           %-13llu (avg pkt size %u bytes)\n",
 	 (long long unsigned int)total_ip_bytes,
 	 (unsigned int)(total_ip_bytes/raw_packet_count));
-  printf("\tUnique flows:       \x1b[36m%-13u\x1b[0m\n", ndpi_flow_count);
+  printf("\tUnique flows:       %-13u\n", ndpi_flow_count);
 
   if(tot_usec > 0) {
     char buf[32], buf1[32];
     float t = (float)(ip_packet_count*1000000)/(float)tot_usec;
     float b = (float)(total_wire_bytes * 8 *1000000)/(float)tot_usec;
 
-    printf("\tnDPI throughput:    \x1b[36m%s pps / %s/sec\x1b[0m\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+    printf("\tnDPI throughput:    %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
   }
 
   for(i=0; i<NUM_ROOTS; i++)
     ndpi_twalk(ndpi_flows_root[i], node_proto_guess_walker, NULL);
 
   if(enable_protocol_guess) {
-    printf("\tGuessed flow protocols: \x1b[35m%-13u\x1b[0m\n", guessed_flow_protocols);
+    printf("\tGuessed flow protocols: %-13u\n", guessed_flow_protocols);
   }
 
   printf("\n\nDetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_struct); i++) {
     if(protocol_counter[i] > 0) {
-      printf("\t\x1b[31m%-20s\x1b[0m packets: \x1b[33m%-13llu\x1b[0m bytes: \x1b[34m%-13llu\x1b[0m "
-	     "flows: \x1b[36m%-13u\x1b[0m\n",
+      printf("\t%-20s packets: %-13llu bytes: %-13llu "
+	     "flows: %-13u\n",
 	     ndpi_get_proto_name(ndpi_struct, i), (long long unsigned int)protocol_counter[i],
 	     (long long unsigned int)protocol_counter_bytes[i], protocol_flows[i]);
 
