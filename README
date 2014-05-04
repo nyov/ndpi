@@ -15,7 +15,7 @@ inspected by the classifier:
 
 The project is now in an early development alpha stage. That means that
 NOTHING works besides the features pointed out below. However, every week
-the library is enhanced by including new fatures and supporting more
+the library is enhanced by including new features and supporting more
 protocols and applications.
 
 1. The code of the library compiles on Linux as a stand-alone library.
@@ -40,7 +40,7 @@ defined as the queried host name, not the name of the DNS server itself.
 
 For now, the "service" is a mix of "service providers" and "content
 providers". That is going to be fixed in new versions, so these two values
-will beseparated from each other. Direct domain names will be provided in
+will be separated from each other. Direct domain names will be provided in
 case if the matching to the pre-defines provider names is not successful.
 
 Few examples of the currently obtained results:
@@ -64,7 +64,7 @@ user-defined protocols, etc) are available.
 
 5. The documentation built for nDPI is no longer valid, as the nDPIng API is
 different. No documentation for nDPIng will be provided unless nDPIng reaches
-the first realease stage.
+the first release stage.
 
 6. The applications / code designed to work with nDPI will not work with
 nDPIng without changing the way how the library is used. Moreover, the
@@ -76,7 +76,7 @@ folder. The compilation instructions and the documentation is contained in
 the folder. The code of the example application compiles on Linux as a
 stand-alone application.
 
-8. No change log will be provided unless nDPIng reaches the first realease
+8. No change log will be provided unless nDPIng reaches the first release
 stage.
 
 Tomasz Bujlow <tomasz@skatnet.dk>
