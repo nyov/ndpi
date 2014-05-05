@@ -143,6 +143,10 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     len = ndpi_min(packet->host_line.len, sizeof(flow->host_server_name)-1);
     strncpy((char*)flow->host_server_name, (char*)packet->host_line.ptr, len);
     flow->host_server_name[len] = '\0';
+    
+    len = ndpi_min(packet->forwarded_line.len, sizeof(flow->nat_ip)-1);
+    strncpy((char*)flow->nat_ip, (char*)packet->forwarded_line.ptr, len);
+    flow->nat_ip[len] = '\0';
   }
    
   /* check for accept line */
@@ -287,8 +291,16 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
 	packet->http_method.len = filename_start - 1;
 
 	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "http structure detected, adding\n");
+      
+	if(filename_start == 8) 
+	  ndpi_int_http_add_connection(flow, NDPI_RESULT_BASE_HTTP_CONNECT);
+	else {
+	  if((packet->http_url_name.len > 7) && (!strncmp((const char*)packet->http_url_name.ptr, "http://", 7)))
+	    ndpi_int_http_add_connection(flow, NDPI_RESULT_BASE_HTTP_PROXY);
+	  else
+	    ndpi_int_http_add_connection(flow, NDPI_RESULT_BASE_HTTP);
+	}
 
-	ndpi_int_http_add_connection(flow, (filename_start == 8) ? NDPI_RESULT_BASE_HTTP_CONNECT : NDPI_RESULT_BASE_HTTP);
 	check_content_type_and_change_protocol(ndpi_struct, flow);
 	/* HTTP found, look for host... */
 	if (packet->host_line.ptr != NULL) {

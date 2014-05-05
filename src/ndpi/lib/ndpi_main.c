@@ -1320,6 +1320,18 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
 	  packet->host_line.len = packet->line[packet->parsed_lines].len - 5;
 	}
       }
+      
+      if(packet->line[packet->parsed_lines].len > 17
+	 && memcmp(packet->line[packet->parsed_lines].ptr, "X-Forwarded-For:", 16) == 0) {
+	// some stupid clients omit a space and place the hostname directly after the colon
+	if(packet->line[packet->parsed_lines].ptr[16] == ' ') {
+	  packet->forwarded_line.ptr = &packet->line[packet->parsed_lines].ptr[17];
+	  packet->forwarded_line.len = packet->line[packet->parsed_lines].len - 17;
+	} else {
+	  packet->forwarded_line.ptr = &packet->line[packet->parsed_lines].ptr[16];
+	  packet->forwarded_line.len = packet->line[packet->parsed_lines].len - 16;
+	}
+      }
 
       if(packet->line[packet->parsed_lines].len > 14
 	 &&
