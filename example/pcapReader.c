@@ -265,7 +265,9 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
   return(retStr);
 }
 
-static void printFlow(struct ndpi_flow *flow) {
+static void printFlow(u_int *num, struct ndpi_flow *flow) {
+  if(num != NULL) printf("\t%u", ++(*num));
+  
   printf("\t%s %s:%u <-> %s:%u ",
 	 ipProto2Name(flow->protocol),
 	 flow->lower_name, ntohs(flow->lower_port),
@@ -280,20 +282,22 @@ static void printFlow(struct ndpi_flow *flow) {
 
 static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
+  u_int *num = (u_int*)user_data;
 
   if(flow->detected_protocol != 0 /* UNKNOWN */) return;
 
   if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
-    printFlow(flow);
+    printFlow(num, flow);
 }
 
 static void node_print_known_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
-
+  u_int *num = (u_int*)user_data;
+  
   if(flow->detected_protocol == 0 /* UNKNOWN */) return;
 
   if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
-    printFlow(flow);
+    printFlow(num, flow);
 }
 
 static unsigned int node_guess_undetected_protocol(struct ndpi_flow *flow) {
@@ -312,6 +316,7 @@ static unsigned int node_guess_undetected_protocol(struct ndpi_flow *flow) {
 
 static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
+  u_int *num = (u_int*)user_data;
 
 #if 0
   printf("<%d>Walk on node %s (%p)\n",
@@ -327,7 +332,7 @@ static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int dept
     if(enable_protocol_guess) {
       if(flow->detected_protocol == 0 /* UNKNOWN */) {
         node_guess_undetected_protocol(flow);
-	// printFlow(flow);
+	// printFlow(num, flow);
       }
     }
 
@@ -478,8 +483,11 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
 
       ndpi_flow_count += 1;
 
-      //printFlow(newflow);
-
+      if(0) {
+	printf("%u\t", ndpi_flow_count);
+	printFlow(&ndpi_flow_count, newflow);
+      }
+      
       *src = newflow->src_id, *dst = newflow->dst_id;
       return(newflow);
     }
@@ -628,7 +636,7 @@ static unsigned int packet_processing(const u_int64_t time,
         }
       }
 
-      printFlow(flow);
+      printFlow(NULL, flow);
     }
   }
 
@@ -734,15 +742,19 @@ static void printResults(u_int64_t tot_usec)
 
   // printf("\n\nTotal Flow Traffic: %llu (diff: %llu)\n", total_flow_bytes, total_ip_bytes-total_flow_bytes);
 
-  if(verbose && (protocol_counter[0] > 0)) {
+  if(verbose) {
+    u_int num = 0;
     printf("\n");
 
     for(i=0; i<NUM_ROOTS; i++)
-      ndpi_twalk(ndpi_flows_root[i], node_print_known_proto_walker, NULL);
+      ndpi_twalk(ndpi_flows_root[i], node_print_known_proto_walker, &num);
 
-    printf("\n\nUndetected flows:\n");
-    for(i=0; i<NUM_ROOTS; i++)
-      ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker, NULL);
+    if(protocol_counter[0] > 0) {
+      num = 0;
+      printf("\n\nUndetected flows:\n");
+      for(i=0; i<NUM_ROOTS; i++)
+	ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker, &num);
+    }
   }
 }
 
