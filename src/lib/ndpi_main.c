@@ -558,7 +558,7 @@ static int ndpi_default_ports_tree_node_t_cmp(const void *a, const void *b) {
   ndpi_default_ports_tree_node_t *fa = (ndpi_default_ports_tree_node_t*)a;
   ndpi_default_ports_tree_node_t *fb = (ndpi_default_ports_tree_node_t*)b;
 
-  // printf("[NDPI] %s(%d, %d)\n", __FUNCTION__, fa->default_port, fb->default_port);
+  //printf("[NDPI] %s(%d, %d)\n", __FUNCTION__, fa->default_port, fb->default_port);
 
   return((fa->default_port == fb->default_port) ? 0 : ((fa->default_port < fb->default_port) ? -1 : 1));
 }
@@ -582,43 +582,29 @@ void ndpi_default_ports_tree_node_t_walker(const void *node, const ndpi_VISIT wh
 
 static void addDefaultPort(ndpi_port_range *range,
 			   ndpi_proto_defaults_t *def, ndpi_default_ports_tree_node_t **root) {
-  ndpi_default_ports_tree_node_t *node = (ndpi_default_ports_tree_node_t*)ndpi_malloc(sizeof(ndpi_default_ports_tree_node_t));
+  ndpi_default_ports_tree_node_t *ret;
+  u_int16_t port;
 
   // printf("[NDPI] %s(%d)\n", __FUNCTION__, port);
 
-  if(!node) {
-    printf("[NDPI] %s(): not enough memory\n", __FUNCTION__);
-  } else {
-    ndpi_default_ports_tree_node_t *ret;
-    u_int16_t port;
+  for(port=range->port_low; port<=range->port_high; port++) {
+    ndpi_default_ports_tree_node_t *node = (ndpi_default_ports_tree_node_t*)ndpi_malloc(sizeof(ndpi_default_ports_tree_node_t));
 
-    for(port=range->port_low; port<=range->port_high; port++) {
-      node->proto = def, node->default_port = port;
-      ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
-
-      if(ret != node) {
-	printf("[NDPI] %s(): found duplicate for port %u: overwriting it with new value\n", __FUNCTION__, port);
-	ret = *(ndpi_default_ports_tree_node_t**)ndpi_tdelete(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
-
-	if(!ret) {
-	  printf("[NDPI] %s(): internal error\n", __FUNCTION__);
-	  ndpi_free(node);
-	  break;
-	}
-
-	ndpi_free(ret);
-
-	/* Now let's add it */
-	ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
-
-	if(ret != node) {
-	  printf("[NDPI] %s(): internal error\n", __FUNCTION__);
-	  ndpi_free(node);
-	  break;
-	}
-      }
+    if(!node) {
+      printf("[NDPI] %s(): not enough memory\n", __FUNCTION__);
+      break;
     }
-  }
+
+    node->proto = def, node->default_port = port;
+    ret = *(ndpi_default_ports_tree_node_t**)ndpi_tsearch(node, (void*)root, ndpi_default_ports_tree_node_t_cmp); /* Add it to the tree */
+
+    if(ret != node) {
+      printf("[NDPI] %s(): found duplicate for port %u: overwriting it with new value\n", __FUNCTION__, port);
+
+      ret->proto = def;
+      ndpi_free(node);
+    }
+  } 
 }
 
 /* ****************************************************** */
@@ -1559,9 +1545,9 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
 
 #if 0
   printf("\nTCP:\n");
-  ndpi_twalk(tcpRoot, ndpi_default_ports_tree_node_t_walker, NULL);
+  ndpi_twalk(ndpi_mod->tcpRoot, ndpi_default_ports_tree_node_t_walker, NULL);
   printf("\nUDP:\n");
-  ndpi_twalk(udpRoot, ndpi_default_ports_tree_node_t_walker, NULL);
+  ndpi_twalk(ndpi_mod->udpRoot, ndpi_default_ports_tree_node_t_walker, NULL);
 #endif
 #endif
 

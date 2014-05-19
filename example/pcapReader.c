@@ -958,6 +958,8 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   packet_processing(time, iph, iph6, ip_offset, header->len - ip_offset, header->len);
 }
 
+/* ******************************************************************** */
+
 static void runPcapLoop(void)
 {
   if((!shutdown_app) && (_pcap_handle != NULL))
