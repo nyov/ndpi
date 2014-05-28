@@ -32,3 +32,11 @@ SSL->POPS
 15. Copyright notices.
 
 16. Make it working in Windows / Linux kernel.
+
+17. Import all the changes from the original nDPI:
+
+svn co https://svn.ntop.org/svn/ntop/trunk/nDPI/
+cd nDPI/
+svn log > log.txt
+vim log.txt 
+svn diff -r PREVIOUS_REV_NUM > patch.diff

@@ -292,7 +292,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
 
 	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "http structure detected, adding\n");
       
-	if(filename_start == 8) 
+	if(filename_start == 8 && (memcmp(packet->payload, "CONNECT ", 8) == 0)) /* nathan@getoffmalawn.com */
 	  ndpi_int_http_add_connection(flow, NDPI_RESULT_BASE_HTTP_CONNECT);
 	else {
 	  if((packet->http_url_name.len > 7) && (!strncmp((const char*)packet->http_url_name.ptr, "http://", 7)))
