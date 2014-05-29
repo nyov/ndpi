@@ -62,6 +62,7 @@ ndpi_protocol_match host_match[] = {
   { "google-analytics.",		"Google",		NDPI_SERVICE_GOOGLE },
   { "googleusercontent.",		"Google",		NDPI_SERVICE_GOOGLE },
   { "googleadservices.",		"Google",		NDPI_SERVICE_GOOGLE },
+  { "googleapis.com",	   	        "Google",		NDPI_SERVICE_GOOGLE },
   { "maps.google.",			"GoogleMaps",		NDPI_SERVICE_GOOGLE_MAPS },
   { "maps.gstatic.com",			"GoogleMaps",		NDPI_SERVICE_GOOGLE_MAPS },
   { ".gmail.",				"GMail",		NDPI_SERVICE_GMAIL },
