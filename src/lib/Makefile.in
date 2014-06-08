@@ -125,7 +125,7 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-oracle.lo libndpi_la-rsync.lo libndpi_la-rtcp.lo \
 	libndpi_la-skinny.lo libndpi_la-tor.lo libndpi_la-whoisdas.lo \
 	libndpi_la-collectd.lo libndpi_la-socks5.lo \
-	libndpi_la-socks4.lo libndpi_la-pando.lo
+	libndpi_la-socks4.lo libndpi_la-pando.lo libndpi_la-megaco.lo
 libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
 libndpi_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
@@ -409,7 +409,8 @@ libndpi_la_SOURCES = \
 			protocols/collectd.c \
 			protocols/socks5.c \
 			protocols/socks4.c \
-			protocols/pando.c
+			protocols/pando.c \
+			protocols/megaco.c
 
 all: all-am
 
@@ -537,6 +538,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-maplestory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mdns.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-meebo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-megaco.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mgcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-mms.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-msn.Plo@am__quote@
@@ -1538,6 +1540,13 @@ libndpi_la-pando.lo: protocols/pando.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/pando.c' object='libndpi_la-pando.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-pando.lo `test -f 'protocols/pando.c' || echo '$(srcdir)/'`protocols/pando.c
+
+libndpi_la-megaco.lo: protocols/megaco.c
+@am__fastdepCC_TRUE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-megaco.lo -MD -MP -MF $(DEPDIR)/libndpi_la-megaco.Tpo -c -o libndpi_la-megaco.lo `test -f 'protocols/megaco.c' || echo '$(srcdir)/'`protocols/megaco.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libndpi_la-megaco.Tpo $(DEPDIR)/libndpi_la-megaco.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='protocols/megaco.c' object='libndpi_la-megaco.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL)  --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-megaco.lo `test -f 'protocols/megaco.c' || echo '$(srcdir)/'`protocols/megaco.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
