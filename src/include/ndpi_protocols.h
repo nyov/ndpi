@@ -199,6 +199,7 @@ void ndpi_search_socks5(struct ndpi_detection_module_struct *ndpi_struct, struct
 void ndpi_search_socks4(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_rtmp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_pando(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_search_megaco(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 
 #ifdef USE_SKYPE_HEURISTICS
 u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,

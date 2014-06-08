@@ -196,6 +196,7 @@ extern "C" {
 #define NDPI_PROTOCOL_RTMP					174 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_FTP_DATA				        175 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_PANDO					185 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_PROTOCOL_MEGACO				186 /* Gianluca Costa <g.costa@xplico.org> */
 
 #define NDPI_CONTENT_AVI				39
 #define NDPI_CONTENT_FLASH				40
