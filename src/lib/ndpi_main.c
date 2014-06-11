@@ -3414,10 +3414,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
   ndpi_connection_tracking(ndpi_struct, flow);
 
-  if(flow == NULL && (flow->packet.tcp != NULL || flow->packet.udp != NULL)) {
-    return (NDPI_PROTOCOL_UNKNOWN);
-  }
-
   /* build ndpi_selction packet bitmask */
   ndpi_selection_packet = NDPI_SELECTION_BITMASK_PROTOCOL_COMPLETE_TRAFFIC;
   if(flow->packet.iph != NULL) {
