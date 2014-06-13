@@ -102,7 +102,7 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
       173.194.0.0/16
     */
     if(((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
-       || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 173.194.0.0 */)) {
+       || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xADC20000 /* 173.194.0.0 */)) {      
       return(NDPI_SERVICE_GOOGLE);
     }
 
