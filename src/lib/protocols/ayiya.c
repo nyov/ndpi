@@ -43,9 +43,6 @@ void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct 
   struct ndpi_packet_struct *packet = &flow->packet;
 
   if(packet->udp && (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)) {
-    u_int8_t i;
-    u_int16_t packet_len;
-    
     /* Ayiya is udp based, port 5072 */
     if ((packet->udp->source == htons(5072) || packet->udp->dest == htons(5072))
 	/* check for ayiya new packet */
@@ -53,9 +50,14 @@ void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	) {
       /* FINISH */
       struct ayiya *a = (struct ayiya*)packet->payload;
-      u_int32_t epoch = ntohl(a->epoch), now = (u_int32_t)time(NULL);
+      u_int32_t epoch = ntohl(a->epoch), now;
       u_int32_t fireyears = 86400 * 365 * 5;
       
+#ifndef __KERNEL__
+      now = time(NULL);
+#else
+      now = 1402729042; /* Dummy workaround */
+#endif
       if((epoch >= (now - fireyears)) && (epoch <= (now+86400 /* 1 day */)))      
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_AYIYA, NDPI_REAL_PROTOCOL);
 

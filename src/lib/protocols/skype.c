@@ -23,6 +23,7 @@
 
 #ifdef NDPI_PROTOCOL_SKYPE
 
+#if 0
 static u_int is_private_addr(u_int32_t addr) {
   addr = ntohl(addr);
 
@@ -49,6 +50,7 @@ static u_int64_t get_skype_key(u_int32_t src_host, u_int32_t dst_host) {
 
   return(key);
 }
+#endif
 
 #ifdef USE_SKYPE_HEURISTICS
 u_int8_t is_skype_connection(struct ndpi_detection_module_struct *ndpi_struct,
