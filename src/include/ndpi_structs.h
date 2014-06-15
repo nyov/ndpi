@@ -665,6 +665,10 @@ typedef struct ndpi_flow_struct {
 #endif
 #endif
 
+#ifdef NDPI_PROTOCOL_REDIS
+  u_int8_t redis_s2d_first_char, redis_d2s_first_char;
+#endif
+
   u_int16_t packet_counter;			// can be 0-65000
   u_int16_t packet_direction_counter[2];
   u_int16_t byte_counter[2];

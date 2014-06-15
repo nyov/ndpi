@@ -406,8 +406,17 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
       lower_port = tcph->source;
       upper_port = tcph->dest;
     } else {
-      lower_port = tcph->dest;
-      upper_port = tcph->source;
+	lower_port = tcph->dest;
+	upper_port = tcph->source;
+
+	if(iph->saddr == iph->daddr) {
+	  if(lower_port > upper_port) {
+	    u_int16_t p = lower_port;
+
+	    lower_port = upper_port;
+	    upper_port = p;
+	  }
+	}
     }
   } else if(iph->protocol == 17 && l4_packet_len >= 8) {
     // udp
@@ -426,11 +435,8 @@ static struct ndpi_flow *get_ndpi_flow(const u_int8_t version,
   }
 
   flow.protocol = iph->protocol;
-  flow.lower_ip = lower_ip;
-  flow.upper_ip = upper_ip;
-  flow.lower_port = lower_port;
-  flow.upper_port = upper_port;
-
+  flow.lower_ip = lower_ip, flow.upper_ip = upper_ip;
+  flow.lower_port = lower_port, flow.upper_port = upper_port;
 
   if(0)
     printf("[NDPI] [%u][%u:%u <-> %u:%u]\n",
@@ -850,7 +856,14 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   }
   lasttime = time;
 
-  if(_pcap_datalink_type == DLT_EN10MB) {
+  if(_pcap_datalink_type == DLT_NULL) {   
+    if(ntohl(*((u_int32_t*)packet)) == 2)
+      type = ETH_P_IP;
+    else 
+      type = 0x86DD; /* IPv6 */
+
+    ip_offset = 4;
+  } else if(_pcap_datalink_type == DLT_EN10MB) {
     ethernet = (struct ndpi_ethhdr *) packet;
     ip_offset = sizeof(struct ndpi_ethhdr);
     type = ntohs(ethernet->h_proto);
