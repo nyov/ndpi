@@ -227,6 +227,9 @@ static char* ipProto2Name(u_short proto_id) {
   case 112:
     return("VRRP");
     break;
+  case IPPROTO_IGMP:
+    return("IGMP");
+    break;
   }
 
   snprintf(proto, sizeof(proto), "%u", proto_id);
@@ -307,7 +310,7 @@ static unsigned int node_guess_undetected_protocol(struct ndpi_flow *flow) {
 							   ntohs(flow->lower_port),
 							   ntohl(flow->upper_ip),
 							   ntohs(flow->upper_port));
-
+  printf("Guess state: %u\n", flow->detected_protocol);
   if(flow->detected_protocol != 0)
     guessed_flow_protocols++;
 

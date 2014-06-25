@@ -604,7 +604,7 @@ static void addDefaultPort(ndpi_port_range *range,
       ret->proto = def;
       ndpi_free(node);
     }
-  } 
+  }
 }
 
 /* ****************************************************** */
@@ -1638,7 +1638,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 				      ndpi_search_http_tcp,
 				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
 				      NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN,
-				      ADD_TO_DETECTION_BITMASK); 
+				      ADD_TO_DETECTION_BITMASK);
 #endif
 #ifdef NDPI_CONTENT_FLASH
   ndpi_set_bitmask_protocol_detection(ndpi_struct, detection_bitmask, a++,
@@ -2806,7 +2806,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   ndpi_set_bitmask_protocol_detection(ndpi_struct, detection_bitmask, a++,
 				      NDPI_PROTOCOL_RTCP,
 				      ndpi_search_rtcp,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP_OR_UDP_WITH_PAYLOAD,
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 #endif
