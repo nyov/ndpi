@@ -34,7 +34,6 @@
 extern "C" {
 #endif
 
-//  #define NDPI_ENABLE_DEBUG_MESSAGES
 
 #define NDPI_DETECTION_SUPPORT_IPV6
 #define NDPI_PROTOCOL_HISTORY_SIZE				3

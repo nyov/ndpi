@@ -2,7 +2,7 @@
  * directdownloadlink.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
+ * Copyright (C) 2011-14svn - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -37,7 +37,7 @@ static void ndpi_int_direct_download_link_add_connection(struct ndpi_detection_m
 							 struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-	
+
   ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, NDPI_CORRELATED_PROTOCOL);
 
   flow->l4.tcp.ddlink_server_direction = packet->packet_direction;
@@ -695,7 +695,7 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
 
  end_ddl_nothing_found:
   NDPI_LOG(NDPI_PROTOCOL_DIRECT_DOWNLOAD_LINK, ndpi_struct, NDPI_LOG_DEBUG,
-	   "Nothing Found\n%.*s\n", packet->payload_packet_len, packet->payload);
+	   "Nothing Found\n");
   return 0;
 
  end_ddl_found:
@@ -708,7 +708,7 @@ u_int8_t search_ddl_domains(struct ndpi_detection_module_struct *ndpi_struct, st
 void ndpi_search_direct_download_link_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-	
+
   //      struct ndpi_id_struct         *src=ndpi_struct->src;
   //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 #if 0

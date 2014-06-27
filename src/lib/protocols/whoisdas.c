@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -36,7 +36,7 @@ void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, str
     if(packet->payload_packet_len > 0) {
       u_int max_len = sizeof(flow->host_server_name)-1;
       u_int i, j;
-      
+
       for(i=strlen((const char *)flow->host_server_name), j=0; (i<max_len) && (j<packet->payload_packet_len); i++, j++) {
 	if((packet->payload[j] == '\n') || (packet->payload[j] == '\r')) break;
 
@@ -48,9 +48,9 @@ void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, str
       NDPI_LOG(NDPI_PROTOCOL_WHOIS_DAS, ndpi_struct, NDPI_LOG_DEBUG, "{WHOIS/DAS] %s\n", flow->host_server_name);
     }
 
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WHOIS_DAS, NDPI_REAL_PROTOCOL);      
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_WHOIS_DAS, NDPI_REAL_PROTOCOL);
   } else {
-    NDPI_LOG(NDPI_PROTOCOL_WHOIS_DAS, ndpi_struct, NDPI_LOG_DEBUG, "excluding whois_das at stage %d\n", flow->l4.tcp.whois_das_stage);
+    NDPI_LOG(NDPI_PROTOCOL_WHOIS_DAS, ndpi_struct, NDPI_LOG_TRACE, "WHOIS Excluded.\n");
     NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_WHOIS_DAS);
   }
 }

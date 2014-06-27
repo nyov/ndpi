@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -41,7 +41,7 @@ static void ndpi_int_vnc_add_connection(struct ndpi_detection_module_struct
 void ndpi_search_vnc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	
+
 //      struct ndpi_id_struct         *src=ndpi_struct->src;
 //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -49,7 +49,7 @@ void ndpi_search_vnc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 	if (flow->l4.tcp.vnc_stage == 0) {
 		if (packet->payload_packet_len == 12
 			&& memcmp(packet->payload, "RFB 003.00", 10) == 0 && packet->payload[11] == 0x0a) {
-			NDPI_LOG(NDPI_PROTOCOL_POPO, ndpi_struct, NDPI_LOG_DEBUG, "reached vnc stage one\n");
+			NDPI_LOG(NDPI_PROTOCOL_VNC, ndpi_struct, NDPI_LOG_DEBUG, "reached vnc stage one\n");
 			flow->l4.tcp.vnc_stage = 1 + packet->packet_direction;
 			return;
 		}

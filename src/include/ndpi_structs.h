@@ -188,7 +188,7 @@ typedef struct ndpi_id_struct {
 #endif
 } ndpi_id_struct;
 
-/* ************************************************** */ 
+/* ************************************************** */
 
 struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_MAIL_SMTP
@@ -320,7 +320,7 @@ struct ndpi_flow_tcp_struct {
 #endif
 }
 
-/* ************************************************** */ 
+/* ************************************************** */
 
 #if !defined(WIN32)
   __attribute__ ((__packed__))
@@ -372,7 +372,7 @@ struct ndpi_flow_udp_struct {
 #endif
 }
 
-/* ************************************************** */ 
+/* ************************************************** */
 
 #if !defined(WIN32)
   __attribute__ ((__packed__))
@@ -414,7 +414,7 @@ typedef struct ndpi_packet_struct {
   u_int16_t detected_protocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
   u_int8_t detected_subprotocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
 
-  /* this is for simple read-only access to the real protocol 
+  /* this is for simple read-only access to the real protocol
    * used for the main loop */
   u_int16_t real_protocol_read_only;
 
@@ -426,7 +426,7 @@ typedef struct ndpi_packet_struct {
   struct {
     u_int8_t entry_is_real_protocol:5;
     u_int8_t current_stack_size_minus_one:3;
-  } 
+  }
 #if !defined(WIN32)
     __attribute__ ((__packed__))
 #endif
@@ -511,7 +511,7 @@ typedef struct _ndpi_automa {
 typedef struct ndpi_detection_module_struct {
   NDPI_PROTOCOL_BITMASK detection_bitmask;
   NDPI_PROTOCOL_BITMASK generic_http_packet_bitmask;
-  
+
   u_int32_t current_ts;
   u_int32_t ticks_per_second;
 
@@ -610,18 +610,18 @@ typedef struct ndpi_flow_struct {
 #  if NDPI_PROTOCOL_HISTORY_SIZE > 5
 #    error protocol stack size not supported
 #  endif
-  
+
   struct {
     u_int8_t entry_is_real_protocol:5;
     u_int8_t current_stack_size_minus_one:3;
-  } 
-    
+  }
+
 #if !defined(WIN32)
     __attribute__ ((__packed__))
 #endif
     protocol_stack_info;
-#endif  
-  
+#endif
+
   /* init parameter, internal used to set up timestamp,... */
   u_int8_t init_finished:1;
   u_int8_t setup_packet_direction:1;
@@ -646,7 +646,7 @@ typedef struct ndpi_flow_struct {
     struct {
       u_int8_t num_queries, num_answers, ret_code;
       u_int8_t bad_packet /* the received packet looks bad */;
-      u_int16_t query_type, query_class, rsp_type;      
+      u_int16_t query_type, query_class, rsp_type;
     } dns;
   } protos;
   /* ALL protocol specific 64 bit variables here */
@@ -741,7 +741,7 @@ typedef struct ndpi_flow_struct {
 #ifdef NDPI_PROTOCOL_PPLIVE
   u_int32_t pplive_stage1:3;			// 0-6
   u_int32_t pplive_stage2:2;			// 0-2
-  u_int32_t pplive_stage3:2;			// 0-2    
+  u_int32_t pplive_stage3:2;			// 0-2
 #endif
 
   /* internal structures to save functions calls */
@@ -750,5 +750,5 @@ typedef struct ndpi_flow_struct {
   struct ndpi_id_struct *src;
   struct ndpi_id_struct *dst;
 } ndpi_flow_struct_t;
-		     
+
 #endif							/* __NDPI_STRUCTS_INCLUDE_FILE__ */

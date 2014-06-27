@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -28,14 +28,14 @@
 
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
 
-static void ndpi_int_jabber_add_connection(struct ndpi_detection_module_struct *ndpi_struct, 
+static void ndpi_int_jabber_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					   struct ndpi_flow_struct *flow,
 					   u_int32_t protocol, ndpi_protocol_type_t protocol_type)
 {
   ndpi_int_add_connection(ndpi_struct, flow, protocol, protocol_type);
 }
 
-static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct *ndpi_struct, 
+static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 						   struct ndpi_flow_struct *flow, u_int16_t x)
 {
 #if defined( NDPI_PROTOCOL_TANGO ) || defined( NDPI_PROTOCOL_TRUPHONE ) || defined( NDPI_SERVICE_WHATSAPP )
@@ -67,7 +67,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct *ndpi_struct, st
 
   u_int16_t x;
 
-  NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "search jabber.\n");
+  NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_TRACE, "JABBER detection....\n");
 
   /* search for jabber file transfer */
   /* this part is working asymmetrically */
@@ -298,11 +298,11 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct *ndpi_struct, st
   }
   if (flow->packet_counter < 3) {
     NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct,
-	     NDPI_LOG_TRACE, "packet_counter: %u\n", flow->packet_counter);
+	     NDPI_LOG_DEBUG, "packet_counter: %u\n", flow->packet_counter);
     return;
   }
 
-  NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "Excluding jabber connection\n");
+  NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_TRACE, "JABBER Excluded.\n");
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_UNENCRYPED_JABBER);
 
 #ifdef NDPI_PROTOCOL_TRUPHONE

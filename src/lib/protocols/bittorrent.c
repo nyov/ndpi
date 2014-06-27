@@ -2,7 +2,7 @@
  * bittorrent.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
+ * Copyright (C) 2011-14 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -372,7 +372,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
   struct ndpi_packet_struct *packet = &flow->packet;
 
   /* This is broadcast */
-  if(packet->iph 
+  if(packet->iph
      && ((packet->iph->saddr == 0xFFFFFFFF) || (packet->iph->daddr == 0xFFFFFFFF)))
     return;
 
@@ -384,7 +384,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
       ndpi_int_search_bittorrent_tcp(ndpi_struct, flow);
     }
     else if(packet->udp != NULL) {
-      if((ntohs(packet->udp->source) < 1024) 
+      if((ntohs(packet->udp->source) < 1024)
 	 || (ntohs(packet->udp->dest) < 1024) /* High ports only */)
 	return;
 
@@ -403,7 +403,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	u_int8_t v1_version     = packet->payload[0];
 	u_int8_t v1_extension   = packet->payload[1];
 	u_int32_t v1_window_size = *((u_int32_t*)&packet->payload[12]);
-	
+
 	if((packet->payload[0]== 0x60)
 	   && (packet->payload[1]== 0x0)
 	   && (packet->payload[2]== 0x0)
@@ -428,9 +428,9 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	  struct timespec t;
 
 	  getnstimeofday(&t);
-	  now = t.tv_sec;	    
+	  now = t.tv_sec;
 #endif
-	  
+
 	  if((ts < (now+86400)) && (ts > (now-86400))) {
 	    goto bittorrent_found;
 	  }
@@ -459,19 +459,19 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	  } else {
           long offset = 0;
           begin = (char *)packet->payload;
-          while((packet->payload_packet_len-19) > offset 
+          while((packet->payload_packet_len-19) > offset
               && (begin = memchr(begin, 'B',  packet->payload_packet_len-19)) != NULL) {
                 offset = (u_long)begin - (u_long)packet->payload;
             if((packet->payload_packet_len-19) > offset) {
 
-              if(memcmp(begin, "BitTorrent protocol", 19) == 0) {             
+              if(memcmp(begin, "BitTorrent protocol", 19) == 0) {
                 goto bittorrent_found;
               } else {
                   begin++;
               }
             }
           }
-      } 
+      }
     }
 
     return;

@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -54,14 +54,14 @@ static u_int8_t ndpi_int_find_xmsn(struct ndpi_detection_module_struct *ndpi_str
 static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-	
+
   struct ndpi_id_struct *src = flow->src;
   struct ndpi_id_struct *dst = flow->dst;
 
   u_int16_t plen;
   u_int16_t status = 0;
 
-  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "search msn tcp.\n");
+  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN tcp detection...\n");
 #ifdef NDPI_PROTOCOL_SSL
   if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_SSL) {
     NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn ssl ft test\n");
@@ -473,7 +473,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
       return;
     }
   }
-  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "msn 7.\n");
+  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_DEBUG, "msn 7.\n");
   if (flow->packet_counter <= MAX_PACKETS_FOR_MSN) {
     if (packet->tcp->source == htons(443)
 	|| packet->tcp->dest == htons(443)) {
@@ -492,7 +492,7 @@ static void ndpi_search_msn_tcp(struct ndpi_detection_module_struct *ndpi_struct
     /* For no
        n port 443 flows exclude flow bitmask after first packet itself */
   }
-  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "exclude msn.\n");
+  NDPI_LOG(NDPI_PROTOCOL_MSN, ndpi_struct, NDPI_LOG_TRACE, "MSN tcp excluded.\n");
  ndpi_msn_exclude:
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MSN);
 }
@@ -503,7 +503,7 @@ static void ndpi_search_udp_msn_misc(struct ndpi_detection_module_struct
 				     *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-	
+
   struct ndpi_id_struct *src = flow->src;
   struct ndpi_id_struct *dst = flow->dst;
 
@@ -533,7 +533,7 @@ static void ndpi_search_udp_msn_misc(struct ndpi_detection_module_struct
 void ndpi_search_msn(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-	
+
   /* this if request should always be true */
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_MSN) == 0) {
     /* we deal with tcp now */

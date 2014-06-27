@@ -106,7 +106,6 @@ extern "C" {
   } ndpi_unique_flow_ipv4_and_6_struct_t;
 
   typedef enum {
-
     NDPI_LOG_ERROR,
     NDPI_LOG_TRACE,
     NDPI_LOG_DEBUG
@@ -141,7 +140,7 @@ extern "C" {
   char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
   /**
-   * This function returns a new initialized detection module. 
+   * This function returns a new initialized detection module.
    * @param ticks_per_second the timestamp resolution per second (like 1000 for millisecond resolution)
    * @param ndpi_malloc function pointer to a memory allocator
    * @param ndpi_debug_printf a function pointer to a debug output function, use NULL in productive envionments
@@ -174,11 +173,11 @@ extern "C" {
    * @param detection_bitmask the protocol bitmask
    */
   void
-  ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *ndpi_struct, 
+  ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *ndpi_struct,
 				       const NDPI_PROTOCOL_BITMASK * detection_bitmask);
   /**
    * This function will processes one packet and returns the ID of the detected protocol.
-   * This is the main packet processing function. 
+   * This is the main packet processing function.
    *
    * @param ndpi_struct the detection module
    * @param flow void pointer to the connection state machine
@@ -194,8 +193,8 @@ extern "C" {
 				struct ndpi_flow_struct *flow,
 				const unsigned char *packet,
 				const unsigned short packetlen,
-				const u_int32_t current_tick, 
-				struct ndpi_id_struct *src, 
+				const u_int32_t current_tick,
+				struct ndpi_id_struct *src,
 				struct ndpi_id_struct *dst);
 
 #define NDPI_DETECTION_ONLY_IPV4 ( 1 << 0 )
@@ -232,25 +231,25 @@ extern "C" {
   /**
    * returns the real protocol for the flow of the last packet given to the detection.
    * if no real protocol could be found, the unknown protocol will be returned.
-   * 
+   *
    * @param ndpi_struct the detection module
    * @return the protocol id of the last real protocol found in the protocol history of the flow
    */
   u_int16_t ndpi_detection_get_real_protocol_of_flow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-  
+
   /**
    * returns true if the protocol history of the flow of the last packet given to the detection
    * contains the given protocol.
-   * 
+   *
    * @param ndpi_struct the detection module
    * @return 1 if protocol has been found, 0 otherwise
    */
   u_int8_t ndpi_detection_flow_protocol_history_contains_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 								  struct ndpi_flow_struct *flow,
 								  u_int16_t protocol_id);
-  unsigned int ndpi_find_port_based_protocol(struct ndpi_detection_module_struct *ndpi_struct, 
-					     u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);  
-  unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct *ndpi_struct, 
+  unsigned int ndpi_find_port_based_protocol(struct ndpi_detection_module_struct *ndpi_struct,
+					     u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);
+  unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 					      u_int8_t proto, u_int32_t shost, u_int16_t sport, u_int32_t dhost, u_int16_t dport);
   int ndpi_match_string_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
 				    struct ndpi_flow_struct *flow, char *string_to_match, u_int string_to_match_len);
@@ -260,7 +259,7 @@ extern "C" {
   char* ndpi_get_proto_name(struct ndpi_detection_module_struct *mod, u_int16_t proto_id);
   int ndpi_get_protocol_id(struct ndpi_detection_module_struct *ndpi_mod, char *proto);
   void ndpi_dump_protocols(struct ndpi_detection_module_struct *mod);
-  int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, 
+  int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,
 			  char *string_to_match, u_int string_to_match_len);
 
   int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char* path);
@@ -278,6 +277,7 @@ extern "C" {
 
 /**
    * This function sets a single protocol bitmask
+   * @param label Protocol name
    * @param ndpi_struct the detection module
    * @param detection_bitmask the protocol bitmask
    * @param idx the index of the callback_buffer
@@ -287,7 +287,7 @@ extern "C" {
    * @param b_add_detection_bitmask set true if you want add the protocol bitmask to the detection bitmask
    * NB: this function does not increment the index of the callback_buffer
    */
-   void ndpi_set_bitmask_protocol_detection(struct ndpi_detection_module_struct *ndpi_struct,
+   void ndpi_set_bitmask_protocol_detection(char * label, struct ndpi_detection_module_struct *ndpi_struct,
     const NDPI_PROTOCOL_BITMASK * detection_bitmask,
     const u_int32_t idx,
     u_int16_t ndpi_protocol_id,

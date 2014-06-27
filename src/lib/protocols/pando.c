@@ -2,7 +2,7 @@
  * pando.c
  *
  * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
- * 
+ *
  * The signature is based on the Libprotoident library.
  *
  * This file is part of nDPI, an open source deep packet inspection
@@ -20,7 +20,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 #include "ndpi_utils.h"
@@ -55,7 +55,7 @@ static void ndpi_check_pando_udp(struct ndpi_detection_module_struct *ndpi_struc
 			flow->pando_stage = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
 			return;
 		}
-		
+
 		if ((payload_len > 0) && match_first_bytes(packet->payload, "UDPA")) {
 			NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "Possible PANDO request detected, we will look further for the response...\n");
 
@@ -63,7 +63,7 @@ static void ndpi_check_pando_udp(struct ndpi_detection_module_struct *ndpi_struc
 			flow->pando_stage = packet->packet_direction + 3; // packet_direction 0: stage 3, packet_direction 1: stage 4
 			return;
 		}
-		
+
 		if ((payload_len > 0) && (match_first_bytes(packet->payload, "UDPR") || match_first_bytes(packet->payload, "UDPE"))) {
 			NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "Possible PANDO request detected, we will look further for the response...\n");
 
@@ -88,7 +88,7 @@ static void ndpi_check_pando_udp(struct ndpi_detection_module_struct *ndpi_struc
 			NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PANDO, resetting the stage to 0...\n");
 			flow->pando_stage = 0;
 		}
-		
+
 	} else if ((flow->pando_stage == 3) || (flow->pando_stage == 4)) {
 		NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "PANDO stage %u: \n", flow->pando_stage);
 
@@ -105,7 +105,7 @@ static void ndpi_check_pando_udp(struct ndpi_detection_module_struct *ndpi_struc
 			NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "The reply did not seem to belong to PANDO, resetting the stage to 0...\n");
 			flow->pando_stage = 0;
 		}
-		
+
 	} else if ((flow->pando_stage == 5) || (flow->pando_stage == 6)) {
 		NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "PANDO stage %u: \n", flow->pando_stage);
 
@@ -127,10 +127,10 @@ static void ndpi_check_pando_udp(struct ndpi_detection_module_struct *ndpi_struc
 
 void ndpi_search_pando(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	
+
 	/* Break after 20 packets. */
 	if (flow->packet_counter > 20) {
-		NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "Exclude PANDO.\n");
+		NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_TRACE, "PANDO excluded.\n");
 		NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_PANDO);
 		return;
 	}
@@ -144,13 +144,13 @@ void ndpi_search_pando(struct ndpi_detection_module_struct *ndpi_struct, struct 
 		return;
 	}
 
-	NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_DEBUG, "PANDO detection...\n");
+	NDPI_LOG(NDPI_PROTOCOL_PANDO, ndpi_struct, NDPI_LOG_TRACE, "PANDO detection...\n");
 	ndpi_check_pando_tcp(ndpi_struct, flow);
-	
+
 	if (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_PANDO) {
 	    return;
 	}
-	
+
 	ndpi_check_pando_udp(ndpi_struct, flow);
 }
 

@@ -27,7 +27,7 @@
 
 #ifdef NDPI_PROTOCOL_HTTP
 
-static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *ndpi_struct, 
+static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					 struct ndpi_flow_struct *flow,
 					 u_int32_t protocol)
 {
@@ -42,7 +42,7 @@ static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *nd
       ndpi_int_reset_protocol(flow);
       ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
     }
-    
+
     flow->http_detected = 1;
   }
 }
@@ -73,7 +73,7 @@ static void flash_check_http_payload(struct ndpi_detection_module_struct
 static void avi_check_http_payload(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  
+
 
   NDPI_LOG(NDPI_CONTENT_AVI, ndpi_struct, NDPI_LOG_DEBUG, "called avi_check_http_payload: %u %u %u\n",
 	  packet->empty_line_position_set, flow->l4.tcp.http_empty_line_seen, packet->empty_line_position);
@@ -118,8 +118,8 @@ static void teamviewer_check_http_payload(struct ndpi_detection_module_struct *n
 {
     struct ndpi_packet_struct *packet = &flow->packet;
     const u_int8_t *pos;
-    
-    NDPI_LOG(NDPI_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_DEBUG, "called teamviewer_check_http_payload: %u %u %u\n", 
+
+    NDPI_LOG(NDPI_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_DEBUG, "called teamviewer_check_http_payload: %u %u %u\n",
             packet->empty_line_position_set, flow->l4.tcp.http_empty_line_seen, packet->empty_line_position);
 
     if (packet->empty_line_position_set == 0 || (packet->empty_line_position + 5) > (packet->payload_packet_len))
@@ -157,9 +157,9 @@ static void setHttpUserAgent(struct ndpi_flow_struct *flow, char *ua) {
   else if(!strcmp(ua, "Windows NT 6.1")) ua = "Windows 7";
   else if(!strcmp(ua, "Windows NT 6.2")) ua = "Windows 8";
   else if(!strcmp(ua, "Windows NT 6.3")) ua = "Windows 8.1";
-  
+
   //printf("==> %s\n", ua);
-  snprintf((char*)flow->detected_os, sizeof(flow->detected_os), "%s", ua);  
+  snprintf((char*)flow->detected_os, sizeof(flow->detected_os), "%s", ua);
 }
 
 static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
@@ -167,7 +167,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
   struct ndpi_packet_struct *packet = &flow->packet;
 
   if(packet->iph /* IPv4 only */) {
-    /* 
+    /*
        Twitter Inc. TWITTER-NETWORK (NET-199-59-148-0-1) 199.59.148.0 - 199.59.151.255
        199.59.148.0/22
     */
@@ -177,7 +177,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
       return;
     }
 
-    /* 
+    /*
        CIDR:           69.53.224.0/19
        OriginAS:       AS2906
        NetName:        NETFLIX-INC
@@ -188,7 +188,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
       return;
     }
   }
-    
+
   if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP)
      || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP_PROXY))
     {
@@ -226,7 +226,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 
   /* check user agent here too */
   if (packet->user_agent_line.ptr != NULL && packet->user_agent_line.len != 0) {
-    /* Format: 
+    /* Format:
        Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) ....
     */
     if(packet->user_agent_line.len > 7) {
@@ -235,17 +235,17 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 
       strncpy(ua, (const char *)packet->user_agent_line.ptr, mlen);
       ua[mlen] = '\0';
-      
+
       if(strncmp(ua, "Mozilla", 7) == 0) {
 	char *parent = strchr(ua, '(');
-	
+
 	if(parent) {
 	  char *token, *end;
 
 	  parent++;
 	  end = strchr(parent, ')');
 	  if(end) end[0] = '\0';
-	  
+
 	  token = strsep(&parent, ";");
 	  if(token) {
 	    if((strcmp(token, "X11") == 0)
@@ -255,8 +255,8 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 	       ) {
 	      token = strsep(&parent, ";");
 	      if(token && (token[0] == ' ')) token++; /* Skip space */
-	      
-	      if(token 
+
+	      if(token
 		 && ((strcmp(token, "U") == 0)
 		     || (strncmp(token, "MSIE", 4) == 0))) {
 		token = strsep(&parent, ";");
@@ -266,7 +266,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 		  token = strsep(&parent, ";");
 
 		  if(token && (token[0] == ' ')) token++; /* Skip space */
-		  
+
 		  if(token && (strncmp(token, "AOL", 3)  == 0)) {
 		    token = strsep(&parent, ";");
 
@@ -308,13 +308,13 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     flow->nat_ip[len] = '\0';
 
     parseHttpSubprotocol(ndpi_struct, flow);
-    
+
     if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
       ndpi_int_http_add_connection(ndpi_struct, flow, packet->detected_protocol_stack[0]);
       return; /* We have identified a sub-protocol so we're done */
     }
   }
-   
+
   /* check for accept line */
   if (packet->accept_line.ptr != NULL) {
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "Accept Line found %.*s\n",
@@ -441,7 +441,7 @@ static void http_bitmask_exclude(struct ndpi_flow_struct *flow)
 void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  
+
   //      struct ndpi_id_struct         *src=ndpi_struct->src;
   //      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
@@ -560,7 +560,7 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
 	  return;
 	}
       }
-
+// http://www.slideshare.net/DSPIP/rtsp-analysis-wireshark
       if (packet->line[0].len >= 9 && memcmp(&packet->line[0].ptr[packet->line[0].len - 9], " HTTP/1.", 8) == 0) {
 	ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP);
 	check_content_type_and_change_protocol(ndpi_struct, flow);
@@ -574,15 +574,16 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, stru
     }
   } else {
     /* We have received a response for a previously identified partial HTTP request */
-    
+
     if((packet->parsed_lines == 1) && (packet->packet_direction == 1 /* server -> client */)) {
-      /* 
+      /*
 	 In apache if you do "GET /\n\n" the response comes without any header so we can assume that
 	 this can be the case
       */
       ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP);
       return;
     }
+
   }
 
   NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP: REQUEST NOT HTTP CONFORM\n");
