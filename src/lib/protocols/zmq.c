@@ -33,7 +33,7 @@ static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, str
   u_int32_t payload_len = packet->payload_packet_len; 
   u_char p0[] =  { 0x00, 0x00, 0x00, 0x05, 0x01, 0x66, 0x6c, 0x6f, 0x77 };
   u_char p1[] =  { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x7f };
-  u_char p2[] =  { 0x12, 0x28, 0x66, 0x6c, 0x6f, 0x77, 0x00, 0x00, 0x00, 0x0 };
+  u_char p2[] =  { 0x28, 0x66, 0x6c, 0x6f, 0x77, 0x00 };
 
   if(payload_len == 0) return; /* Shouldn't happen */
 
@@ -70,24 +70,16 @@ static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, str
 	return;
       }	
     }
-  } else if(payload_len == 10) {
+  } else if(payload_len >= 10) {
     if(flow->l4.tcp.prev_zmq_pkt_len == 10) {
       if(((memcmp(packet->payload, p1, 10) == 0)
 	  && (memcmp(flow->l4.tcp.prev_zmq_pkt, p1, 10) == 0))
-	 || ((memcmp(packet->payload, p2, 10) == 0)
-	     && (memcmp(flow->l4.tcp.prev_zmq_pkt, p2, 10) == 0))) {
+	 || ((memcmp(&packet->payload[1], p2, sizeof(p2)) == 0)
+	     && (memcmp(&flow->l4.tcp.prev_zmq_pkt[1], p2, sizeof(p2)) == 0))) {
 	ndpi_int_zmq_add_connection(ndpi_struct, flow);
 	return;
       }	
     }
-  } else if(payload_len > 10) {
-    if((packet->payload[0] == 0x1)
-       && (packet->payload[1] == 0x28)
-       && (packet->payload[18] == 0x20)
-       && (packet->payload[19] == 0x29)) {
-	ndpi_int_zmq_add_connection(ndpi_struct, flow);
-	return;
-      }	
   }
 }
 
