@@ -27,26 +27,6 @@
 
 #if defined(NDPI_PROTOCOL_IP_IPSEC) || defined(NDPI_PROTOCOL_IP_GRE) || defined(NDPI_PROTOCOL_IP_ICMP)  || defined(NDPI_PROTOCOL_IP_IGMP) || defined(NDPI_PROTOCOL_IP_EGP) || defined(NDPI_PROTOCOL_IP_SCTP) || defined(NDPI_PROTOCOL_IP_OSPF) || defined(NDPI_PROTOCOL_IP_IP_IN_IP)
 
-
-#define NDPI_IPSEC_PROTOCOL_ESP	50
-#define NDPI_IPSEC_PROTOCOL_AH	51
-
-#define NDPI_GRE_PROTOCOL_TYPE	0x2F
-
-#define NDPI_ICMP_PROTOCOL_TYPE	0x01
-#define NDPI_IGMP_PROTOCOL_TYPE	0x02
-
-#define NDPI_EGP_PROTOCOL_TYPE	0x08
-
-#define NDPI_OSPF_PROTOCOL_TYPE	0x59
-
-#define NDPI_SCTP_PROTOCOL_TYPE	132
-
-#define NDPI_IPIP_PROTOCOL_TYPE  0x04
-
-#define NDPI_ICMPV6_PROTOCOL_TYPE  0x3a
-
-
 #define set_protocol_and_bmask(nprot)					\
   {									\
     if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask,nprot) != 0) \

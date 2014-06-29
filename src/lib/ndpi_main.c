@@ -1368,6 +1368,42 @@ static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *
 
       return(found->proto->protoId);
     }
+  } else {
+    /* No TCP/UDP */
+
+    switch(proto) {
+    case NDPI_IPSEC_PROTOCOL_ESP:
+    case NDPI_IPSEC_PROTOCOL_AH:
+      return(NDPI_PROTOCOL_IP_IPSEC);
+      break;
+    case NDPI_GRE_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_GRE);
+      break;
+    case NDPI_ICMP_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_ICMP);
+      break;
+    case NDPI_IGMP_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_IGMP);
+      break;
+    case NDPI_EGP_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_EGP);
+      break;
+    case NDPI_SCTP_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_SCTP);
+      break;
+    case NDPI_OSPF_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_OSPF);
+      break;
+    case NDPI_IPIP_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_IP_IN_IP);
+      break;
+    case NDPI_ICMPV6_PROTOCOL_TYPE:
+      return(NDPI_PROTOCOL_IP_ICMPV6);
+      break;
+    case 112:
+      return(NDPI_PROTOCOL_IP_VRRP);
+      break;
+    }
   }
 
 #ifdef USE_SKYPE_HEURISTICS
