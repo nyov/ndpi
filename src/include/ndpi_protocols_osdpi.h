@@ -197,6 +197,7 @@ extern "C" {
 #define NDPI_PROTOCOL_PANDO					185 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_MEGACO    				186 /* Gianluca Costa <g.costa@xplico.org> */
 #define NDPI_PROTOCOL_REDIS                                     187
+#define NDPI_PROTOCOL_ZMQ                                       188
 
 #define NDPI_CONTENT_AVI				39
 #define NDPI_CONTENT_FLASH				40
@@ -233,7 +234,7 @@ extern "C" {
 #define NDPI_SERVICE_YAHOO				184 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL			187
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL			188
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                   (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)

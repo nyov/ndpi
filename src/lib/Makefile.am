@@ -150,6 +150,7 @@ libndpi_la_SOURCES = \
 			protocols/socks4.c \
 			protocols/pando.c \
 			protocols/megaco.c \
-			protocols/redis.c
+			protocols/redis.c \
+			protocols/zmq.c
 
 # NTOP protocols are at the end

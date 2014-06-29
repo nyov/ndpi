@@ -318,6 +318,11 @@ struct ndpi_flow_tcp_struct {
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   u_int8_t teamviewer_stage;
 #endif
+
+#ifdef NDPI_PROTOCOL_ZMQ
+  u_int8_t prev_zmq_pkt_len;
+  u_char prev_zmq_pkt[10];
+#endif
 }
 
 /* ************************************************** */

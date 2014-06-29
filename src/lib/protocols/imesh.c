@@ -144,7 +144,9 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct,
     } else if (packet->actual_payload_len == 10	/* PATTERN:: ?? ?? 04|00 00 64|00 00 */
 	       && (packet->payload[2] == 0x04 || packet->payload[2] == 0x00)
 	       && packet->payload[3] == 0x00 && (packet->payload[4] == 0x00 || packet->payload[4] == 0x64)
-	       && packet->payload[5] == 0x00) {
+	       && packet->payload[5] == 0x00
+	       && (packet->payload[2] != packet->payload[4]) /* We do not want that the packet is ?? ?? 00 00 00 00 */
+	       ) {
       flow->l4.tcp.imesh_stage += 2;
       NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG,
 	       "IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
@@ -157,7 +159,9 @@ void ndpi_search_imesh_tcp_udp(struct ndpi_detection_module_struct *ndpi_struct,
 	       && packet->payload[1] == 0x00 && (packet->payload[2] == 0x04 || packet->payload[2] == 0x00)
 	       && packet->payload[3] == 0x00 && (packet->payload[4] == 0x00 || packet->payload[4] == 0x01)
 	       && packet->payload[5] == 0x00 && (packet->payload[6] == 0x01 || packet->payload[6] == 0x00)
-	       && packet->payload[7] == 0x00 && packet->payload[9] == 0x00) {
+	       && packet->payload[7] == 0x00 && packet->payload[9] == 0x00
+	       && (packet->payload[2] || packet->payload[4] || packet->payload[6]) /* We do not want that the packet is all 06 00 00 ... */
+	       ) {
       flow->l4.tcp.imesh_stage += 2;
       NDPI_LOG(NDPI_PROTOCOL_IMESH, ndpi_struct, NDPI_LOG_DEBUG,
 	       "IMESH FOUND :: Payload %u\n", packet->actual_payload_len);
