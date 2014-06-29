@@ -795,6 +795,8 @@ static void printResults(u_int64_t tot_usec)
   u_int32_t i;
   u_int64_t total_flow_bytes = 0;
 
+  if(total_wire_bytes == 0) return;
+
   printf("\nTraffic statistics:\n");
   printf("\tEthernet bytes:        %-13llu (includes ethernet CRC/IFC/trailer)\n",
 	 (long long unsigned int)total_wire_bytes);
