@@ -808,19 +808,19 @@ static void printResults(u_int64_t tot_usec)
 	 (unsigned int)(total_ip_bytes/raw_packet_count));
   printf("\tUnique flows:          %-13u\n", ndpi_flow_count);
 
-  printf("\tTCP Packets:           %-13llu\n", ndpi_stats.tcp_count);
-  printf("\tUDP Packets:           %-13llu\n", ndpi_stats.udp_count);
-  printf("\tVLAN Packets:          %-13llu\n", ndpi_stats.vlan_count);
-  printf("\tMPLS Packets:          %-13llu\n", ndpi_stats.mpls_count);
-  printf("\tPPPoE Packets:         %-13llu\n", ndpi_stats.pppoe_count);
-  printf("\tFragmented Packets:    %-13llu\n", ndpi_stats.fragmented_count);
+  printf("\tTCP Packets:           %-13lu\n", ndpi_stats.tcp_count);
+  printf("\tUDP Packets:           %-13lu\n", ndpi_stats.udp_count);
+  printf("\tVLAN Packets:          %-13lu\n", ndpi_stats.vlan_count);
+  printf("\tMPLS Packets:          %-13lu\n", ndpi_stats.mpls_count);
+  printf("\tPPPoE Packets:         %-13lu\n", ndpi_stats.pppoe_count);
+  printf("\tFragmented Packets:    %-13lu\n", ndpi_stats.fragmented_count);
   printf("\tMax Packet size:       %-13u\n",   ndpi_stats.max_packet_len);
-  printf("\tPacket Len < 64:       %-13llu\n", ndpi_stats.packet_len[0]);
-  printf("\tPacket Len 64-128:     %-13llu\n", ndpi_stats.packet_len[1]);
-  printf("\tPacket Len 128-256:    %-13llu\n", ndpi_stats.packet_len[2]);
-  printf("\tPacket Len 256-1024:   %-13llu\n", ndpi_stats.packet_len[3]);
-  printf("\tPacket Len 1024-1500:  %-13llu\n", ndpi_stats.packet_len[4]);
-  printf("\tPacket Len > 1500:     %-13llu\n", ndpi_stats.packet_len[5]);
+  printf("\tPacket Len < 64:       %-13lu\n", ndpi_stats.packet_len[0]);
+  printf("\tPacket Len 64-128:     %-13lu\n", ndpi_stats.packet_len[1]);
+  printf("\tPacket Len 128-256:    %-13lu\n", ndpi_stats.packet_len[2]);
+  printf("\tPacket Len 256-1024:   %-13lu\n", ndpi_stats.packet_len[3]);
+  printf("\tPacket Len 1024-1500:  %-13lu\n", ndpi_stats.packet_len[4]);
+  printf("\tPacket Len > 1500:     %-13lu\n", ndpi_stats.packet_len[5]);
 
   if(tot_usec > 0) {
     char buf[32], buf1[32];
