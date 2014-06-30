@@ -2239,11 +2239,11 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 
 #ifdef NDPI_PROTOCOL_TEAMVIEWER
   ndpi_set_bitmask_protocol_detection( "TEAMVIEWER", ndpi_struct, detection_bitmask, a++,
-				      NDPI_PROTOCOL_TEAMVIEWER,
-				      ndpi_search_teamview,
-				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
-				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
-				      ADD_TO_DETECTION_BITMASK);
+				       NDPI_PROTOCOL_TEAMVIEWER,
+				       ndpi_search_teamview,
+				       NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP,
+				       SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				       ADD_TO_DETECTION_BITMASK);
 #endif
 
 #ifdef NDPI_PROTOCOL_DHCP
