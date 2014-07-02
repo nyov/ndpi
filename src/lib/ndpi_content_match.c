@@ -30,9 +30,9 @@ typedef struct {
 
 /*
   Host-based match
-  
+
   HTTP:  Server: field
-  HTTPS: Server certificate name  
+  HTTPS: Server certificate name
  */
 
 ndpi_protocol_match host_match[] = {
@@ -96,7 +96,7 @@ ndpi_protocol_match host_match[] = {
 
 
 /*
-  Mime-type content match match  
+  Mime-type content match match
 */
 ndpi_protocol_match content_match[] = {
   { "audio/mpeg",			NULL,		        NDPI_CONTENT_MPEG },
