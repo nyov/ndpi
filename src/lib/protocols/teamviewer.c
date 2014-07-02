@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -31,13 +31,14 @@ static void ndpi_int_teamview_add_connection(struct ndpi_detection_module_struct
                                              *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TEAMVIEWER, NDPI_REAL_PROTOCOL);
+  NDPI_LOG(NDPI_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_TRACE, "TEAMWIEWER Found.\n");
 }
 
 
 void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-    
+  NDPI_LOG(NDPI_PROTOCOL_TEAMVIEWER, ndpi_struct, NDPI_LOG_TRACE, "TEAMWIEWER detection...\n");
   /*
     TeamViewer
     178.77.120.0/25
@@ -50,13 +51,13 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
 
     /* 95.211.37.195 - 95.211.37.203 */
     if(((src >= 1607673283) && (src <= 1607673291))
-       || ((dst >= 1607673283) && (dst <= 1607673291))      
+       || ((dst >= 1607673283) && (dst <= 1607673291))
        || ((src & 0xFFFFFF80 /* 255.255.255.128 */) == 0xB24D7800 /* 178.77.120.0 */)
        || ((dst & 0xFFFFFF80 /* 255.255.255.128 */) == 0xB24D7800 /* 178.77.120.0 */)
        ) {
       ndpi_int_teamview_add_connection(ndpi_struct, flow);
       return;
-    }    
+    }
   }
 
   if(packet->payload_packet_len == 0) return;
@@ -65,7 +66,7 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
     if (packet->payload_packet_len > 13) {
       if (packet->payload[0] == 0x00 && packet->payload[11] == 0x17 && packet->payload[12] == 0x24) { /* byte 0 is a counter/seq number, and at the start is 0 */
 	flow->l4.udp.teamviewer_stage++;
-	if (flow->l4.udp.teamviewer_stage == 4 || 
+	if (flow->l4.udp.teamviewer_stage == 4 ||
 	    packet->udp->dest == ntohs(5938) || packet->udp->source == ntohs(5938)) {
 	  ndpi_int_teamview_add_connection(ndpi_struct, flow);
 	}
@@ -77,7 +78,7 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
     if (packet->payload_packet_len > 2) {
       if (packet->payload[0] == 0x17 && packet->payload[1] == 0x24) {
 	flow->l4.udp.teamviewer_stage++;
-	if (flow->l4.udp.teamviewer_stage == 4 || 
+	if (flow->l4.udp.teamviewer_stage == 4 ||
 	    packet->tcp->dest == ntohs(5938) || packet->tcp->source == ntohs(5938)) {
 	  ndpi_int_teamview_add_connection(ndpi_struct, flow);
 	}
@@ -93,7 +94,7 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
       }
     }
   }
-    
+
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_TEAMVIEWER);
 }
 #endif

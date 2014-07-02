@@ -15,7 +15,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public License
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  */
 
 
@@ -25,12 +25,13 @@
 
 static void ndpi_int_zmq_add_connection(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_ZMQ, NDPI_REAL_PROTOCOL);
+  NDPI_LOG(NDPI_PROTOCOL_ZMQ, ndpi_struct, NDPI_LOG_TRACE, "ZMQ Found.\n");
 }
 
 
 static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
-  struct ndpi_packet_struct *packet = &flow->packet;  
-  u_int32_t payload_len = packet->payload_packet_len; 
+  struct ndpi_packet_struct *packet = &flow->packet;
+  u_int32_t payload_len = packet->payload_packet_len;
   u_char p0[] =  { 0x00, 0x00, 0x00, 0x05, 0x01, 0x66, 0x6c, 0x6f, 0x77 };
   u_char p1[] =  { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x7f };
   u_char p2[] =  { 0x28, 0x66, 0x6c, 0x6f, 0x77, 0x00 };
@@ -39,7 +40,7 @@ static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, str
 
   /* Break after 17 packets. */
   if(flow->packet_counter > 17) {
-    NDPI_LOG(NDPI_PROTOCOL_ZMQ, ndpi_struct, NDPI_LOG_DEBUG, "Exclude ZMQ.\n");
+    NDPI_LOG(NDPI_PROTOCOL_ZMQ, ndpi_struct, NDPI_LOG_TRACE, "Exclude ZMQ.\n");
     NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_PROTOCOL_ZMQ);
     return;
   }
@@ -56,19 +57,19 @@ static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, str
 	 && (memcmp(flow->l4.tcp.prev_zmq_pkt, "\01\02", 2) == 0)) {
 	ndpi_int_zmq_add_connection(ndpi_struct, flow);
 	return;
-      }	      
+      }
     } else if(flow->l4.tcp.prev_zmq_pkt_len == 9) {
       if((memcmp(packet->payload, "\00\00", 2) == 0)
 	 && (memcmp(flow->l4.tcp.prev_zmq_pkt, p0, 9) == 0)) {
 	ndpi_int_zmq_add_connection(ndpi_struct, flow);
 	return;
-      }	      
+      }
     } else if(flow->l4.tcp.prev_zmq_pkt_len == 10) {
       if((memcmp(packet->payload, "\01\02", 2) == 0)
 	 && (memcmp(flow->l4.tcp.prev_zmq_pkt, p1, 10) == 0)) {
 	ndpi_int_zmq_add_connection(ndpi_struct, flow);
 	return;
-      }	
+      }
     }
   } else if(payload_len >= 10) {
     if(flow->l4.tcp.prev_zmq_pkt_len == 10) {
@@ -78,7 +79,7 @@ static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, str
 	     && (memcmp(&flow->l4.tcp.prev_zmq_pkt[1], p2, sizeof(p2)) == 0))) {
 	ndpi_int_zmq_add_connection(ndpi_struct, flow);
 	return;
-      }	
+      }
     }
   }
 }
@@ -86,7 +87,7 @@ static void ndpi_check_zmq(struct ndpi_detection_module_struct *ndpi_struct, str
 void ndpi_search_zmq(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
 
-  NDPI_LOG(NDPI_PROTOCOL_ZMQ, ndpi_struct, NDPI_LOG_DEBUG, "ZMQ detection...\n");
+  NDPI_LOG(NDPI_PROTOCOL_ZMQ, ndpi_struct, NDPI_LOG_TRACE, "ZMQ detection...\n");
 
   /* skip marked packets */
   if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_ZMQ) {
