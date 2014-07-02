@@ -545,9 +545,7 @@ void ndpi_search_ssl_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
        && ((packet->payload[0] == 'W')
 	   && (packet->payload[1] == 'A')
 	   && (packet->payload[4] == 0)
-	   && (packet->payload[2] >= 0)
 	   && (packet->payload[2] <= 9)
-	   && (packet->payload[3] >= 0)
 	   && (packet->payload[3] <= 9))) {
       ndpi_int_add_connection(ndpi_struct, flow, NDPI_SERVICE_WHATSAPP, NDPI_REAL_PROTOCOL);
       return;

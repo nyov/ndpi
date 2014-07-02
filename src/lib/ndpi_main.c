@@ -61,7 +61,7 @@
 #endif
 
 #ifdef __KERNEL__
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,32)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,39)
 static inline char _tolower(const char c)
 {
   return c | 0x20;
