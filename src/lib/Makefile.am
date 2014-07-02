@@ -151,6 +151,7 @@ libndpi_la_SOURCES = \
 			protocols/pando.c \
 			protocols/megaco.c \
 			protocols/redis.c \
-			protocols/zmq.c
+			protocols/zmq.c \
+			protocols/twitter.c
 
 # NTOP protocols are at the end
