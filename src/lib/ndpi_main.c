@@ -1219,6 +1219,9 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ZMQ, "ZeroMQ",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0 , 0, 0, 0, 0) /* UDP */);
+  /* ndpi_set_proto_defaults(ndpi_mod, NDPI_SERVICE_TWITTER, "Twitter",
+                    ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) ,
+                    ndpi_build_default_ports(ports_b, 0 , 0, 0, 0, 0) ); */
 
   init_string_based_protocols(ndpi_mod);
 
@@ -1839,7 +1842,7 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
   ndpi_set_bitmask_protocol_detection( "RTSP", ndpi_struct, detection_bitmask, a++,
               NDPI_PROTOCOL_RTSP,
               ndpi_search_rtsp_tcp_udp,
-              NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD,
+              NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD,
               SAVE_DETECTION_BITMASK_AS_UNKNOWN,
               ADD_TO_DETECTION_BITMASK);
 #endif
@@ -2949,6 +2952,16 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 				       SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				       ADD_TO_DETECTION_BITMASK);
 #endif
+
+
+// #ifdef NDPI_SERVICE_TWITTER
+//   ndpi_set_bitmask_protocol_detection( "TWITTER", ndpi_struct, detection_bitmask, a++,
+//                NDPI_SERVICE_TWITTER,
+//                ndpi_search_twitter,
+//                NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION,
+//                SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+//                ADD_TO_DETECTION_BITMASK);
+// #endif
 
   ndpi_struct->callback_buffer_size = a;
 
