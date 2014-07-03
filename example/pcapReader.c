@@ -165,7 +165,7 @@ static void help(u_int long_help) {
     ndpi_dump_protocols(ndpi_thread_info[0].ndpi_struct);
   }
 
-  exit(-1);
+  exit(!long_help);
 }
 
 /* ***************************************************** */
@@ -1151,7 +1151,7 @@ void test_lib(u_int16_t thread_id) {
   closePcapFile(thread_id);
 
   printResults(thread_id, tot_usec);
-  
+
   terminateDetection(thread_id);
 }
 
@@ -1175,11 +1175,11 @@ int main(int argc, char **argv) {
 
   for(i=0; i<num_loops; i++) {
     int thread_id;
-    
+
     for(thread_id=0; thread_id<num_threads; thread_id++)
       test_lib(thread_id);
   }
-  
+
   return 0;
 }
 
