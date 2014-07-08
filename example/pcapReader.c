@@ -987,14 +987,6 @@ void sigproc(int sig) {
 
   for(thread_id=0; thread_id<num_threads; thread_id++)
     breakPcapLoop(thread_id);
-  //  closePcapFile(thread_id);
-  //
-  //printResults(0);
-  //
-  //for(thread_id=0; thread_id<num_threads; thread_id++)
-  //  terminateDetection(thread_id);
-
-  exit(0);
 }
 
 /* ***************************************************** */
