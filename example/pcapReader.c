@@ -77,6 +77,10 @@ static u_int8_t num_threads = 1;
 static u_int32_t detection_tick_resolution = 1000;
 static time_t capture_until = 0;
 
+#define IDLE_SCAN_PERIOD           10 /* msec (use detection_tick_resolution = 1000) */
+#define MAX_IDLE_TIME           30000
+#define IDLE_SCAN_BUDGET         1024
+
 #define NUM_ROOTS                 512
 
 static u_int32_t num_flows;
@@ -98,13 +102,19 @@ struct thread_stats {
 
 struct reader_thread {
   struct ndpi_detection_module_struct *ndpi_struct;
-  struct ndpi_flow *ndpi_flows_root[NUM_ROOTS];
+  void *ndpi_flows_root[NUM_ROOTS];
   char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
   pcap_t *_pcap_handle;
+  u_int64_t last_time;
+  u_int64_t last_idle_scan_time;
+  u_int32_t idle_scan_idx;
+  u_int32_t num_idle_flows;
   pthread_t pthread;
 
   /* TODO Add barrier */
   struct thread_stats stats;
+
+  struct ndpi_flow *idle_flows[IDLE_SCAN_BUDGET];
 };
 
 static struct reader_thread ndpi_thread_info[MAX_NUM_READER_THREADS];
@@ -132,12 +142,16 @@ typedef struct ndpi_flow {
   u_int16_t lower_port;
   u_int16_t upper_port;
   u_int8_t detection_completed, protocol;
+  u_int16_t __padding;
   struct ndpi_flow_struct *ndpi_flow;
   char lower_name[32], upper_name[32];
+
+  u_int64_t last_seen;
 
   u_int32_t packets, bytes;
   // result only, not used for flow identification
   u_int32_t detected_protocol;
+
   char host_server_name[256];
 
   void *src_id, *dst_id;
@@ -381,6 +395,41 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 
 /* ***************************************************** */
 
+static void free_ndpi_flow(struct ndpi_flow *flow) {
+  if(flow->ndpi_flow) { ndpi_free(flow->ndpi_flow); flow->ndpi_flow = NULL; }
+  if(flow->src_id)    { ndpi_free(flow->src_id); flow->src_id = NULL;       }
+  if(flow->dst_id)    { ndpi_free(flow->dst_id); flow->dst_id = NULL;       }
+}
+
+/* ***************************************************** */
+
+static void ndpi_flow_freer(void *node) {
+  struct ndpi_flow *flow = (struct ndpi_flow*)node;
+
+  free_ndpi_flow(flow);
+  ndpi_free(flow);
+}
+
+/* ***************************************************** */
+
+static void node_idle_scan_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
+  struct ndpi_flow *flow = *(struct ndpi_flow **) node;
+  u_int16_t thread_id = *((u_int16_t *) user_data);
+
+  if (ndpi_thread_info[thread_id].num_idle_flows == IDLE_SCAN_BUDGET) /* TODO optimise with a budget-based walk */
+    return;
+
+  if ((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
+    if (flow->last_seen + MAX_IDLE_TIME < ndpi_thread_info[thread_id].last_time) {
+      free_ndpi_flow(flow);
+      /* adding to a queue (we can't delete it from the tree inline ) */
+      ndpi_thread_info[thread_id].idle_flows[ndpi_thread_info[thread_id].num_idle_flows++] = flow;
+    }
+  }
+}
+
+/* ***************************************************** */
+
 static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
   u_int16_t thread_id = *((u_int16_t*)user_data);
@@ -456,11 +505,11 @@ static int node_cmp(const void *a, const void *b) {
   struct ndpi_flow *fa = (struct ndpi_flow*)a;
   struct ndpi_flow *fb = (struct ndpi_flow*)b;
 
-  if(fa->lower_ip < fb->lower_ip) return(-1); else { if(fa->lower_ip > fb->lower_ip) return(1); }
+  if(fa->lower_ip   < fb->lower_ip  ) return(-1); else { if(fa->lower_ip   > fb->lower_ip  ) return(1); }
   if(fa->lower_port < fb->lower_port) return(-1); else { if(fa->lower_port > fb->lower_port) return(1); }
-  if(fa->upper_ip < fb->upper_ip) return(-1); else { if(fa->upper_ip > fb->upper_ip) return(1); }
+  if(fa->upper_ip   < fb->upper_ip  ) return(-1); else { if(fa->upper_ip   > fb->upper_ip  ) return(1); }
   if(fa->upper_port < fb->upper_port) return(-1); else { if(fa->upper_port > fb->upper_port) return(1); }
-  if(fa->protocol < fb->protocol) return(-1); else { if(fa->protocol > fb->protocol) return(1); }
+  if(fa->protocol   < fb->protocol  ) return(-1); else { if(fa->protocol   > fb->protocol  ) return(1); }
 
   return(0);
 }
@@ -574,7 +623,7 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
 	   iph->protocol, lower_ip, ntohs(lower_port), upper_ip, ntohs(upper_port));
 
   idx = (lower_ip + upper_ip + iph->protocol + lower_port + upper_port) % NUM_ROOTS;
-  ret = ndpi_tfind(&flow, (void*)&ndpi_thread_info[thread_id].ndpi_flows_root[idx], node_cmp);
+  ret = ndpi_tfind(&flow, &ndpi_thread_info[thread_id].ndpi_flows_root[idx], node_cmp);
 
   if(ret == NULL) {
     if(ndpi_thread_info[thread_id].stats.ndpi_flow_count == MAX_NDPI_FLOWS) {
@@ -616,7 +665,7 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
 	return(NULL);
       }
 
-      ndpi_tsearch(newflow, (void*)&ndpi_thread_info[thread_id].ndpi_flows_root[idx], node_cmp); /* Add */
+      ndpi_tsearch(newflow, &ndpi_thread_info[thread_id].ndpi_flows_root[idx], node_cmp); /* Add */
       ndpi_thread_info[thread_id].stats.ndpi_flow_count += 1;
 
       *src = newflow->src_id, *dst = newflow->dst_id;
@@ -689,23 +738,6 @@ static void setupDetection(u_int16_t thread_id) {
 
 /* ***************************************************** */
 
-static void free_ndpi_flow(struct ndpi_flow *flow) {
-  if(flow->ndpi_flow) { ndpi_free(flow->ndpi_flow); flow->ndpi_flow = NULL; }
-  if(flow->src_id)    { ndpi_free(flow->src_id); flow->src_id = NULL;       }
-  if(flow->dst_id)    { ndpi_free(flow->dst_id); flow->dst_id = NULL;       }
-}
-
-/* ***************************************************** */
-
-static void ndpi_flow_freer(void *node) {
-  struct ndpi_flow *flow = (struct ndpi_flow*)node;
-
-  free_ndpi_flow(flow);
-  ndpi_free(flow);
-}
-
-/* ***************************************************** */
-
 static void terminateDetection(u_int16_t thread_id) {
   int i;
 
@@ -729,7 +761,7 @@ static unsigned int packet_processing(u_int16_t thread_id,
   struct ndpi_id_struct *src, *dst;
   struct ndpi_flow *flow;
   struct ndpi_flow_struct *ndpi_flow = NULL;
-  u_int32_t protocol = 0;
+  u_int32_t i, protocol = 0;
   u_int8_t proto;
 
   if(iph)
@@ -744,6 +776,7 @@ static unsigned int packet_processing(u_int16_t thread_id,
     ndpi_thread_info[thread_id].stats.total_wire_bytes += rawsize + 24 /* CRC etc */, ndpi_thread_info[thread_id].stats.total_ip_bytes += rawsize;
     ndpi_flow = flow->ndpi_flow;
     flow->packets++, flow->bytes += rawsize;
+    flow->last_seen = time;
   } else {
     return(0);
   }
@@ -786,6 +819,19 @@ static unsigned int packet_processing(u_int16_t thread_id,
   if(ndpi_flow->l4.tcp.host_server_name[0] != '\0')
     printf("%s\n", ndpi_flow->l4.tcp.host_server_name);
 #endif
+
+  if (ndpi_thread_info[thread_id].last_idle_scan_time + IDLE_SCAN_PERIOD < ndpi_thread_info[thread_id].last_time) {
+    /* scan for idle flows */
+    ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[ndpi_thread_info[thread_id].idle_scan_idx], node_idle_scan_walker, &thread_id);
+
+    /* remove idle flows (unfortunately we cannot do this inline) */
+    while (ndpi_thread_info[thread_id].num_idle_flows > 0)
+      ndpi_tdelete(ndpi_thread_info[thread_id].idle_flows[--ndpi_thread_info[thread_id].num_idle_flows], 
+                   &ndpi_thread_info[thread_id].ndpi_flows_root[ndpi_thread_info[thread_id].idle_scan_idx], node_cmp);
+
+    if (++ndpi_thread_info[thread_id].idle_scan_idx == NUM_ROOTS) ndpi_thread_info[thread_id].idle_scan_idx = 0;
+    ndpi_thread_info[thread_id].last_idle_scan_time = ndpi_thread_info[thread_id].last_time;
+  }
 
   return 0;
 }
@@ -1036,12 +1082,11 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
 
 /* ***************************************************** */
 
-static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header, const u_char * packet) {
+static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header, const u_char *packet) {
   const struct ndpi_ethhdr *ethernet;
   struct ndpi_iphdr *iph;
   struct ndpi_ip6_hdr *iph6;
   u_int64_t time;
-  static u_int64_t lasttime = 0;
   u_int16_t type, ip_offset, ip_len;
   u_int16_t frag_off = 0;
   u_int8_t proto = 0;
@@ -1059,11 +1104,12 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
 
   time = ((uint64_t) header->ts.tv_sec) * detection_tick_resolution +
     header->ts.tv_usec / (1000000 / detection_tick_resolution);
-  if(lasttime > time) {
-    // printf("\nWARNING: timestamp bug in the pcap file (ts delta: %llu, repairing)\n", lasttime - time);
-    time = lasttime;
+
+  if(ndpi_thread_info[thread_id].last_time > time) { /* safety check */
+    // printf("\nWARNING: timestamp bug in the pcap file (ts delta: %llu, repairing)\n", ndpi_thread_info[thread_id].last_time - time);
+    time = ndpi_thread_info[thread_id].last_time;
   }
-  lasttime = time;
+  ndpi_thread_info[thread_id].last_time = time;
 
   if(_pcap_datalink_type == DLT_NULL) {
     if(ntohl(*((u_int32_t*)packet)) == 2)
@@ -1129,7 +1175,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
     if((frag_off & 0x3FFF) != 0) {
       static u_int8_t ipv4_frags_warning_used = 0;
 
-    v4_frags_warning:
+     v4_frags_warning:
       ndpi_thread_info[thread_id].stats.fragmented_count++;
       if(ipv4_frags_warning_used == 0) {
 	printf("\n\nWARNING: IPv4 fragments are not handled by this demo (nDPI supports them)\n");
@@ -1147,7 +1193,7 @@ static void pcap_packet_callback(u_char * args, const struct pcap_pkthdr *header
   } else {
     static u_int8_t ipv4_warning_used = 0;
 
-  v4_warning:
+   v4_warning:
     if(ipv4_warning_used == 0) {
       printf("\n\nWARNING: only IPv4/IPv6 packets are supported in this demo (nDPI supports both IPv4 and IPv6), all other packets will be discarded\n\n");
       ipv4_warning_used = 1;
@@ -1300,17 +1346,16 @@ int gettimeofday(struct timeval *tv, struct timezone *tz) {
   __int64         t;
   static int      tzflag;
 
-  if(tv)
-    {
-      GetSystemTimeAsFileTime(&ft);
-      li.LowPart  = ft.dwLowDateTime;
-      li.HighPart = ft.dwHighDateTime;
-      t  = li.QuadPart;       /* In 100-nanosecond intervals */
-      t -= EPOCHFILETIME;     /* Offset to the Epoch time */
-      t /= 10;                /* In microseconds */
-      tv->tv_sec  = (long)(t / 1000000);
-      tv->tv_usec = (long)(t % 1000000);
-    }
+  if(tv) {
+    GetSystemTimeAsFileTime(&ft);
+    li.LowPart  = ft.dwLowDateTime;
+    li.HighPart = ft.dwHighDateTime;
+    t  = li.QuadPart;       /* In 100-nanosecond intervals */
+    t -= EPOCHFILETIME;     /* Offset to the Epoch time */
+    t /= 10;                /* In microseconds */
+    tv->tv_sec  = (long)(t / 1000000);
+    tv->tv_usec = (long)(t % 1000000);
+  }
 
   if(tz) {
     if(!tzflag) {
