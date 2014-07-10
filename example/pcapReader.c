@@ -19,6 +19,10 @@
  *
  */
 
+#ifndef WIN32
+#define _GNU_SOURCE
+#include <sched.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #ifdef WIN32
@@ -70,6 +74,9 @@ static u_int16_t decode_tunnels = 0;
 static u_int16_t num_loops = 1;
 static u_int8_t shutdown_app = 0;
 static u_int8_t num_threads = 1;
+#ifndef WIN32
+static int core_affinity[MAX_NUM_READER_THREADS];
+#endif
 
 /**
  * Detection parameters
@@ -165,18 +172,18 @@ static void help(u_int long_help) {
 	 "          [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n"
 	 "          [-n <threads>]\n\n"
 	 "Usage:\n"
-	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture\n"
+	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture (comma-separated list)\n"
 	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
 	 "  -s <duration>             | Maximum capture duration in seconds (live traffic capture only)\n"
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
-	 "  -n <num threads>          | Number of threads. Default: %d (experimental).\n"
+	 "  -n <num threads>          | Number of threads. Default: number of interfaces in -i\n"
+         "  -g <id:id...>             | Thread affinity mask (one core id per thread)\n"
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -t                        | Dissect GTP tunnels\n"
 	 "  -h                        | This help\n"
 	 "  -v <1|2>                  | Verbose 'unknown protocol' packet print. 1=verbose, 2=very verbose\n"
-	 "  -V <1|2>                  | Verbose nDPI trace log print. 1=trace, 2=debug\n",
-	 num_threads);
+	 "  -V <1|2>                  | Verbose nDPI trace log print. 1=trace, 2=debug\n");
 
   if(long_help) {
     printf("\n\nSupported protocols:\n");
@@ -191,10 +198,13 @@ static void help(u_int long_help) {
 /* ***************************************************** */
 
 static void parseOptions(int argc, char **argv) {
-  char *__pcap_file = NULL;
+  char *__pcap_file = NULL, *bind_mask = NULL;
   int thread_id, opt;
+#ifndef WIN32
+  u_int num_cores = sysconf( _SC_NPROCESSORS_ONLN );
+#endif
 
-  while ((opt = getopt(argc, argv, "df:i:hp:l:s:tv:V:n:")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:g:i:hp:l:s:tv:V:n:")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -206,6 +216,10 @@ static void parseOptions(int argc, char **argv) {
 
     case 'f':
       _bpf_filter = optarg;
+      break;
+
+    case 'g':
+      bind_mask = optarg;
       break;
 
     case 'l':
@@ -248,7 +262,7 @@ static void parseOptions(int argc, char **argv) {
   }
 
   // check parameters
-  if(_pcap_file[0] == NULL || strcmp(_pcap_file[0], "") == 0) {
+  if (_pcap_file[0] == NULL || strcmp(_pcap_file[0], "") == 0) {
     help(0);
   }
 
@@ -264,6 +278,20 @@ static void parseOptions(int argc, char **argv) {
     for (thread_id = 1; thread_id < num_threads; thread_id++)
       _pcap_file[thread_id] = _pcap_file[0];
   }
+
+#ifndef WIN32
+  for (thread_id = 0; thread_id < num_threads; thread_id++)
+    core_affinity[thread_id] = -1; 
+
+  if (num_cores > 1 && bind_mask != NULL) {
+    char *core_id = strtok(bind_mask, ":");
+    thread_id = 0;
+    while (core_id != NULL && thread_id < num_threads) {
+      core_affinity[thread_id++] = atoi(core_id) % num_cores;
+      core_id = strtok(NULL, ":");
+    }
+  }
+#endif
 }
 
 /* ***************************************************** */
@@ -1246,6 +1274,18 @@ static void runPcapLoop(u_int16_t thread_id) {
 void *processing_thread(void *_thread_id) {
   long thread_id = (long) _thread_id;
 
+#ifndef WIN32
+  if (core_affinity[thread_id] >= 0) {
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(core_affinity[thread_id], &cpuset);
+
+    if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) != 0)
+      fprintf(stderr, "Error while binding thread %ld to core %d\n", thread_id, core_affinity[thread_id]);
+    else
+      printf("Running thread %ld on core %d...\n", thread_id, core_affinity[thread_id]);
+  } else
+#endif 
   printf("Running thread %ld...\n", thread_id);
 
   runPcapLoop(thread_id);
