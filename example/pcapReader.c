@@ -19,7 +19,7 @@
  *
  */
 
-#ifndef WIN32
+#ifdef linux
 #define _GNU_SOURCE
 #include <sched.h>
 #endif
@@ -64,7 +64,6 @@ static void setupDetection(u_int16_t thread_id);
 static char *_pcap_file[MAX_NUM_READER_THREADS]; /**< Ingress pcap file/interafaces */
 static char *_bpf_filter      = NULL; /**< bpf filter  */
 static char *_protoFilePath   = NULL; /**< Protocol file path  */
-static int _pcap_datalink_type = 0;
 
 /**
  * User preferences
@@ -74,7 +73,7 @@ static u_int16_t decode_tunnels = 0;
 static u_int16_t num_loops = 1;
 static u_int8_t shutdown_app = 0;
 static u_int8_t num_threads = 1;
-#ifndef WIN32
+#ifdef linux
 static int core_affinity[MAX_NUM_READER_THREADS];
 #endif
 
@@ -112,11 +111,13 @@ struct reader_thread {
   void *ndpi_flows_root[NUM_ROOTS];
   char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
   pcap_t *_pcap_handle;
+  FILE *playlist_fp;
   u_int64_t last_time;
   u_int64_t last_idle_scan_time;
   u_int32_t idle_scan_idx;
   u_int32_t num_idle_flows;
   pthread_t pthread;
+  int _pcap_datalink_type;
 
   /* TODO Add barrier */
   struct thread_stats stats;
@@ -178,7 +179,9 @@ static void help(u_int long_help) {
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
 	 "  -n <num threads>          | Number of threads. Default: number of interfaces in -i\n"
+#ifdef linux
          "  -g <id:id...>             | Thread affinity mask (one core id per thread)\n"
+#endif
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -t                        | Dissect GTP tunnels\n"
 	 "  -h                        | This help\n"
@@ -200,7 +203,7 @@ static void help(u_int long_help) {
 static void parseOptions(int argc, char **argv) {
   char *__pcap_file = NULL, *bind_mask = NULL;
   int thread_id, opt;
-#ifndef WIN32
+#ifdef linux
   u_int num_cores = sysconf( _SC_NPROCESSORS_ONLN );
 #endif
 
@@ -279,7 +282,7 @@ static void parseOptions(int argc, char **argv) {
       _pcap_file[thread_id] = _pcap_file[0];
   }
 
-#ifndef WIN32
+#ifdef linux
   for (thread_id = 0; thread_id < num_threads; thread_id++)
     core_affinity[thread_id] = -1; 
 
@@ -1065,24 +1068,30 @@ void sigproc(int sig) {
 
 /* ***************************************************** */
 
-static void openPcapFileOrDevice(u_int16_t thread_id) {
-  u_int snaplen = 1514;
-  int promisc = 1;
-  char errbuf[PCAP_ERRBUF_SIZE];
+static int getNextPcapFileFromPlaylist(u_int16_t thread_id, char filename[], u_int32_t filename_len) {
 
-  if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_live(_pcap_file[thread_id], snaplen, promisc, 500, errbuf)) == NULL) {
-    ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(_pcap_file[thread_id], ndpi_thread_info[thread_id]._pcap_error_buffer);
-    capture_until = 0;
+  if (ndpi_thread_info[thread_id].playlist_fp == NULL) {
+    if ((ndpi_thread_info[thread_id].playlist_fp = fopen(_pcap_file[thread_id], "r")) == NULL)
+      return -1;
+  }
 
-    if(ndpi_thread_info[thread_id]._pcap_handle == NULL) {
-      printf("ERROR: could not open pcap file: %s\n", ndpi_thread_info[thread_id]._pcap_error_buffer);
-      exit(-1);
-    } else
-      printf("Reading packets from pcap file %s...\n", _pcap_file[thread_id]);
-  } else
-    printf("Capturing live traffic from device %s...\n", _pcap_file[thread_id]);
+next_line:
+  if (fgets(filename, filename_len, ndpi_thread_info[thread_id].playlist_fp)) {
+    int l = strlen(filename);
+    if (filename[0] == '\0' || filename[0] == '#') goto next_line;
+    if (filename[l-1] == '\n') filename[l-1] = '\0';
+    return 0;
+  } else {
+    fclose(ndpi_thread_info[thread_id].playlist_fp);
+    ndpi_thread_info[thread_id].playlist_fp = NULL;
+    return -1;
+  }
+}
 
-  _pcap_datalink_type = pcap_datalink(ndpi_thread_info[thread_id]._pcap_handle);
+/* ***************************************************** */
+
+static void configurePcapHandle(u_int16_t thread_id) {
+  ndpi_thread_info[thread_id]._pcap_datalink_type = pcap_datalink(ndpi_thread_info[thread_id]._pcap_handle);
 
   if(_bpf_filter != NULL) {
     struct bpf_program fcode;
@@ -1096,6 +1105,37 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
 	printf("Succesfully set BPF filter to '%s'\n", _bpf_filter);
     }
   }
+}
+
+/* ***************************************************** */
+
+static void openPcapFileOrDevice(u_int16_t thread_id) {
+  u_int snaplen = 1514;
+  int promisc = 1;
+  char errbuf[PCAP_ERRBUF_SIZE];
+
+  /* trying to open a live interface */
+  if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_live(_pcap_file[thread_id], snaplen, promisc, 500, errbuf)) == NULL) {
+    capture_until = 0;
+
+    /* trying to open a pcap file */
+    if ((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(_pcap_file[thread_id], ndpi_thread_info[thread_id]._pcap_error_buffer)) == NULL) {
+      char filename[256];
+
+      /* trying to open a pcap playlist */
+      if (getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) != 0 ||
+          (ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(filename, ndpi_thread_info[thread_id]._pcap_error_buffer)) == NULL) {
+
+        printf("ERROR: could not open pcap file or playlist: %s\n", ndpi_thread_info[thread_id]._pcap_error_buffer);
+        exit(-1);
+      } else
+        printf("Reading packets from playlist %s...\n", _pcap_file[thread_id]);
+    } else
+      printf("Reading packets from pcap file %s...\n", _pcap_file[thread_id]);
+  } else
+    printf("Capturing live traffic from device %s...\n", _pcap_file[thread_id]);
+
+  configurePcapHandle(thread_id);
 
   if(capture_until > 0) {
     printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
@@ -1139,18 +1179,18 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
   }
   ndpi_thread_info[thread_id].last_time = time;
 
-  if(_pcap_datalink_type == DLT_NULL) {
+  if(ndpi_thread_info[thread_id]._pcap_datalink_type == DLT_NULL) {
     if(ntohl(*((u_int32_t*)packet)) == 2)
       type = ETH_P_IP;
     else
       type = 0x86DD; /* IPv6 */
 
     ip_offset = 4;
-  } else if(_pcap_datalink_type == DLT_EN10MB) {
+  } else if(ndpi_thread_info[thread_id]._pcap_datalink_type == DLT_EN10MB) {
     ethernet = (struct ndpi_ethhdr *) packet;
     ip_offset = sizeof(struct ndpi_ethhdr);
     type = ntohs(ethernet->h_proto);
-  } else if(_pcap_datalink_type == 113 /* Linux Cooked Capture */) {
+  } else if(ndpi_thread_info[thread_id]._pcap_datalink_type == 113 /* Linux Cooked Capture */) {
     type = (packet[14] << 8) + packet[15];
     ip_offset = 16;
   } else
@@ -1274,7 +1314,7 @@ static void runPcapLoop(u_int16_t thread_id) {
 void *processing_thread(void *_thread_id) {
   long thread_id = (long) _thread_id;
 
-#ifndef WIN32
+#ifdef linux
   if (core_affinity[thread_id] >= 0) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
@@ -1288,7 +1328,17 @@ void *processing_thread(void *_thread_id) {
 #endif 
   printf("Running thread %ld...\n", thread_id);
 
+pcap_loop:
   runPcapLoop(thread_id);
+
+  if (ndpi_thread_info[thread_id].playlist_fp != NULL) { /* playlist: read next file */
+    char filename[256];
+    if (getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) != 0 && 
+        (ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(filename, ndpi_thread_info[thread_id]._pcap_error_buffer)) != NULL) {
+      configurePcapHandle(thread_id);
+      goto pcap_loop;
+    }
+  }
 
   return NULL;
 }
@@ -1299,7 +1349,6 @@ void test_lib() {
   struct timeval begin, end;
   u_int64_t tot_usec;
   long thread_id;
-
 
   for (thread_id = 0; thread_id < num_threads; thread_id++) {
     setupDetection(thread_id);
