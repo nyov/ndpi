@@ -62,6 +62,7 @@ static void setupDetection(u_int16_t thread_id);
  * Client parameters
  */
 static char *_pcap_file[MAX_NUM_READER_THREADS]; /**< Ingress pcap file/interafaces */
+static FILE *playlist_fp[MAX_NUM_READER_THREADS] = { NULL }; /**< Ingress playlist */
 static char *_bpf_filter      = NULL; /**< bpf filter  */
 static char *_protoFilePath   = NULL; /**< Protocol file path  */
 
@@ -111,7 +112,6 @@ struct reader_thread {
   void *ndpi_flows_root[NUM_ROOTS];
   char _pcap_error_buffer[PCAP_ERRBUF_SIZE];
   pcap_t *_pcap_handle;
-  FILE *playlist_fp;
   u_int64_t last_time;
   u_int64_t last_idle_scan_time;
   u_int32_t idle_scan_idx;
@@ -1070,20 +1070,20 @@ void sigproc(int sig) {
 
 static int getNextPcapFileFromPlaylist(u_int16_t thread_id, char filename[], u_int32_t filename_len) {
 
-  if (ndpi_thread_info[thread_id].playlist_fp == NULL) {
-    if ((ndpi_thread_info[thread_id].playlist_fp = fopen(_pcap_file[thread_id], "r")) == NULL)
+  if (playlist_fp[thread_id] == NULL) {
+    if ((playlist_fp[thread_id] = fopen(_pcap_file[thread_id], "r")) == NULL)
       return -1;
   }
 
 next_line:
-  if (fgets(filename, filename_len, ndpi_thread_info[thread_id].playlist_fp)) {
+  if (fgets(filename, filename_len, playlist_fp[thread_id])) {
     int l = strlen(filename);
     if (filename[0] == '\0' || filename[0] == '#') goto next_line;
     if (filename[l-1] == '\n') filename[l-1] = '\0';
     return 0;
   } else {
-    fclose(ndpi_thread_info[thread_id].playlist_fp);
-    ndpi_thread_info[thread_id].playlist_fp = NULL;
+    fclose(playlist_fp[thread_id]);
+    playlist_fp[thread_id] = NULL;
     return -1;
   }
 }
@@ -1331,9 +1331,9 @@ void *processing_thread(void *_thread_id) {
 pcap_loop:
   runPcapLoop(thread_id);
 
-  if (ndpi_thread_info[thread_id].playlist_fp != NULL) { /* playlist: read next file */
+  if (playlist_fp[thread_id] != NULL) { /* playlist: read next file */
     char filename[256];
-    if (getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) != 0 && 
+    if (getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) == 0 &&
         (ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(filename, ndpi_thread_info[thread_id]._pcap_error_buffer)) != NULL) {
       configurePcapHandle(thread_id);
       goto pcap_loop;
