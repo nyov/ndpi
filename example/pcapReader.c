@@ -173,7 +173,7 @@ static void help(u_int long_help) {
 	 "          [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n"
 	 "          [-n <threads>]\n\n"
 	 "Usage:\n"
-	 "  -i <file.pcap|device>     | Specify a pcap file to read packets from or a device for live capture (comma-separated list)\n"
+	 "  -i <file.pcap|device>     | Specify a pcap file/playlist to read packets from or a device for live capture (comma-separated list)\n"
 	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
 	 "  -s <duration>             | Maximum capture duration in seconds (live traffic capture only)\n"
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
