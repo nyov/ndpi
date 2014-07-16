@@ -162,6 +162,8 @@ struct ndpi_flow_tcp_struct {
   u_int8_t citrix_packet_id;
   u_int8_t lotus_notes_packet_id;
   u_int8_t teamviewer_stage;
+  u_int8_t prev_zmq_pkt_len;
+  u_char prev_zmq_pkt[10];
 }
 
 /* ************************************************** */ 
@@ -428,7 +430,8 @@ typedef struct ndpi_flow_struct {
   u_int32_t steam_stage3:2;			// 0 - 2
   u_int32_t pplive_stage1:3;			// 0-6
   u_int32_t pplive_stage2:2;			// 0-2
-  u_int32_t pplive_stage3:2;			// 0-2    
+  u_int32_t pplive_stage3:2;			// 0-2
+  u_int8_t redis_s2d_first_char, redis_d2s_first_char;
 
   /* internal structures to save functions calls */
   struct ndpi_packet_struct packet;

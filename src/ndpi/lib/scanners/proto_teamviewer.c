@@ -30,41 +30,64 @@ void ndpi_search_teamview(struct ndpi_detection_module_struct *ndpi_struct, stru
 {
     struct ndpi_packet_struct *packet = &flow->packet;
     
-    
+    /*
+      TeamViewer
+      178.77.120.0/25
+
+      http://myip.ms/view/ip_owners/144885/Teamviewer_Gmbh.html
+    */
+    if(flow->packet.iph) {
+      u_int32_t src = ntohl(flow->packet.iph->saddr);
+      u_int32_t dst = ntohl(flow->packet.iph->daddr);
+
+      /* 95.211.37.195 - 95.211.37.203 */
+      if(((src >= 1607673283) && (src <= 1607673291))
+	|| ((dst >= 1607673283) && (dst <= 1607673291))
+	|| ((src & 0xFFFFFF80 /* 255.255.255.128 */) == 0xB24D7800 /* 178.77.120.0 */)
+	|| ((dst & 0xFFFFFF80 /* 255.255.255.128 */) == 0xB24D7800 /* 178.77.120.0 */)
+	) {
+	flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+	flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
+	return;
+      }
+    }
+
+    if(packet->payload_packet_len == 0) return;
+
     if (packet->udp != NULL) {
-         if (packet->payload_packet_len > 13) {
-             if (packet->payload[0] == 0x00 && packet->payload[11] == 0x17 && packet->payload[12] == 0x24) { /* byte 0 is a counter/seq number, and at the start is 0 */
-                flow->l4.udp.teamviewer_stage++;
-                if (flow->l4.udp.teamviewer_stage == 4 || 
-                    packet->udp->dest == ntohs(5938) || packet->udp->source == ntohs(5938)) {
-                    flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
-		    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
-                }
-                return;
-            }
-        }
+      if (packet->payload_packet_len > 13) {
+	if (packet->payload[0] == 0x00 && packet->payload[11] == 0x17 && packet->payload[12] == 0x24) { /* byte 0 is a counter/seq number, and at the start is 0 */
+	  flow->l4.udp.teamviewer_stage++;
+	  if (flow->l4.udp.teamviewer_stage == 4 ||
+	      packet->udp->dest == ntohs(5938) || packet->udp->source == ntohs(5938)) {
+	    flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+	    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
+	  }
+	  return;
+	}
+      }
     }
     else if(packet->tcp != NULL) {
-        if (packet->payload_packet_len > 2) {
-            if (packet->payload[0] == 0x17 && packet->payload[1] == 0x24) {
-                flow->l4.udp.teamviewer_stage++;
-                if (flow->l4.udp.teamviewer_stage == 4 || 
-                    packet->tcp->dest == ntohs(5938) || packet->tcp->source == ntohs(5938)) {
-                    flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
-		    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
-                }
-                return;
-            }
-            else if (flow->l4.udp.teamviewer_stage) {
-                if (packet->payload[0] == 0x11 && packet->payload[1] == 0x30) {
-                    flow->l4.udp.teamviewer_stage++;
-                    if (flow->l4.udp.teamviewer_stage == 4)
-                        flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
-			flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
-                }
-                return;
-            }
-        }
+      if (packet->payload_packet_len > 2) {
+	if (packet->payload[0] == 0x17 && packet->payload[1] == 0x24) {
+	  flow->l4.udp.teamviewer_stage++;
+	  if (flow->l4.udp.teamviewer_stage == 4 ||
+	      packet->tcp->dest == ntohs(5938) || packet->tcp->source == ntohs(5938)) {
+	    flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+	    flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
+	  }
+	  return;
+	}
+	else if (flow->l4.udp.teamviewer_stage) {
+	  if (packet->payload[0] == 0x11 && packet->payload[1] == 0x30) {
+	    flow->l4.udp.teamviewer_stage++;
+	    if (flow->l4.udp.teamviewer_stage == 4)
+	      flow->ndpi_result_app = NDPI_RESULT_APP_TEAMVIEWER;
+	      flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
+	  }
+	  return;
+	}
+      }
     }
     
     flow->ndpi_excluded_app[NDPI_RESULT_APP_TEAMVIEWER] = 1;
@@ -75,5 +98,5 @@ void ndpi_register_proto_teamviewer (struct ndpi_detection_module_struct *ndpi_m
   int tcp_ports[5] = {0, 0, 0, 0, 0};
   int udp_ports[5] = {0, 0, 0, 0, 0};
 
-  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_TEAMVIEWER, "TeamViewer", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_teamview);
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_TEAMVIEWER, "TeamViewer", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP, tcp_ports, udp_ports, ndpi_search_teamview);
 }

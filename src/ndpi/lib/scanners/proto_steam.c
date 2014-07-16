@@ -25,9 +25,7 @@
 
 static void ndpi_check_steam_http(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	u_int32_t payload_len = packet->payload_packet_len;
 
-	
 	if (packet->user_agent_line.ptr != NULL && packet->user_agent_line.len >= 23 && memcmp(packet->user_agent_line.ptr, "Valve/Steam HTTP Client", 23) == 0) {
 		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Found STEAM.\n");
 		flow->ndpi_result_app = NDPI_RESULT_APP_STEAM;

@@ -115,6 +115,9 @@ void ndpi_register_proto_vmware (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_vnc (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_warcraft3 (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_yahoo_messenger (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_megaco (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_redis (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_zmq (struct ndpi_detection_module_struct *mod);
 
 void ndpi_register_content_raw (struct ndpi_detection_module_struct *mod);
 

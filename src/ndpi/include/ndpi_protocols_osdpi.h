@@ -35,7 +35,6 @@
 extern "C" {
 #endif
 
-//  #define NDPI_ENABLE_DEBUG_MESSAGES
 #define NDPI_DETECTION_SUPPORT_IPV6
 
 /* This level is for different IP protocols, see: http://en.wikipedia.org/wiki/List_of_IP_protocol_numbers. */
@@ -211,7 +210,10 @@ typedef enum {
   NDPI_RESULT_APP_RTMP, /* Tomasz Bujlow <tomasz@skatnet.dk> */
   NDPI_RESULT_APP_FTP_DATA, /* Tomasz Bujlow <tomasz@skatnet.dk> */
   NDPI_RESULT_APP_PANDO, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_APP_SKYPE,  
+  NDPI_RESULT_APP_SKYPE,
+  NDPI_RESULT_APP_MEGACO, /* Gianluca Costa <g.costa@xplico.org> */
+  NDPI_RESULT_APP_REDIS,
+  NDPI_RESULT_APP_ZMQ,
   NDPI_RESULT_APP_LAST
 } ndpi_result_app_t;
 

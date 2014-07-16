@@ -127,7 +127,7 @@ void ndpi_search_pando(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	
 	/* Break after 20 packets. */
 	if (flow->packet_counter > 20) {
-		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Exclude PANDO.\n");
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "PANDO excluded.\n");
 		flow->ndpi_excluded_app[NDPI_RESULT_APP_PANDO] = 1;
 		return;
 	}

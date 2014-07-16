@@ -58,6 +58,7 @@ void ndpi_search_service_by_ip(struct ndpi_detection_module_struct *ndpi_struct,
     if(((saddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
        || ((daddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
       flow->ndpi_result_service = NDPI_RESULT_SERVICE_APPLE;
+      return;
     }
 
     /* 
@@ -71,27 +72,66 @@ void ndpi_search_service_by_ip(struct ndpi_detection_module_struct *ndpi_struct,
        || (((saddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000))
        ) {
       flow->ndpi_result_service = NDPI_RESULT_SERVICE_SKYPE;
+      return;
     }
   
     /*
       Google
       173.194.0.0/16
     */
-    //if(((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
-      // || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xDC20000 /* 173.194.0.0 */)) {
-      //flow->ndpi_result_service = NDPI_RESULT_SERVICE_GOOGLE;
-    //}
+    if(((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
+       || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xADC20000 /* 173.194.0.0 */)) {
+      flow->ndpi_result_service = NDPI_RESULT_SERVICE_GOOGLE;
+      return;
+    }
     
     /* 
-       Twitter Inc. TWITTER-NETWORK (NET-199-59-148-0-1) 199.59.148.0 - 199.59.151.255
-       199.59.148.0/22
+       Twitter Inc.
     */
-    if(((saddr & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)
-       || ((daddr & 0xFFFFFC00 /* 255.255.252.0 */) == 0xC73B9400 /* 199.59.148.0 */)) {
+    
+    // 192.133.76.0/22
+    /* 192.133.76.0 - 192.133.79.255 */
+    if(((saddr >= 3229961216) && (saddr <= 3229962239))
+       || ((daddr >= 3229961216) && (daddr <= 3229962239))
+       || ((saddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0x5C854C00/* 92.133.76.0 */)
+       || ((daddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0x5C854C00/* 92.133.76.0 */)
+       ) {
+      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
+      return;
+    }
+    // 199.16.156.0/22
+    /* 199.16.156.0 - 199.16.159.255 */
+    if(((saddr >= 3339754496) && (saddr <= 3339755519))
+       || ((daddr >= 3339754496) && (daddr <= 3339755519))
+       || ((saddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC7109C00/* 199.16.156.0 */)
+       || ((daddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC7109C00/* 199.16.156.0 */)
+       ) {
       flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
       return;
     }
 
+     // 199.59.148.0/22
+    /* 199.59.148.0 - 199.59.151.255 */
+    if(((saddr >= 3342570496) && (saddr <= 3342571519))
+       || ((daddr >= 3342570496) && (daddr <= 3342571519))
+       || ((saddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC73B9400/* 199.59.148.0 */)
+       || ((daddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC73B9400/* 199.59.148.0 */)
+       ) {
+      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
+      return;
+    }
+
+     // 199.96.56.0 /21
+    /* 199.96.56.0 - 199.96.63.255 */
+    if(((saddr >= 3344971776) && (saddr <= 3344973823))
+       || ((daddr >= 3344971776) && (daddr <= 3344973823))
+       || ((saddr & 0xFFFFF800 /* 255.255.248.0  */) == 0xC7603800/* 199.96.56.0 */)
+       || ((daddr & 0xFFFFF800 /* 255.255.248.0  */) == 0xC7603800/* 199.96.56.0 */)
+       ) {
+      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
+      return;
+    }
+    
     /* 
        CIDR:           69.53.224.0/19
        OriginAS:       AS2906
@@ -127,7 +167,7 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
     return;
   }  
   
-  if (packet->iph /* IPv4 Only: we need to support packet->iphv6 at some point */) {
+  if (packet->iph /* IPv4 Only: we need to support packet->iphv6 at some point. */) {
     ndpi_search_service_by_ip(ndpi_struct, flow, ntohl(packet->iph->saddr), ntohl(packet->iph->daddr));
   }
 	
@@ -210,6 +250,7 @@ void ndpi_register_service_parser (struct ndpi_detection_module_struct *ndpi_mod
   service_to_automa(ndpi_mod, &ndpi_mod->service_automa, "google-analytics.", NDPI_RESULT_SERVICE_GOOGLE);
   service_to_automa(ndpi_mod, &ndpi_mod->service_automa, "googleusercontent.", NDPI_RESULT_SERVICE_GOOGLE);
   service_to_automa(ndpi_mod, &ndpi_mod->service_automa, "googleadservices.", NDPI_RESULT_SERVICE_GOOGLE);
+  service_to_automa(ndpi_mod, &ndpi_mod->service_automa, "googleapis.com", NDPI_RESULT_SERVICE_GOOGLE);
   service_to_automa(ndpi_mod, &ndpi_mod->service_automa, ".google.", NDPI_RESULT_SERVICE_GOOGLE);
   service_to_automa(ndpi_mod, &ndpi_mod->service_automa, ".gmail.", NDPI_RESULT_SERVICE_GOOGLE);
   service_to_automa(ndpi_mod, &ndpi_mod->service_automa, ".grooveshark.com", NDPI_RESULT_SERVICE_GROOVESHARK);

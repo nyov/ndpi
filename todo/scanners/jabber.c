@@ -67,7 +67,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct *ndpi_struct, st
 
   u_int16_t x;
 
-  NDPI_LOG(NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "search jabber.\n");
+  NDPI_LOG(NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "JABBER detection.\n");
 
   /* search for jabber file transfer */
   /* this part is working asymmetrically */
@@ -302,7 +302,7 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct *ndpi_struct, st
     return;
   }
 
-  NDPI_LOG(NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "Excluding jabber connection\n");
+  NDPI_LOG(NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_DEBUG, "JABBER Excluded\n");
   NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_UNENCRYPED_JABBER);
 
 #ifdef NDPI_OLD_RESULT_APP_TRUPHONE

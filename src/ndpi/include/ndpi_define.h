@@ -30,6 +30,10 @@
   gcc -E -dM - < /dev/null |grep ENDIAN
 */
 
+#ifndef NDPI_ENABLE_DEBUG_MESSAGES
+//#define NDPI_ENABLE_DEBUG_MESSAGES
+#endif
+
 #ifdef WIN32
 #define __LITTLE_ENDIAN__ 1
 #endif

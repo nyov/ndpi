@@ -48,7 +48,6 @@ static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module
     }
   }
 
-
   if (packet->payload_packet_len > 20) {
     /* test for match 0x13+"BitTorrent protocol" */
     if (packet->payload[0] == 0x13) {
@@ -349,7 +348,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
   struct ndpi_packet_struct *packet = &flow->packet;
 
   /* This is broadcast */
-  if(packet->iph 
+  if(packet->iph
      && ((packet->iph->saddr == 0xFFFFFFFF) || (packet->iph->daddr == 0xFFFFFFFF)))
     return;
 
@@ -401,7 +400,7 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	  struct timespec t;
 
 	  getnstimeofday(&t);
-	  now = t.tv_sec;	    
+	  now = t.tv_sec;
 #endif
 	  
 	  if((ts < (now+86400)) && (ts > (now-86400))) {
@@ -431,19 +430,19 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 	  } else {
           long offset = 0;
           begin = (char *)packet->payload;
-          while((packet->payload_packet_len-19) > offset 
+          while((packet->payload_packet_len-19) > offset
               && (begin = memchr(begin, 'B',  packet->payload_packet_len-19)) != NULL) {
                 offset = (u_long)begin - (u_long)packet->payload;
             if((packet->payload_packet_len-19) > offset) {
 
-              if(memcmp(begin, "BitTorrent protocol", 19) == 0) {             
+              if(memcmp(begin, "BitTorrent protocol", 19) == 0) {
                 goto bittorrent_found;
               } else {
                   begin++;
               }
             }
           }
-      } 
+      }
     }
 
     return;

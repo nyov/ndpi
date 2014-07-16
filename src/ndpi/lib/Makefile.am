@@ -78,4 +78,7 @@ libndpi_la_SOURCES = \
 			scanners/proto_vmware.c \
 			scanners/proto_vnc.c \
 			scanners/proto_warcraft3.c \
-			scanners/proto_yahoo_messenger.c
+			scanners/proto_yahoo_messenger.c \
+			scanners/proto_megaco.c \
+			scanners/proto_redis.c \
+			scanners/proto_zmq.c

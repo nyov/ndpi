@@ -57,7 +57,7 @@
 			  ndpi_build_default_ports(ports_tcp, 0, 0, 0, 0, 0),
 			  ndpi_build_default_ports(ports_udp, 0, 0, 0, 0, 0));
   ndpi_set_proto_defaults(ndpi_mod, NDPI_OLD_RESULT_APP_RTSP, "RTSP",
-			  ndpi_build_default_ports(ports_tcp, 0, 0, 0, 0, 0),
+			  ndpi_build_default_ports(ports_tcp, 554, 0, 0, 0, 0),
 			  ndpi_build_default_ports(ports_udp, 554, 0, 0, 0, 0));
   ndpi_set_proto_defaults(ndpi_mod, NDPI_OLD_RESULT_APP_ICECAST, "IceCast",
 			  ndpi_build_default_ports(ports_tcp, 0, 0, 0, 0, 0),

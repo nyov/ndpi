@@ -24,33 +24,6 @@
 
 #include "ndpi_utils.h"
 
-static u_int is_private_addr(u_int32_t addr) {
-  addr = ntohl(addr);
-
-  if(((addr & 0xFF000000) == 0x0A000000) /* 10.0.0.0/8  */
-     || ((addr & 0xFFF00000) == 0xAC100000) /* 172.16/12   */
-	|| ((addr & 0xFFFF0000) == 0xC0A80000) /* 192.168/16  */
-     || ((addr & 0xFF000000) == 0x7F000000) /* 127.0.0.0/8 */
-     )
-    return(1);
-  else
-    return(0);
-}
-
-static u_int64_t get_skype_key(u_int32_t src_host, u_int32_t dst_host) {
-  u_int64_t key;
-  
-  if(src_host < dst_host) {
-    key = src_host;
-    key = (key << 32)+dst_host;
-  } else {
-    key = dst_host;
-    key = (key << 32)+src_host;
-  }
-
-  return(key);
-}
-
 void ndpi_search_skype(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;

@@ -44,7 +44,6 @@ static void setHttpUserAgent(struct ndpi_flow_struct *flow, char *ua) {
   else if(!strcmp(ua, "Windows NT 5.1")) ua = "Windows XP";
   else if(!strcmp(ua, "Windows NT 5.2")) ua = "Windows Server 2003";
   else if(!strcmp(ua, "Windows NT 6.0")) ua = "Windows Vista";
-  else if(!strcmp(ua, "Windows NT 7.0")) ua = "Windows 7";
   else if(!strcmp(ua, "Windows NT 6.1")) ua = "Windows 7";
   else if(!strcmp(ua, "Windows NT 6.2")) ua = "Windows 8";
   else if(!strcmp(ua, "Windows NT 6.3")) ua = "Windows 8.1";

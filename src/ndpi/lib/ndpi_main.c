@@ -260,6 +260,9 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_register_proto_vnc (ndpi_mod);
   ndpi_register_proto_warcraft3 (ndpi_mod);
   ndpi_register_proto_yahoo_messenger (ndpi_mod);
+  ndpi_register_proto_megaco (ndpi_mod);
+  ndpi_register_proto_redis (ndpi_mod);
+  ndpi_register_proto_zmq (ndpi_mod);
   
   ndpi_register_content_raw (ndpi_mod);
   ndpi_register_content_http (ndpi_mod);
@@ -584,6 +587,8 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
   if(tcph != NULL) {
     /* reset retried bytes here before setting it */
     packet->num_retried_bytes = 0;
+    
+    packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
 
     if(tcph->syn != 0 && tcph->ack == 0 && flow->l4.tcp.seen_syn == 0 && flow->l4.tcp.seen_syn_ack == 0
        && flow->l4.tcp.seen_ack == 0) {
@@ -650,7 +655,9 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
       flow->next_tcp_seq_nr[0] = 0;
       flow->next_tcp_seq_nr[1] = 0;
     }
-  }
+  } //else if(udph != NULL) {
+    // packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
+  //}
 
   if(flow->packet_counter < MAX_PACKET_COUNTER && packet->payload_packet_len) {
     flow->packet_counter++;

@@ -37,7 +37,6 @@ void ndpi_search_collectd(struct ndpi_detection_module_struct *ndpi_struct, stru
 
 
   while(len < packet->payload_packet_len) {
-    u_int16_t elem_type = ntohs(*((u_int16_t*)&packet->payload[len]));
     u_int16_t elem_len = ntohs(*((u_int16_t*)&packet->payload[len+2]));
 
     if (elem_len == 0) break;
