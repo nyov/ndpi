@@ -1,5 +1,5 @@
 /*
- * pcapReader.c
+ * ndpiReader.c
  *
  * Copyright (C) 2011-14 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
@@ -169,7 +169,7 @@ typedef struct ndpi_flow {
 static u_int32_t size_flow_struct = 0;
 
 static void help(u_int long_help) {
-  printf("pcapReader -i <file|device> [-f <filter>][-s <duration>]\n"
+  printf("ndpiReader -i <file|device> [-f <filter>][-s <duration>]\n"
 	 "          [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n"
 	 "          [-n <threads>]\n\n"
 	 "Usage:\n"
@@ -568,7 +568,7 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
   void *ret;
 
   /*
-    Note: to keep things simple (pcapReader is just a demo app)
+    Note: to keep things simple (ndpiReader is just a demo app)
     we handle IPv6 a-la-IPv4.
   */
   if(version == 4) {
@@ -1160,7 +1160,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
   u_int8_t proto = 0;
   u_int16_t thread_id = *((u_int16_t*)args);
 
-  // printf("[pcapReader] pcap_packet_callback : [%u.%u.%u.%u.%u -> %u.%u.%u.%u.%u]\n", ethernet->h_dest[1],ethernet->h_dest[2],ethernet->h_dest[3],ethernet->h_dest[4],ethernet->h_dest[5],ethernet->h_source[1],ethernet->h_source[2],ethernet->h_source[3],ethernet->h_source[4],ethernet->h_source[5]);
+  // printf("[ndpiReader] pcap_packet_callback : [%u.%u.%u.%u.%u -> %u.%u.%u.%u.%u]\n", ethernet->h_dest[1],ethernet->h_dest[2],ethernet->h_dest[3],ethernet->h_dest[4],ethernet->h_dest[5],ethernet->h_source[1],ethernet->h_source[2],ethernet->h_source[3],ethernet->h_source[4],ethernet->h_source[5]);
   ndpi_thread_info[thread_id].stats.raw_packet_count++;
 
   if((capture_until != 0) && (header->ts.tv_sec >= capture_until)) {
