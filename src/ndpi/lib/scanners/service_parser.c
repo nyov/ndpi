@@ -147,7 +147,7 @@ void ndpi_search_service_by_ip(struct ndpi_detection_module_struct *ndpi_struct,
 void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
   
-  if (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
+  if (flow->ndpi_excluded_service == 1) {
     return;
   }
   
@@ -156,6 +156,7 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
   }
   
   if (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
+    flow->ndpi_excluded_service = 1;
     return;
   }
   
@@ -164,17 +165,24 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
   }
   
   if (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
+    flow->ndpi_excluded_service = 1;
     return;
   }  
   
+  /* Do not excluded the service based on the IP header detection! */
   if (packet->iph /* IPv4 Only: we need to support packet->iphv6 at some point. */) {
     ndpi_search_service_by_ip(ndpi_struct, flow, ntohl(packet->iph->saddr), ntohl(packet->iph->daddr));
   }
-	
-  /* Break after 10 packets. */
-  if ((flow->ndpi_result_content == NDPI_RESULT_CONTENT_STILL_UNKNOWN) && (flow->packet_counter > 20)) {
-    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Could not find any HTTP content.\n");
-    flow->ndpi_result_content = NDPI_RESULT_CONTENT_UNKNOWN;
+  
+  /* Exclude the service and break after 20 packets. */
+  if (flow->packet_counter > 20) { 
+    flow->ndpi_excluded_service = 1;
+    
+    if (flow->ndpi_result_service == NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Could not find any HTTP service.\n");
+      flow->ndpi_result_service = NDPI_RESULT_SERVICE_UNKNOWN;
+    }
+    
     return;
   }
 }

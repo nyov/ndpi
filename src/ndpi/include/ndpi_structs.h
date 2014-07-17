@@ -385,6 +385,7 @@ typedef struct ndpi_flow_struct {
   
   u_int8_t ndpi_excluded_base[NDPI_RESULT_BASE_LAST];
   u_int8_t ndpi_excluded_app[NDPI_RESULT_APP_LAST];
+  u_int8_t ndpi_excluded_service;
 
   u_char host_server_name[256]; /* HTTP host or DNS query */
   u_char detected_os[32];       /* Via HTTP User-Agent    */

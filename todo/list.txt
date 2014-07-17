@@ -31,8 +31,6 @@ SSL->POPS
 
 15. Make it working in Windows / Linux kernel.
 
-16. Services should be matched by IP addresses only when otjher methods fail. That should be done after the last possible packet of the flow is processed or after 10 packets (what is faster).
-
 svn co https://svn.ntop.org/svn/ntop/trunk/nDPI/
 cd nDPI/
 svn log > log.txt
