@@ -46,6 +46,7 @@ static void ndpi_match_service(struct ndpi_detection_module_struct *ndpi_struct,
 
   if (matching_protocol_id != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
     flow->ndpi_result_service = matching_protocol_id;
+    flow->ndpi_excluded_service = 1;
   }
 }
 
@@ -155,8 +156,7 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
     ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, (char *)flow->host_server_name, strlen((const char*)flow->host_server_name));
   }
   
-  if (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
-    flow->ndpi_excluded_service = 1;
+  if (flow->ndpi_excluded_service == 1) {
     return;
   }
   
@@ -164,8 +164,7 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
     ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, flow->certificate, strlen(flow->certificate));
   }
   
-  if (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
-    flow->ndpi_excluded_service = 1;
+  if (flow->ndpi_excluded_service == 1) {
     return;
   }  
   

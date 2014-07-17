@@ -1133,14 +1133,14 @@ void ndpi_detection_process_packet(struct ndpi_detection_module_struct *ndpi_str
     flow->ndpi_result_service = NDPI_RESULT_SERVICE_UNKNOWN;
   }
   
-  if (flow->ndpi_result_service == NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
+  if (flow->ndpi_excluded_service == 0) {
     
     for (i = 0; i < NDPI_RESULT_SERVICE_LAST; i++) {
       if (ndpi_struct->ndpi_scanners_service[i].func != NULL) {
 	(*ndpi_struct->ndpi_scanners_service[i].func)(ndpi_struct, flow);
       }
       
-      if (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
+      if (flow->ndpi_excluded_service == 1) {
 	break;
       }
     }

@@ -1,0 +1,51 @@
+/*
+ * proto_dcerpc.c
+ *
+ * Copyright (C) 2011-13 by ntop.org
+ * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
+ *
+ * This file is part of nDPIng, an open source deep packet inspection
+ * library based on nDPI, OpenDPI, and PACE technology by ipoque GmbH
+ *
+ * nDPIng is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * nDPIng is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with nDPIng.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ */
+
+#include "ndpi_utils.h"
+
+void ndpi_search_dcerpc(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
+  if ((packet->tcp != NULL) 
+     && (packet->payload_packet_len > 64) 
+     && ((ntohs(packet->tcp->source) == 135) || (ntohs(packet->tcp->dest) == 135))
+     && (packet->payload[0] == 0x05) /* version 5 */
+     && (packet->payload[2] < 16) /* Packet type */
+     ) {	 
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "DCERPC match\n");	  
+    flow->ndpi_result_app = NDPI_RESULT_APP_DCERPC;
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_DCERPC] = 1;
+    return;
+  }
+
+  flow->ndpi_excluded_app[NDPI_RESULT_APP_DCERPC] = 1;
+}
+
+void ndpi_register_proto_dcerpc (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {135, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_DCERPC, "DCE_RPC", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_dcerpc);
+}
