@@ -1,5 +1,5 @@
 /*
- * mysql.c
+ * proto_mysql.c
  * 
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
@@ -24,21 +24,10 @@
  */
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_OLD_RESULT_APP_MYSQL
 
-static void ndpi_int_mysql_add_connection(struct ndpi_detection_module_struct
-											*ndpi_struct, struct ndpi_flow_struct *flow)
-{
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_MYSQL, NDPI_REAL_PROTOCOL);
-}
-
-void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_mysql(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
 	
-//      struct ndpi_id_struct         *src=ndpi_struct->src;
-//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
-
 	if (packet->payload_packet_len > 37	//min length
 		&& get_u_int16_t(packet->payload, 0) == packet->payload_packet_len - 4	//first 3 bytes are length
 		&& get_u_int8_t(packet->payload, 2) == 0x00	//3rd byte of packet length
@@ -48,14 +37,16 @@ void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, str
 		&& get_u_int8_t(packet->payload, 6) == 0x2e	//dot
 		) {
 		u_int32_t a;
+	
 		for (a = 7; a + 31 < packet->payload_packet_len; a++) {
 			if (packet->payload[a] == 0x00) {
 				if (get_u_int8_t(packet->payload, a + 13) == 0x00	//filler byte
 					&& get_u_int64_t(packet->payload, a + 19) == 0x0ULL	//13 more
 					&& get_u_int32_t(packet->payload, a + 27) == 0x0	//filler bytes
 					&& get_u_int8_t(packet->payload, a + 31) == 0x0) {
-					NDPI_LOG(NDPI_OLD_RESULT_APP_MYSQL, ndpi_struct, NDPI_LOG_DEBUG, "MySQL detected.\n");
-					ndpi_int_mysql_add_connection(ndpi_struct, flow);
+					NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "MySQL detected.\n");
+					flow->ndpi_result_app = NDPI_RESULT_APP_MYSQL;
+					flow->ndpi_excluded_app[NDPI_RESULT_APP_MYSQL] = 1;
 					return;
 				}
 				break;
@@ -63,8 +54,13 @@ void ndpi_search_mysql_tcp(struct ndpi_detection_module_struct *ndpi_struct, str
 		}
 	}
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_MYSQL);
-
+	flow->ndpi_excluded_app[NDPI_RESULT_APP_MYSQL] = 1;
 }
 
-#endif
+void ndpi_register_proto_mysql (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {3306, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_MYSQL, "MySQL", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_mysql);
+}

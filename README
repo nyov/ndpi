@@ -13,35 +13,34 @@ inspected by the classifier:
 - service provider
 - content provider
 
-The project is now in an early development alpha stage. That means that
+The project is now in an early development alpha stage. This means that
 NOTHING works besides the features pointed out below. However, every week
 the library is enhanced by including new features and supporting more
 protocols and applications.
 
 1. The code of the library compiles on Linux as a stand-alone library.
-Linux kernel version and Windows versions are not officially supported
+Linux kernel version and Windows versions are not officially supported.
 They can work, but they do not need to. The code is not tested against
 those purposes.
 
 2. The library provides accurate results for the supported protocols and
-applications. The number of applications currently supported is very
-limited and it is much lower than the number of applications supported
-originally by nDPI.
+applications. The number of applications currently supported is lower than
+the number of applications supported originally by nDPI.
 
 3. The current format of the obtained results is not the final one.
 However, it demonstrates various new techniques used by nDPIng. The results
-obtained from nDPIng are easy to account and they are given as:
+obtained from nDPIng are easy to be accounted and they are given as:
 a) protocol - beginning from TCP/UDP, then going into higher levels;
-b) content (when it could be detected);
-c) service (when it could be detected). The service is defined as the
-well-known name of the remote host. So, for example, it could be "Facebook"
-for web browser flows from Facebook. The only exception is DNS - service is
-defined as the queried host name, not the name of the DNS server itself.
+b) content (if detected);
+c) service (if detected). The service is defined as the well-known name of
+the remote host. So, for example, it could be "Facebook" for web browser
+flows from Facebook. The only exception is DNS - service is defined as the
+queried host name, not the name of the DNS server itself.
 
 For now, the "service" is a mix of "service providers" and "content
-providers". That is going to be fixed in new versions, so these two values
+providers". This is going to be fixed in new versions, so these two values
 will be separated from each other. Direct domain names will be provided in
-case if the matching to the pre-defines provider names is not successful.
+case if the matching to the predefined provider names is not successful.
 
 Few examples of the currently obtained results:
 
@@ -68,7 +67,7 @@ the first release stage.
 
 6. The applications / code designed to work with nDPI will not work with
 nDPIng without changing the way how the library is used. Moreover, the
-current design and API of nDPIng is provisional. That means that in any
+current design and API of nDPIng is provisional. It means that in any
 revision it can (and many times will) change without any prior notice.
 
 7. An example Linux application using nDPIng is included in the "example"

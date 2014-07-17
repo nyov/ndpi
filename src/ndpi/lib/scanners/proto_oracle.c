@@ -1,5 +1,5 @@
 /*
- * oracle.c
+ * proto_oracle.c
  *
  * Copyright (C) 2013 Remy Mudingay <mudingay@ill.fr>
  * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
@@ -25,23 +25,15 @@
 #include "ndpi_utils.h"
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_OLD_RESULT_APP_ORACLE
-static void ndpi_int_oracle_add_connection(struct ndpi_detection_module_struct
-					   *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_ORACLE, NDPI_CORRELATED_PROTOCOL);
-}
-
-void ndpi_search_oracle(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_oracle(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
   u_int16_t dport = 0, sport = 0;
 
-  NDPI_LOG(NDPI_OLD_RESULT_APP_ORACLE, ndpi_struct, NDPI_LOG_DEBUG, "search for ORACLE.\n");
+  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search for ORACLE.\n");
 
   if(packet->tcp != NULL) {
     sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
-    NDPI_LOG(NDPI_OLD_RESULT_APP_ORACLE, ndpi_struct, NDPI_LOG_DEBUG, "calculating ORACLE over tcp.\n");
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "calculating ORACLE over tcp.\n");
     /* Oracle Database 9g,10g,11g */
     if ((dport == 1521 || sport == 1521)
 	&&  (((packet->payload[0] == 0x07) && (packet->payload[1] == 0xff) && (packet->payload[2] == 0x00))
@@ -49,17 +41,26 @@ void ndpi_search_oracle(struct ndpi_detection_module_struct *ndpi_struct, struct
 	     && (packet->payload[1] != 0x00)
 	     && (packet->payload[2] == 0x00)
 		 && (packet->payload[3] == 0x00)))) {
-      NDPI_LOG(NDPI_OLD_RESULT_APP_ORACLE, ndpi_struct, NDPI_LOG_DEBUG, "found oracle.\n");
-      ndpi_int_oracle_add_connection(ndpi_struct, flow);
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found oracle.\n");
+      flow->ndpi_result_app = NDPI_RESULT_APP_ORACLE;
+      flow->ndpi_excluded_app[NDPI_RESULT_APP_ORACLE] = 1;
     } else if (packet->payload_packet_len == 213 && packet->payload[0] == 0x00 &&
                packet->payload[1] == 0xd5 && packet->payload[2] == 0x00 &&
                packet->payload[3] == 0x00 ) {
-      NDPI_LOG(NDPI_OLD_RESULT_APP_ORACLE, ndpi_struct, NDPI_LOG_DEBUG, "found oracle.\n");
-      ndpi_int_oracle_add_connection(ndpi_struct, flow);
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found oracle.\n");
+      flow->ndpi_result_app = NDPI_RESULT_APP_ORACLE;
+      flow->ndpi_excluded_app[NDPI_RESULT_APP_ORACLE] = 1;
     }
   } else {
-    NDPI_LOG(NDPI_OLD_RESULT_APP_ORACLE, ndpi_struct, NDPI_LOG_DEBUG, "exclude ORACLE.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_ORACLE);
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "exclude ORACLE.\n");
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_ORACLE] = 1;
   }
 }
-#endif
+
+void ndpi_register_proto_oracle (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {1521, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_ORACLE, "Oracle", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_oracle);
+}

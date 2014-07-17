@@ -1,5 +1,5 @@
 /*
- * pptp.c
+ * proto_pptp.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
@@ -24,22 +24,9 @@
  */
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_OLD_RESULT_APP_PPTP
 
-static void ndpi_int_pptp_add_connection(struct ndpi_detection_module_struct
-										   *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_PPTP, NDPI_REAL_PROTOCOL);
-}
-
-void ndpi_search_pptp(struct ndpi_detection_module_struct
-						*ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_pptp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	
-
-	// struct ndpi_id_struct *src=ndpi_struct->src;
-	// struct ndpi_id_struct *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len >= 10 && get_u_int16_t(packet->payload, 0) == htons(packet->payload_packet_len)
 		&& get_u_int16_t(packet->payload, 2) == htons(0x0001)	/* message type: control message */
@@ -47,12 +34,20 @@ void ndpi_search_pptp(struct ndpi_detection_module_struct
 		&&(get_u_int16_t(packet->payload, 8) == htons(0x0001)	/* control type: start-control-connection-request */
 		)) {
 
-		NDPI_LOG(NDPI_OLD_RESULT_APP_PPTP, ndpi_struct, NDPI_LOG_DEBUG, "found pptp.\n");
-		ndpi_int_pptp_add_connection(ndpi_struct, flow);
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found pptp.\n");
+		flow->ndpi_result_app = NDPI_RESULT_APP_PPTP;
+		flow->ndpi_excluded_app[NDPI_RESULT_APP_PPTP] = 1;
 		return;
 	}
 
-	NDPI_LOG(NDPI_OLD_RESULT_APP_PPTP, ndpi_struct, NDPI_LOG_DEBUG, "exclude pptp.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_PPTP);
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "exclude pptp.\n");
+	flow->ndpi_excluded_app[NDPI_RESULT_APP_PPTP] = 1;
 }
-#endif
+
+void ndpi_register_proto_pptp (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_PPTP, "PPTP", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_pptp);
+}

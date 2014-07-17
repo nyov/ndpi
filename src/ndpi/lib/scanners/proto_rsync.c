@@ -1,5 +1,5 @@
 /*
- * rsync.c
+ * proto_rsync.c
  *
  * Copyright (C) 2013 Remy Mudingay <mudingay@ill.fr>
  * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
@@ -25,23 +25,16 @@
 #include "ndpi_utils.h"
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_OLD_RESULT_APP_RSYNC
-static void ndpi_int_rsync_add_connection(struct ndpi_detection_module_struct
-					  *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-  ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_RSYNC, NDPI_CORRELATED_PROTOCOL);
-}
-
-void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
   u_int16_t dport = 0, sport = 0;
 
-  NDPI_LOG(NDPI_OLD_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "search for RSYNC.\n");
+  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search for RSYNC.\n");
 
-  if(packet->tcp != NULL) {
+  if (packet->tcp != NULL) {
     sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
-    NDPI_LOG(NDPI_OLD_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "calculating RSYNC over tcp.\n");
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "calculating RSYNC over tcp.\n");
+    
     /*
      * Should match: memcmp(packet->payload, "@RSYN NCD: 28", 14) == 0)
      */
@@ -50,12 +43,20 @@ void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct 
 	packet->payload[3] == 0x59 && packet->payload[4] == 0x4e &&
 	packet->payload[5] == 0x43 && packet->payload[6] == 0x44 &&
 	packet->payload[7] == 0x3a ) {
-      NDPI_LOG(NDPI_OLD_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "found rsync.\n");
-      ndpi_int_rsync_add_connection(ndpi_struct, flow);
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found rsync.\n");
+      flow->ndpi_result_app = NDPI_RESULT_APP_RSYNC;
+      flow->ndpi_excluded_app[NDPI_RESULT_APP_RSYNC] = 1;
     }
   } else {
-    NDPI_LOG(NDPI_OLD_RESULT_APP_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "exclude RSYNC.\n");
-    NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_RSYNC);
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "exclude RSYNC.\n");
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_RSYNC] = 1;
   }
 }
-#endif
+
+void ndpi_register_proto_rsync (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {873, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_RSYNC, "RSYNC", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_rsync);
+}

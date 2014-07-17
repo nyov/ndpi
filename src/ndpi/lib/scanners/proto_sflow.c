@@ -1,5 +1,5 @@
 /*
- * sflow.c
+ * proto_sflow.c
  *
  * Copyright (C) 2011-13 - ntop.org
  * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
@@ -24,29 +24,35 @@
 
 #include "ndpi_utils.h"
 
-#ifdef NDPI_OLD_RESULT_APP_SFLOW
-
-static void ndpi_check_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
+  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "sflow detection...\n");
+  
+    /* Break after 20 packets. */
+  if (flow->packet_counter > 20) {
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Exclude sflow.\n");
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_SFLOW] = 1;
+    return;
+  }
+  
   struct ndpi_packet_struct *packet = &flow->packet;  
-  // const u_int8_t *packet_payload = packet->payload;
   u_int32_t payload_len = packet->payload_packet_len;
 
-  if((packet->udp != NULL)
+  if ((packet->udp != NULL)
      && (payload_len >= 24)
      /* Version */
      && (packet->payload[0] == 0) && (packet->payload[1] == 0) && (packet->payload[2] == 0)
      && ((packet->payload[3] == 2) || (packet->payload[3] == 5))) {
-    NDPI_LOG(NDPI_OLD_RESULT_APP_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "Found sflow.\n");
-    ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_SFLOW, NDPI_REAL_PROTOCOL);
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Found sflow.\n");
+    flow->ndpi_result_app = NDPI_RESULT_APP_SFLOW;
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_SFLOW] = 1;
     return;
   }
 }
 
-void ndpi_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-  NDPI_LOG(NDPI_OLD_RESULT_APP_SFLOW, ndpi_struct, NDPI_LOG_DEBUG, "sflow detection...\n");
-  ndpi_check_sflow(ndpi_struct, flow);
-}
+void ndpi_register_proto_sflow (struct ndpi_detection_module_struct *ndpi_mod) {
 
-#endif
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {6343, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_SFLOW, "sFlow", NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_sflow);
+}

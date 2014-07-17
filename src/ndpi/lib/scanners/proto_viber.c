@@ -1,5 +1,5 @@
 /*
- * viber.c 
+ * proto_viber.c 
  *
  * Copyright (C) 2013 Remy Mudingay <mudingay@ill.fr>
  * Copyright (C) 2013 ntop.org
@@ -26,30 +26,34 @@
 #include "ndpi_utils.h"
 #include "ndpi_protocols.h"
 
-#ifdef NDPI_OLD_RESULT_APP_VIBER
-
-void ndpi_search_viber(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_viber(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
   u_int16_t dport = 0, sport = 0;
   
-  NDPI_LOG(NDPI_OLD_RESULT_APP_VIBER, ndpi_struct, NDPI_LOG_DEBUG, "search for VIBER.\n");
+  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search for VIBER.\n");
   
-  if(packet->udp != NULL) {
+  if (packet->udp != NULL) {
     sport = ntohs(packet->udp->source), dport = ntohs(packet->udp->dest);
-    NDPI_LOG(NDPI_OLD_RESULT_APP_VIBER, ndpi_struct, NDPI_LOG_DEBUG, "calculating dport over udp.\n");
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "calculating dport over udp.\n");
 
-    if((packet->payload_packet_len == 12 && packet->payload[2] == 0x03 && packet->payload[3] == 0x00)
+    if ((packet->payload_packet_len == 12 && packet->payload[2] == 0x03 && packet->payload[3] == 0x00)
        || (packet->payload_packet_len == 20 && packet->payload[2] == 0x09 && packet->payload[3] == 0x00)
        || ((packet->payload_packet_len < 135) && (packet->payload[0] == 0x11))) {
-      NDPI_LOG(NDPI_OLD_RESULT_APP_VIBER, ndpi_struct, NDPI_LOG_DEBUG, "found VIBER.\n");
-      ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_VIBER, NDPI_REAL_PROTOCOL);
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found VIBER.\n");
+      flow->ndpi_result_app = NDPI_RESULT_APP_VIBER;
+      flow->ndpi_excluded_app[NDPI_RESULT_APP_VIBER] = 1;
       return;
     } 
   }
 
-  NDPI_LOG(NDPI_OLD_RESULT_APP_VIBER, ndpi_struct, NDPI_LOG_DEBUG, "exclude VIBER.\n");
-  NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_VIBER);
+  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "exclude VIBER.\n");
+  flow->ndpi_excluded_app[NDPI_RESULT_APP_VIBER] = 1;
 }
 
-#endif
+void ndpi_register_proto_viber (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_VIBER, "Viber", NDPI_SELECTION_BITMASK_PROTOCOL_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_viber);
+}

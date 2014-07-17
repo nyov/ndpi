@@ -1,5 +1,5 @@
 /*
- * tds.c
+ * proto_tds.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
@@ -24,21 +24,9 @@
  */
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_OLD_RESULT_APP_TDS
 
-static void ndpi_int_tds_add_connection(struct ndpi_detection_module_struct
-										  *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_TDS, NDPI_REAL_PROTOCOL);
-}
-
-void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
-						   *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_tds(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	
-//      struct ndpi_id_struct         *src=ndpi_struct->src;
-//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
 	if (packet->payload_packet_len > 8
 		&& packet->payload_packet_len < 512
@@ -70,8 +58,9 @@ void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
 			switch (flow->l4.tcp.tds_login_version) {
 			case 0x12:
 				if (packet->payload[0] == 0x12) {
-					NDPI_LOG(NDPI_OLD_RESULT_APP_TDS, ndpi_struct, NDPI_LOG_DEBUG, "TDS detected\n");
-					ndpi_int_tds_add_connection(ndpi_struct, flow);
+					NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "TDS detected\n");
+					flow->ndpi_result_app = NDPI_RESULT_APP_TDS;
+					flow->ndpi_excluded_app[NDPI_RESULT_APP_TDS] = 1;
 					return;
 				} else {
 					goto exclude_tds;
@@ -85,7 +74,13 @@ void ndpi_search_tds_tcp(struct ndpi_detection_module_struct
 
   exclude_tds:
 
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_TDS);
+	flow->ndpi_excluded_app[NDPI_RESULT_APP_TDS] = 1;
 }
 
-#endif
+void ndpi_register_proto_tds (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_TDS, "TDS", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_WITH_PAYLOAD_WITHOUT_RETRANSMISSION, tcp_ports, udp_ports, ndpi_search_tds);
+}

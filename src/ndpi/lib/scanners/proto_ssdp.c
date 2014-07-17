@@ -1,5 +1,5 @@
 /*
- * ssdp.c
+ * proto_ssdp.c
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
@@ -24,24 +24,13 @@
  */
 
 #include "ndpi_protocols.h"
-#ifdef NDPI_OLD_RESULT_APP_SSDP
-
-
-static void ndpi_int_ssdp_add_connection(struct ndpi_detection_module_struct
-										   *ndpi_struct, struct ndpi_flow_struct *flow)
-{
-	ndpi_int_add_connection(ndpi_struct, flow, NDPI_OLD_RESULT_APP_SSDP, NDPI_REAL_PROTOCOL);
-}
 
 /* this detection also works asymmetrically */
-void ndpi_search_ssdp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
-{
+void ndpi_search_ssdp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
-	
-//      struct ndpi_id_struct         *src=ndpi_struct->src;
-//      struct ndpi_id_struct         *dst=ndpi_struct->dst;
 
-	NDPI_LOG(NDPI_OLD_RESULT_APP_SSDP, ndpi_struct, NDPI_LOG_DEBUG, "search ssdp.\n");
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search ssdp.\n");
+	
 	if (packet->udp != NULL) {
 
 		if (packet->payload_packet_len > 100) {
@@ -49,22 +38,30 @@ void ndpi_search_ssdp(struct ndpi_detection_module_struct *ndpi_struct, struct n
 				|| memcmp(packet->payload, "NOTIFY * HTTP/1.1", 17) == 0) {
 
 
-				NDPI_LOG(NDPI_OLD_RESULT_APP_SSDP, ndpi_struct, NDPI_LOG_DEBUG, "found ssdp.\n");
-				ndpi_int_ssdp_add_connection(ndpi_struct, flow);
+				NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found ssdp.\n");
+				flow->ndpi_result_app = NDPI_RESULT_APP_SSDP;
+				flow->ndpi_excluded_app[NDPI_RESULT_APP_SSDP] = 1;
 				return;
 			}
 
-#define SSDP_HTTP "HTTP/1.1 200 OK\r\n"
+			#define SSDP_HTTP "HTTP/1.1 200 OK\r\n"
 			if(memcmp(packet->payload, SSDP_HTTP, strlen(SSDP_HTTP)) == 0) {
-			  NDPI_LOG(NDPI_OLD_RESULT_APP_SSDP, ndpi_struct, NDPI_LOG_DEBUG, "found ssdp.\n");
-			  ndpi_int_ssdp_add_connection(ndpi_struct, flow);
+			  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found ssdp.\n");
+			  flow->ndpi_result_app = NDPI_RESULT_APP_SSDP;
+			  flow->ndpi_excluded_app[NDPI_RESULT_APP_SSDP] = 1;
 			  return;
 			}
 		}
 	}
 
-	NDPI_LOG(NDPI_OLD_RESULT_APP_SSDP, ndpi_struct, NDPI_LOG_DEBUG, "ssdp excluded.\n");
-	NDPI_ADD_PROTOCOL_TO_BITMASK(flow->excluded_protocol_bitmask, NDPI_OLD_RESULT_APP_SSDP);
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "ssdp excluded.\n");
+	flow->ndpi_excluded_app[NDPI_RESULT_APP_SSDP] = 1;
 }
 
-#endif
+void ndpi_register_proto_ssdp (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_SSDP, "SSDP", NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_UDP_WITH_PAYLOAD, tcp_ports, udp_ports, ndpi_search_ssdp);
+}

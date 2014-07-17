@@ -81,4 +81,36 @@ libndpi_la_SOURCES = \
 			scanners/proto_yahoo_messenger.c \
 			scanners/proto_megaco.c \
 			scanners/proto_redis.c \
-			scanners/proto_zmq.c
+			scanners/proto_zmq.c \
+			scanners/proto_afp.c \
+			scanners/proto_applejuice.c \
+			scanners/proto_ayiya.c \
+			scanners/proto_collectd.c \
+			scanners/proto_corba.c \
+			scanners/proto_dcerpc.c \
+			scanners/proto_gtp.c \
+			scanners/proto_guildwars.c \
+			scanners/proto_h323.c \
+			scanners/proto_halflife2_and_mods.c \
+			scanners/proto_http_activesync.c \
+			scanners/proto_kerberos.c \
+			scanners/proto_kontiki.c \
+			scanners/proto_mssql.c \
+			scanners/proto_mysql.c \
+			scanners/proto_noe.c \
+			scanners/proto_openft.c \
+			scanners/proto_oracle.c \
+			scanners/proto_pcanywhere.c \
+			scanners/proto_pptp.c \
+			scanners/proto_radius.c \
+			scanners/proto_rsync.c \
+			scanners/proto_rtcp.c \
+			scanners/proto_rtsp.c \
+			scanners/proto_sflow.c \
+			scanners/proto_ssdp.c \
+			scanners/proto_stealthnet.c \
+			scanners/proto_tds.c \
+			scanners/proto_viber.c \
+			scanners/proto_whoisdas.c \
+			scanners/proto_world_of_kung_fu.c \
+			scanners/proto_xdmcp.c
