@@ -32,6 +32,7 @@ static void ndpi_int_twitter_add_connection(struct ndpi_detection_module_struct
   ndpi_int_add_connection(ndpi_struct, flow, NDPI_SERVICE_TWITTER, NDPI_REAL_PROTOCOL);
 }
 
+
 void ndpi_search_twitter(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
 
@@ -44,45 +45,12 @@ void ndpi_search_twitter(struct ndpi_detection_module_struct *ndpi_struct, struc
     // IPv4
     u_int32_t src = ntohl(flow->packet.iph->saddr);
     u_int32_t dst = ntohl(flow->packet.iph->daddr);
-
-    // 192.133.76.0/22
-    /* 192.133.76.0 - 192.133.79.255 */
-    if(((src >= 3229961216) && (src <= 3229962239))
-       || ((dst >= 3229961216) && (dst <= 3229962239))
-       || ((src & 0xFFFFFC00 /* 255.255.252.0  */) == 0x5C854C00/* 92.133.76.0 */)
-       || ((dst & 0xFFFFFC00 /* 255.255.252.0  */) == 0x5C854C00/* 92.133.76.0 */)
-       ) {
-      ndpi_int_twitter_add_connection(ndpi_struct, flow);
-      return;
-    }
-    // 199.16.156.0/22
-    /* 199.16.156.0 - 199.16.159.255 */
-    if(((src >= 3339754496) && (src <= 3339755519))
-       || ((dst >= 3339754496) && (dst <= 3339755519))
-       || ((src & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC7109C00/* 199.16.156.0 */)
-       || ((dst & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC7109C00/* 199.16.156.0 */)
-       ) {
-      ndpi_int_twitter_add_connection(ndpi_struct, flow);
-      return;
-    }
-
-     // 199.59.148.0/22
-    /* 199.59.148.0 - 199.59.151.255 */
-    if(((src >= 3342570496) && (src <= 3342571519))
-       || ((dst >= 3342570496) && (dst <= 3342571519))
-       || ((src & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC73B9400/* 199.59.148.0 */)
-       || ((dst & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC73B9400/* 199.59.148.0 */)
-       ) {
-      ndpi_int_twitter_add_connection(ndpi_struct, flow);
-      return;
-    }
-
-     // 199.96.56.0 /21
-    /* 199.96.56.0 - 199.96.63.255 */
-    if(((src >= 3344971776) && (src <= 3344973823))
-       || ((dst >= 3344971776) && (dst <= 3344973823))
-       || ((src & 0xFFFFF800 /* 255.255.248.0  */) == 0xC7603800/* 199.96.56.0 */)
-       || ((dst & 0xFFFFF800 /* 255.255.248.0  */) == 0xC7603800/* 199.96.56.0 */)
+    
+    if(ndpi_ips_match(src, dst, 0xC0854C00, 22)     /* 192.133.76.0/22 */
+       || ndpi_ips_match(src, dst, 0xC7109C00, 22)  /* 199.16.156.0/22 */
+       || ndpi_ips_match(src, dst, 0xC73B9400, 22)  /* 199.59.148.0/22 */
+       || ndpi_ips_match(src, dst, 0xC7603A00, 23)  /* 199.96.58.0/23  */
+       || ndpi_ips_match(src, dst, 0xC7603E00, 23)  /* 199.96.62.0/23  */
        ) {
       ndpi_int_twitter_add_connection(ndpi_struct, flow);
       return;

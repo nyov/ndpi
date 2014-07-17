@@ -50,7 +50,9 @@
 #endif
 
 // #include "ndpi_credis.c"
+#ifdef HAVE_NDPI_CACHE
 #include "ndpi_cache.c"
+#endif
 #include "ndpi_content_match.c"
 
 #ifdef WIN32
@@ -307,6 +309,23 @@ void ndpi_tdestroy(void *vrootp, void (*freefct)(void *)) {
 
   if(root != NULL)
     ndpi_tdestroy_recurse(root, freefct);
+}
+
+/* ****************************************** */
+
+u_int8_t ndpi_net_match(u_int32_t ip_to_check,
+			u_int32_t net, 
+			u_int32_t num_bits) {
+  u_int32_t mask = 0;
+
+  mask = ~(~mask >> num_bits);
+  
+  return(((ip_to_check & mask) == (net & mask)) ? 1 : 0);
+}
+
+u_int8_t ndpi_ips_match(u_int32_t src, u_int32_t dst,
+			u_int32_t net, u_int32_t num_bits) {  
+  return(ndpi_net_match(src, net, num_bits) || ndpi_net_match(dst, net, num_bits));
 }
 
 /* ****************************************** */
