@@ -113,4 +113,43 @@ libndpi_la_SOURCES = \
 			scanners/proto_viber.c \
 			scanners/proto_whoisdas.c \
 			scanners/proto_world_of_kung_fu.c \
-			scanners/proto_xdmcp.c
+			scanners/proto_xdmcp.c \
+			scanners/proto_aimini.c \
+			scanners/proto_armagetron.c \
+			scanners/proto_battlefield.c \
+			scanners/proto_citrix.c \
+			scanners/proto_crossfire.c \
+			scanners/proto_dofus.c \
+			scanners/proto_fiesta.c \
+			scanners/proto_filetopia.c \
+			scanners/proto_florensia.c \
+			scanners/proto_iax.c \
+			scanners/proto_icecast.c \
+			scanners/proto_ipp.c \
+			scanners/proto_irc.c \
+			scanners/proto_jabber.c \
+			scanners/proto_ldap.c \
+			scanners/proto_lotus_notes.c \
+			scanners/proto_maplestory.c \
+			scanners/proto_mdns.c \
+			scanners/proto_meebo.c \
+			scanners/proto_mgcp.c \
+			scanners/proto_msn.c \
+			scanners/proto_oscar.c \
+			scanners/proto_postgres.c \
+			scanners/proto_qq.c \
+			scanners/proto_quake.c \
+			scanners/proto_shoutcast.c \
+			scanners/proto_skinny.c \
+			scanners/proto_socrates.c \
+			scanners/proto_soulseek.c \
+			scanners/proto_stun.c \
+			scanners/proto_syslog.c \
+			scanners/proto_teamspeak.c \
+			scanners/proto_thunder.c \
+			scanners/proto_tvants.c \
+			scanners/proto_tvuplayer.c \
+			scanners/proto_veohtv.c \
+			scanners/proto_winmx.c \
+			scanners/proto_xbox.c \
+			scanners/proto_zattoo.c

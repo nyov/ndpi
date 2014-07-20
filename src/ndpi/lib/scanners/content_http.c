@@ -182,7 +182,6 @@ void ndpi_register_content_http (struct ndpi_detection_module_struct *ndpi_mod) 
   ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_QUICKTIME, "QuickTime_Video", NULL);
   ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_REALMEDIA, "Real_Media", NULL);
   ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_WINDOWSMEDIA, "Windows_Media", NULL);
-  ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_MMS, "MMS", NULL);
   ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_WEBM, "WebM", NULL);
   
   ndpi_mod->http_content_automa.ac_automa = ac_automata_init(ac_match_http_content_handler);
@@ -217,7 +216,6 @@ void ndpi_register_content_http (struct ndpi_detection_module_struct *ndpi_mod) 
   http_content_to_automa(ndpi_mod, &ndpi_mod->http_content_automa, "audio/x-wav", NDPI_RESULT_CONTENT_WINDOWSMEDIA);
   http_content_to_automa(ndpi_mod, &ndpi_mod->http_content_automa, "application/vnd.ms.wms-hdr.asfv1", NDPI_RESULT_CONTENT_WINDOWSMEDIA);
   http_content_to_automa(ndpi_mod, &ndpi_mod->http_content_automa, "NSPlayer/", NDPI_RESULT_CONTENT_WINDOWSMEDIA);
-  http_content_to_automa(ndpi_mod, &ndpi_mod->http_content_automa, "application/x-mms-framed", NDPI_RESULT_CONTENT_MMS);
   http_content_to_automa(ndpi_mod, &ndpi_mod->http_content_automa, "audio/webm", NDPI_RESULT_CONTENT_WEBM);
   http_content_to_automa(ndpi_mod, &ndpi_mod->http_content_automa, "video/webm", NDPI_RESULT_CONTENT_WEBM);
 }

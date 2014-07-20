@@ -174,7 +174,27 @@ am_libndpi_la_OBJECTS = libndpi_la-ahocorasick.lo libndpi_la-node.lo \
 	libndpi_la-proto_ssdp.lo libndpi_la-proto_stealthnet.lo \
 	libndpi_la-proto_tds.lo libndpi_la-proto_viber.lo \
 	libndpi_la-proto_whoisdas.lo \
-	libndpi_la-proto_world_of_kung_fu.lo libndpi_la-proto_xdmcp.lo
+	libndpi_la-proto_world_of_kung_fu.lo libndpi_la-proto_xdmcp.lo \
+	libndpi_la-proto_aimini.lo libndpi_la-proto_armagetron.lo \
+	libndpi_la-proto_battlefield.lo libndpi_la-proto_citrix.lo \
+	libndpi_la-proto_crossfire.lo libndpi_la-proto_dofus.lo \
+	libndpi_la-proto_fiesta.lo libndpi_la-proto_filetopia.lo \
+	libndpi_la-proto_florensia.lo libndpi_la-proto_iax.lo \
+	libndpi_la-proto_icecast.lo libndpi_la-proto_ipp.lo \
+	libndpi_la-proto_irc.lo libndpi_la-proto_jabber.lo \
+	libndpi_la-proto_ldap.lo libndpi_la-proto_lotus_notes.lo \
+	libndpi_la-proto_maplestory.lo libndpi_la-proto_mdns.lo \
+	libndpi_la-proto_meebo.lo libndpi_la-proto_mgcp.lo \
+	libndpi_la-proto_msn.lo libndpi_la-proto_oscar.lo \
+	libndpi_la-proto_postgres.lo libndpi_la-proto_qq.lo \
+	libndpi_la-proto_quake.lo libndpi_la-proto_shoutcast.lo \
+	libndpi_la-proto_skinny.lo libndpi_la-proto_socrates.lo \
+	libndpi_la-proto_soulseek.lo libndpi_la-proto_stun.lo \
+	libndpi_la-proto_syslog.lo libndpi_la-proto_teamspeak.lo \
+	libndpi_la-proto_thunder.lo libndpi_la-proto_tvants.lo \
+	libndpi_la-proto_tvuplayer.lo libndpi_la-proto_veohtv.lo \
+	libndpi_la-proto_winmx.lo libndpi_la-proto_xbox.lo \
+	libndpi_la-proto_zattoo.lo
 libndpi_la_OBJECTS = $(am_libndpi_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -474,7 +494,46 @@ libndpi_la_SOURCES = \
 			scanners/proto_viber.c \
 			scanners/proto_whoisdas.c \
 			scanners/proto_world_of_kung_fu.c \
-			scanners/proto_xdmcp.c
+			scanners/proto_xdmcp.c \
+			scanners/proto_aimini.c \
+			scanners/proto_armagetron.c \
+			scanners/proto_battlefield.c \
+			scanners/proto_citrix.c \
+			scanners/proto_crossfire.c \
+			scanners/proto_dofus.c \
+			scanners/proto_fiesta.c \
+			scanners/proto_filetopia.c \
+			scanners/proto_florensia.c \
+			scanners/proto_iax.c \
+			scanners/proto_icecast.c \
+			scanners/proto_ipp.c \
+			scanners/proto_irc.c \
+			scanners/proto_jabber.c \
+			scanners/proto_ldap.c \
+			scanners/proto_lotus_notes.c \
+			scanners/proto_maplestory.c \
+			scanners/proto_mdns.c \
+			scanners/proto_meebo.c \
+			scanners/proto_mgcp.c \
+			scanners/proto_msn.c \
+			scanners/proto_oscar.c \
+			scanners/proto_postgres.c \
+			scanners/proto_qq.c \
+			scanners/proto_quake.c \
+			scanners/proto_shoutcast.c \
+			scanners/proto_skinny.c \
+			scanners/proto_socrates.c \
+			scanners/proto_soulseek.c \
+			scanners/proto_stun.c \
+			scanners/proto_syslog.c \
+			scanners/proto_teamspeak.c \
+			scanners/proto_thunder.c \
+			scanners/proto_tvants.c \
+			scanners/proto_tvuplayer.c \
+			scanners/proto_veohtv.c \
+			scanners/proto_winmx.c \
+			scanners/proto_xbox.c \
+			scanners/proto_zattoo.c
 
 all: all-am
 
@@ -562,21 +621,30 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-ndpi_main.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_afp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_aimini.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_applejuice.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_armagetron.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ayiya.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_battlefield.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_bgp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_bittorrent.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ciscovpn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_citrix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_collectd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_corba.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_crossfire.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_dcerpc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_dhcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_dhcpv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_directconnect.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_dns.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_dofus.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_dropbox.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_edonkey.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_fasttrack.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_fiesta.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_filetopia.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_florensia.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ftp_control.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ftp_data.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_gnutella.Plo@am__quote@
@@ -586,11 +654,23 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_halflife2_and_mods.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_http.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_http_activesync.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_iax.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_icecast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_imap.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_imesh.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ipp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_irc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_jabber.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_kerberos.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_kontiki.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ldap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_lotus_notes.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_maplestory.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_mdns.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_meebo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_megaco.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_mgcp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_msn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_mssql.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_mysql.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_netbios.Plo@am__quote@
@@ -601,12 +681,16 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_openft.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_openvpn.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_oracle.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_oscar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_pando.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_pcanywhere.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_pop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_postgres.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_pplive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ppstream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_pptp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_qq.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_quake.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_radius.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_rdp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_redis.Plo@am__quote@
@@ -616,14 +700,18 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_rtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_rtsp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_sflow.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_shoutcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_sip.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_skinny.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_skype.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_smb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_smtp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_snmp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_socks4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_socks5.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_socrates.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_sopcast.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_soulseek.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_spotify.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ssdp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ssh.Plo@am__quote@
@@ -631,22 +719,32 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_ssl_based.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_stealthnet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_steam.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_stun.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_syslog.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_tds.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_teamspeak.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_teamviewer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_telnet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_tftp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_thunder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_tor.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_tvants.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_tvuplayer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_usenet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_various_directdownloadlink.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_veohtv.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_viber.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_vmware.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_vnc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_warcraft3.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_whoisdas.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_winmx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_world_of_kung_fu.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_world_of_warcraft.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_xbox.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_xdmcp.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_yahoo_messenger.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_zattoo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-proto_zmq.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-service_parser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libndpi_la-sort.Plo@am__quote@
@@ -1336,6 +1434,279 @@ libndpi_la-proto_xdmcp.lo: scanners/proto_xdmcp.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_xdmcp.c' object='libndpi_la-proto_xdmcp.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_xdmcp.lo `test -f 'scanners/proto_xdmcp.c' || echo '$(srcdir)/'`scanners/proto_xdmcp.c
+
+libndpi_la-proto_aimini.lo: scanners/proto_aimini.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_aimini.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_aimini.Tpo -c -o libndpi_la-proto_aimini.lo `test -f 'scanners/proto_aimini.c' || echo '$(srcdir)/'`scanners/proto_aimini.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_aimini.Tpo $(DEPDIR)/libndpi_la-proto_aimini.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_aimini.c' object='libndpi_la-proto_aimini.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_aimini.lo `test -f 'scanners/proto_aimini.c' || echo '$(srcdir)/'`scanners/proto_aimini.c
+
+libndpi_la-proto_armagetron.lo: scanners/proto_armagetron.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_armagetron.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_armagetron.Tpo -c -o libndpi_la-proto_armagetron.lo `test -f 'scanners/proto_armagetron.c' || echo '$(srcdir)/'`scanners/proto_armagetron.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_armagetron.Tpo $(DEPDIR)/libndpi_la-proto_armagetron.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_armagetron.c' object='libndpi_la-proto_armagetron.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_armagetron.lo `test -f 'scanners/proto_armagetron.c' || echo '$(srcdir)/'`scanners/proto_armagetron.c
+
+libndpi_la-proto_battlefield.lo: scanners/proto_battlefield.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_battlefield.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_battlefield.Tpo -c -o libndpi_la-proto_battlefield.lo `test -f 'scanners/proto_battlefield.c' || echo '$(srcdir)/'`scanners/proto_battlefield.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_battlefield.Tpo $(DEPDIR)/libndpi_la-proto_battlefield.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_battlefield.c' object='libndpi_la-proto_battlefield.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_battlefield.lo `test -f 'scanners/proto_battlefield.c' || echo '$(srcdir)/'`scanners/proto_battlefield.c
+
+libndpi_la-proto_citrix.lo: scanners/proto_citrix.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_citrix.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_citrix.Tpo -c -o libndpi_la-proto_citrix.lo `test -f 'scanners/proto_citrix.c' || echo '$(srcdir)/'`scanners/proto_citrix.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_citrix.Tpo $(DEPDIR)/libndpi_la-proto_citrix.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_citrix.c' object='libndpi_la-proto_citrix.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_citrix.lo `test -f 'scanners/proto_citrix.c' || echo '$(srcdir)/'`scanners/proto_citrix.c
+
+libndpi_la-proto_crossfire.lo: scanners/proto_crossfire.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_crossfire.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_crossfire.Tpo -c -o libndpi_la-proto_crossfire.lo `test -f 'scanners/proto_crossfire.c' || echo '$(srcdir)/'`scanners/proto_crossfire.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_crossfire.Tpo $(DEPDIR)/libndpi_la-proto_crossfire.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_crossfire.c' object='libndpi_la-proto_crossfire.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_crossfire.lo `test -f 'scanners/proto_crossfire.c' || echo '$(srcdir)/'`scanners/proto_crossfire.c
+
+libndpi_la-proto_dofus.lo: scanners/proto_dofus.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_dofus.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_dofus.Tpo -c -o libndpi_la-proto_dofus.lo `test -f 'scanners/proto_dofus.c' || echo '$(srcdir)/'`scanners/proto_dofus.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_dofus.Tpo $(DEPDIR)/libndpi_la-proto_dofus.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_dofus.c' object='libndpi_la-proto_dofus.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_dofus.lo `test -f 'scanners/proto_dofus.c' || echo '$(srcdir)/'`scanners/proto_dofus.c
+
+libndpi_la-proto_fiesta.lo: scanners/proto_fiesta.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_fiesta.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_fiesta.Tpo -c -o libndpi_la-proto_fiesta.lo `test -f 'scanners/proto_fiesta.c' || echo '$(srcdir)/'`scanners/proto_fiesta.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_fiesta.Tpo $(DEPDIR)/libndpi_la-proto_fiesta.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_fiesta.c' object='libndpi_la-proto_fiesta.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_fiesta.lo `test -f 'scanners/proto_fiesta.c' || echo '$(srcdir)/'`scanners/proto_fiesta.c
+
+libndpi_la-proto_filetopia.lo: scanners/proto_filetopia.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_filetopia.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_filetopia.Tpo -c -o libndpi_la-proto_filetopia.lo `test -f 'scanners/proto_filetopia.c' || echo '$(srcdir)/'`scanners/proto_filetopia.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_filetopia.Tpo $(DEPDIR)/libndpi_la-proto_filetopia.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_filetopia.c' object='libndpi_la-proto_filetopia.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_filetopia.lo `test -f 'scanners/proto_filetopia.c' || echo '$(srcdir)/'`scanners/proto_filetopia.c
+
+libndpi_la-proto_florensia.lo: scanners/proto_florensia.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_florensia.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_florensia.Tpo -c -o libndpi_la-proto_florensia.lo `test -f 'scanners/proto_florensia.c' || echo '$(srcdir)/'`scanners/proto_florensia.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_florensia.Tpo $(DEPDIR)/libndpi_la-proto_florensia.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_florensia.c' object='libndpi_la-proto_florensia.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_florensia.lo `test -f 'scanners/proto_florensia.c' || echo '$(srcdir)/'`scanners/proto_florensia.c
+
+libndpi_la-proto_iax.lo: scanners/proto_iax.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_iax.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_iax.Tpo -c -o libndpi_la-proto_iax.lo `test -f 'scanners/proto_iax.c' || echo '$(srcdir)/'`scanners/proto_iax.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_iax.Tpo $(DEPDIR)/libndpi_la-proto_iax.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_iax.c' object='libndpi_la-proto_iax.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_iax.lo `test -f 'scanners/proto_iax.c' || echo '$(srcdir)/'`scanners/proto_iax.c
+
+libndpi_la-proto_icecast.lo: scanners/proto_icecast.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_icecast.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_icecast.Tpo -c -o libndpi_la-proto_icecast.lo `test -f 'scanners/proto_icecast.c' || echo '$(srcdir)/'`scanners/proto_icecast.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_icecast.Tpo $(DEPDIR)/libndpi_la-proto_icecast.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_icecast.c' object='libndpi_la-proto_icecast.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_icecast.lo `test -f 'scanners/proto_icecast.c' || echo '$(srcdir)/'`scanners/proto_icecast.c
+
+libndpi_la-proto_ipp.lo: scanners/proto_ipp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_ipp.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_ipp.Tpo -c -o libndpi_la-proto_ipp.lo `test -f 'scanners/proto_ipp.c' || echo '$(srcdir)/'`scanners/proto_ipp.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_ipp.Tpo $(DEPDIR)/libndpi_la-proto_ipp.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_ipp.c' object='libndpi_la-proto_ipp.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_ipp.lo `test -f 'scanners/proto_ipp.c' || echo '$(srcdir)/'`scanners/proto_ipp.c
+
+libndpi_la-proto_irc.lo: scanners/proto_irc.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_irc.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_irc.Tpo -c -o libndpi_la-proto_irc.lo `test -f 'scanners/proto_irc.c' || echo '$(srcdir)/'`scanners/proto_irc.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_irc.Tpo $(DEPDIR)/libndpi_la-proto_irc.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_irc.c' object='libndpi_la-proto_irc.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_irc.lo `test -f 'scanners/proto_irc.c' || echo '$(srcdir)/'`scanners/proto_irc.c
+
+libndpi_la-proto_jabber.lo: scanners/proto_jabber.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_jabber.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_jabber.Tpo -c -o libndpi_la-proto_jabber.lo `test -f 'scanners/proto_jabber.c' || echo '$(srcdir)/'`scanners/proto_jabber.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_jabber.Tpo $(DEPDIR)/libndpi_la-proto_jabber.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_jabber.c' object='libndpi_la-proto_jabber.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_jabber.lo `test -f 'scanners/proto_jabber.c' || echo '$(srcdir)/'`scanners/proto_jabber.c
+
+libndpi_la-proto_ldap.lo: scanners/proto_ldap.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_ldap.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_ldap.Tpo -c -o libndpi_la-proto_ldap.lo `test -f 'scanners/proto_ldap.c' || echo '$(srcdir)/'`scanners/proto_ldap.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_ldap.Tpo $(DEPDIR)/libndpi_la-proto_ldap.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_ldap.c' object='libndpi_la-proto_ldap.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_ldap.lo `test -f 'scanners/proto_ldap.c' || echo '$(srcdir)/'`scanners/proto_ldap.c
+
+libndpi_la-proto_lotus_notes.lo: scanners/proto_lotus_notes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_lotus_notes.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_lotus_notes.Tpo -c -o libndpi_la-proto_lotus_notes.lo `test -f 'scanners/proto_lotus_notes.c' || echo '$(srcdir)/'`scanners/proto_lotus_notes.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_lotus_notes.Tpo $(DEPDIR)/libndpi_la-proto_lotus_notes.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_lotus_notes.c' object='libndpi_la-proto_lotus_notes.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_lotus_notes.lo `test -f 'scanners/proto_lotus_notes.c' || echo '$(srcdir)/'`scanners/proto_lotus_notes.c
+
+libndpi_la-proto_maplestory.lo: scanners/proto_maplestory.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_maplestory.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_maplestory.Tpo -c -o libndpi_la-proto_maplestory.lo `test -f 'scanners/proto_maplestory.c' || echo '$(srcdir)/'`scanners/proto_maplestory.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_maplestory.Tpo $(DEPDIR)/libndpi_la-proto_maplestory.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_maplestory.c' object='libndpi_la-proto_maplestory.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_maplestory.lo `test -f 'scanners/proto_maplestory.c' || echo '$(srcdir)/'`scanners/proto_maplestory.c
+
+libndpi_la-proto_mdns.lo: scanners/proto_mdns.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_mdns.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_mdns.Tpo -c -o libndpi_la-proto_mdns.lo `test -f 'scanners/proto_mdns.c' || echo '$(srcdir)/'`scanners/proto_mdns.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_mdns.Tpo $(DEPDIR)/libndpi_la-proto_mdns.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_mdns.c' object='libndpi_la-proto_mdns.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_mdns.lo `test -f 'scanners/proto_mdns.c' || echo '$(srcdir)/'`scanners/proto_mdns.c
+
+libndpi_la-proto_meebo.lo: scanners/proto_meebo.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_meebo.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_meebo.Tpo -c -o libndpi_la-proto_meebo.lo `test -f 'scanners/proto_meebo.c' || echo '$(srcdir)/'`scanners/proto_meebo.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_meebo.Tpo $(DEPDIR)/libndpi_la-proto_meebo.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_meebo.c' object='libndpi_la-proto_meebo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_meebo.lo `test -f 'scanners/proto_meebo.c' || echo '$(srcdir)/'`scanners/proto_meebo.c
+
+libndpi_la-proto_mgcp.lo: scanners/proto_mgcp.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_mgcp.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_mgcp.Tpo -c -o libndpi_la-proto_mgcp.lo `test -f 'scanners/proto_mgcp.c' || echo '$(srcdir)/'`scanners/proto_mgcp.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_mgcp.Tpo $(DEPDIR)/libndpi_la-proto_mgcp.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_mgcp.c' object='libndpi_la-proto_mgcp.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_mgcp.lo `test -f 'scanners/proto_mgcp.c' || echo '$(srcdir)/'`scanners/proto_mgcp.c
+
+libndpi_la-proto_msn.lo: scanners/proto_msn.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_msn.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_msn.Tpo -c -o libndpi_la-proto_msn.lo `test -f 'scanners/proto_msn.c' || echo '$(srcdir)/'`scanners/proto_msn.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_msn.Tpo $(DEPDIR)/libndpi_la-proto_msn.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_msn.c' object='libndpi_la-proto_msn.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_msn.lo `test -f 'scanners/proto_msn.c' || echo '$(srcdir)/'`scanners/proto_msn.c
+
+libndpi_la-proto_oscar.lo: scanners/proto_oscar.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_oscar.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_oscar.Tpo -c -o libndpi_la-proto_oscar.lo `test -f 'scanners/proto_oscar.c' || echo '$(srcdir)/'`scanners/proto_oscar.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_oscar.Tpo $(DEPDIR)/libndpi_la-proto_oscar.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_oscar.c' object='libndpi_la-proto_oscar.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_oscar.lo `test -f 'scanners/proto_oscar.c' || echo '$(srcdir)/'`scanners/proto_oscar.c
+
+libndpi_la-proto_postgres.lo: scanners/proto_postgres.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_postgres.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_postgres.Tpo -c -o libndpi_la-proto_postgres.lo `test -f 'scanners/proto_postgres.c' || echo '$(srcdir)/'`scanners/proto_postgres.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_postgres.Tpo $(DEPDIR)/libndpi_la-proto_postgres.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_postgres.c' object='libndpi_la-proto_postgres.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_postgres.lo `test -f 'scanners/proto_postgres.c' || echo '$(srcdir)/'`scanners/proto_postgres.c
+
+libndpi_la-proto_qq.lo: scanners/proto_qq.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_qq.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_qq.Tpo -c -o libndpi_la-proto_qq.lo `test -f 'scanners/proto_qq.c' || echo '$(srcdir)/'`scanners/proto_qq.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_qq.Tpo $(DEPDIR)/libndpi_la-proto_qq.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_qq.c' object='libndpi_la-proto_qq.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_qq.lo `test -f 'scanners/proto_qq.c' || echo '$(srcdir)/'`scanners/proto_qq.c
+
+libndpi_la-proto_quake.lo: scanners/proto_quake.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_quake.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_quake.Tpo -c -o libndpi_la-proto_quake.lo `test -f 'scanners/proto_quake.c' || echo '$(srcdir)/'`scanners/proto_quake.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_quake.Tpo $(DEPDIR)/libndpi_la-proto_quake.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_quake.c' object='libndpi_la-proto_quake.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_quake.lo `test -f 'scanners/proto_quake.c' || echo '$(srcdir)/'`scanners/proto_quake.c
+
+libndpi_la-proto_shoutcast.lo: scanners/proto_shoutcast.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_shoutcast.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_shoutcast.Tpo -c -o libndpi_la-proto_shoutcast.lo `test -f 'scanners/proto_shoutcast.c' || echo '$(srcdir)/'`scanners/proto_shoutcast.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_shoutcast.Tpo $(DEPDIR)/libndpi_la-proto_shoutcast.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_shoutcast.c' object='libndpi_la-proto_shoutcast.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_shoutcast.lo `test -f 'scanners/proto_shoutcast.c' || echo '$(srcdir)/'`scanners/proto_shoutcast.c
+
+libndpi_la-proto_skinny.lo: scanners/proto_skinny.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_skinny.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_skinny.Tpo -c -o libndpi_la-proto_skinny.lo `test -f 'scanners/proto_skinny.c' || echo '$(srcdir)/'`scanners/proto_skinny.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_skinny.Tpo $(DEPDIR)/libndpi_la-proto_skinny.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_skinny.c' object='libndpi_la-proto_skinny.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_skinny.lo `test -f 'scanners/proto_skinny.c' || echo '$(srcdir)/'`scanners/proto_skinny.c
+
+libndpi_la-proto_socrates.lo: scanners/proto_socrates.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_socrates.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_socrates.Tpo -c -o libndpi_la-proto_socrates.lo `test -f 'scanners/proto_socrates.c' || echo '$(srcdir)/'`scanners/proto_socrates.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_socrates.Tpo $(DEPDIR)/libndpi_la-proto_socrates.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_socrates.c' object='libndpi_la-proto_socrates.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_socrates.lo `test -f 'scanners/proto_socrates.c' || echo '$(srcdir)/'`scanners/proto_socrates.c
+
+libndpi_la-proto_soulseek.lo: scanners/proto_soulseek.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_soulseek.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_soulseek.Tpo -c -o libndpi_la-proto_soulseek.lo `test -f 'scanners/proto_soulseek.c' || echo '$(srcdir)/'`scanners/proto_soulseek.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_soulseek.Tpo $(DEPDIR)/libndpi_la-proto_soulseek.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_soulseek.c' object='libndpi_la-proto_soulseek.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_soulseek.lo `test -f 'scanners/proto_soulseek.c' || echo '$(srcdir)/'`scanners/proto_soulseek.c
+
+libndpi_la-proto_stun.lo: scanners/proto_stun.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_stun.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_stun.Tpo -c -o libndpi_la-proto_stun.lo `test -f 'scanners/proto_stun.c' || echo '$(srcdir)/'`scanners/proto_stun.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_stun.Tpo $(DEPDIR)/libndpi_la-proto_stun.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_stun.c' object='libndpi_la-proto_stun.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_stun.lo `test -f 'scanners/proto_stun.c' || echo '$(srcdir)/'`scanners/proto_stun.c
+
+libndpi_la-proto_syslog.lo: scanners/proto_syslog.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_syslog.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_syslog.Tpo -c -o libndpi_la-proto_syslog.lo `test -f 'scanners/proto_syslog.c' || echo '$(srcdir)/'`scanners/proto_syslog.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_syslog.Tpo $(DEPDIR)/libndpi_la-proto_syslog.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_syslog.c' object='libndpi_la-proto_syslog.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_syslog.lo `test -f 'scanners/proto_syslog.c' || echo '$(srcdir)/'`scanners/proto_syslog.c
+
+libndpi_la-proto_teamspeak.lo: scanners/proto_teamspeak.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_teamspeak.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_teamspeak.Tpo -c -o libndpi_la-proto_teamspeak.lo `test -f 'scanners/proto_teamspeak.c' || echo '$(srcdir)/'`scanners/proto_teamspeak.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_teamspeak.Tpo $(DEPDIR)/libndpi_la-proto_teamspeak.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_teamspeak.c' object='libndpi_la-proto_teamspeak.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_teamspeak.lo `test -f 'scanners/proto_teamspeak.c' || echo '$(srcdir)/'`scanners/proto_teamspeak.c
+
+libndpi_la-proto_thunder.lo: scanners/proto_thunder.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_thunder.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_thunder.Tpo -c -o libndpi_la-proto_thunder.lo `test -f 'scanners/proto_thunder.c' || echo '$(srcdir)/'`scanners/proto_thunder.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_thunder.Tpo $(DEPDIR)/libndpi_la-proto_thunder.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_thunder.c' object='libndpi_la-proto_thunder.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_thunder.lo `test -f 'scanners/proto_thunder.c' || echo '$(srcdir)/'`scanners/proto_thunder.c
+
+libndpi_la-proto_tvants.lo: scanners/proto_tvants.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_tvants.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_tvants.Tpo -c -o libndpi_la-proto_tvants.lo `test -f 'scanners/proto_tvants.c' || echo '$(srcdir)/'`scanners/proto_tvants.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_tvants.Tpo $(DEPDIR)/libndpi_la-proto_tvants.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_tvants.c' object='libndpi_la-proto_tvants.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_tvants.lo `test -f 'scanners/proto_tvants.c' || echo '$(srcdir)/'`scanners/proto_tvants.c
+
+libndpi_la-proto_tvuplayer.lo: scanners/proto_tvuplayer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_tvuplayer.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_tvuplayer.Tpo -c -o libndpi_la-proto_tvuplayer.lo `test -f 'scanners/proto_tvuplayer.c' || echo '$(srcdir)/'`scanners/proto_tvuplayer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_tvuplayer.Tpo $(DEPDIR)/libndpi_la-proto_tvuplayer.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_tvuplayer.c' object='libndpi_la-proto_tvuplayer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_tvuplayer.lo `test -f 'scanners/proto_tvuplayer.c' || echo '$(srcdir)/'`scanners/proto_tvuplayer.c
+
+libndpi_la-proto_veohtv.lo: scanners/proto_veohtv.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_veohtv.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_veohtv.Tpo -c -o libndpi_la-proto_veohtv.lo `test -f 'scanners/proto_veohtv.c' || echo '$(srcdir)/'`scanners/proto_veohtv.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_veohtv.Tpo $(DEPDIR)/libndpi_la-proto_veohtv.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_veohtv.c' object='libndpi_la-proto_veohtv.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_veohtv.lo `test -f 'scanners/proto_veohtv.c' || echo '$(srcdir)/'`scanners/proto_veohtv.c
+
+libndpi_la-proto_winmx.lo: scanners/proto_winmx.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_winmx.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_winmx.Tpo -c -o libndpi_la-proto_winmx.lo `test -f 'scanners/proto_winmx.c' || echo '$(srcdir)/'`scanners/proto_winmx.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_winmx.Tpo $(DEPDIR)/libndpi_la-proto_winmx.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_winmx.c' object='libndpi_la-proto_winmx.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_winmx.lo `test -f 'scanners/proto_winmx.c' || echo '$(srcdir)/'`scanners/proto_winmx.c
+
+libndpi_la-proto_xbox.lo: scanners/proto_xbox.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_xbox.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_xbox.Tpo -c -o libndpi_la-proto_xbox.lo `test -f 'scanners/proto_xbox.c' || echo '$(srcdir)/'`scanners/proto_xbox.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_xbox.Tpo $(DEPDIR)/libndpi_la-proto_xbox.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_xbox.c' object='libndpi_la-proto_xbox.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_xbox.lo `test -f 'scanners/proto_xbox.c' || echo '$(srcdir)/'`scanners/proto_xbox.c
+
+libndpi_la-proto_zattoo.lo: scanners/proto_zattoo.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libndpi_la-proto_zattoo.lo -MD -MP -MF $(DEPDIR)/libndpi_la-proto_zattoo.Tpo -c -o libndpi_la-proto_zattoo.lo `test -f 'scanners/proto_zattoo.c' || echo '$(srcdir)/'`scanners/proto_zattoo.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libndpi_la-proto_zattoo.Tpo $(DEPDIR)/libndpi_la-proto_zattoo.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='scanners/proto_zattoo.c' object='libndpi_la-proto_zattoo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libndpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libndpi_la-proto_zattoo.lo `test -f 'scanners/proto_zattoo.c' || echo '$(srcdir)/'`scanners/proto_zattoo.c
 
 mostlyclean-libtool:
 	-rm -f *.lo
