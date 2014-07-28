@@ -26,7 +26,6 @@
 #ifndef __NDPI_STRUCTS_INCLUDE_FILE__
 #define __NDPI_STRUCTS_INCLUDE_FILE__
 
-#include "ndpi_credis.h"
 #include "linux_compat.h"
 
 #include "ndpi_define.h"
@@ -589,20 +588,6 @@ typedef struct ndpi_detection_module_struct {
   char ip_string[NDPI_IP_STRING_SIZE];
 #endif
   u_int8_t ip_version_limit;
-
-  /* Cache */
-  NDPI_REDIS redis;
-
-#ifdef USE_SKYPE_HEURISTICS
-  /* Skype (we need a lock as this cache can be accessed concurrently) */
-  struct ndpi_LruCache skypeCache;
-#ifndef __KERNEL__
-  pthread_mutex_t skypeCacheLock;
-#else
-  spinlock_t skypeCacheLock;
-#endif
-#endif
-
   /* ********************* */
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
 

@@ -49,10 +49,6 @@
 #endif
 #endif
 
-// #include "ndpi_credis.c"
-#ifdef HAVE_NDPI_CACHE
-#include "ndpi_cache.c"
-#endif
 #include "ndpi_content_match.c"
 
 #ifdef WIN32
@@ -487,18 +483,6 @@ u_int32_t ndpi_detection_get_sizeof_ndpi_id_struct(void)
 
 char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id) {
   return((id >= ndpi_mod->ndpi_num_supported_protocols) ? NULL : ndpi_mod->proto_defaults[id].protoName);
-}
-
-/* ******************************************************************** */
-
-void ndpi_enable_cache(struct ndpi_detection_module_struct *ndpi_mod, char* redis_host, u_int redis_port) {
-#if 0
-  if(((ndpi_mod->redis = ndpi_credis_connect(redis_host, redis_port, 10000)) == NULL)
-     || (ndpi_credis_ping(ndpi_mod->redis) != 0)) {
-    printf("Redis Connection error: %s:%d", redis_host, redis_port);
-    ndpi_mod->redis = NULL;
-  }
-#endif
 }
 
 /* ******************************************************************** */
@@ -1321,16 +1305,6 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_str->host_automa.ac_automa = ac_automata_init(ac_match_handler);
   ndpi_str->content_automa.ac_automa = ac_automata_init(ac_match_handler);
 
-#ifdef USE_SKYPE_HEURISTICS
-  ndpi_init_lru_cache(&ndpi_str->skypeCache, 4096);
-
-#ifndef __KERNEL__
-  pthread_mutex_init(&ndpi_str->skypeCacheLock, NULL);
-#else
-  spin_lock_init(&ndpi_str->skypeCacheLock);
-#endif
-#endif
-
   ndpi_init_protocol_defaults(ndpi_str);
   return ndpi_str;
 }
@@ -1357,12 +1331,6 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
     if(ndpi_struct->content_automa.ac_automa != NULL)
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->content_automa.ac_automa);
 
-#ifdef USE_SKYPE_HEURISTICS
-    ndpi_free_lru_cache(&ndpi_struct->skypeCache);
-#ifndef __KERNEL__
-    pthread_mutex_destroy(&ndpi_struct->skypeCacheLock);
-#endif
-#endif
     ndpi_free(ndpi_struct);
   }
 }
@@ -1431,12 +1399,6 @@ static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *
       break;
     }
   }
-
-#ifdef USE_SKYPE_HEURISTICS
-  /* Use skype as last resort */
-  if(shost && dhost && is_skype_connection(ndpi_struct, shost, dhost))
-    return(NDPI_PROTOCOL_SKYPE);
-#endif
 
   return(NDPI_PROTOCOL_UNKNOWN);
 }

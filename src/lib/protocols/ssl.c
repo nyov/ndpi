@@ -381,13 +381,6 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
        && (!(flow->l4.tcp.ssl_seen_client_cert && flow->l4.tcp.ssl_seen_server_cert))) {
       /* SSL without certificate (Skype, Ultrasurf?) */
       ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL_NO_CERT);
-#ifdef NDPI_PROTOCOL_SKYPE
-      //printf("[SSL] %08X -> %08X\n", packet->iph->saddr, packet->iph->daddr);
-#ifdef USE_SKYPE_HEURISTICS
-      if(packet->iph)
-	add_skype_connection(ndpi_struct, packet->iph->saddr, packet->iph->daddr);
-#endif
-#endif
     } else
       ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
   }
