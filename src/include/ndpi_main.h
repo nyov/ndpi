@@ -216,8 +216,6 @@ extern void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mo
 				    ndpi_port_range *tcpDefPorts, ndpi_port_range *udpDefPorts);
 extern void ndpi_int_reset_packet_protocol(struct ndpi_packet_struct *packet);
 extern void ndpi_int_reset_protocol(struct ndpi_flow_struct *flow);
-extern void ndpi_ip_clear(ndpi_ip_addr_t * ip);
-extern int ndpi_ip_is_set(const ndpi_ip_addr_t * ip);
 extern int ndpi_packet_src_ip_eql(const struct ndpi_packet_struct *packet, const ndpi_ip_addr_t * ip);
 extern int ndpi_packet_dst_ip_eql(const struct ndpi_packet_struct *packet, const ndpi_ip_addr_t * ip);
 extern void ndpi_packet_src_ip_get(const struct ndpi_packet_struct *packet, ndpi_ip_addr_t * ip);

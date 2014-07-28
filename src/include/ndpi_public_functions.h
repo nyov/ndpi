@@ -265,9 +265,6 @@ extern "C" {
   int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char* path);
   u_int ndpi_get_num_supported_protocols(struct ndpi_detection_module_struct *ndpi_mod);
   char* ndpi_revision(void);
-
-  void* ndpi_create_empty_automa(struct ndpi_detection_module_struct *ndpi_struct);
-  int ndpi_add_host_url_subprotocol_to_automa(struct ndpi_detection_module_struct *ndpi_struct, char *value, int protocol_id, void* automa);
   void ndpi_set_automa(struct ndpi_detection_module_struct *ndpi_struct, void* automa);
 
 #define ADD_TO_DETECTION_BITMASK             1
