@@ -28,8 +28,10 @@
   gcc -E -dM - < /dev/null |grep ENDIAN
 */
 
+#if 0
 #ifndef NDPI_ENABLE_DEBUG_MESSAGES
 #define NDPI_ENABLE_DEBUG_MESSAGES
+#endif
 #endif
 
 #ifdef WIN32
