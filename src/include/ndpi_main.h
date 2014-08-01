@@ -85,7 +85,7 @@ typedef unsigned long  u_long;
 #endif
 typedef u_char  u_int8_t;
 typedef u_short u_int16_t;
-typedef uint   u_int32_t;
+typedef unsigned int u_int32_t;
 typedef unsigned __int64 u_int64_t;
 #endif /* Win32 */
 
