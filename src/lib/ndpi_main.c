@@ -1585,7 +1585,7 @@ int ndpi_load_protocols_file(struct ndpi_detection_module_struct *ndpi_mod, char
 }
 
 /* ntop */
-static void ndpi_set_bitmask_protocol_detection( char * label,
+void ndpi_set_bitmask_protocol_detection( char * label,
 					  struct ndpi_detection_module_struct *ndpi_struct,
 					  const NDPI_PROTOCOL_BITMASK * detection_bitmask,
 					  const u_int32_t idx,
