@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2011-14 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
+ * Copyright (C) 2014 - Matteo Bogo <matteo.bogo@gmail.com> (JSON support)
  *
  * nDPI is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
@@ -41,6 +42,7 @@
 #include <pcap.h>
 #include <signal.h>
 #include <pthread.h>
+#include <json.h>
 
 #include "../config.h"
 #include "linux_compat.h"
@@ -65,11 +67,13 @@ static char *_pcap_file[MAX_NUM_READER_THREADS]; /**< Ingress pcap file/interafa
 static FILE *playlist_fp[MAX_NUM_READER_THREADS] = { NULL }; /**< Ingress playlist */
 static char *_bpf_filter      = NULL; /**< bpf filter  */
 static char *_protoFilePath   = NULL; /**< Protocol file path  */
+static char *_jsonFilePath    = NULL; /**< JSON file path  */
+static json_object *jArray_known_flows, *jArray_unknown_flows;
 
 /**
  * User preferences
  */
-static u_int8_t enable_protocol_guess = 1, verbose = 0, nDPI_traceLevel = 0;
+static u_int8_t enable_protocol_guess = 1, verbose = 0, nDPI_traceLevel = 0, json_flag = 0;
 static u_int16_t decode_tunnels = 0;
 static u_int16_t num_loops = 1;
 static u_int8_t shutdown_app = 0;
@@ -171,7 +175,7 @@ static u_int32_t size_flow_struct = 0;
 static void help(u_int long_help) {
   printf("ndpiReader -i <file|device> [-f <filter>][-s <duration>]\n"
 	 "          [-p <protos>][-l <loops>[-d][-h][-t][-v <level>]\n"
-	 "          [-n <threads>]\n\n"
+	 "          [-n <threads>] [-j <file>]\n\n"
 	 "Usage:\n"
 	 "  -i <file.pcap|device>     | Specify a pcap file/playlist to read packets from or a device for live capture (comma-separated list)\n"
 	 "  -f <BPF filter>           | Specify a BPF filter for filtering selected traffic\n"
@@ -179,6 +183,7 @@ static void help(u_int long_help) {
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
 	 "  -n <num threads>          | Number of threads. Default: number of interfaces in -i\n"
+	 "  -j <file.json>            | Specify a file to write the content of packets in .json format\n"
 #ifdef linux
          "  -g <id:id...>             | Thread affinity mask (one core id per thread)\n"
 #endif
@@ -207,7 +212,7 @@ static void parseOptions(int argc, char **argv) {
   u_int num_cores = sysconf( _SC_NPROCESSORS_ONLN );
 #endif
 
-  while ((opt = getopt(argc, argv, "df:g:i:hp:l:s:tv:V:n:")) != EOF) {
+  while ((opt = getopt(argc, argv, "df:g:i:hp:l:s:tv:V:n:j:")) != EOF) {
     switch (opt) {
     case 'd':
       enable_protocol_guess = 0;
@@ -256,6 +261,11 @@ static void parseOptions(int argc, char **argv) {
 
     case 'h':
       help(1);
+      break;
+      
+    case 'j':
+      _jsonFilePath = optarg;
+      json_flag = 1;
       break;
 
     default:
@@ -410,6 +420,10 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
 /* ***************************************************** */
 
 static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
+  
+  json_object *jObj;
+
+  if(!json_flag) {
   printf("\t%u", ++num_flows);
 
   printf("\t%s %s:%u <-> %s:%u ",
@@ -422,6 +436,28 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 	 ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol),
 	 flow->packets, flow->bytes,
 	 flow->host_server_name);
+  } else {
+    jObj = json_object_new_object();
+    
+    json_object_object_add(jObj,"flow.num",json_object_new_int(num_flows));
+    json_object_object_add(jObj,"protocol",json_object_new_string(ipProto2Name(flow->protocol)));
+    json_object_object_add(jObj,"host_a.name",json_object_new_string(flow->lower_name));
+    json_object_object_add(jObj,"host_a.port",json_object_new_int(ntohs(flow->lower_port)));
+    json_object_object_add(jObj,"host_b.name",json_object_new_string(flow->upper_name));
+    json_object_object_add(jObj,"host_n.port",json_object_new_int(ntohs(flow->upper_port)));
+    json_object_object_add(jObj,"detected.protocol",json_object_new_int(flow->detected_protocol));
+    json_object_object_add(jObj,"detected.protocol.name",json_object_new_string(ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol)));
+    json_object_object_add(jObj,"packets",json_object_new_int(flow->packets));
+    json_object_object_add(jObj,"bytes",json_object_new_int(flow->bytes));
+    
+    if(flow->host_server_name[0] != '\0')
+      json_object_object_add(jObj,"host.server.name",json_object_new_string(flow->host_server_name));
+    
+    if(json_flag == 1)
+      json_object_array_add(jArray_known_flows,jObj);
+    else if(json_flag == 2)
+      json_object_array_add(jArray_unknown_flows,jObj);
+  }  
 }
 
 /* ***************************************************** */
@@ -922,6 +958,8 @@ static void printResults(u_int64_t tot_usec) {
   u_int64_t total_flow_bytes = 0;
   struct thread_stats cumulative_stats;
   int thread_id;
+  FILE *json_fp;
+  json_object *jObj_main, *jObj_trafficStats, *jArray_detProto, *jObj;
 
   memset(&cumulative_stats, 0, sizeof(cumulative_stats));
 
@@ -955,7 +993,8 @@ static void printResults(u_int64_t tot_usec) {
       cumulative_stats.packet_len[i] += ndpi_thread_info[thread_id].stats.packet_len[i];
     cumulative_stats.max_packet_len += ndpi_thread_info[thread_id].stats.max_packet_len;
   }
- 
+
+  if(!json_flag) {
   printf("\nTraffic statistics:\n");
   printf("\tEthernet bytes:        %-13llu (includes ethernet CRC/IFC/trailer)\n",
 	 (long long unsigned int)cumulative_stats.total_wire_bytes);
@@ -993,16 +1032,67 @@ static void printResults(u_int64_t tot_usec) {
 
   if(enable_protocol_guess)
     printf("\tGuessed flow protos:   %-13u\n", cumulative_stats.guessed_flow_protocols);
+  } else {
+      if((json_fp = fopen(_jsonFilePath,"w")) == NULL) {
+	printf("Error create .json file\n");
+	json_flag = 0;
+      }
+      else {
+	jObj_main = json_object_new_object();  
+	jObj_trafficStats = json_object_new_object();
+	jArray_known_flows = json_object_new_array(); 
+	jArray_unknown_flows = json_object_new_array();
+	jArray_detProto = json_object_new_array();
+	
+	json_object_object_add(jObj_trafficStats,"ethernet.bytes",json_object_new_int64(cumulative_stats.total_wire_bytes));
+	json_object_object_add(jObj_trafficStats,"discarded.bytes",json_object_new_int64(cumulative_stats.total_discarded_bytes));
+	json_object_object_add(jObj_trafficStats,"ip.packets",json_object_new_int64(cumulative_stats.ip_packet_count));
+	json_object_object_add(jObj_trafficStats,"total.packets",json_object_new_int64(cumulative_stats.raw_packet_count));
+	json_object_object_add(jObj_trafficStats,"ip.bytes",json_object_new_int64(cumulative_stats.total_ip_bytes));
+	json_object_object_add(jObj_trafficStats,"avg.pkt.size",json_object_new_int(cumulative_stats.total_ip_bytes/cumulative_stats.raw_packet_count));
+	json_object_object_add(jObj_trafficStats,"unique.flows",json_object_new_int(cumulative_stats.ndpi_flow_count));
+	json_object_object_add(jObj_trafficStats,"tcp.pkts",json_object_new_int64(cumulative_stats.tcp_count));
+	json_object_object_add(jObj_trafficStats,"udp.pkts",json_object_new_int64(cumulative_stats.udp_count));
+	json_object_object_add(jObj_trafficStats,"vlan.pkts",json_object_new_int64(cumulative_stats.vlan_count));
+	json_object_object_add(jObj_trafficStats,"mpls.pkts",json_object_new_int64(cumulative_stats.mpls_count));
+	json_object_object_add(jObj_trafficStats,"pppoe.pkts",json_object_new_int64(cumulative_stats.pppoe_count));
+	json_object_object_add(jObj_trafficStats,"fragmented.pkts",json_object_new_int64(cumulative_stats.fragmented_count));
+	json_object_object_add(jObj_trafficStats,"max.pkt.size",json_object_new_int(cumulative_stats.max_packet_len));
+	json_object_object_add(jObj_trafficStats,"pkt.len_min64",json_object_new_int64(cumulative_stats.packet_len[0]));
+	json_object_object_add(jObj_trafficStats,"pkt.len_64_128",json_object_new_int64(cumulative_stats.packet_len[1]));
+	json_object_object_add(jObj_trafficStats,"pkt.len_128_256",json_object_new_int64(cumulative_stats.packet_len[2]));
+	json_object_object_add(jObj_trafficStats,"pkt.len_256_1024",json_object_new_int64(cumulative_stats.packet_len[3]));
+	json_object_object_add(jObj_trafficStats,"pkt.len_1024_1500",json_object_new_int64(cumulative_stats.packet_len[4]));
+	json_object_object_add(jObj_trafficStats,"pkt.len_grt1500",json_object_new_int64(cumulative_stats.packet_len[5]));
+	json_object_object_add(jObj_trafficStats,"guessed.flow.protos",json_object_new_int(cumulative_stats.guessed_flow_protocols));
+	
+	json_object_object_add(jObj_main,"traffic.statistics",jObj_trafficStats);
+	
+      }
+  }  
 
-  printf("\n\nDetected protocols:\n");
+  if(!json_flag) printf("\n\nDetected protocols:\n");
   for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_thread_info[0].ndpi_struct); i++) {
     if(cumulative_stats.protocol_counter[i] > 0) {
+
+      if(!json_flag) {
       printf("\t%-20s packets: %-13llu bytes: %-13llu "
 	     "flows: %-13u\n",
 	     ndpi_get_proto_name(ndpi_thread_info[0].ndpi_struct, i),
 	     (long long unsigned int)cumulative_stats.protocol_counter[i],
 	     (long long unsigned int)cumulative_stats.protocol_counter_bytes[i],
 	     cumulative_stats.protocol_flows[i]);
+      } else {
+	jObj = json_object_new_object();
+		
+	json_object_object_add(jObj,"name",json_object_new_string(ndpi_get_proto_name(ndpi_thread_info[0].ndpi_struct, i)));
+	json_object_object_add(jObj,"packets",json_object_new_int64(cumulative_stats.protocol_counter[i]));
+	json_object_object_add(jObj,"bytes",json_object_new_int64(cumulative_stats.protocol_counter_bytes[i]));
+	json_object_object_add(jObj,"flows",json_object_new_int(cumulative_stats.protocol_flows[i]));
+	
+	json_object_array_add(jArray_detProto,jObj);
+	
+      }
 
       total_flow_bytes += cumulative_stats.protocol_counter_bytes[i];
     }
@@ -1011,7 +1101,7 @@ static void printResults(u_int64_t tot_usec) {
   // printf("\n\nTotal Flow Traffic: %llu (diff: %llu)\n", total_flow_bytes, cumulative_stats.total_ip_bytes-total_flow_bytes);
 
   if(verbose) {
-    printf("\n");
+    if(!json_flag) printf("\n");
 
     num_flows = 0;
     for (thread_id = 0; thread_id < num_threads; thread_id++) {
@@ -1021,7 +1111,10 @@ static void printResults(u_int64_t tot_usec) {
 
     for (thread_id = 0; thread_id < num_threads; thread_id++) {
       if (ndpi_thread_info[thread_id].stats.protocol_counter[0] > 0) {
-        printf("\n\nUndetected flows:\n");
+        if(!json_flag) printf("\n\nUndetected flows:\n");
+
+	if(json_flag)
+	  json_flag = 2;
         break;
       }
     }
@@ -1033,6 +1126,14 @@ static void printResults(u_int64_t tot_usec) {
 	  ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[i], node_print_unknown_proto_walker, &thread_id);
       }
     }
+  }
+  
+  if(json_flag != 0) {
+    json_object_object_add(jObj_main,"detected.protos",jArray_detProto);
+    json_object_object_add(jObj_main,"known.flows",jArray_known_flows);
+    json_object_object_add(jObj_main,"unknown.flows",jArray_unknown_flows);
+    fprintf(json_fp,"%s\n",json_object_to_json_string(jObj_main));
+    fclose(json_fp);
   }
 }
 
@@ -1128,17 +1229,20 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
 
         printf("ERROR: could not open pcap file or playlist: %s\n", ndpi_thread_info[thread_id]._pcap_error_buffer);
         exit(-1);
-      } else
-        printf("Reading packets from playlist %s...\n", _pcap_file[thread_id]);
-    } else
-      printf("Reading packets from pcap file %s...\n", _pcap_file[thread_id]);
-  } else
-    printf("Capturing live traffic from device %s...\n", _pcap_file[thread_id]);
+      } else {
+        if(!json_flag) printf("Reading packets from playlist %s...\n", _pcap_file[thread_id]);
+      }
+    } else {
+      if(!json_flag) printf("Reading packets from pcap file %s...\n", _pcap_file[thread_id]);
+    }
+  } else {
+    if(!json_flag) printf("Capturing live traffic from device %s...\n", _pcap_file[thread_id]);
+  }
 
   configurePcapHandle(thread_id);
 
   if(capture_until > 0) {
-    printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
+    if(!json_flag) printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
 
 #ifndef WIN32
     alarm(capture_until);
@@ -1230,7 +1334,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
       static u_int8_t cap_warning_used = 0;
 
       if(cap_warning_used == 0) {
-	printf("\n\nWARNING: packet capture size is smaller than packet size, DETECTION MIGHT NOT WORK CORRECTLY\n\n");
+	if(!json_flag) printf("\n\nWARNING: packet capture size is smaller than packet size, DETECTION MIGHT NOT WORK CORRECTLY\n\n");
 	cap_warning_used = 1;
       }
     }
@@ -1246,7 +1350,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
      v4_frags_warning:
       ndpi_thread_info[thread_id].stats.fragmented_count++;
       if(ipv4_frags_warning_used == 0) {
-	printf("\n\nWARNING: IPv4 fragments are not handled by this demo (nDPI supports them)\n");
+	if(!json_flag) printf("\n\nWARNING: IPv4 fragments are not handled by this demo (nDPI supports them)\n");
 	ipv4_frags_warning_used = 1;
       }
 
@@ -1263,7 +1367,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
 
    v4_warning:
     if(ipv4_warning_used == 0) {
-      printf("\n\nWARNING: only IPv4/IPv6 packets are supported in this demo (nDPI supports both IPv4 and IPv6), all other packets will be discarded\n\n");
+      if(!json_flag) printf("\n\nWARNING: only IPv4/IPv6 packets are supported in this demo (nDPI supports both IPv4 and IPv6), all other packets will be discarded\n\n");
       ipv4_warning_used = 1;
     }
 
@@ -1322,11 +1426,12 @@ void *processing_thread(void *_thread_id) {
 
     if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) != 0)
       fprintf(stderr, "Error while binding thread %ld to core %d\n", thread_id, core_affinity[thread_id]);
-    else
-      printf("Running thread %ld on core %d...\n", thread_id, core_affinity[thread_id]);
+    else {
+      if(!json_flag) printf("Running thread %ld on core %d...\n", thread_id, core_affinity[thread_id]);
+    }
   } else
 #endif 
-  printf("Running thread %ld...\n", thread_id);
+    if(!json_flag) printf("Running thread %ld...\n", thread_id);
 
 pcap_loop:
   runPcapLoop(thread_id);
@@ -1386,14 +1491,16 @@ int main(int argc, char **argv) {
 
   parseOptions(argc, argv);
 
-  printf("\n-----------------------------------------------------------\n"
+  if(!json_flag) {
+    printf("\n-----------------------------------------------------------\n"
 	 "* NOTE: This is demo app to show *some* nDPI features.\n"
-	 "* In this demo we have implemented only some basic features\n"
-	 "* just to show you what you can do with the library. Feel \n"
-	 "* free to extend it and send us the patches for inclusion\n"
-	 "------------------------------------------------------------\n\n");
+	   "* In this demo we have implemented only some basic features\n"
+	   "* just to show you what you can do with the library. Feel \n"
+	   "* free to extend it and send us the patches for inclusion\n"
+	   "------------------------------------------------------------\n\n");
 
-  printf("Using nDPI (%s) [%d thread(s)]\n", ndpi_revision(), num_threads);
+    printf("Using nDPI (%s) [%d thread(s)]\n", ndpi_revision(), num_threads);
+  }
 
   signal(SIGINT, sigproc);
 
