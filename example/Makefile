@@ -18,10 +18,10 @@ JSON_INC=-I$(JSON_HOME)
 JSON_LIB=$(JSON_HOME)/.libs/libjson-c.a
 
 INC=-I../src/include/ $(JSON_INC)
-LIB=../src/lib/.libs/libndpi.a ${LIBPCAP} ${LIBPFRING} $(JSON_LIB) -lpthread
+LIB=../lib/libndpi.a ${LIBPCAP} ${LIBPFRING} $(JSON_LIB) -lpthread
 FLAGS=-O2 #-g #-fno-color-diagnostics
 
-ndpiReader: ndpiReader.c Makefile ../src/lib/.libs/libndpi.a $(JSON_LIB)
+ndpiReader: ndpiReader.c Makefile ../lib/libndpi.a $(JSON_LIB)
 	gcc $(FLAGS) $(INC) ndpiReader.c -o ndpiReader $(LIB)
 
 
@@ -30,3 +30,6 @@ $(JSON_LIB):
 
 clean:
 	\/bin/rm -f ndpiReader
+	
+cleanall: clean
+	cd $(JSON_HOME); make clean

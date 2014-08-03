@@ -63,6 +63,13 @@ $(JSON_LIB):
 
 install: all
 	mkdir -p @INSTALL_PREFIX@/include @INSTALL_PREFIX@/lib @INSTALL_PREFIX@/bin
-	cp ./include/*.h @INSTALL_PREFIX@/include
-	cp ./lib/* @INSTALL_PREFIX@/lib
-	cp ./bin/* @INSTALL_PREFIX@/bin
+	cp ./src/include/*.h @INSTALL_PREFIX@/include
+	cp -r ./lib/* @INSTALL_PREFIX@/lib
+	cp ./example/ndpiReader @INSTALL_PREFIX@/bin
+
+uninstall: 
+	
+	rm -r @INSTALL_PREFIX@/include/ndpi*
+	rm -r @INSTALL_PREFIX@/lib/libndpi*
+	rm  @INSTALL_PREFIX@/bin/ndpiReader
+	
