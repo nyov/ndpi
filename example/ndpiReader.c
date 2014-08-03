@@ -422,7 +422,7 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
 static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
   
   json_object *jObj;
-
+  
   if(!json_flag) {
   printf("\t%u", ++num_flows);
 
@@ -439,7 +439,6 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
   } else {
     jObj = json_object_new_object();
     
-    json_object_object_add(jObj,"flow.num",json_object_new_int(num_flows));
     json_object_object_add(jObj,"protocol",json_object_new_string(ipProto2Name(flow->protocol)));
     json_object_object_add(jObj,"host_a.name",json_object_new_string(flow->lower_name));
     json_object_object_add(jObj,"host_a.port",json_object_new_int(ntohs(flow->lower_port)));
@@ -953,6 +952,14 @@ char* formatPackets(float numPkts, char *buf) {
 
 /* ***************************************************** */
 
+static void json_init() {
+  
+  jArray_known_flows = json_object_new_array(); 
+  jArray_unknown_flows = json_object_new_array();  
+}
+
+/* ***************************************************** */
+
 static void printResults(u_int64_t tot_usec) {
   u_int32_t i;
   u_int64_t total_flow_bytes = 0;
@@ -993,7 +1000,7 @@ static void printResults(u_int64_t tot_usec) {
       cumulative_stats.packet_len[i] += ndpi_thread_info[thread_id].stats.packet_len[i];
     cumulative_stats.max_packet_len += ndpi_thread_info[thread_id].stats.max_packet_len;
   }
-
+  
   if(!json_flag) {
   printf("\nTraffic statistics:\n");
   printf("\tEthernet bytes:        %-13llu (includes ethernet CRC/IFC/trailer)\n",
@@ -1040,8 +1047,6 @@ static void printResults(u_int64_t tot_usec) {
       else {
 	jObj_main = json_object_new_object();  
 	jObj_trafficStats = json_object_new_object();
-	jArray_known_flows = json_object_new_array(); 
-	jArray_unknown_flows = json_object_new_array();
 	jArray_detProto = json_object_new_array();
 	
 	json_object_object_add(jObj_trafficStats,"ethernet.bytes",json_object_new_int64(cumulative_stats.total_wire_bytes));
@@ -1131,7 +1136,10 @@ static void printResults(u_int64_t tot_usec) {
   if(json_flag != 0) {
     json_object_object_add(jObj_main,"detected.protos",jArray_detProto);
     json_object_object_add(jObj_main,"known.flows",jArray_known_flows);
-    json_object_object_add(jObj_main,"unknown.flows",jArray_unknown_flows);
+    
+    if(json_object_array_length(jArray_unknown_flows) != 0)
+      json_object_object_add(jObj_main,"unknown.flows",jArray_unknown_flows);
+    
     fprintf(json_fp,"%s\n",json_object_to_json_string(jObj_main));
     fclose(json_fp);
   }
@@ -1454,6 +1462,8 @@ void test_lib() {
   struct timeval begin, end;
   u_int64_t tot_usec;
   long thread_id;
+  
+  json_init();
 
   for (thread_id = 0; thread_id < num_threads; thread_id++) {
     setupDetection(thread_id);
