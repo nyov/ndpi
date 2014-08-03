@@ -24,7 +24,7 @@ AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
 AC_CHECK_LIB([pcap], [pcap_open_live])
 
-if ac_cv_lib_pcap_pcap_open_live="no"; then :
+if test $ac_cv_lib_pcap_pcap_open_live = "no"; then :
    PCAP_HOME=$HOME/PF_RING/userland/libpcap
    if test -f $PCAP_HOME/libpcap.a; then :
      echo "Found $PCAP_HOME"
