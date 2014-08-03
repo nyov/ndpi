@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#include "ndpi_content_match.c"
+#include "ndpi_content_match.c.inc"
 
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */

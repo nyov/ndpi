@@ -1,14 +1,10 @@
-AC_INIT([nDPI], [1.4.0])
-AC_CONFIG_SRCDIR([src/include/ndpi_protocols.h])
+AC_INIT([src/ndpi_main.c], [1.4.0])
 
-AM_INIT_AUTOMAKE([-Wall])
-AC_CONFIG_MACRO_DIR([m4])
-AC_PROG_LIBTOOL
+if test ${prefix} == "NONE"; then
+  prefix=/usr/local/ndpi
+fi
 
-AC_PROG_CC
-AC_PROG_INSTALL
-
-LT_INIT
+INSTALL_PREFIX=${prefix}
 
 SVN_RELEASE=`svn info . | grep "^Revision"|cut -d " " -f 2`
 AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
@@ -26,15 +22,30 @@ esac
 
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
-AC_CONFIG_FILES([Makefile
-		src/lib/Makefile
-		src/include/Makefile
-		libndpi.pc
-		])
+AC_CHECK_LIB([pcap], [pcap_open_live])
+
+if ac_cv_lib_pcap_pcap_open_live="no"; then :
+   PCAP_HOME=$HOME/PF_RING/userland/libpcap
+   if test -f $PCAP_HOME/libpcap.a; then :
+     echo "Found $PCAP_HOME"
+     PCAP_INC="-I $PCAP_HOME"
+     PCAP_LIB="$PCAP_HOME/libpcap.a $HOME/PF_RING/userland/lib/libpfring.a -lnuma"
+   else
+     echo ""
+     echo "ERROR: Missing libpcap(-dev) library required to compile the example application"
+     echo "ERROR: Please install it and try again"
+     exit
+   fi
+else
+  PCAP_LIB="-lpcap"
+fi
+
+AC_CONFIG_FILES([Makefile])
 
 AC_CONFIG_HEADERS(config.h)
-AC_SUBST(PLATFORM_DEPENDENT)
 AC_SUBST(SVN_RELEASE)
 AC_SUBST(SVN_DATE)
-
+AC_SUBST(INSTALL_PREFIX)
+AC_SUBST(PCAP_INC)
+AC_SUBST(PCAP_LIB)
 AC_OUTPUT
