@@ -1,3 +1,4 @@
+libndpi.so
 {
 global:
     ndpi_dump_protocols;
@@ -16,6 +17,9 @@ global:
     ndpi_twalk;
     ndpi_tdelete;
     ndpi_revision;
+    ndpi_init_detection_module;
+    ndpi_get_num_supported_protocols;
 
-    local: *;
-}
+local:
+    *;
+};

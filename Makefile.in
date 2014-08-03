@@ -18,15 +18,14 @@ NDPI_LIBDIR=lib
 
 OBJECTS=$(SOURCES:.c=.o)
 
-# -Wl,--version-script=libndpi.exp
 ifeq ($(OS),Linux)
 SHEXT=so
-SHLIBS = -Wl,-soname,--version-script=libndpi.exp
+SHLIBS = -Wl,--version-script=libndpi.exp,-soname,libndpi.so.1
 endif
 
 ifeq ($(OS),Darwin)
 SHEXT=dylib
-SHLIBS = -install_name lib/libndpi.dylib -Wl,-version-script=libndpi.exp
+SHLIBS = -install_name lib/libndpi.dylib
 endif
 
 NDPI_SHARED=$(NDPI_LIBDIR)/libndpi-@PACKAGE_VERSION@.$(SHEXT)
@@ -47,14 +46,14 @@ cleanall: clean
 
 $(NDPI_SHARED) : $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS) $(SHLIBS)
-	cd $(NDPI_LIBDIR); ln -s libndpi-@PACKAGE_VERSION@.$(SHEXT) libndpi.$(SHEXT)
+	cd $(NDPI_LIBDIR); ln -sf libndpi-@PACKAGE_VERSION@.$(SHEXT) libndpi.$(SHEXT).1; ln -sf  libndpi.$(SHEXT).1  libndpi.$(SHEXT)
 
 $(NDPI_STATIC): $(OBJECTS)
 	ar rc $(NDPI_STATIC) $(OBJECTS)
 	$(RANLIB) $@
 
 $(READER): $(NDPI_STATIC) $(JSON_LIB)
-	$(CC) $(CFLAGS) $(JSON_INC) @PCAP_INC@ example/ndpiReader.c -o $@ $(NDPI_SHARED) @PCAP_LIB@ $(JSON_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(JSON_INC) @PCAP_INC@ example/ndpiReader.c -o $@ $(NDPI_STATIC) @PCAP_LIB@ $(JSON_LIB) $(LIBS)
 
 $(JSON_LIB):
 	cd $(JSON_HOME); ./autogen.sh; ./configure; make
