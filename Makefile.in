@@ -31,7 +31,7 @@ cleanall: clean
 	rm -f config.h configure Makefile
 
 $(NDPI_SHARED) : $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS) -Wl,-soname
 	cd $(NDPI_LIBDIR); ln -s libndpi-@PACKAGE_VERSION@.so libndpi.so
 
 $(NDPI_STATIC): $(OBJECTS)

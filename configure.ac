@@ -1,4 +1,4 @@
-AC_INIT([src/ndpi_main.c], [1.4.0])
+AC_INIT([src/ndpi_main.c], [1.4.99])
 
 if test ${prefix} == "NONE"; then
   prefix=/usr/local/ndpi
