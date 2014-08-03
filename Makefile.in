@@ -1,5 +1,8 @@
 .PHONY : clean
 
+SHELL=/bin/sh
+OS := $(shell uname -s)
+
 INCLUDE=-Isrc/include -Isrc/lib/third_party/include
 
 CFLAGS= -fPIC -g $(INCLUDE)
@@ -15,12 +18,24 @@ NDPI_LIBDIR=lib
 
 OBJECTS=$(SOURCES:.c=.o)
 
-NDPI_SHARED=$(NDPI_LIBDIR)/libndpi-@PACKAGE_VERSION@.so
+# -Wl,--version-script=libndpi.exp
+ifeq ($(OS),Linux)
+SHEXT=so
+SHLIBS = -Wl,-soname,--version-script=libndpi.exp
+endif
+
+ifeq ($(OS),Darwin)
+SHEXT=dylib
+SHLIBS = -install_name lib/libndpi.dylib -Wl,-version-script=libndpi.exp
+endif
+
+NDPI_SHARED=$(NDPI_LIBDIR)/libndpi-@PACKAGE_VERSION@.$(SHEXT)
 NDPI_STATIC=$(NDPI_LIBDIR)/libndpi.a
 
 JSON_HOME=example/third-party/json-c
 JSON_INC=-I$(JSON_HOME)
 JSON_LIB=$(JSON_HOME)/.libs/libjson-c.a
+
 
 all: $(NDPI_SHARED) $(READER)
 
@@ -31,15 +46,15 @@ cleanall: clean
 	rm -f config.h configure Makefile
 
 $(NDPI_SHARED) : $(OBJECTS)
-	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS) -Wl,-soname
-	cd $(NDPI_LIBDIR); ln -s libndpi-@PACKAGE_VERSION@.so libndpi.so
+	$(CC) $(CFLAGS) $(OBJECTS) -o $@ $(LDFLAGS) $(SHLIBS)
+	cd $(NDPI_LIBDIR); ln -s libndpi-@PACKAGE_VERSION@.$(SHEXT) libndpi.$(SHEXT)
 
 $(NDPI_STATIC): $(OBJECTS)
 	ar rc $(NDPI_STATIC) $(OBJECTS)
 	$(RANLIB) $@
 
 $(READER): $(NDPI_STATIC) $(JSON_LIB)
-	$(CC) $(CFLAGS) $(JSON_INC) @PCAP_INC@ example/ndpiReader.c -o $@ $(NDPI_STATIC) @PCAP_LIB@ $(JSON_LIB) $(LIBS)
+	$(CC) $(CFLAGS) $(JSON_INC) @PCAP_INC@ example/ndpiReader.c -o $@ $(NDPI_SHARED) @PCAP_LIB@ $(JSON_LIB) $(LIBS)
 
 $(JSON_LIB):
 	cd $(JSON_HOME); ./autogen.sh; ./configure; make
