@@ -963,6 +963,7 @@ static void json_init() {
 static void printResults(u_int64_t tot_usec) {
   u_int32_t i;
   u_int64_t total_flow_bytes = 0;
+  u_int avg_pkt_size = 0;
   struct thread_stats cumulative_stats;
   int thread_id;
   FILE *json_fp;
@@ -1010,9 +1011,11 @@ static void printResults(u_int64_t tot_usec) {
   printf("\tIP packets:            %-13llu of %llu packets total\n",
 	 (long long unsigned int)cumulative_stats.ip_packet_count,
 	 (long long unsigned int)cumulative_stats.raw_packet_count);
+  /* In order to prevent Floating point exception in case of no traffic*/
+  if (cumulative_stats.total_ip_bytes && cumulative_stats.raw_packet_count)
+    avg_pkt_size = (unsigned int)(cumulative_stats.total_ip_bytes/cumulative_stats.raw_packet_count);
   printf("\tIP bytes:              %-13llu (avg pkt size %u bytes)\n",
-	 (long long unsigned int)cumulative_stats.total_ip_bytes,
-	 (unsigned int)(cumulative_stats.total_ip_bytes/cumulative_stats.raw_packet_count));
+	 (long long unsigned int)cumulative_stats.total_ip_bytes,avg_pkt_size);
   printf("\tUnique flows:          %-13u\n", cumulative_stats.ndpi_flow_count);
 
   printf("\tTCP Packets:           %-13lu\n", (unsigned long)cumulative_stats.tcp_count);
