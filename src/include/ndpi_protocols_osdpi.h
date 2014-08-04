@@ -194,10 +194,12 @@ extern "C" {
 #define NDPI_PROTOCOL_COLLECTD				        171
 #define NDPI_PROTOCOL_RTMP					174 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_PROTOCOL_FTP_DATA				        175 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_PROTOCOL_PANDO					185 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_PROTOCOL_MEGACO    				186 /* Gianluca Costa <g.costa@xplico.org> */
-#define NDPI_PROTOCOL_REDIS                                     187
-#define NDPI_PROTOCOL_ZMQ                                       188
+#define NDPI_PROTOCOL_ZMQ                                       177
+#define NDPI_PROTOCOL_MEGACO    				181 /* Gianluca Costa <g.costa@xplico.org> */
+#define NDPI_PROTOCOL_REDIS                                     182
+#define NDPI_PROTOCOL_PANDO					183 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+
+
 
 #define NDPI_CONTENT_AVI				39
 #define NDPI_CONTENT_FLASH				40
@@ -224,17 +226,17 @@ extern "C" {
 #define NDPI_SERVICE_APPLE_ITUNES			145
 #define NDPI_SERVICE_TUENTI				149
 #define NDPI_SERVICE_WIKIPEDIA				176 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_SERVICE_MSN				177 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_SERVICE_MSN				NDPI_PROTOCOL_MSN /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_SERVICE_AMAZON				178 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_SERVICE_EBAY				179 /* Tomasz Bujlow <tomasz@skatnet.dk> */
 #define NDPI_SERVICE_CNN				180 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_SERVICE_DROPBOX				181 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_SERVICE_SKYPE				182 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_SERVICE_VIBER				183 /* Tomasz Bujlow <tomasz@skatnet.dk> */
-#define NDPI_SERVICE_YAHOO				184 /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_SERVICE_DROPBOX				NDPI_PROTOCOL_DROPBOX /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_SERVICE_SKYPE				NDPI_PROTOCOL_SKYPE /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_SERVICE_VIBER				NDPI_PROTOCOL_VIBER /* Tomasz Bujlow <tomasz@skatnet.dk> */
+#define NDPI_SERVICE_YAHOO				NDPI_PROTOCOL_YAHOO /* Tomasz Bujlow <tomasz@skatnet.dk> */
 
 /* UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE UPDATE */
-#define NDPI_LAST_IMPLEMENTED_PROTOCOL			188
+#define NDPI_LAST_IMPLEMENTED_PROTOCOL			183
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                   (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)
