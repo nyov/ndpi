@@ -3,7 +3,6 @@
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-14 - ntop.org
- * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -676,7 +675,7 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
 
     filename_start = http_request_url_offset(ndpi_struct, flow);
 
-    /* FOUND HTTP CONNECTION PROTOCOL */
+    /* FOUND HTTP CONNECT PROTOCOL */
     if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN) {
       check_content_type_and_change_protocol(ndpi_struct, flow);
       return;
@@ -720,8 +719,15 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
 
     if ((packet->http_url_name.len > 7)
         && (!strncmp((const char*) packet->http_url_name.ptr, "http://", 7))) {
-      NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP_PROXY Found. (Exit)\n");
+      NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP_PROXY Found.\n");
       ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP_PROXY);
+      check_content_type_and_change_protocol(ndpi_struct, flow);
+    }
+
+    if(filename_start == 8 && (memcmp(packet->payload, "CONNECT ", 8) == 0)) /* nathan@getoffmalawn.com */
+    {
+      NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP_CONNECT Found.\n");
+      ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP_CONNECT);
       check_content_type_and_change_protocol(ndpi_struct, flow);
     }
 
@@ -735,8 +741,6 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
       flow->l4.tcp.http_stage = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
       return;
     }
-
-    /* Encode the direction of the packet in the stage, so we will know when we need to look for the response packet. */
 
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP: REQUEST NOT HTTP CONFORM\n");
     http_bitmask_exclude(flow);
