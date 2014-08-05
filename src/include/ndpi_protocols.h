@@ -1,8 +1,8 @@
 /*
  * ndpi_protocols.h
  *
+ * Copyright (C) 2011-14 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -28,50 +28,6 @@
 
 #include "ndpi_main.h"
 
-#define NDPI_IPSEC_PROTOCOL_ESP	   50
-#define NDPI_IPSEC_PROTOCOL_AH	   51
-#define NDPI_GRE_PROTOCOL_TYPE	   0x2F
-#define NDPI_ICMP_PROTOCOL_TYPE	   0x01
-#define NDPI_IGMP_PROTOCOL_TYPE	   0x02
-#define NDPI_EGP_PROTOCOL_TYPE	   0x08
-#define NDPI_OSPF_PROTOCOL_TYPE	   0x59
-#define NDPI_SCTP_PROTOCOL_TYPE	   132
-#define NDPI_IPIP_PROTOCOL_TYPE    0x04
-#define NDPI_ICMPV6_PROTOCOL_TYPE  0x3a
-
-/* the get_uXX will return raw network packet bytes !! */
-#define get_u_int8_t(X,O)  (*(u_int8_t *)(((u_int8_t *)X) + O))
-#define get_u_int16_t(X,O)  (*(u_int16_t *)(((u_int8_t *)X) + O))
-#define get_u_int32_t(X,O)  (*(u_int32_t *)(((u_int8_t *)X) + O))
-#define get_u_int64_t(X,O)  (*(u_int64_t *)(((u_int8_t *)X) + O))
-
-/* new definitions to get little endian from network bytes */
-#define get_ul8(X,O) get_u_int8_t(X,O)
-
-
-#if defined(__LITTLE_ENDIAN__)
-#define get_l16(X,O)  get_u_int16_t(X,O)
-#define get_l32(X,O)  get_u_int32_t(X,O)
-#elif defined(__BIG_ENDIAN__)
-/* convert the bytes from big to little endian */
-#ifndef __KERNEL__
-# define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
-# define get_l32(X,O) bswap_32(get_u_int32_t(X,O))
-#else
-# define get_l16(X,O) __cpu_to_le16(get_u_int16_t(X,O))
-# define get_l32(X,O) __cpu_to_le32(get_u_int32_t(X,O))
-#endif
-
-#else
-
-#error "__BYTE_ORDER MUST BE DEFINED !"
-
-#endif							/* __BYTE_ORDER */
-
-/* define memory callback function */
-#define match_first_bytes(payload,st) (memcmp((payload),(st),(sizeof(st)-1))==0)
-
-void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct, char *attr, char *value, int protocol_id);
 
 /* TCP/UDP protocols */
 u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struct,
@@ -103,6 +59,7 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct *ndpi_struct, 
 void ndpi_search_mail_imap_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_mail_smtp_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+void ndpi_http_subprotocol_conf(struct ndpi_detection_module_struct *ndpi_struct, char *attr, char *value, int protocol_id);
 void ndpi_search_ftp_control(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_ftp_data(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 void ndpi_search_usenet_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);

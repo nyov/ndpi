@@ -23,7 +23,7 @@
  */
 
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 #ifdef NDPI_PROTOCOL_SIP
 static void ndpi_int_sip_add_connection(struct ndpi_detection_module_struct *ndpi_struct,

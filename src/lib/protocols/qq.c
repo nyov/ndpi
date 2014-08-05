@@ -23,7 +23,7 @@
  */
 
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 #ifdef NDPI_PROTOCOL_QQ
 

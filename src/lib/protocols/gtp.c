@@ -19,7 +19,7 @@
  */
 
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 #ifdef NDPI_PROTOCOL_GTP
 
@@ -44,11 +44,14 @@ static void ndpi_check_gtp(struct ndpi_detection_module_struct *ndpi_struct, str
 #endif
 
   if((packet->udp != NULL) && (payload_len > sizeof(struct gtp_header_generic))) {
-    u_int32_t gtp_u = ntohs(2152);
-    u_int32_t gtp_c = ntohs(2123);
+    u_int32_t gtp_u  = ntohs(2152);
+    u_int32_t gtp_c  = ntohs(2123);
+    u_int32_t gtp_v0 = ntohs(3386);
 
     if((packet->udp->source == gtp_u) || (packet->udp->dest == gtp_u)
-       || (packet->udp->source == gtp_c) || (packet->udp->dest == gtp_c)) {
+       || (packet->udp->source == gtp_c) || (packet->udp->dest == gtp_c)
+       || (packet->udp->source == gtp_v0) || (packet->udp->dest == gtp_v0)
+       ) {
       struct gtp_header_generic *gtp = (struct gtp_header_generic*)packet->payload;
       u_int8_t gtp_version = (gtp->flags & 0xE0) >> 5;
 

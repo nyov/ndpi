@@ -29,9 +29,8 @@
 #endif
 
 #include "ahocorasick.h"
-#include "ndpi_main.h"
-#include "ndpi_protocols.h"
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
+
 
 #ifndef __KERNEL__
 #include "../../config.h"
@@ -3708,126 +3707,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   return a;
 }
 
-static u_int8_t ndpi_detection_build_key_internal(struct ndpi_detection_module_struct *ndpi_struct,
-						  const u_int8_t * l3, u_int16_t l3_len,
-						  const u_int8_t * l4, u_int16_t l4_len,
-						  u_int8_t l4_protocol,
-						  struct ndpi_unique_flow_ipv4_and_6_struct *key_return,
-						  u_int8_t * dir_return,
-						  u_int32_t flags)
-{
-  const struct ndpi_iphdr *iph = NULL;
-  u_int8_t swapped = 0;
-
-  if(key_return == NULL || l3 == NULL)
-    return 1;
-
-  if(l3_len < sizeof(*iph))
-    return 1;
-
-  iph = (const struct ndpi_iphdr *) l3;
-
-  if(iph->version == 4 && ((iph->ihl * 4) > l3_len || l3_len < ntohs(iph->tot_len)
-			   || (iph->frag_off & htons(0x1FFF)) != 0)) {
-    return 1;
-  }
-
-  if((flags & NDPI_DETECTION_ONLY_IPV6) && iph->version == 4) {
-    return 1;
-  }
-#ifdef NDPI_DETECTION_SUPPORT_IPV6
-  else if((flags & NDPI_DETECTION_ONLY_IPV4) && iph->version == 6) {
-    return 1;
-  }
-#endif
-
-  //memset( key_return, 0, sizeof( *key_return ) );
-
-  /* needed:
-   *  - unfragmented or first part of the fragmented packet
-   *  - ip header <= packet len
-   *  - ip total length >= packet len
-   */
-
-  if(iph->version == 4 && iph->ihl >= 5) {
-    NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_DEBUG, "ipv4 header\n");
-
-    key_return->is_ip_v6 = 0;
-    key_return->protocol = l4_protocol;
-
-    if(iph->saddr < iph->daddr) {
-      key_return->ip.ipv4.lower_ip = iph->saddr;
-      key_return->ip.ipv4.upper_ip = iph->daddr;
-    } else {
-      key_return->ip.ipv4.upper_ip = iph->saddr;
-      key_return->ip.ipv4.lower_ip = iph->daddr;
-      swapped = 1;
-    }
-
-    key_return->ip.ipv4.dummy[0] = 0;
-    key_return->ip.ipv4.dummy[1] = 0;
-    key_return->ip.ipv4.dummy[2] = 0;
-
-
-#ifdef NDPI_DETECTION_SUPPORT_IPV6
-  } else if(iph->version == 6 && l3_len >= sizeof(struct ndpi_ipv6hdr)) {
-    const struct ndpi_ipv6hdr *ip6h = (const struct ndpi_ipv6hdr *) iph;
-
-    if((l3_len - sizeof(struct ndpi_ipv6hdr)) < ntohs(ip6h->payload_len)) {
-      return 3;
-    }
-
-    key_return->is_ip_v6 = 1;
-    key_return->protocol = l4_protocol;
-
-    if(NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(&ip6h->saddr, &ip6h->daddr)) {
-      key_return->ip.ipv6.lower_ip[0] = ((u_int64_t *) & ip6h->saddr)[0];
-      key_return->ip.ipv6.lower_ip[1] = ((u_int64_t *) & ip6h->saddr)[1];
-      key_return->ip.ipv6.upper_ip[0] = ((u_int64_t *) & ip6h->daddr)[0];
-      key_return->ip.ipv6.upper_ip[1] = ((u_int64_t *) & ip6h->daddr)[1];
-    } else {
-      key_return->ip.ipv6.lower_ip[0] = ((u_int64_t *) & ip6h->daddr)[0];
-      key_return->ip.ipv6.lower_ip[1] = ((u_int64_t *) & ip6h->daddr)[1];
-      key_return->ip.ipv6.upper_ip[0] = ((u_int64_t *) & ip6h->saddr)[0];
-      key_return->ip.ipv6.upper_ip[1] = ((u_int64_t *) & ip6h->saddr)[1];
-      swapped = 1;
-    }
-#endif
-  } else {
-    return 5;
-  }
-
-  /* tcp / udp detection */
-  if(key_return->protocol == 6 /* TCP */  && l4_len >= sizeof(struct ndpi_tcphdr)) {
-    const struct ndpi_tcphdr *tcph = (const struct ndpi_tcphdr *) l4;
-    if(swapped == 0) {
-      key_return->lower_port = tcph->source;
-      key_return->upper_port = tcph->dest;
-    } else {
-      key_return->lower_port = tcph->dest;
-      key_return->upper_port = tcph->source;
-    }
-  } else if(key_return->protocol == 17 /* UDP */  && l4_len >= sizeof(struct ndpi_udphdr)) {
-    const struct ndpi_udphdr *udph = (struct ndpi_udphdr *) l4;
-    if(swapped == 0) {
-      key_return->lower_port = udph->source;
-      key_return->upper_port = udph->dest;
-    } else {
-      key_return->lower_port = udph->dest;
-      key_return->upper_port = udph->source;
-    }
-  } else {
-    /* non tcp/udp protocols, one connection between two ip addresses */
-    key_return->lower_port = 0;
-    key_return->upper_port = 0;
-  }
-
-  if(dir_return != NULL) {
-    *dir_return = swapped;
-  }
-
-  return 0;
-}
 
 u_int32_t ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read)
 {
@@ -4302,13 +4181,6 @@ u_int8_t ndpi_detection_get_l4(const u_int8_t * l3, u_int16_t l3_len, const u_in
 			       u_int8_t * l4_protocol_return, u_int32_t flags)
 {
   return ndpi_detection_get_l4_internal(NULL, l3, l3_len, l4_return, l4_len_return, l4_protocol_return, flags);
-}
-
-u_int8_t ndpi_detection_build_key(const u_int8_t * l3, u_int16_t l3_len, const u_int8_t * l4, u_int16_t l4_len, u_int8_t l4_protocol,
-				  struct ndpi_unique_flow_ipv4_and_6_struct * key_return, u_int8_t * dir_return, u_int32_t flags)
-{
-  return ndpi_detection_build_key_internal(NULL, l3, l3_len, l4, l4_len, l4_protocol, key_return, dir_return,
-					   flags);
 }
 
 void ndpi_int_add_connection(struct ndpi_detection_module_struct *ndpi_struct,

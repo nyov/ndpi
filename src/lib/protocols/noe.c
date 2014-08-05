@@ -6,8 +6,8 @@
  */
 
 
-#include "ndpi_utils.h"
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
+
 
 #ifdef NDPI_PROTOCOL_NOE
 static void ndpi_int_noe_add_connection(struct ndpi_detection_module_struct

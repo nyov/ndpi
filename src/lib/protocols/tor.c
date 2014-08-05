@@ -6,8 +6,8 @@
  */
 
 
-#include "ndpi_utils.h"
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
+
 
 #ifdef NDPI_PROTOCOL_TOR
 static void ndpi_int_tor_add_connection(struct ndpi_detection_module_struct

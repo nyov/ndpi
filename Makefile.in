@@ -58,9 +58,6 @@ $(READER): $(NDPI_STATIC) $(JSON_LIB)
 $(JSON_LIB):
 	cd $(JSON_HOME); ./autogen.sh; ./configure; make
 
-#$(READER): $(NDPI_SHARED) src/example/ndpiReader.c
-#	$(CC) $(CFLAGS) src/example/ndpiReader.c -o $@ $(NDPI_SHARED) $(LIBS)
-
 install: all
 	mkdir -p @INSTALL_PREFIX@/include @INSTALL_PREFIX@/lib @INSTALL_PREFIX@/bin
 	cp ./src/include/*.h @INSTALL_PREFIX@/include
@@ -71,4 +68,3 @@ uninstall:
 	rm -r @INSTALL_PREFIX@/include/ndpi*
 	rm -r @INSTALL_PREFIX@/lib/libndpi*
 	rm  @INSTALL_PREFIX@/bin/ndpiReader
-	

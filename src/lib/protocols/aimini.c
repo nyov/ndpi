@@ -24,7 +24,6 @@
 
 
 #include "ndpi_protocols.h"
-#include "ndpi_utils.h"
 
 #ifdef NDPI_PROTOCOL_AIMINI
 

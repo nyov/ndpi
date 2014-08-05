@@ -1,7 +1,7 @@
 /*
  *
+ * Copyright (C) 2011-14 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -142,6 +142,8 @@
 /* DEFINITION OF MAX LINE NUMBERS FOR line parse algorithm */
 #define NDPI_MAX_PARSE_LINES_PER_PACKET                        200
 
+#define MAX_PACKET_COUNTER                                   65000
+#define MAX_DEFAULT_PORTS                                        5
 
 /**********************
  * detection features *
@@ -195,5 +197,88 @@
 /** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
 #define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
   ((((u_int64_t *)(x))[0]) < (((u_int64_t *)(y))[0]) || ( (((u_int64_t *)(x))[0]) == (((u_int64_t *)(y))[0]) && (((u_int64_t *)(x))[1]) < (((u_int64_t *)(y))[1])) )
+
+#define NDPI_NUM_BITS              256
+
+#define NDPI_BITS /* 32 */ (sizeof(ndpi_ndpi_mask) * 8 /* number of bits in a byte */)        /* bits per mask */
+#define howmanybits(x, y)   (((x)+((y)-1))/(y))
+
+
+#define NDPI_SET(p, n)    ((p)->fds_bits[(n)/NDPI_BITS] |= (1 << (((u_int32_t)n) % NDPI_BITS)))
+#define NDPI_CLR(p, n)    ((p)->fds_bits[(n)/NDPI_BITS] &= ~(1 << (((u_int32_t)n) % NDPI_BITS)))
+#define NDPI_ISSET(p, n)  ((p)->fds_bits[(n)/NDPI_BITS] & (1 << (((u_int32_t)n) % NDPI_BITS)))
+#define NDPI_ZERO(p)      memset((char *)(p), 0, sizeof(*(p)))
+#define NDPI_ONE(p)       memset((char *)(p), 0xFF, sizeof(*(p)))
+
+#define NDPI_NUM_FDS_BITS     howmanybits(NDPI_NUM_BITS, NDPI_BITS)
+
+#define NDPI_PROTOCOL_BITMASK ndpi_protocol_bitmask_struct_t
+  
+#define NDPI_BITMASK_ADD(a,b)     NDPI_SET(&a,b)
+#define NDPI_BITMASK_DEL(a,b)     NDPI_CLR(&a,b)
+#define NDPI_BITMASK_RESET(a)     NDPI_ZERO(&a)
+#define NDPI_BITMASK_SET_ALL(a)   NDPI_ONE(&a)
+#define NDPI_BITMASK_SET(a, b)    { memcpy(&a, &b, sizeof(NDPI_PROTOCOL_BITMASK)); }
+
+/* this is a very very tricky macro *g*,
+  * the compiler will remove all shifts here if the protocol is static...
+ */
+#define NDPI_ADD_PROTOCOL_TO_BITMASK(bmask,value)     NDPI_SET(&bmask,value)
+#define NDPI_DEL_PROTOCOL_FROM_BITMASK(bmask,value)   NDPI_CLR(&bmask,value)
+#define NDPI_COMPARE_PROTOCOL_TO_BITMASK(bmask,value) NDPI_ISSET(&bmask,value)
+
+#define NDPI_SAVE_AS_BITMASK(bmask,value)  { NDPI_ZERO(&bmask) ; NDPI_ADD_PROTOCOL_TO_BITMASK(bmask, value); }
+
+
+#define ndpi_min(a,b)   ((a < b) ? a : b)
+#define ndpi_max(a,b)   ((a > b) ? a : b)
+
+#define NDPI_PARSE_PACKET_LINE_INFO(ndpi_struct,flow,packet)		\
+                        if (packet->packet_lines_parsed_complete != 1) {        \
+			  ndpi_parse_packet_line_info(ndpi_struct,flow);	\
+                        }                                                       \
+
+#define NDPI_IPSEC_PROTOCOL_ESP	   50
+#define NDPI_IPSEC_PROTOCOL_AH	   51
+#define NDPI_GRE_PROTOCOL_TYPE	   0x2F
+#define NDPI_ICMP_PROTOCOL_TYPE	   0x01
+#define NDPI_IGMP_PROTOCOL_TYPE	   0x02
+#define NDPI_EGP_PROTOCOL_TYPE	   0x08
+#define NDPI_OSPF_PROTOCOL_TYPE	   0x59
+#define NDPI_SCTP_PROTOCOL_TYPE	   132
+#define NDPI_IPIP_PROTOCOL_TYPE    0x04
+#define NDPI_ICMPV6_PROTOCOL_TYPE  0x3a
+
+/* the get_uXX will return raw network packet bytes !! */
+#define get_u_int8_t(X,O)  (*(u_int8_t *)(((u_int8_t *)X) + O))
+#define get_u_int16_t(X,O)  (*(u_int16_t *)(((u_int8_t *)X) + O))
+#define get_u_int32_t(X,O)  (*(u_int32_t *)(((u_int8_t *)X) + O))
+#define get_u_int64_t(X,O)  (*(u_int64_t *)(((u_int8_t *)X) + O))
+
+/* new definitions to get little endian from network bytes */
+#define get_ul8(X,O) get_u_int8_t(X,O)
+
+
+#if defined(__LITTLE_ENDIAN__)
+#define get_l16(X,O)  get_u_int16_t(X,O)
+#define get_l32(X,O)  get_u_int32_t(X,O)
+#elif defined(__BIG_ENDIAN__)
+/* convert the bytes from big to little endian */
+#ifndef __KERNEL__
+# define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
+# define get_l32(X,O) bswap_32(get_u_int32_t(X,O))
+#else
+# define get_l16(X,O) __cpu_to_le16(get_u_int16_t(X,O))
+# define get_l32(X,O) __cpu_to_le32(get_u_int32_t(X,O))
+#endif
+
+#else
+
+#error "__BYTE_ORDER MUST BE DEFINED !"
+
+#endif							/* __BYTE_ORDER */
+
+/* define memory callback function */
+#define match_first_bytes(payload,st) (memcmp((payload),(st),(sizeof(st)-1))==0)
 
 #endif /* __NDPI_DEFINE_INCLUDE_FILE__ */

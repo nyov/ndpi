@@ -1,8 +1,8 @@
 /*
  * ndpi_main.h
  *
+ * Copyright (C) 2011-14 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
- * Copyright (C) 2011-13 - ntop.org
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -21,7 +21,6 @@
  * along with nDPI.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
 
 #ifndef __NDPI_MAIN_INCLUDE_FILE__
 #define __NDPI_MAIN_INCLUDE_FILE__
@@ -58,73 +57,15 @@
 #include <sys/param.h>
 #include <limits.h>
 #endif
-
 #endif
 
-#ifdef WIN32
-#include <Winsock2.h> /* winsock.h is included automatically */
-#include <process.h>
-#include <io.h>
-#include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
-#include <process.h> /* for getpid() and the exec..() family */
-
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#define snprintf	_snprintf
-
-extern char* strsep(char **stringp, const char *delim);
-
-#define __attribute__(x)
-#include <stdint.h>
-#ifndef __GNUC__
-typedef unsigned char  u_char;
-typedef unsigned short u_short;
-typedef unsigned int   uint;
-typedef unsigned long  u_long;
-#endif
-typedef u_char  u_int8_t;
-typedef u_short u_int16_t;
-typedef unsigned int u_int32_t;
-typedef unsigned __int64 u_int64_t;
-#endif /* Win32 */
-
-
-#include "linux_compat.h"
-
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include <netinet/in.h>
-#if defined(__NetBSD__) || defined(__OpenBSD__)
-#include <netinet/in_systm.h>
-#if defined(__OpenBSD__)
-#include <pthread.h>
-#endif
-#endif
-#endif
-
-#ifndef WIN32
-#ifndef __KERNEL__
-
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <netinet/udp.h>
-#else
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-#endif
-#endif
-
+#include "ndpi_win32.h"
+#include "ndpi_unix.h"
 #include "ndpi_define.h"
-#include "ndpi_macros.h"
-#include "ndpi_protocols_osdpi.h"
+#include "ndpi_protocol_ids.h"
+#include "ndpi_typedefs.h"
+#include "ndpi_protocols.h"
 
-typedef enum {
-  ndpi_preorder,
-  ndpi_postorder,
-  ndpi_endorder,
-  ndpi_leaf
-} ndpi_VISIT;
 
 void *ndpi_tdelete(const void * __restrict, void ** __restrict,
 		   int (*)(const void *, const void *));
@@ -133,11 +74,10 @@ void *ndpi_tsearch(const void *, void**, int (*)(const void *, const void *));
 void ndpi_twalk(const void *, void (*)(const void *, ndpi_VISIT, int, void*), void *user_data);
 void ndpi_tdestroy(void *vrootp, void (*freefct)(void *));
 
+int NDPI_BITMASK_COMPARE(NDPI_PROTOCOL_BITMASK a, NDPI_PROTOCOL_BITMASK b);
+int NDPI_BITMASK_IS_EMPTY(NDPI_PROTOCOL_BITMASK a);
+void NDPI_DUMP_BITMASK(NDPI_PROTOCOL_BITMASK a);
 
-typedef struct node_t {
-  char	  *key;
-  struct node_t *left, *right;
-} ndpi_node;
 
 extern u_int8_t ndpi_net_match(u_int32_t ip_to_check,
 			       u_int32_t net,
@@ -148,42 +88,6 @@ extern u_int8_t ndpi_ips_match(u_int32_t src, u_int32_t dst,
 
 extern char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
-#ifdef HAVE_NDPI_CACHE
-/* Least recently used cache */
-struct ndpi_LruCacheNumEntry {
-  u_int64_t key;
-  u_int64_t value;
-};
-
-struct ndpi_LruCacheStrEntry {
-  char *key, *value;
-  time_t expire_time;
-};
-
-struct ndpi_LruCacheEntry {
-  u_int8_t numeric_node;
-
-  union {
-    struct ndpi_LruCacheNumEntry num; /* numeric_node == 1 */
-    struct ndpi_LruCacheStrEntry str; /* numeric_node == 0 */
-  } u;
-
-  struct ndpi_LruCacheEntry *next; /* Hash collision list */
-};
-
-struct ndpi_LruCache {
-  u_int32_t max_cache_node_len, hash_size, mem_size;
-  u_int32_t num_cache_add, num_cache_find, num_cache_misses;
-  u_int32_t last_num_cache_add, last_num_cache_find, last_num_cache_misses;
-  u_int32_t *current_hash_size; /* Allocated dynamically */
-  struct ndpi_LruCacheEntry **hash;   /* Allocated dynamically */
-};
-
-
-u_int32_t ndpi_find_lru_cache_num(struct ndpi_LruCache *cache, u_int64_t key);
-int ndpi_add_to_lru_cache_num(struct ndpi_LruCache *cache, u_int64_t key, u_int64_t value);
-#endif /* HAVE_NDPI_CACHE */
-
 u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 
 u_int32_t ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
@@ -192,9 +96,10 @@ u_int32_t ndpi_bytestream_dec_or_hex_to_number(const u_int8_t * str, u_int16_t m
 u_int64_t ndpi_bytestream_dec_or_hex_to_number64(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 u_int32_t ndpi_bytestream_to_ipv4(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 
-#include "ndpi_api.h"
-#include "ndpi_protocol_history.h"
-#include "ndpi_structs.h"
+
+void ndpi_int_add_connection(struct ndpi_detection_module_struct *ndpi_struct,                             
+                             struct ndpi_flow_struct *flow,
+                             u_int16_t detected_protocol, ndpi_protocol_type_t protocol_type);
 
 
 /* function to parse a packet which has line based information into a line based structure
@@ -224,5 +129,21 @@ extern char *ndpi_get_ip_string(struct ndpi_detection_module_struct *ndpi_struct
 extern char *ndpi_get_packet_src_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
 					   const struct ndpi_packet_struct *packet);
 extern char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id);
+
+extern u_int8_t ndpi_net_match(u_int32_t ip_to_check,
+			       u_int32_t net,
+			       u_int32_t num_bits);
+
+extern u_int8_t ndpi_ips_match(u_int32_t src, u_int32_t dst,
+			       u_int32_t net, u_int32_t num_bits);
+
+extern char* ndpi_strnstr(const char *s, const char *find, size_t slen);
+
+#ifdef NDPI_ENABLE_DEBUG_MESSAGES
+  void ndpi_debug_get_last_log_function_line(struct ndpi_detection_module_struct *ndpi_struct,
+					     const char **file, const char **func, u_int32_t * line);
+#endif
+
+#include "ndpi_api.h"
 
 #endif							/* __NDPI_MAIN_INCLUDE_FILE__ */

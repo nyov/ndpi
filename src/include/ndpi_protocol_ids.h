@@ -1,8 +1,8 @@
 /*
- * ndpi_protocols_osdpi.h
+ * ndpi_protocol_ids.h
  *
- * Copyright (C) 2009-11 - ipoque GmbH
  * Copyright (C) 2011-14 - ntop.org
+ * Copyright (C) 2009-11 - ipoque GmbH
  *
  * This file is part of nDPI, an open source deep packet inspection
  * library based on the OpenDPI and PACE technology by ipoque GmbH
@@ -30,11 +30,6 @@
 #ifndef __NDPI_PROTOCOLS_DEFAULT_H__
 #define __NDPI_PROTOCOLS_DEFAULT_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 #define NDPI_DETECTION_SUPPORT_IPV6
 #define NDPI_PROTOCOL_HISTORY_SIZE				3
 
@@ -52,7 +47,7 @@ extern "C" {
 #define NDPI_PROTOCOL_IP_ICMPV6					102
 
 #define NDPI_PROTOCOL_HTTP					7
-#define NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV 		60
+#define NDPI_PROTOCOL_HTTP_APPLICATION_VEOHTV 		        60
 #define NDPI_PROTOCOL_SSL_NO_CERT			        64 /* SSL without certificate (Skype, Ultrasurf?) - ntop.org */
 #define NDPI_PROTOCOL_SSL					91
 #define NDPI_PROTOCOL_HTTP_APPLICATION_ACTIVESYNC		110
@@ -240,7 +235,4 @@ extern "C" {
 
 #define NDPI_MAX_SUPPORTED_PROTOCOLS (NDPI_LAST_IMPLEMENTED_PROTOCOL + 1)
 #define NDPI_MAX_NUM_CUSTOM_PROTOCOLS                   (NDPI_NUM_BITS-NDPI_LAST_IMPLEMENTED_PROTOCOL)
-#ifdef __cplusplus
-}
-#endif
 #endif

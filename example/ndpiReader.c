@@ -45,8 +45,8 @@
 #include <json.h>
 
 #include "../config.h"
-#include "linux_compat.h"
-#include "ndpi_main.h"
+
+#include "ndpi_api.h"
 
 #if defined(__OpenBSD__)
 #include <sys/socket.h>
@@ -182,7 +182,7 @@ static void help(u_int long_help) {
 	 "  -s <duration>             | Maximum capture duration in seconds (live traffic capture only)\n"
 	 "  -p <file>.protos          | Specify a protocol file (eg. protos.txt)\n"
 	 "  -l <num loops>            | Number of detection loops (test only)\n"
-	 "  -n <num threads>          | Number of threads. Default: number of interfaces in -i\n"
+	 "  -n <num threads>          | Number of threads. Default: number of interfaces in -i. Ignored with pcap files.\n"
 	 "  -j <file.json>            | Specify a file to write the content of packets in .json format\n"
 #ifdef linux
          "  -g <id:id...>             | Thread affinity mask (one core id per thread)\n"
@@ -1229,6 +1229,8 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
   /* trying to open a live interface */
   if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_live(_pcap_file[thread_id], snaplen, promisc, 500, errbuf)) == NULL) {
     capture_until = 0;
+
+    num_threads = 1; /* Open pcap files in single threads mode */
 
     /* trying to open a pcap file */
     if ((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(_pcap_file[thread_id], ndpi_thread_info[thread_id]._pcap_error_buffer)) == NULL) {
