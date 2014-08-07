@@ -69,7 +69,7 @@ static char *_bpf_filter      = NULL; /**< bpf filter  */
 static char *_protoFilePath   = NULL; /**< Protocol file path  */
 static char *_jsonFilePath    = NULL; /**< JSON file path  */
 static json_object *jArray_known_flows, *jArray_unknown_flows;
-
+static u_int8_t live_capture = 0;
 /**
  * User preferences
  */
@@ -275,11 +275,11 @@ static void parseOptions(int argc, char **argv) {
   }
 
   // check parameters
-  if (_pcap_file[0] == NULL || strcmp(_pcap_file[0], "") == 0) {
+  if(_pcap_file[0] == NULL || strcmp(_pcap_file[0], "") == 0) {
     help(0);
   }
 
-  if (strchr(_pcap_file[0], ',')) { /* multiple ingress interfaces */
+  if(strchr(_pcap_file[0], ',')) { /* multiple ingress interfaces */
     num_threads = 0; /* setting number of threads = number of interfaces */
     __pcap_file = strtok(_pcap_file[0], ",");
     while (__pcap_file != NULL && num_threads < MAX_NUM_READER_THREADS) {
@@ -287,16 +287,16 @@ static void parseOptions(int argc, char **argv) {
       __pcap_file = strtok(NULL, ",");
     }
   } else {
-    if (num_threads > MAX_NUM_READER_THREADS) num_threads = MAX_NUM_READER_THREADS;
-    for (thread_id = 1; thread_id < num_threads; thread_id++)
+    if(num_threads > MAX_NUM_READER_THREADS) num_threads = MAX_NUM_READER_THREADS;
+    for(thread_id = 1; thread_id < num_threads; thread_id++)
       _pcap_file[thread_id] = _pcap_file[0];
   }
 
 #ifdef linux
-  for (thread_id = 0; thread_id < num_threads; thread_id++)
+  for(thread_id = 0; thread_id < num_threads; thread_id++)
     core_affinity[thread_id] = -1; 
 
-  if (num_cores > 1 && bind_mask != NULL) {
+  if(num_cores > 1 && bind_mask != NULL) {
     char *core_id = strtok(bind_mask, ":");
     thread_id = 0;
     while (core_id != NULL && thread_id < num_threads) {
@@ -325,9 +325,9 @@ static void debug_printf(u_int32_t protocol, void *id_struct,
 
     va_start (va_ap, format);
 
-    if (log_level == NDPI_LOG_ERROR)
+    if(log_level == NDPI_LOG_ERROR)
       extra_msg = "ERROR: ";
-    else if (log_level == NDPI_LOG_TRACE)
+    else if(log_level == NDPI_LOG_TRACE)
       extra_msg = "TRACE: ";
     else
       extra_msg = "DEBUG: ";
@@ -419,11 +419,17 @@ char* intoaV4(unsigned int addr, char* buf, u_short bufLen) {
 
 /* ***************************************************** */
 
-static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
-  
+static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) { 
   json_object *jObj;
   
   if(!json_flag) {
+#if 1
+    printf("\t%s %s:%u <-> %s:%u\n",
+	   ipProto2Name(flow->protocol),
+	   flow->lower_name, ntohs(flow->lower_port),
+	   flow->upper_name, ntohs(flow->upper_port));
+
+#else
   printf("\t%u", ++num_flows);
 
   printf("\t%s %s:%u <-> %s:%u ",
@@ -436,6 +442,7 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 	 ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol),
 	 flow->packets, flow->bytes,
 	 flow->host_server_name);
+#endif
   } else {
     jObj = json_object_new_object();
     
@@ -482,16 +489,28 @@ static void node_idle_scan_walker(const void *node, ndpi_VISIT which, int depth,
   struct ndpi_flow *flow = *(struct ndpi_flow **) node;
   u_int16_t thread_id = *((u_int16_t *) user_data);
 
-  if (ndpi_thread_info[thread_id].num_idle_flows == IDLE_SCAN_BUDGET) /* TODO optimise with a budget-based walk */
+  if(ndpi_thread_info[thread_id].num_idle_flows == IDLE_SCAN_BUDGET) /* TODO optimise with a budget-based walk */
     return;
 
-  if ((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
-    if (flow->last_seen + MAX_IDLE_TIME < ndpi_thread_info[thread_id].last_time) {
+  if((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
+    if(flow->last_seen + MAX_IDLE_TIME < ndpi_thread_info[thread_id].last_time) {
       free_ndpi_flow(flow);
+      ndpi_thread_info[thread_id].stats.ndpi_flow_count--;
+
       /* adding to a queue (we can't delete it from the tree inline ) */
       ndpi_thread_info[thread_id].idle_flows[ndpi_thread_info[thread_id].num_idle_flows++] = flow;
     }
   }
+}
+
+/* ***************************************************** */
+
+static void node_count_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
+  struct ndpi_flow *flow = *(struct ndpi_flow**)node;
+  u_int16_t num = *((u_int16_t*)user_data);
+
+  if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
+    *((u_int16_t*)user_data) = num + 1;
 }
 
 /* ***************************************************** */
@@ -601,6 +620,7 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
   u_int16_t upper_port;
   struct ndpi_flow flow;
   void *ret;
+  u_int8_t *l3;
 
   /*
     Note: to keep things simple (ndpiReader is just a demo app)
@@ -613,6 +633,12 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
     if((iph->ihl * 4) > ipsize || ipsize < ntohs(iph->tot_len)
        || (iph->frag_off & htons(0x1FFF)) != 0)
       return NULL;
+
+    l4_offset = iph->ihl * 4;
+    l3 = (u_int8_t*)iph;
+  } else {
+    l4_offset = sizeof(struct ndpi_ip6_hdr);
+    l3 = (u_int8_t*)iph6;
   }
 
   if(l4_packet_len < 64)
@@ -640,12 +666,12 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
   }
 
   *proto = iph->protocol;
-  l4_offset = iph->ihl * 4;
+
   if(iph->protocol == 6 && l4_packet_len >= 20) {
     ndpi_thread_info[thread_id].stats.tcp_count++;
 
     // tcp
-    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) iph + l4_offset);
+    tcph = (struct ndpi_tcphdr *) ((u_int8_t *) l3 + l4_offset);
     if(iph->saddr < iph->daddr) {
       lower_port = tcph->source;
       upper_port = tcph->dest;
@@ -666,7 +692,7 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
     // udp
     ndpi_thread_info[thread_id].stats.udp_count++;
 
-    udph = (struct ndpi_udphdr *) ((u_int8_t *) iph + l4_offset);
+    udph = (struct ndpi_udphdr *) ((u_int8_t *) l3 + l4_offset);
     if(iph->saddr < iph->daddr) {
       lower_port = udph->source;
       upper_port = udph->dest;
@@ -730,11 +756,14 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
 	printf("[NDPI] %s(4): not enough memory\n", __FUNCTION__);
 	return(NULL);
       }
-
+      
       ndpi_tsearch(newflow, &ndpi_thread_info[thread_id].ndpi_flows_root[idx], node_cmp); /* Add */
-      ndpi_thread_info[thread_id].stats.ndpi_flow_count += 1;
+      ndpi_thread_info[thread_id].stats.ndpi_flow_count++;
 
       *src = newflow->src_id, *dst = newflow->dst_id;
+
+      // printFlow(thread_id, newflow);
+
       return(newflow);
     }
   } else {
@@ -886,17 +915,19 @@ static unsigned int packet_processing(u_int16_t thread_id,
     printf("%s\n", ndpi_flow->l4.tcp.host_server_name);
 #endif
 
-  if (ndpi_thread_info[thread_id].last_idle_scan_time + IDLE_SCAN_PERIOD < ndpi_thread_info[thread_id].last_time) {
-    /* scan for idle flows */
-    ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[ndpi_thread_info[thread_id].idle_scan_idx], node_idle_scan_walker, &thread_id);
-
-    /* remove idle flows (unfortunately we cannot do this inline) */
-    while (ndpi_thread_info[thread_id].num_idle_flows > 0)
-      ndpi_tdelete(ndpi_thread_info[thread_id].idle_flows[--ndpi_thread_info[thread_id].num_idle_flows], 
-                   &ndpi_thread_info[thread_id].ndpi_flows_root[ndpi_thread_info[thread_id].idle_scan_idx], node_cmp);
-
-    if (++ndpi_thread_info[thread_id].idle_scan_idx == NUM_ROOTS) ndpi_thread_info[thread_id].idle_scan_idx = 0;
-    ndpi_thread_info[thread_id].last_idle_scan_time = ndpi_thread_info[thread_id].last_time;
+  if(live_capture) {
+    if(ndpi_thread_info[thread_id].last_idle_scan_time + IDLE_SCAN_PERIOD < ndpi_thread_info[thread_id].last_time) {
+      /* scan for idle flows */
+      ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[ndpi_thread_info[thread_id].idle_scan_idx], node_idle_scan_walker, &thread_id);
+      
+      /* remove idle flows (unfortunately we cannot do this inline) */
+      while (ndpi_thread_info[thread_id].num_idle_flows > 0)
+	ndpi_tdelete(ndpi_thread_info[thread_id].idle_flows[--ndpi_thread_info[thread_id].num_idle_flows], 
+		     &ndpi_thread_info[thread_id].ndpi_flows_root[ndpi_thread_info[thread_id].idle_scan_idx], node_cmp);
+      
+      if(++ndpi_thread_info[thread_id].idle_scan_idx == NUM_ROOTS) ndpi_thread_info[thread_id].idle_scan_idx = 0;
+      ndpi_thread_info[thread_id].last_idle_scan_time = ndpi_thread_info[thread_id].last_time;
+    }
   }
 
   return 0;
@@ -971,8 +1002,8 @@ static void printResults(u_int64_t tot_usec) {
 
   memset(&cumulative_stats, 0, sizeof(cumulative_stats));
 
-  for (thread_id = 0; thread_id < num_threads; thread_id++) {
-    if (ndpi_thread_info[thread_id].stats.total_wire_bytes == 0) continue;
+  for(thread_id = 0; thread_id < num_threads; thread_id++) {
+    if(ndpi_thread_info[thread_id].stats.total_wire_bytes == 0) continue;
 
     for(i=0; i<NUM_ROOTS; i++)
       ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[i], node_proto_guess_walker, &thread_id);
@@ -984,20 +1015,21 @@ static void printResults(u_int64_t tot_usec) {
     cumulative_stats.total_wire_bytes += ndpi_thread_info[thread_id].stats.total_wire_bytes;
     cumulative_stats.total_ip_bytes += ndpi_thread_info[thread_id].stats.total_ip_bytes;
     cumulative_stats.total_discarded_bytes += ndpi_thread_info[thread_id].stats.total_discarded_bytes;
-    for (i = 0; i < NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1; i++)
+
+    for(i = 0; i < ndpi_get_num_supported_protocols(ndpi_thread_info[0].ndpi_struct); i++) {
       cumulative_stats.protocol_counter[i] += ndpi_thread_info[thread_id].stats.protocol_counter[i];
-    for (i = 0; i < NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1; i++)
       cumulative_stats.protocol_counter_bytes[i] += ndpi_thread_info[thread_id].stats.protocol_counter_bytes[i];
-    for (i = 0; i < NDPI_MAX_SUPPORTED_PROTOCOLS + NDPI_MAX_NUM_CUSTOM_PROTOCOLS + 1; i++)
       cumulative_stats.protocol_flows[i] += ndpi_thread_info[thread_id].stats.protocol_flows[i];
+    }
+
     cumulative_stats.ndpi_flow_count += ndpi_thread_info[thread_id].stats.ndpi_flow_count;
-    cumulative_stats.tcp_count += ndpi_thread_info[thread_id].stats.tcp_count;
-    cumulative_stats.udp_count += ndpi_thread_info[thread_id].stats.udp_count;
-    cumulative_stats.mpls_count += ndpi_thread_info[thread_id].stats.mpls_count;
+    cumulative_stats.tcp_count   += ndpi_thread_info[thread_id].stats.tcp_count;
+    cumulative_stats.udp_count   += ndpi_thread_info[thread_id].stats.udp_count;
+    cumulative_stats.mpls_count  += ndpi_thread_info[thread_id].stats.mpls_count;
     cumulative_stats.pppoe_count += ndpi_thread_info[thread_id].stats.pppoe_count; 
-    cumulative_stats.vlan_count += ndpi_thread_info[thread_id].stats.vlan_count;
+    cumulative_stats.vlan_count  += ndpi_thread_info[thread_id].stats.vlan_count;
     cumulative_stats.fragmented_count += ndpi_thread_info[thread_id].stats.fragmented_count;
-    for (i = 0; i < 6; i++)
+    for(i = 0; i < 6; i++)
       cumulative_stats.packet_len[i] += ndpi_thread_info[thread_id].stats.packet_len[i];
     cumulative_stats.max_packet_len += ndpi_thread_info[thread_id].stats.max_packet_len;
   }
@@ -1012,7 +1044,7 @@ static void printResults(u_int64_t tot_usec) {
 	 (long long unsigned int)cumulative_stats.ip_packet_count,
 	 (long long unsigned int)cumulative_stats.raw_packet_count);
   /* In order to prevent Floating point exception in case of no traffic*/
-  if (cumulative_stats.total_ip_bytes && cumulative_stats.raw_packet_count)
+  if(cumulative_stats.total_ip_bytes && cumulative_stats.raw_packet_count)
     avg_pkt_size = (unsigned int)(cumulative_stats.total_ip_bytes/cumulative_stats.raw_packet_count);
   printf("\tIP bytes:              %-13llu (avg pkt size %u bytes)\n",
 	 (long long unsigned int)cumulative_stats.total_ip_bytes,avg_pkt_size);
@@ -1080,9 +1112,8 @@ static void printResults(u_int64_t tot_usec) {
   }  
 
   if(!json_flag) printf("\n\nDetected protocols:\n");
-  for (i = 0; i <= ndpi_get_num_supported_protocols(ndpi_thread_info[0].ndpi_struct); i++) {
+  for(i = 0; i <= ndpi_get_num_supported_protocols(ndpi_thread_info[0].ndpi_struct); i++) {
     if(cumulative_stats.protocol_counter[i] > 0) {
-
       if(!json_flag) {
       printf("\t%-20s packets: %-13llu bytes: %-13llu "
 	     "flows: %-13u\n",
@@ -1112,13 +1143,13 @@ static void printResults(u_int64_t tot_usec) {
     if(!json_flag) printf("\n");
 
     num_flows = 0;
-    for (thread_id = 0; thread_id < num_threads; thread_id++) {
+    for(thread_id = 0; thread_id < num_threads; thread_id++) {
       for(i=0; i<NUM_ROOTS; i++)
         ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[i], node_print_known_proto_walker, &thread_id);
     }
 
-    for (thread_id = 0; thread_id < num_threads; thread_id++) {
-      if (ndpi_thread_info[thread_id].stats.protocol_counter[0] > 0) {
+    for(thread_id = 0; thread_id < num_threads; thread_id++) {
+      if(ndpi_thread_info[thread_id].stats.protocol_counter[0 /* 0 = Unknown */] > 0) {
         if(!json_flag) printf("\n\nUndetected flows:\n");
 
 	if(json_flag)
@@ -1128,8 +1159,8 @@ static void printResults(u_int64_t tot_usec) {
     }
 
     num_flows = 0;
-    for (thread_id = 0; thread_id < num_threads; thread_id++) {
-      if (ndpi_thread_info[thread_id].stats.protocol_counter[0] > 0) {
+    for(thread_id = 0; thread_id < num_threads; thread_id++) {
+      if(ndpi_thread_info[thread_id].stats.protocol_counter[0] > 0) {
         for(i=0; i<NUM_ROOTS; i++)
 	  ndpi_twalk(ndpi_thread_info[thread_id].ndpi_flows_root[i], node_print_unknown_proto_walker, &thread_id);
       }
@@ -1182,16 +1213,16 @@ void sigproc(int sig) {
 
 static int getNextPcapFileFromPlaylist(u_int16_t thread_id, char filename[], u_int32_t filename_len) {
 
-  if (playlist_fp[thread_id] == NULL) {
-    if ((playlist_fp[thread_id] = fopen(_pcap_file[thread_id], "r")) == NULL)
+  if(playlist_fp[thread_id] == NULL) {
+    if((playlist_fp[thread_id] = fopen(_pcap_file[thread_id], "r")) == NULL)
       return -1;
   }
 
 next_line:
-  if (fgets(filename, filename_len, playlist_fp[thread_id])) {
+  if(fgets(filename, filename_len, playlist_fp[thread_id])) {
     int l = strlen(filename);
-    if (filename[0] == '\0' || filename[0] == '#') goto next_line;
-    if (filename[l-1] == '\n') filename[l-1] = '\0';
+    if(filename[0] == '\0' || filename[0] == '#') goto next_line;
+    if(filename[l-1] == '\n') filename[l-1] = '\0';
     return 0;
   } else {
     fclose(playlist_fp[thread_id]);
@@ -1230,14 +1261,15 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
   if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_live(_pcap_file[thread_id], snaplen, promisc, 500, errbuf)) == NULL) {
     capture_until = 0;
 
+    live_capture = 0;
     num_threads = 1; /* Open pcap files in single threads mode */
 
     /* trying to open a pcap file */
-    if ((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(_pcap_file[thread_id], ndpi_thread_info[thread_id]._pcap_error_buffer)) == NULL) {
+    if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(_pcap_file[thread_id], ndpi_thread_info[thread_id]._pcap_error_buffer)) == NULL) {
       char filename[256];
 
       /* trying to open a pcap playlist */
-      if (getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) != 0 ||
+      if(getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) != 0 ||
           (ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(filename, ndpi_thread_info[thread_id]._pcap_error_buffer)) == NULL) {
 
         printf("ERROR: could not open pcap file or playlist: %s\n", ndpi_thread_info[thread_id]._pcap_error_buffer);
@@ -1249,6 +1281,8 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
       if(!json_flag) printf("Reading packets from pcap file %s...\n", _pcap_file[thread_id]);
     }
   } else {
+    live_capture = 1;
+
     if(!json_flag) printf("Capturing live traffic from device %s...\n", _pcap_file[thread_id]);
   }
 
@@ -1432,12 +1466,12 @@ void *processing_thread(void *_thread_id) {
   long thread_id = (long) _thread_id;
 
 #ifdef linux
-  if (core_affinity[thread_id] >= 0) {
+  if(core_affinity[thread_id] >= 0) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(core_affinity[thread_id], &cpuset);
 
-    if (pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) != 0)
+    if(pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) != 0)
       fprintf(stderr, "Error while binding thread %ld to core %d\n", thread_id, core_affinity[thread_id]);
     else {
       if(!json_flag) printf("Running thread %ld on core %d...\n", thread_id, core_affinity[thread_id]);
@@ -1449,9 +1483,10 @@ void *processing_thread(void *_thread_id) {
 pcap_loop:
   runPcapLoop(thread_id);
 
-  if (playlist_fp[thread_id] != NULL) { /* playlist: read next file */
+  if(playlist_fp[thread_id] != NULL) { /* playlist: read next file */
     char filename[256];
-    if (getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) == 0 &&
+
+    if(getNextPcapFileFromPlaylist(thread_id, filename, sizeof(filename)) == 0 &&
         (ndpi_thread_info[thread_id]._pcap_handle = pcap_open_offline(filename, ndpi_thread_info[thread_id]._pcap_error_buffer)) != NULL) {
       configurePcapHandle(thread_id);
       goto pcap_loop;
@@ -1470,7 +1505,7 @@ void test_lib() {
   
   json_init();
 
-  for (thread_id = 0; thread_id < num_threads; thread_id++) {
+  for(thread_id = 0; thread_id < num_threads; thread_id++) {
     setupDetection(thread_id);
     openPcapFileOrDevice(thread_id);
   }
@@ -1478,11 +1513,11 @@ void test_lib() {
   gettimeofday(&begin, NULL);
 
   /* Running processing threads */
-  for (thread_id = 0; thread_id < num_threads; thread_id++)
+  for(thread_id = 0; thread_id < num_threads; thread_id++)
     pthread_create(&ndpi_thread_info[thread_id].pthread, NULL, processing_thread, (void *) thread_id);
 
   /* Waiting for completion */
-  for (thread_id = 0; thread_id < num_threads; thread_id++)
+  for(thread_id = 0; thread_id < num_threads; thread_id++)
     pthread_join(ndpi_thread_info[thread_id].pthread, NULL);
 
   gettimeofday(&end, NULL);
@@ -1491,7 +1526,7 @@ void test_lib() {
   /* Printing cumulative results */
   printResults(tot_usec);
 
-  for (thread_id = 0; thread_id < num_threads; thread_id++) {
+  for(thread_id = 0; thread_id < num_threads; thread_id++) {
     closePcapFile(thread_id);
     terminateDetection(thread_id);
   }

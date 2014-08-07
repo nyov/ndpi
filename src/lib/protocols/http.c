@@ -29,20 +29,24 @@
 static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					 struct ndpi_flow_struct *flow,
 					 u_int32_t protocol) {
-  ndpi_search_tcp_or_udp(ndpi_struct, flow);
+
 
   if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
     /* This is HTTP and it is not a sub protocol (e.g. skype or dropbox) */
 
+
     if(protocol != NDPI_PROTOCOL_HTTP) {
+      ndpi_search_tcp_or_udp(ndpi_struct, flow);
       ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_CORRELATED_PROTOCOL);
-    } else {
+    }else {
       ndpi_int_reset_protocol(flow);
       ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
-    }
 
+    }
     flow->http_detected = 1;
   }
+
+
 }
 
 #ifdef NDPI_CONTENT_FLASH
@@ -187,8 +191,7 @@ static void parseHttpSubprotocol(struct ndpi_detection_module_struct *ndpi_struc
     }
   }
 
-  if((packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP)
-     || (packet->detected_protocol_stack[0] == NDPI_PROTOCOL_HTTP_PROXY))
+  if(flow->l4.tcp.http_stage == 0)
     {
       /* Try matching subprotocols */
       // ndpi_match_string_subprotocol(ndpi_struct, flow, (char*)packet->host_line.ptr, packet->host_line.len);
@@ -680,11 +683,6 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
 
     filename_start = http_request_url_offset(ndpi_struct, flow);
 
-    /* FOUND HTTP CONNECT PROTOCOL */
-    if (packet->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN) {
-      check_content_type_and_change_protocol(ndpi_struct, flow);
-      return;
-    }
 
     if (filename_start == 0) {
       NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG,
@@ -852,8 +850,12 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct,
     return;
   }
 
+  if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN) {
+     return;
+   }
+
   NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP detection...\n");
   ndpi_check_http_tcp(ndpi_struct, flow);
-
+  //_iorg_ndpi_search_http_tcp(ndpi_struct, flow);
 }
 #endif
