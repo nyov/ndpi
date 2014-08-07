@@ -215,14 +215,6 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 
   u_int8_t a;
 
-  if(packet->content_line.ptr != NULL && packet->content_line.len != 0) {
-    NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "Content Type Line found %.*s\n",
-	     packet->content_line.len, packet->content_line.ptr);
-
-    ndpi_match_content_subprotocol(ndpi_struct, flow, (char*)packet->content_line.ptr, packet->content_line.len);
-  }
-
-  /* check user agent here too */
   if(packet->user_agent_line.ptr != NULL && packet->user_agent_line.len != 0) {
     /* Format:
        Mozilla/5.0 (iPad; U; CPU OS 3_2 like Mac OS X; en-us) AppleWebKit/531.21.10 (KHTML, like Gecko) ....
@@ -307,9 +299,14 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 
     parseHttpSubprotocol(ndpi_struct, flow);
 
-    if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
-      ndpi_int_http_add_connection(ndpi_struct, flow, packet->detected_protocol_stack[0]);
-      return; /* We have identified a sub-protocol so we're done */
+    if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
+      ndpi_match_string_subprotocol(ndpi_struct, flow, (char *)flow->host_server_name, strlen((const char *)flow->host_server_name));
+
+    if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN) {
+      if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
+	ndpi_int_http_add_connection(ndpi_struct, flow, packet->detected_protocol_stack[0]);
+	return; /* We have identified a sub-protocol so we're done */
+      }
     }
   }
 
@@ -323,6 +320,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     }
 #endif
   }
+
   /* search for line startin with "Icy-MetaData" */
 #ifdef NDPI_CONTENT_MPEG
   for (a = 0; a < packet->parsed_lines; a++) {
@@ -336,6 +334,14 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 #endif
 #endif
 
+  if(packet->content_line.ptr != NULL && packet->content_line.len != 0) {
+    NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "Content Type Line found %.*s\n",
+	     packet->content_line.len, packet->content_line.ptr);
+    
+    ndpi_match_content_subprotocol(ndpi_struct, flow, (char*)packet->content_line.ptr, packet->content_line.len);
+  }
+
+  /* check user agent here too */
 }
 
 static void check_http_payload(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -667,7 +673,6 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
 
   /* Check if we so far detected the protocol in the request or not. */
   if (flow->l4.tcp.http_stage == 0) {
-
     flow->http_detected = 0;
 
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP stage %d: \n",
@@ -743,6 +748,8 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
       NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG,
           "HTTP START Found, we will look further for the response...\n");
 
+      check_content_type_and_change_protocol(ndpi_struct, flow);
+
       if(packet->host_line.ptr != NULL) {
         flow->http_detected = 1;
         NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG,
@@ -770,7 +777,7 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
 	       " SECOND PAYLOAD TRAFFIC FROM CLIENT, FIRST PACKET MIGHT HAVE BEEN HTTP...UNKNOWN TRAFFIC, HERE FOR HTTP again.. \n");
 
       ndpi_parse_packet_line_info(ndpi_struct, flow);
-
+      
       if (packet->parsed_lines <= 1) {
         /* wait some packets in case request is split over more than 2 packets */
         if (flow->packet_counter < 5) {

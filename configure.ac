@@ -1,24 +1,18 @@
-AC_INIT([src/ndpi_main.c], [1.4.99])
+AC_INIT([libndpi], [1.4.99])
 
-if test ${prefix} == "NONE"; then
-  prefix=/usr/local
-fi
+AC_CONFIG_MACRO_DIR([m4])
 
-INSTALL_PREFIX=${prefix}
+AM_INIT_AUTOMAKE([foreign subdir-objects])
+
+LT_INIT
+
+AC_PROG_CC
+AX_PTHREAD
 
 SVN_RELEASE=`svn info . | grep "^Revision"|cut -d " " -f 2`
 AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
 SVN_DATE=`svn info . | grep "^Last Changed Date"|cut -d " " -f 4-`
 AC_DEFINE_UNQUOTED(NDPI_SVN_DATE, "${SVN_DATE}", [Last SVN change])
-
-case "$host:$CC" in
-    *darwin* )
-        RES=`gcc -Wall -fno-color-diagnostics src/lib/ndpi_main.c 2>&1 | grep "unrecognized command line option "|wc -l`
-	if test $RES -eq 0; then
-	        PLATFORM_DEPENDENT="-fno-color-diagnostics"
-	fi
-	;;
-esac
 
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
@@ -40,12 +34,11 @@ else
   PCAP_LIB="-lpcap"
 fi
 
-AC_CONFIG_FILES([Makefile])
-
+AC_CONFIG_FILES([Makefile src/lib/Makefile example/Makefile libndpi.pc])
 AC_CONFIG_HEADERS(config.h)
 AC_SUBST(SVN_RELEASE)
 AC_SUBST(SVN_DATE)
-AC_SUBST(INSTALL_PREFIX)
 AC_SUBST(PCAP_INC)
 AC_SUBST(PCAP_LIB)
+
 AC_OUTPUT

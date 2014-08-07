@@ -127,7 +127,6 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 
     memset(buffer, 0, buffer_len);
 
-
     /* Truncate total len, search at least in incomplete packet */
     if (total_len > packet->payload_packet_len)
 	total_len = packet->payload_packet_len;
