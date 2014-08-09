@@ -54,7 +54,7 @@ void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct 
       u_int32_t fireyears = 86400 * 365 * 5;
       
 #ifndef __KERNEL__
-      now = time(NULL);
+      now = (u_int32_t)time(NULL);
 #else
       now = 1402729042; /* Dummy workaround */
 #endif
