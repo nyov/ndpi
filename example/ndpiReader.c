@@ -48,9 +48,7 @@
 
 #include "ndpi_api.h"
 
-#if defined(__OpenBSD__)
 #include <sys/socket.h>
-#endif
 
 #define MAX_NUM_READER_THREADS     16
 
