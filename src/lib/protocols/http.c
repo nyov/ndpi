@@ -30,10 +30,8 @@ static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *nd
 					 struct ndpi_flow_struct *flow,
 					 u_int32_t protocol) {
 
-
   if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) {
     /* This is HTTP and it is not a sub protocol (e.g. skype or dropbox) */
-
 
     if(protocol != NDPI_PROTOCOL_HTTP) {
       ndpi_search_tcp_or_udp(ndpi_struct, flow);
@@ -45,7 +43,6 @@ static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *nd
     }
     flow->http_detected = 1;
   }
-
 
 }
 
@@ -743,8 +740,9 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
         check_content_type_and_change_protocol(ndpi_struct, flow);
       }
 
+
       NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG,
-          "HTTP START Found, we will look further for the response...\n");
+          "HTTP START Found, we will look for sub-protocols (content and host)...\n");
 
       check_content_type_and_change_protocol(ndpi_struct, flow);
 
@@ -856,6 +854,5 @@ void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struct,
 
   NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP detection...\n");
   ndpi_check_http_tcp(ndpi_struct, flow);
-  //_iorg_ndpi_search_http_tcp(ndpi_struct, flow);
 }
 #endif
