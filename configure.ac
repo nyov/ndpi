@@ -16,26 +16,44 @@ AC_DEFINE_UNQUOTED(NDPI_SVN_DATE, "${SVN_DATE}", [Last SVN change])
 
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
-AC_CHECK_LIB([pcap], [pcap_open_live])
-
-if test $ac_cv_lib_pcap_pcap_open_live = "no"; then :
-   PCAP_HOME=$HOME/PF_RING/userland/libpcap
-   if test -f $PCAP_HOME/libpcap.a; then :
-     echo "Found $PCAP_HOME"
+PCAP_HOME=$HOME/PF_RING/userland/libpcap
+if test -f $PCAP_HOME/libpcap.a; then :
+     echo "Using libpcap from $PCAP_HOME"
      PCAP_INC="-I $PCAP_HOME"
      PCAP_LIB="$PCAP_HOME/libpcap.a $HOME/PF_RING/userland/lib/libpfring.a -lnuma"
-   else
-     echo ""
-     echo "ERROR: Missing libpcap(-dev) library required to compile the example application"
-     echo "ERROR: Please install it and try again"
-     exit
-   fi
 else
-  PCAP_LIB="-lpcap"
+    AC_CHECK_LIB([pcap], [pcap_open_live], [PCAP_LIB="-lpcap"])
+
+     if test $ac_cv_lib_pcap_pcap_open_live = "no"; then :
+       echo ""
+       echo "ERROR: Missing libpcap(-dev) library required to compile the example application"
+       echo "ERROR: Please install it and try again"
+       exit
+   fi
 fi
+
+AC_ARG_WITH([system-json-c],
+            [AS_HELP_STRING([--with-system-json-c],
+                            [use system libjson-c (default is no)])])
+if test "x$with_system_json_c" = "xyes"; then
+    PKG_CHECK_MODULES([JSON_C], [json-c])
+else
+    JSON_C_CFLAGS=-Ithird-party/json-c
+    JSON_C_LIBS=third-party/json-c/libjson-c.la
+fi
+
+AC_ARG_ENABLE([examples-dynamic-linking],
+             [AS_HELP_STRING([--enable-examples-dynamic-linking],
+                             [dynamically link examples against libndpi (default is no)])])
+
+AM_CONDITIONAL(JSON_C_SYSTEM, [test "x$with_system_json_c" = "xyes"])
+AM_CONDITIONAL(EXAMPLES_DYNAMIC_LINK, [test "x$enable_examples_dynamic_linking" = "xyes"])  
 
 AC_CONFIG_FILES([Makefile src/lib/Makefile example/Makefile libndpi.pc])
 AC_CONFIG_HEADERS(config.h)
+AC_SUBST(JSON_C_CFLAGS)
+AC_SUBST(JSON_C_LIBS)
+AC_SUBST(JSON_C_SYSTEM)
 AC_SUBST(SVN_RELEASE)
 AC_SUBST(SVN_DATE)
 AC_SUBST(PCAP_INC)

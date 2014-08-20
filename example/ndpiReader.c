@@ -1243,7 +1243,7 @@ static void configurePcapHandle(u_int16_t thread_id) {
       if(pcap_setfilter(ndpi_thread_info[thread_id]._pcap_handle, &fcode) < 0) {
 	printf("pcap_setfilter error: '%s'\n", pcap_geterr(ndpi_thread_info[thread_id]._pcap_handle));
       } else
-	printf("Succesfully set BPF filter to '%s'\n", _bpf_filter);
+	printf("Successfully set BPF filter to '%s'\n", _bpf_filter);
     }
   }
 }

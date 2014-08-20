@@ -16,3 +16,4 @@ ndpi_tdelete
 ndpi_revision
 ndpi_init_detection_module
 ndpi_get_num_supported_protocols
+ndpi_set_proto_defaults
