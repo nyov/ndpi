@@ -21,6 +21,9 @@ if test -f $PCAP_HOME/libpcap.a; then :
      echo "Using libpcap from $PCAP_HOME"
      PCAP_INC="-I $PCAP_HOME"
      PCAP_LIB="$PCAP_HOME/libpcap.a $HOME/PF_RING/userland/lib/libpfring.a -lnuma"
+
+     AC_CHECK_LIB([rt], [clock_gettime],   [PCAP_LIB="$PCAP_LIB -lrt"])
+     AC_CHECK_LIB([nl], [nl_handle_alloc], [PCAP_LIB="$PCAP_LIB -lnl"])
 else
     AC_CHECK_LIB([pcap], [pcap_open_live], [PCAP_LIB="-lpcap"])
 
