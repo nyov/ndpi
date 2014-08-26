@@ -181,7 +181,8 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 
 	      if(num_dots >= 2) {
 		stripCertificateTrailer(buffer, buffer_len);
-
+		snprintf(flow->protos.ssl.server_certificate, 
+			 sizeof(flow->protos.ssl.server_certificate), "%s", buffer);
 		return(1 /* Server Certificate */);
 	      }
 	    }
@@ -238,6 +239,9 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct,
 		    strncpy(buffer, &server_name[begin], len);
 		    buffer[len] = '\0';
 		    stripCertificateTrailer(buffer, buffer_len);
+
+		    snprintf(flow->protos.ssl.client_certificate,
+			     sizeof(flow->protos.ssl.client_certificate), "%s", buffer);
 
 		    /* We're happy now */
 		    return(2 /* Client Certificate */);

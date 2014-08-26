@@ -163,7 +163,11 @@ typedef struct ndpi_flow {
   u_int32_t detected_protocol;
 
   char host_server_name[256];
-
+  
+  struct {
+    char client_certificate[48], server_certificate[48];
+  } ssl;
+  
   void *src_id, *dst_id;
 } ndpi_flow_t;
 
@@ -421,7 +425,7 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
   json_object *jObj;
   
   if(!json_flag) {
-#if 1
+#if 0
     printf("\t%s %s:%u <-> %s:%u\n",
 	   ipProto2Name(flow->protocol),
 	   flow->lower_name, ntohs(flow->lower_port),
@@ -435,11 +439,16 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 	 flow->lower_name, ntohs(flow->lower_port),
 	 flow->upper_name, ntohs(flow->upper_port));
 
-  printf("[proto: %u/%s][%u pkts/%u bytes][%s]\n",
+  printf("[proto: %u/%s][%u pkts/%u bytes]",
 	 flow->detected_protocol,
 	 ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol),
-	 flow->packets, flow->bytes,
-	 flow->host_server_name);
+	 flow->packets, flow->bytes);
+    
+  if(flow->host_server_name[0] != '\0') printf("[Host: %s]", flow->host_server_name);
+  if(flow->ssl.client_certificate[0] != '\0') printf("[SSL client: %s]", flow->ssl.client_certificate);
+  if(flow->ssl.server_certificate[0] != '\0') printf("[SSL server: %s]", flow->ssl.server_certificate);
+
+  printf("\n");
 #endif
   } else {
     jObj = json_object_new_object();
@@ -457,6 +466,19 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
     if(flow->host_server_name[0] != '\0')
       json_object_object_add(jObj,"host.server.name",json_object_new_string(flow->host_server_name));
     
+    if((flow->ssl.client_certificate[0] != '\0') || (flow->ssl.server_certificate[0] != '\0')) {
+      json_object *sjObj = json_object_new_object();
+
+      if(flow->ssl.client_certificate[0] != '\0')
+	json_object_object_add(sjObj, "client", json_object_new_string(flow->ssl.client_certificate));
+
+      if(flow->ssl.server_certificate[0] != '\0')
+	json_object_object_add(sjObj, "server", json_object_new_string(flow->ssl.server_certificate));
+
+      json_object_object_add(jObj, "ssl", sjObj);
+    }
+
+  //flow->protos.ssl.client_certificate, flow->protos.ssl.server_certificate);
     if(json_flag == 1)
       json_object_array_add(jArray_known_flows,jObj);
     else if(json_flag == 2)
@@ -887,12 +909,13 @@ static unsigned int packet_processing(u_int16_t thread_id,
      || ((proto == IPPROTO_TCP) && (flow->packets > 10))) {
     flow->detection_completed = 1;
 
-#if 0
-    if(flow->ndpi_flow->l4.tcp.host_server_name[0] != '\0')
-      printf("%s\n", flow->ndpi_flow->l4.tcp.host_server_name);
-#endif
-
     snprintf(flow->host_server_name, sizeof(flow->host_server_name), "%s", flow->ndpi_flow->host_server_name);
+    
+    if((proto == IPPROTO_TCP) && (flow->detected_protocol != NDPI_PROTOCOL_DNS)) {
+      snprintf(flow->ssl.client_certificate, sizeof(flow->ssl.client_certificate), "%s", flow->ndpi_flow->protos.ssl.client_certificate);
+      snprintf(flow->ssl.server_certificate, sizeof(flow->ssl.server_certificate), "%s", flow->ndpi_flow->protos.ssl.server_certificate);
+    }
+
     free_ndpi_flow(flow);
 
     if(verbose > 1) {

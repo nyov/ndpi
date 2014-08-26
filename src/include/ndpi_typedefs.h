@@ -614,7 +614,7 @@ typedef struct ndpi_flow_struct {
 
   u_int8_t protocol_id_already_guessed;
   u_int16_t guessed_protocol_id;
-  u_char host_server_name[256]; /* HTTP host or DNS query   */
+  u_char host_server_name[256]; /* HTTP host or DNS query   */ 
   u_char detected_os[32];       /* Via HTTP User-Agent      */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
 
@@ -624,6 +624,10 @@ typedef struct ndpi_flow_struct {
       u_int8_t bad_packet /* the received packet looks bad */;
       u_int16_t query_type, query_class, rsp_type;
     } dns;
+
+    struct {
+      char client_certificate[32], server_certificate[32];
+    } ssl;
   } protos;
   /* ALL protocol specific 64 bit variables here */
 
