@@ -26,6 +26,19 @@
 
 #ifdef NDPI_PROTOCOL_HTTP
 
+/*
+  nDPI is pretty scrupoulous about HTTP so it waits until the 
+  HTTP response is received just to check that it conforms 
+  with the HTTP specs. However this might be a waste of time as 
+  in 99.99% of the cases is like that.
+
+  If defined, HTTP_QUICK_MODE sets this flow as HTTP without
+  waiting for the HTTP response (that might not come however).
+
+ */
+#define HTTP_QUICK_MODE     1
+
+
 static void ndpi_int_http_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					 struct ndpi_flow_struct *flow,
 					 u_int32_t protocol) {
@@ -747,17 +760,23 @@ static void ndpi_check_http_tcp(struct ndpi_detection_module_struct *ndpi_struct
       check_content_type_and_change_protocol(ndpi_struct, flow);
 
       if(packet->host_line.ptr != NULL) {
+#ifdef HTTP_QUICK_MODE
+	if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN) /* No subprotocol found */
+	  ndpi_int_http_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_HTTP);
+#else
         flow->http_detected = 1;
         NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG,
             "HTTP START Found, we will look further for the response...\n");
         flow->l4.tcp.http_stage = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+#endif
+
         return;
       }
     }
 
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP: REQUEST NOT HTTP CONFORM\n");
     http_bitmask_exclude(flow);
-
+    
   } else if ((flow->l4.tcp.http_stage == 1) || (flow->l4.tcp.http_stage == 2)) {
     NDPI_LOG(NDPI_PROTOCOL_HTTP, ndpi_struct, NDPI_LOG_DEBUG, "HTTP stage %u: \n",
 	     flow->l4.tcp.http_stage);
