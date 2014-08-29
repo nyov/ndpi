@@ -24,8 +24,8 @@
  */
 
 
-#ifndef __NDPI_PUBLIC_FUNCTIONS_H__
-#define __NDPI_PUBLIC_FUNCTIONS_H__
+#ifndef __NDPI_API_H__
+#define __NDPI_API_H__
 
 #include "ndpi_main.h"
 

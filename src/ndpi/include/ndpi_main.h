@@ -61,64 +61,13 @@
 
 #endif
 
-#ifdef WIN32
-#include <Winsock2.h> /* winsock.h is included automatically */
-#include <process.h>
-#include <io.h>
-#include <getopt.h> /* getopt from: http://www.pwilson.net/sample.html. */
-#include <process.h> /* for getpid() and the exec..() family */
-
-#ifndef _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_WARNINGS
-#endif
-#define snprintf	_snprintf
-
-extern char* strsep(char **stringp, const char *delim);
-
-#define __attribute__(x)
-#include <stdint.h>
-#ifndef __GNUC__
-typedef unsigned char  u_char;
-typedef unsigned short u_short;
-typedef unsigned int   uint;
-typedef unsigned long  u_long;
-#endif
-typedef u_char  u_int8_t;
-typedef u_short u_int16_t;
-typedef uint   u_int32_t;
-typedef unsigned __int64 u_int64_t;
-#endif /* Win32 */
-
-
-#include "linux_compat.h"
-
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
-#include <netinet/in.h>
-#if defined(__NetBSD__) || defined(__OpenBSD__)
-#include <netinet/in_systm.h>
-#if defined(__OpenBSD__)
-#include <pthread.h>
-#endif
-#endif
-#endif
-
-#ifndef WIN32
-#ifndef __KERNEL__
-
-#include <netinet/ip.h>
-#include <netinet/tcp.h>
-#include <netinet/udp.h>
-#else
-#include <linux/ip.h>
-#include <linux/tcp.h>
-#include <linux/udp.h>
-#endif
-#endif
-
+#include "ndpi_win32.h"
+#include "ndpi_unix.h"
 #include "ndpi_define.h"
 #include "ndpi_protocol_ids.h"
 #include "ndpi_typedefs.h"
 #include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 extern char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
@@ -129,10 +78,6 @@ u_int64_t ndpi_bytestream_to_number64(const u_int8_t * str, u_int16_t max_chars_
 u_int32_t ndpi_bytestream_dec_or_hex_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 u_int64_t ndpi_bytestream_dec_or_hex_to_number64(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
 u_int32_t ndpi_bytestream_to_ipv4(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
-
-#include "ndpi_api.h"
-#include "ndpi_typedefs.h"
-
 
 /* function to parse a packet which has line based information into a line based structure
  * this function will also set some well known line pointers like:

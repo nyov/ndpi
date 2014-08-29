@@ -116,9 +116,6 @@ struct ndpi_win_in6_addr
 #endif
 
 #define s6_addr                 in6_u.u6_addr8
-  // #define s6_addr16               in6_u.u6_addr16
-  // #define s6_addr32               in6_u.u6_addr32
-
 };
 
 #define in6_addr win_in6_addr
@@ -137,8 +134,6 @@ struct ndpi_ip6_ext
 #include <arpa/inet.h>
 #endif
 #endif
-
-
 
 struct ndpi_in6_addr {
   union {

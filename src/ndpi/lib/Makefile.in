@@ -452,7 +452,9 @@ noinst_HEADERS = ../include/ndpi_api.h \
 		../include/ndpi_main.h \
 		../include/ndpi_protocol_ids.h \
 		../include/ndpi_protocols.h \
-		../include/ndpi_typedefs.h
+		../include/ndpi_typedefs.h \
+		../include/ndpi_unix.h \
+		../include/ndpi_win32.h
 
 
 # this will create a library 1.4.0
