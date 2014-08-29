@@ -23,7 +23,8 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
+
 void ndpi_search_world_of_kung_fu(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
 	struct ndpi_packet_struct *packet = &flow->packet;
 	

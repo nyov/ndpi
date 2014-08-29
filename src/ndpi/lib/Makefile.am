@@ -1,11 +1,12 @@
 lib_LTLIBRARIES = libndpi.la
 
-noinst_HEADERS = ../include/ndpi_main.h \
+noinst_HEADERS  = ../include/ndpi_api.h \
+		../include/linux_compat.h \
+		../include/ndpi_define.h \
+		../include/ndpi_main.h \
+		../include/ndpi_protocol_ids.h \
 		../include/ndpi_protocols.h \
-		../include/ndpi_structs.h \
-		../include/ndpi_utils.h \
-		../include/linux_compat.h
-
+		../include/ndpi_typedefs.h
 
 # this will create a library 1.4.0
 LIB_AC=1

@@ -22,7 +22,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 static void ndpi_check_redis(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;  

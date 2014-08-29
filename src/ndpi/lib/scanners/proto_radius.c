@@ -22,7 +22,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 struct radius_header {
   u_int8_t code;

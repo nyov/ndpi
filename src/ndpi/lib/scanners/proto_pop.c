@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 #define POP_BIT_AUTH		0x0001
 #define POP_BIT_APOP		0x0002

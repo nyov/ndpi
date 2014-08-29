@@ -23,8 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, u_int16_t x) {
   
@@ -141,7 +140,6 @@ void ndpi_search_jabber(struct ndpi_detection_module_struct *ndpi_struct, struct
 
   NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "JABBER Excluded\n");
   flow->ndpi_excluded_app[NDPI_RESULT_APP_UNENCRYPED_JABBER] = 1;
-  flow->ndpi_excluded_app[NDPI_RESULT_APP_TRUPHONE] = 1;
 }
 
 void ndpi_register_proto_jabber (struct ndpi_detection_module_struct *ndpi_mod) {

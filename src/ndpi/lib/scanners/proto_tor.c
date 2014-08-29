@@ -22,8 +22,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 void ndpi_search_tor(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {

@@ -21,7 +21,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 static int ndpi_ftp_control_check_request(const u_int8_t *payload) {
   

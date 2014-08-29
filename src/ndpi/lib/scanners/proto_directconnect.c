@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 #define DIRECT_CONNECT_TYPE_HUB  0
 #define DIRECT_CONNECT_TYPE_PEER 1

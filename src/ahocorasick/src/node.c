@@ -24,9 +24,7 @@
 #include <stdlib.h>
 #endif
 
-#include "ndpi_main.h"
-#include "ndpi_protocols.h"
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 #include "../include/node.h"
 #include "sort.h"

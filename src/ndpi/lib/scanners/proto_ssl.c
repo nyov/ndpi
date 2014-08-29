@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 #define NDPI_MAX_SSL_REQUEST_SIZE 10000
 

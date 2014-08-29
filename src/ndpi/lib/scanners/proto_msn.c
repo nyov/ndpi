@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 #define MAX_PACKETS_FOR_MSN 100
 

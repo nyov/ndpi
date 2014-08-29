@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 struct ndpi_yahoo_header {
   u_int8_t YMSG_str[4];

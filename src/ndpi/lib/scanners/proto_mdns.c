@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 #define NDPI_MAX_MDNS_REQUESTS                        128
 

@@ -23,8 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 static u_int8_t is_special_aimini_host(struct ndpi_int_one_line_struct host_line) {
   

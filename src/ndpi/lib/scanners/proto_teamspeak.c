@@ -22,8 +22,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 u_int16_t tdport = 0, tsport = 0;
 u_int16_t udport = 0, usport = 0;

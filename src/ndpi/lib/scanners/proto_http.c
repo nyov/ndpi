@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 static void ndpi_int_http_add_connection(struct ndpi_flow_struct *flow, u_int32_t protocol)
 {

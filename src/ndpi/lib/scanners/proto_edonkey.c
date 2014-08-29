@@ -21,7 +21,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 static int ndpi_edonkey_payload_check(const u_int8_t *data, u_int32_t len) {
   

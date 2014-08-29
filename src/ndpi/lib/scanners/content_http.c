@@ -21,7 +21,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 #include "ahocorasick.h"
 
 static void ndpi_match_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct, ndpi_automa *automa, struct ndpi_flow_struct *flow,

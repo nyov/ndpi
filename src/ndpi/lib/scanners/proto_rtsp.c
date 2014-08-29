@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 /* this function searches for a rtsp-"handshake" over tcp or udp. */
 void ndpi_search_rtsp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {

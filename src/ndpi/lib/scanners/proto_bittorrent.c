@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 static u_int8_t ndpi_int_search_bittorrent_tcp_zero(struct ndpi_detection_module_struct
 						    *ndpi_struct, struct ndpi_flow_struct *flow)

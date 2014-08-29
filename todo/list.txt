@@ -13,23 +13,29 @@
 
 7. Add ability to include user-defined protocols without prior re-compilation of the software.
 
-8. Include all protocols from OpenDPI.
-
-9. Change the structure to include HTTPS as well:
+8. Change the structure to include HTTPS as well:
 SSL->HTTPS->Dropbox
 SSL->POPS
 
-10. Add proper certificates for TOR and other applications.
+9. Add proper certificates for TOR and other applications.
 
-11. Multiple contents / services per flow.
+10. Multiple contents / services per flow.
 
-12. Content and service providers
+11. Content and service providers
 
-13. Custom content types and providers for non defined domsins and fields.
+12. Custom content types and providers for non defined domsins and fields.
 
-14. Excluding protocols by a bitmask.
+13. Excluding protocols by a bitmask.
 
-15. Make it working in Windows / Linux kernel.
+14. Make it working in Windows / Linux kernel.
+
+15. The scanning process should stop when:
+- either all the scanners are already excluded
+- or every level is already detected.
+But sometimes some results from some scanners should be overwritten by another scanners, just by not excluding the levels.
+Make it conssitent in ndpi_main.c and the calling sample application.
+
+16. From protocols_osdpi.h remove all protocols which are not included in nDPIng. Afterwards, publish the list of supported protocols in README.
 
 svn co https://svn.ntop.org/svn/ntop/trunk/nDPI/
 cd nDPI/

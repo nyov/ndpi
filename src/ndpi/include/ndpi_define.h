@@ -118,6 +118,14 @@
 /* misc definitions */
 #define NDPI_DEFAULT_MAX_TCP_RETRANSMISSION_WINDOW_SIZE 0x10000
 
+#define ndpi_min(a,b)   ((a < b) ? a : b)
+#define ndpi_max(a,b)   ((a > b) ? a : b)
+
+#define NDPI_PARSE_PACKET_LINE_INFO(ndpi_struct,flow,packet)		\
+                        if (packet->packet_lines_parsed_complete != 1) {        \
+			  ndpi_parse_packet_line_info(ndpi_struct,flow);	\
+                        }                                                       \
+
 
 /* TODO: rebuild all memory areas to have a more aligned memory block here */
 

@@ -1,7 +1,7 @@
 AC_INIT([nDPIng], [2.0])
 AC_CONFIG_SRCDIR([src/ndpi/include/ndpi_protocols.h])
 
-AM_INIT_AUTOMAKE([-Wall])
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_MACRO_DIR([m4])
 AC_PROG_LIBTOOL
 

@@ -22,7 +22,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 void ndpi_search_sflow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "sflow detection...\n");

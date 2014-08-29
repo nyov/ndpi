@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 #define NDPI_IRC_FIND_LESS(time_err,less) {int t1 = 0;	\
     u_int32_t timestamp = time_err[0];			\

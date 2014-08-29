@@ -25,9 +25,7 @@
 #include <ctype.h>
 #endif
 
-#include "ndpi_main.h"
-#include "ndpi_protocols.h"
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 #include "ahocorasick.h"
 
 /* Allocation step for automata.all_nodes */

@@ -22,7 +22,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 struct gtp_header_generic {
   u_int8_t flags, message_type;

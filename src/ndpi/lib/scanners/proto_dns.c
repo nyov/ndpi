@@ -22,7 +22,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 static u_int getNameLength(u_int i, const u_int8_t *payload, u_int payloadLen) {
   if(payload[i] == 0x00)

@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_utils.h"
+#include "ndpi_api.h"
 
 /*
  * a qq client packet looks like this:

@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 static u_int8_t ndpi_int_check_stun(struct ndpi_detection_module_struct *ndpi_struct, const u_int8_t * payload, const u_int16_t payload_length) {
   

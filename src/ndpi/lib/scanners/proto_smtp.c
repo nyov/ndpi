@@ -23,7 +23,7 @@
  * 
  */
 
-#include "ndpi_protocols.h"
+#include "ndpi_api.h"
 
 #define SMTP_BIT_220		0x01
 #define SMTP_BIT_250		0x02
