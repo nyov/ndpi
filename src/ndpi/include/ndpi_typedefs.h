@@ -407,6 +407,7 @@ typedef struct ndpi_flow_struct {
   u_int32_t pplive_stage2:2;			// 0-2
   u_int32_t pplive_stage3:2;			// 0-2
   u_int8_t redis_s2d_first_char, redis_d2s_first_char;
+  u_int32_t http_detected:1;
 
   /* internal structures to save functions calls */
   struct ndpi_packet_struct packet;
