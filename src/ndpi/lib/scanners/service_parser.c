@@ -90,45 +90,12 @@ void ndpi_search_service_by_ip(struct ndpi_detection_module_struct *ndpi_struct,
        Twitter Inc.
     */
     
-    // 192.133.76.0/22
-    /* 192.133.76.0 - 192.133.79.255 */
-    if(((saddr >= 3229961216) && (saddr <= 3229962239))
-       || ((daddr >= 3229961216) && (daddr <= 3229962239))
-       || ((saddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0x5C854C00/* 92.133.76.0 */)
-       || ((daddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0x5C854C00/* 92.133.76.0 */)
-       ) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
-      return;
-    }
-    // 199.16.156.0/22
-    /* 199.16.156.0 - 199.16.159.255 */
-    if(((saddr >= 3339754496) && (saddr <= 3339755519))
-       || ((daddr >= 3339754496) && (daddr <= 3339755519))
-       || ((saddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC7109C00/* 199.16.156.0 */)
-       || ((daddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC7109C00/* 199.16.156.0 */)
-       ) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
-      return;
-    }
-
-     // 199.59.148.0/22
-    /* 199.59.148.0 - 199.59.151.255 */
-    if(((saddr >= 3342570496) && (saddr <= 3342571519))
-       || ((daddr >= 3342570496) && (daddr <= 3342571519))
-       || ((saddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC73B9400/* 199.59.148.0 */)
-       || ((daddr & 0xFFFFFC00 /* 255.255.252.0  */) == 0xC73B9400/* 199.59.148.0 */)
-       ) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
-      return;
-    }
-
-     // 199.96.56.0 /21
-    /* 199.96.56.0 - 199.96.63.255 */
-    if(((saddr >= 3344971776) && (saddr <= 3344973823))
-       || ((daddr >= 3344971776) && (daddr <= 3344973823))
-       || ((saddr & 0xFFFFF800 /* 255.255.248.0  */) == 0xC7603800/* 199.96.56.0 */)
-       || ((daddr & 0xFFFFF800 /* 255.255.248.0  */) == 0xC7603800/* 199.96.56.0 */)
-       ) {
+    if (ndpi_ips_match(saddr, daddr, 0xC0854C00, 22)     /* 192.133.76.0/22 */
+      || ndpi_ips_match(saddr, daddr, 0xC7109C00, 22)  /* 199.16.156.0/22 */
+      || ndpi_ips_match(saddr, daddr, 0xC73B9400, 22)  /* 199.59.148.0/22 */
+      || ndpi_ips_match(saddr, daddr, 0xC7603A00, 23)  /* 199.96.58.0/23  */
+      || ndpi_ips_match(saddr, daddr, 0xC7603E00, 23)  /* 199.96.62.0/23  */
+    ) {
       flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
       return;
     }

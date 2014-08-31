@@ -69,6 +69,9 @@
 #include "ndpi_protocols.h"
 #include "ndpi_api.h"
 
+extern u_int8_t ndpi_net_match(u_int32_t ip_to_check, u_int32_t net, u_int32_t num_bits);
+extern u_int8_t ndpi_ips_match(u_int32_t src, u_int32_t dst, u_int32_t net, u_int32_t num_bits);
+
 extern char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
 u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_chars_to_read, u_int16_t * bytes_read);
