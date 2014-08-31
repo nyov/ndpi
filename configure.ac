@@ -16,18 +16,18 @@ AC_DEFINE_UNQUOTED(NDPI_SVN_DATE, "${SVN_DATE}", [Last SVN change])
 
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
-PCAP_HOME=$HOME/PF_RING/userland/libpcap
+PCAP_HOME=$HOME/PF_RING/userland
 
 if test -d $PCAP_HOME; then :
    echo -n ""
 else
-   PCAP_HOME=`pwd`/../../PF_RING/userland/libpcap
+   PCAP_HOME=`pwd`/../../PF_RING/userland
 fi
 
-if test -f $PCAP_HOME/libpcap.a; then :
+if test -f $PCAP_HOME/libpcap/libpcap.a; then :
      echo "Using libpcap from $PCAP_HOME"
      PCAP_INC="-I $PCAP_HOME"
-     PCAP_LIB="$PCAP_HOME/libpcap.a -lpfring -lnuma"
+     PCAP_LIB="$PCAP_HOME/libpcap/libpcap.a $PCAP_HOME/lib/libpfring.a -lnuma"
 
      AC_CHECK_LIB([rt], [clock_gettime],   [PCAP_LIB="$PCAP_LIB -lrt"])
      AC_CHECK_LIB([nl], [nl_handle_alloc], [PCAP_LIB="$PCAP_LIB -lnl"])
@@ -45,10 +45,6 @@ fi
 CFLAGS="$CFLAGS $(pkg-config --cflags json-c)"
 LDFLAGS="$LDFLAGS $(pkg-config --libs json-c)"
 AC_CHECK_LIB(json-c, json_object_new_object, AC_DEFINE_UNQUOTED(HAVE_JSON_C, 1, [The JSON-C library is present]))
-
-if test "x$ac_cv_lib_json_c_json_object_new_object" = xyes; then :
-  JSON_C_LIB="-ljson-c"
-fi
 
 AC_CONFIG_FILES([Makefile src/lib/Makefile example/Makefile libndpi.pc])
 AC_CONFIG_HEADERS(config.h)
