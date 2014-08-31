@@ -25,6 +25,18 @@
 
 #include "ndpi_api.h"
 
+/*
+  nDPIng is pretty scrupoulous about HTTP so it waits until the 
+  HTTP response is received just to check that it conforms 
+  with the HTTP specs. However this might be a waste of time as 
+  in 99.99% of the cases is like that.
+
+  If defined, HTTP_QUICK_MODE sets this flow as HTTP without
+  waiting for the HTTP response (that might not come however).
+
+ */
+#define HTTP_QUICK_MODE     1
+
 static void ndpi_int_http_add_connection(struct ndpi_flow_struct *flow, u_int32_t protocol) {
   if (protocol == NDPI_RESULT_BASE_HTTP_CONNECT) {
     flow->ndpi_result_base = NDPI_RESULT_BASE_HTTP_CONNECT;
@@ -302,9 +314,17 @@ static void ndpi_search_http_tcp(struct ndpi_detection_module_struct *ndpi_struc
       check_content_type_and_change_protocol(ndpi_struct, flow);
 
       if (packet->host_line.ptr != NULL) {
-        flow->http_detected = 1;
-        NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "HTTP START Found, we will look further for the response...\n");
+	
+	flow->http_detected = 1;
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "HTTP START Found, we will look further for the response...\n");
         flow->l4.tcp.http_stage = packet->packet_direction + 1; // packet_direction 0: stage 1, packet_direction 1: stage 2
+	
+#ifdef HTTP_QUICK_MODE
+	if (flow->ndpi_result_base == NDPI_RESULT_BASE_STILL_UNKNOWN) {
+	  ndpi_int_http_add_connection(flow, NDPI_RESULT_BASE_HTTP);
+	}
+#endif
+        
         return;
       }
     }
