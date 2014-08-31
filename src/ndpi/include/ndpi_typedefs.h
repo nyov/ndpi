@@ -70,9 +70,6 @@ typedef union {
 #endif
 } ndpi_ip_addr_t;
 
-
-# define MAX_PACKET_COUNTER 65000
-
 typedef struct ndpi_id_struct {
   ndpi_ip_addr_t rtsp_ip_address;
   u_int32_t yahoo_video_lan_timer;

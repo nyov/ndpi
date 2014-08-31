@@ -29,38 +29,6 @@
 
 #include "ndpi_main.h"
 
-/* the get_uXX will return raw network packet bytes !! */
-#define get_u_int8_t(X,O)  (*(u_int8_t *)(((u_int8_t *)X) + O))
-#define get_u_int16_t(X,O)  (*(u_int16_t *)(((u_int8_t *)X) + O))
-#define get_u_int32_t(X,O)  (*(u_int32_t *)(((u_int8_t *)X) + O))
-#define get_u_int64_t(X,O)  (*(u_int64_t *)(((u_int8_t *)X) + O))
-
-/* new definitions to get little endian from network bytes */
-#define get_ul8(X,O) get_u_int8_t(X,O)
-
-
-#if defined(__LITTLE_ENDIAN__)
-#define get_l16(X,O)  get_u_int16_t(X,O)
-#define get_l32(X,O)  get_u_int32_t(X,O)
-#elif defined(__BIG_ENDIAN__)
-/* convert the bytes from big to little endian */
-#ifndef __KERNEL__
-# define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
-# define get_l32(X,O) bswap_32(get_u_int32_t(X,O))
-#else
-# define get_l16(X,O) __cpu_to_le16(get_u_int16_t(X,O))
-# define get_l32(X,O) __cpu_to_le32(get_u_int32_t(X,O))
-#endif
-
-#else
-
-#error "__BYTE_ORDER MUST BE DEFINED !"
-
-#endif							/* __BYTE_ORDER */
-
-/* define memory callback function */
-#define match_first_bytes(payload,st) (memcmp((payload),(st),(sizeof(st)-1))==0)
-
 void ndpi_register_ip_protocols (struct ndpi_detection_module_struct *mod);
 
 void ndpi_register_proto_ciscovpn (struct ndpi_detection_module_struct *mod);

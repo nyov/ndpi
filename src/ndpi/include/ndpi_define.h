@@ -131,6 +131,7 @@
 
 /* DEFINITION OF MAX LINE NUMBERS FOR line parse algorithm */
 #define NDPI_MAX_PARSE_LINES_PER_PACKET                        200
+#define MAX_PACKET_COUNTER 65000
 
 
 /**********************
@@ -181,5 +182,36 @@
 /** macro to compare 2 IPv6 addresses with each other to identify the "smaller" IPv6 address  */
 #define NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(x,y)  \
   ((((u_int64_t *)(x))[0]) < (((u_int64_t *)(y))[0]) || ( (((u_int64_t *)(x))[0]) == (((u_int64_t *)(y))[0]) && (((u_int64_t *)(x))[1]) < (((u_int64_t *)(y))[1])) )
+
+/* the get_uXX will return raw network packet bytes !! */
+#define get_u_int8_t(X,O)  (*(u_int8_t *)(((u_int8_t *)X) + O))
+#define get_u_int16_t(X,O)  (*(u_int16_t *)(((u_int8_t *)X) + O))
+#define get_u_int32_t(X,O)  (*(u_int32_t *)(((u_int8_t *)X) + O))
+#define get_u_int64_t(X,O)  (*(u_int64_t *)(((u_int8_t *)X) + O))
+
+/* new definitions to get little endian from network bytes */
+#define get_ul8(X,O) get_u_int8_t(X,O)
+
+#if defined(__LITTLE_ENDIAN__)
+#define get_l16(X,O)  get_u_int16_t(X,O)
+#define get_l32(X,O)  get_u_int32_t(X,O)
+#elif defined(__BIG_ENDIAN__)
+/* convert the bytes from big to little endian */
+#ifndef __KERNEL__
+# define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
+# define get_l32(X,O) bswap_32(get_u_int32_t(X,O))
+#else
+# define get_l16(X,O) __cpu_to_le16(get_u_int16_t(X,O))
+# define get_l32(X,O) __cpu_to_le32(get_u_int32_t(X,O))
+#endif
+
+#else
+
+#error "__BYTE_ORDER MUST BE DEFINED !"
+
+#endif							/* __BYTE_ORDER */
+
+/* define memory callback function */
+#define match_first_bytes(payload,st) (memcmp((payload),(st),(sizeof(st)-1))==0)
 
 #endif /* __NDPI_DEFINE_INCLUDE_FILE__ */
