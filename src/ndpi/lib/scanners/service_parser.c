@@ -160,8 +160,16 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
     return;
   }
   
-  if (flow->certificate != NULL && strlen(flow->certificate) != 0) {
-    ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, flow->certificate, strlen(flow->certificate));
+  if (flow->server_certificate != NULL && strlen(flow->server_certificate) != 0) {
+    ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, flow->server_certificate, strlen(flow->server_certificate));
+  }
+  
+  if (flow->ndpi_excluded_service == 1) {
+    return;
+  }
+  
+  if (flow->client_certificate != NULL && strlen(flow->client_certificate) != 0) {
+    ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, flow->client_certificate, strlen(flow->client_certificate));
   }
   
   if (flow->ndpi_excluded_service == 1) {

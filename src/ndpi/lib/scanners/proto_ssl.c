@@ -147,7 +147,7 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct n
 
 	      if(num_dots >= 2) {
 		stripCertificateTrailer(buffer, buffer_len);
-
+		snprintf(flow->server_certificate, sizeof(flow->server_certificate), "%s", buffer);
 		return(1 /* Server Certificate */);
 	      }
 	    }
@@ -204,8 +204,7 @@ int getSSLcertificate(struct ndpi_detection_module_struct *ndpi_struct, struct n
 		    strncpy(buffer, &server_name[begin], len);
 		    buffer[len] = '\0';
 		    stripCertificateTrailer(buffer, buffer_len);
-
-		    /* We're happy now */
+		    snprintf(flow->client_certificate, sizeof(flow->client_certificate), "%s", buffer);
 		    return(2 /* Client Certificate */);
 		  }
 
@@ -234,7 +233,6 @@ void sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_
 
   if (rc > 0) {
     packet->ssl_certificate_detected = 1;
-    strcpy(flow->certificate, certificate);
     ndpi_int_ssl_add_connection(flow, NDPI_RESULT_BASE_SSL);
   } 
 

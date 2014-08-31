@@ -364,7 +364,8 @@ typedef struct ndpi_flow_struct {
   u_char host_server_name[256]; /* HTTP host or DNS query */
   u_char detected_os[32];       /* Via HTTP User-Agent    */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
-  char certificate[64];
+  char client_certificate[64];
+  char server_certificate[64];
 
   union {
     struct {
