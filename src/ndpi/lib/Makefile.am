@@ -1,25 +1,19 @@
 lib_LTLIBRARIES = libndpi.la
 
-noinst_HEADERS  = ../include/ndpi_api.h \
-		../include/linux_compat.h \
-		../include/ndpi_define.h \
-		../include/ndpi_main.h \
-		../include/ndpi_protocol_ids.h \
-		../include/ndpi_protocols.h \
-		../include/ndpi_typedefs.h \
-		../include/ndpi_unix.h \
-		../include/ndpi_win32.h
+libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/ndpi/include/ -I$(top_srcdir)/src/ahocorasick/include/
+libndpi_la_LDFLAGS = -version-info 1:0:0 -export-symbols $(top_srcdir)/libndpi.sym
 
-# this will create a library 1.4.0
-LIB_AC=1
-LIB_REV=4
-LIB_ANC=0
+libndpi_la_includedir = $(includedir)/libndpi-@VERSION@/libndpi
 
-# ntop
-AM_CFLAGS=-fPIC @PLATFORM_DEPENDENT@
-
-libndpi_la_CPPFLAGS = -I$(top_srcdir)/src/ndpi/include/  -I$(top_srcdir)/src/ahocorasick/include/
-libndpi_la_LDFLAGS=-version-info ${LIB_AC}:${LIB_REV}:${LIB_ANC}
+libndpi_la_include_HEADERS = ../include/ndpi_api.h \
+			     ../include/linux_compat.h \
+			     ../include/ndpi_define.h \
+			     ../include/ndpi_main.h \
+			     ../include/ndpi_protocol_ids.h \
+			     ../include/ndpi_protocols.h \
+			     ../include/ndpi_typedefs.h \
+			     ../include/ndpi_unix.h \
+			     ../include/ndpi_win32.h
 
 libndpi_la_SOURCES = \
 			../../ahocorasick/src/ahocorasick.c \
