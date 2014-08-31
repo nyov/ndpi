@@ -42,8 +42,14 @@ else
    fi
 fi
 
-CFLAGS="$CFLAGS $(pkg-config --cflags json-c)"
-LDFLAGS="$LDFLAGS $(pkg-config --libs json-c)"
+if test -d /usr/local/include/json-c/; then :
+   CFLAGS="$CFLAGS -I/usr/local/include/json-c/"
+   LDFLAGS="$LDFLAGS -L/usr/local/lib -ljson-c"
+else
+  CFLAGS="$CFLAGS $(pkg-config --cflags json-c)"
+  LDFLAGS="$LDFLAGS $(pkg-config --libs json-c)"
+fi
+
 AC_CHECK_LIB(json-c, json_object_new_object, AC_DEFINE_UNQUOTED(HAVE_JSON_C, 1, [The JSON-C library is present]))
 
 AC_CONFIG_FILES([Makefile src/lib/Makefile example/Makefile libndpi.pc])
