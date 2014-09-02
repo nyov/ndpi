@@ -28,6 +28,16 @@
   gcc -E -dM - < /dev/null |grep ENDIAN
 */
 
+#ifdef __OpenBSD__
+#include <endian.h>
+#define __BYTE_ORDER BYTE_ORDER
+#if BYTE_ORDER == LITTLE_ENDIAN
+#define __LITTLE_ENDIAN__
+#else
+#define __BIG_ENDIAN__
+#endif/* BYTE_ORDER */
+#endif/* __OPENBSD__ */
+
 #if 0
 #ifndef NDPI_ENABLE_DEBUG_MESSAGES
 #define NDPI_ENABLE_DEBUG_MESSAGES
