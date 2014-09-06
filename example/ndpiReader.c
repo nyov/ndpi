@@ -81,6 +81,7 @@ static u_int16_t decode_tunnels = 0;
 static u_int16_t num_loops = 1;
 static u_int8_t shutdown_app = 0;
 static u_int8_t num_threads = 1;
+static u_int32_t current_ndpi_memory = 0, max_ndpi_memory = 0;
 #ifdef linux
 static int core_affinity[MAX_NUM_READER_THREADS];
 #endif
@@ -358,6 +359,11 @@ static void debug_printf(u_int32_t protocol, void *id_struct,
 /* ***************************************************** */
 
 static void *malloc_wrapper(unsigned long size) {
+  current_ndpi_memory += size;
+
+  if(current_ndpi_memory > max_ndpi_memory)
+    max_ndpi_memory = current_ndpi_memory;
+  
   return malloc(size);
 }
 
@@ -775,20 +781,23 @@ static struct ndpi_flow *get_ndpi_flow(u_int16_t thread_id,
 	inet_ntop(AF_INET6, &iph6->ip6_dst, newflow->upper_name, sizeof(newflow->upper_name));
       }
 
-      if((newflow->ndpi_flow = calloc(1, size_flow_struct)) == NULL) {
+      if((newflow->ndpi_flow = malloc_wrapper(size_flow_struct)) == NULL) {
 	printf("[NDPI] %s(2): not enough memory\n", __FUNCTION__);
 	return(NULL);
-      }
+      } else
+	memset(newflow->ndpi_flow, 0, size_flow_struct);
 
-      if((newflow->src_id = calloc(1, size_id_struct)) == NULL) {
+      if((newflow->src_id = malloc_wrapper(size_id_struct)) == NULL) {
 	printf("[NDPI] %s(3): not enough memory\n", __FUNCTION__);
 	return(NULL);
-      }
+      } else
+	memset(newflow->src_id, 0, size_id_struct);
 
-      if((newflow->dst_id = calloc(1, size_id_struct)) == NULL) {
+      if((newflow->dst_id = malloc_wrapper(size_id_struct)) == NULL) {
 	printf("[NDPI] %s(4): not enough memory\n", __FUNCTION__);
 	return(NULL);
-      }
+      } else
+	memset(newflow->dst_id, 0, size_id_struct);
 
       ndpi_tsearch(newflow, &ndpi_thread_info[thread_id].ndpi_flows_root[idx], node_cmp); /* Add */
       ndpi_thread_info[thread_id].stats.ndpi_flow_count++;
@@ -1026,12 +1035,37 @@ static void json_init() {
 
 /* ***************************************************** */
 
+char* formatBytes(u_int32_t howMuch, char *buf, u_int buf_len) {
+  char unit = 'B';
+
+  if(howMuch < 1024) {
+    snprintf(buf, buf_len, "%lu %c", (unsigned long)howMuch, unit);
+  } else if(howMuch < 1048576) {
+    snprintf(buf, buf_len, "%.2f K%c", (float)(howMuch)/1024, unit);
+  } else {
+    float tmpGB = ((float)howMuch)/1048576;
+
+    if(tmpGB < 1024) {
+      snprintf(buf, buf_len, "%.2f M%c", tmpGB, unit);
+    } else {
+      tmpGB /= 1024;
+
+      snprintf(buf, buf_len, "%.2f G%c", tmpGB, unit);
+    }
+  }
+
+  return(buf);
+}
+
+/* ***************************************************** */
+
 static void printResults(u_int64_t tot_usec) {
   u_int32_t i;
   u_int64_t total_flow_bytes = 0;
   u_int avg_pkt_size = 0;
   struct thread_stats cumulative_stats;
   int thread_id;
+  char buf[32];
 #ifdef HAVE_JSON_C
   FILE *json_fp;
   json_object *jObj_main, *jObj_trafficStats, *jArray_detProto, *jObj;
@@ -1070,6 +1104,12 @@ static void printResults(u_int64_t tot_usec) {
       cumulative_stats.packet_len[i] += ndpi_thread_info[thread_id].stats.packet_len[i];
     cumulative_stats.max_packet_len += ndpi_thread_info[thread_id].stats.max_packet_len;
   }
+
+  printf("\nnDPI Memory statistics:\n");
+  printf("\tnDPI Memory (once):      %-13s\n", formatBytes(sizeof(struct ndpi_detection_module_struct), buf, sizeof(buf)));
+  printf("\tFlow Memory (per flow):  %-13s\n", formatBytes(size_flow_struct, buf, sizeof(buf)));
+  printf("\tActual Memory:           %-13s\n", formatBytes(current_ndpi_memory, buf, sizeof(buf)));
+  printf("\tPeak Memory:             %-13s\n", formatBytes(max_ndpi_memory, buf, sizeof(buf)));
 
   if(!json_flag) {
     printf("\nTraffic statistics:\n");
