@@ -52,6 +52,12 @@ src/lib/Makefile.am
 
 11. make
 
+==========
+
+If you want to distribute a source tar file of nDPI do:
+
+# make dist
+
 --------------------------
 Luca Deri <deri@ntop.org>
 Tomasz Bujlow <tomasz@skatnet.dk>
