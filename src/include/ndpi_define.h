@@ -28,6 +28,10 @@
   gcc -E -dM - < /dev/null |grep ENDIAN
 */
 
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#include <machine/endian.h>
+#endif
+
 #ifdef __OpenBSD__
 #include <endian.h>
 #define __BYTE_ORDER BYTE_ORDER
