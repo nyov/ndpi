@@ -15,7 +15,7 @@ make
 In case you want to add new protocols or / and if you happen
 to change .am files (e.g. Makefile.am) remember to do:
 
-# autoreconf -ivf
+# ./autogen.sh
 # ./configure
 # make
 
