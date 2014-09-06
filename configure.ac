@@ -9,9 +9,15 @@ LT_INIT
 AC_PROG_CC
 AX_PTHREAD
 
+if test -d ".svn"; then :
 SVN_RELEASE=`svn info . | grep "^Revision"|cut -d " " -f 2`
-AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
 SVN_DATE=`svn info . | grep "^Last Changed Date"|cut -d " " -f 4-`
+else
+SVN_RELEASE=""
+SVN_DATE=""
+fi
+
+AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
 AC_DEFINE_UNQUOTED(NDPI_SVN_DATE, "${SVN_DATE}", [Last SVN change])
 
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
