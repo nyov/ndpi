@@ -273,10 +273,10 @@
 #define get_ul8(X,O) get_u_int8_t(X,O)
 
 
-#if defined(__LITTLE_ENDIAN__)
+#if defined(__LITTLE_ENDIAN__) || defined(_LITTLE_ENDIAN)
 #define get_l16(X,O)  get_u_int16_t(X,O)
 #define get_l32(X,O)  get_u_int32_t(X,O)
-#elif defined(__BIG_ENDIAN__)
+#elif defined(__BIG_ENDIAN__) || defined(__BIG_ENDIAN)
 /* convert the bytes from big to little endian */
 #ifndef __KERNEL__
 # define get_l16(X,O) bswap_16(get_u_int16_t(X,O))
