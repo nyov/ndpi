@@ -524,26 +524,6 @@ static void ndpi_flow_freer(void *node) {
 
 /* ***************************************************** */
 
-static void node_idle_scan_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
-  struct ndpi_flow *flow = *(struct ndpi_flow **) node;
-  u_int16_t thread_id = *((u_int16_t *) user_data);
-
-  if(ndpi_thread_info[thread_id].num_idle_flows == IDLE_SCAN_BUDGET) /* TODO optimise with a budget-based walk */
-    return;
-
-  if((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
-    if(flow->last_seen + MAX_IDLE_TIME < ndpi_thread_info[thread_id].last_time) {
-      free_ndpi_flow(flow);
-      ndpi_thread_info[thread_id].stats.ndpi_flow_count--;
-
-      /* adding to a queue (we can't delete it from the tree inline ) */
-      ndpi_thread_info[thread_id].idle_flows[ndpi_thread_info[thread_id].num_idle_flows++] = flow;
-    }
-  }
-}
-
-/* ***************************************************** */
-
 static void node_count_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
   u_int16_t num = *((u_int16_t*)user_data);
@@ -596,8 +576,8 @@ static unsigned int node_guess_undetected_protocol(u_int16_t thread_id,
 /* ***************************************************** */
 
 static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
-  struct ndpi_flow *flow = *(struct ndpi_flow**)node;
-  u_int16_t thread_id = *((u_int16_t*)user_data);
+  struct ndpi_flow *flow = *(struct ndpi_flow **) node;
+  u_int16_t thread_id = *((u_int16_t *) user_data);
 
 #if 0
   printf("<%d>Walk on node %s (%p)\n",
@@ -620,6 +600,30 @@ static void node_proto_guess_walker(const void *node, ndpi_VISIT which, int dept
     ndpi_thread_info[thread_id].stats.protocol_counter[flow->detected_protocol]       += flow->packets;
     ndpi_thread_info[thread_id].stats.protocol_counter_bytes[flow->detected_protocol] += flow->bytes;
     ndpi_thread_info[thread_id].stats.protocol_flows[flow->detected_protocol]++;
+  }
+}
+
+/* ***************************************************** */
+
+static void node_idle_scan_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
+  struct ndpi_flow *flow = *(struct ndpi_flow **) node;
+  u_int16_t thread_id = *((u_int16_t *) user_data);
+
+  if(ndpi_thread_info[thread_id].num_idle_flows == IDLE_SCAN_BUDGET) /* TODO optimise with a budget-based walk */
+    return;
+
+  if((which == ndpi_preorder) || (which == ndpi_leaf)) { /* Avoid walking the same node multiple times */
+    if(flow->last_seen + MAX_IDLE_TIME < ndpi_thread_info[thread_id].last_time) {
+
+      /* update stats */
+      node_proto_guess_walker(node, which, depth, user_data);
+
+      free_ndpi_flow(flow);
+      ndpi_thread_info[thread_id].stats.ndpi_flow_count--;
+
+      /* adding to a queue (we can't delete it from the tree inline ) */
+      ndpi_thread_info[thread_id].idle_flows[ndpi_thread_info[thread_id].num_idle_flows++] = flow;
+    }
   }
 }
 
