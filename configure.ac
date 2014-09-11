@@ -32,7 +32,7 @@ fi
 
 if test -f $PCAP_HOME/libpcap/libpcap.a; then :
      echo "Using libpcap from $PCAP_HOME"
-     PCAP_INC="-I $PCAP_HOME"
+     PCAP_INC="-I $PCAP_HOME/libpcap"
      PCAP_LIB="$PCAP_HOME/libpcap/libpcap.a $PCAP_HOME/lib/libpfring.a -lnuma"
 
      AC_CHECK_LIB([rt], [clock_gettime],   [PCAP_LIB="$PCAP_LIB -lrt"])
