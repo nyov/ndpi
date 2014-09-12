@@ -134,6 +134,7 @@ libndpi_la_SOURCES = ndpi_content_match.c.inc \
 		     protocols/usenet.c \
 		     protocols/veohtv.c \
 		     protocols/viber.c \
+		     protocols/vhua.c \
 		     protocols/vmware.c \
 		     protocols/vnc.c \
 		     protocols/warcraft3.c \
