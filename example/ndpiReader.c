@@ -1353,8 +1353,8 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
 
   /* trying to open a live interface */
   if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_live(_pcap_file[thread_id], snaplen, promisc, 500, errbuf)) == NULL) {
-    capture_until = 0;
-
+    capture_for = capture_until = 0;
+    
     live_capture = 0;
     num_threads = 1; /* Open pcap files in single threads mode */
 
