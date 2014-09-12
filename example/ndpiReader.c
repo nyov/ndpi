@@ -92,6 +92,7 @@ static struct timeval pcap_start, pcap_end;
  * Detection parameters
  */
 static u_int32_t detection_tick_resolution = 1000;
+static time_t capture_for = 0;
 static time_t capture_until = 0;
 
 #define IDLE_SCAN_PERIOD           10 /* msec (use detection_tick_resolution = 1000) */
@@ -253,7 +254,8 @@ static void parseOptions(int argc, char **argv) {
       break;
 
     case 's':
-      capture_until = atoi(optarg);
+      capture_for = atoi(optarg);
+      capture_until = capture_for + time(NULL);
       break;
 
     case 't':
@@ -1380,14 +1382,13 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
 
   configurePcapHandle(thread_id);
 
-  if(capture_until > 0) {
-    if(!json_flag) printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_until);
+  if(capture_for > 0) {
+    if(!json_flag) printf("Capturing traffic up to %u seconds\n", (unsigned int)capture_for);
 
 #ifndef WIN32
-    alarm(capture_until);
+    alarm(capture_for);
     signal(SIGALRM, sigproc);
 #endif
-    capture_until += time(NULL);
   }
 }
 
