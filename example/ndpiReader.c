@@ -86,6 +86,8 @@ static u_int32_t current_ndpi_memory = 0, max_ndpi_memory = 0;
 static int core_affinity[MAX_NUM_READER_THREADS];
 #endif
 
+static struct timeval pcap_start, pcap_end;
+
 /**
  * Detection parameters
  */
@@ -1149,8 +1151,14 @@ static void printResults(u_int64_t tot_usec) {
       char buf[32], buf1[32];
       float t = (float)(cumulative_stats.ip_packet_count*1000000)/(float)tot_usec;
       float b = (float)(cumulative_stats.total_wire_bytes * 8 *1000000)/(float)tot_usec;
-
+      float traffic_duration;
+      if (live_capture) traffic_duration = tot_usec;
+      else traffic_duration = (pcap_end.tv_sec*1000000 + pcap_end.tv_usec) - (pcap_start.tv_sec*1000000 + pcap_start.tv_usec);
       printf("\tnDPI throughput:       %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+      t = (float)(cumulative_stats.ip_packet_count*1000000)/(float)traffic_duration;
+      b = (float)(cumulative_stats.total_wire_bytes * 8 *1000000)/(float)traffic_duration;
+      printf("\tTraffic throughput:    %s pps / %s/sec\n", formatPackets(t, buf), formatTraffic(b, 1, buf1));
+      printf("\tTraffic duration:      %.3f sec\n", traffic_duration/1000000);
     }
 
     if(enable_protocol_guess)
@@ -1405,6 +1413,11 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
     return;
   }
 
+  if (!live_capture) {
+    if (!pcap_start.tv_sec) pcap_start.tv_sec = header->ts.tv_sec, pcap_start.tv_usec = header->ts.tv_usec;
+    pcap_end.tv_sec = header->ts.tv_sec, pcap_end.tv_usec = header->ts.tv_usec;
+  }
+
   time = ((uint64_t) header->ts.tv_sec) * detection_tick_resolution +
     header->ts.tv_usec / (1000000 / detection_tick_resolution);
 
@@ -1624,6 +1637,8 @@ int main(int argc, char **argv) {
   int i;
 
   memset(ndpi_thread_info, 0, sizeof(ndpi_thread_info));
+  memset(&pcap_start, 0, sizeof(pcap_start));
+  memset(&pcap_end, 0, sizeof(pcap_end));
 
   parseOptions(argc, argv);
 
