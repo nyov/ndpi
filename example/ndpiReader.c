@@ -1401,7 +1401,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
   u_int64_t time;
   u_int16_t type, ip_offset, ip_len;
   u_int16_t frag_off = 0;
-  u_int8_t proto = 0;
+  u_int8_t proto = 0, vlan_packet = 0;
   u_int16_t thread_id = *((u_int16_t*)args);
 
   // printf("[ndpiReader] pcap_packet_callback : [%u.%u.%u.%u.%u -> %u.%u.%u.%u.%u]\n", ethernet->h_dest[1],ethernet->h_dest[2],ethernet->h_dest[3],ethernet->h_dest[4],ethernet->h_dest[5],ethernet->h_source[1],ethernet->h_source[2],ethernet->h_source[3],ethernet->h_source[4],ethernet->h_source[5]);
@@ -1449,7 +1449,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
     if(type == 0x8100 /* VLAN */) {
       type = (packet[ip_offset+2] << 8) + packet[ip_offset+3];
       ip_offset += 4;
-      ndpi_thread_info[thread_id].stats.vlan_count++;
+      vlan_packet = 1;
     } else if(type == 0x8847 /* MPLS */) {
       u_int32_t label = ntohl(*((u_int32_t*)&packet[ip_offset]));
 
@@ -1467,6 +1467,8 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
     } else
       break;
   }
+
+  ndpi_thread_info[thread_id].stats.vlan_count += vlan_packet;
 
   iph = (struct ndpi_iphdr *) &packet[ip_offset];
 
