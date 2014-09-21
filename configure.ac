@@ -56,6 +56,14 @@ else
   LDFLAGS="$LDFLAGS $(pkg-config --libs json-c)"
 fi
 
+OLD_LIBS=$LIBS
+LIBS="-L/opt/napatech3/lib $LIBS"
+AC_CHECK_LIB([ntapi],
+             [NT_Init],
+             [PCAP_LIB="$PCAP_LIB -L/opt/napatech3/lib -lntapi"],
+             [], [] )
+LIBS=$OLD_LIBS
+
 AC_CHECK_LIB(json-c, json_object_new_object, AC_DEFINE_UNQUOTED(HAVE_JSON_C, 1, [The JSON-C library is present]))
 
 AC_CONFIG_FILES([Makefile src/lib/Makefile example/Makefile libndpi.pc])
