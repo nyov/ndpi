@@ -4854,6 +4854,10 @@ static int ndpi_automa_match_string_subprotocol(struct ndpi_detection_module_str
 
   if(matching_protocol_id != NDPI_PROTOCOL_UNKNOWN) {
     packet->detected_protocol_stack[0] = matching_protocol_id;
+
+    if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
+      flow->detected_protocol_stack[0] = packet->detected_protocol_stack[0];
+
     return(packet->detected_protocol_stack[0]);
   }
 
