@@ -32,12 +32,10 @@ static void ndpi_int_rsync_add_connection(struct ndpi_detection_module_struct
 void ndpi_search_rsync(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  u_int16_t dport = 0, sport = 0;
 
   NDPI_LOG(NDPI_PROTOCOL_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "search for RSYNC.\n");
 
   if(packet->tcp != NULL) {
-    sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
     NDPI_LOG(NDPI_PROTOCOL_RSYNC, ndpi_struct, NDPI_LOG_DEBUG, "calculating RSYNC over tcp.\n");
     /*
      * Should match: memcmp(packet->payload, "@RSYN NCD: 28", 14) == 0)

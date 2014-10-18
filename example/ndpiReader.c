@@ -68,7 +68,9 @@ static char *_pcap_file[MAX_NUM_READER_THREADS]; /**< Ingress pcap file/interafa
 static FILE *playlist_fp[MAX_NUM_READER_THREADS] = { NULL }; /**< Ingress playlist */
 static char *_bpf_filter      = NULL; /**< bpf filter  */
 static char *_protoFilePath   = NULL; /**< Protocol file path  */
+#ifdef HAVE_JSON_C
 static char *_jsonFilePath    = NULL; /**< JSON file path  */
+#endif
 #ifdef HAVE_JSON_C
 static json_object *jArray_known_flows, *jArray_unknown_flows;
 #endif
@@ -906,7 +908,7 @@ static unsigned int packet_processing(u_int16_t thread_id,
   struct ndpi_id_struct *src, *dst;
   struct ndpi_flow *flow;
   struct ndpi_flow_struct *ndpi_flow = NULL;
-  u_int32_t i, protocol = 0;
+  u_int32_t protocol = 0;
   u_int8_t proto;
 
   if(iph)
@@ -949,8 +951,6 @@ static unsigned int packet_processing(u_int16_t thread_id,
     free_ndpi_flow(flow);
 
     if(verbose > 1) {
-      char buf1[32], buf2[32];
-
       if(enable_protocol_guess) {
 	if(flow->detected_protocol == 0 /* UNKNOWN */) {
 	  protocol = node_guess_undetected_protocol(thread_id, flow);
@@ -1494,7 +1494,6 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
     if((frag_off & 0x3FFF) != 0) {
       static u_int8_t ipv4_frags_warning_used = 0;
 
-    v4_frags_warning:
       ndpi_thread_info[thread_id].stats.fragmented_count++;
       if(ipv4_frags_warning_used == 0) {
 	if(!json_flag) printf("\n\nWARNING: IPv4 fragments are not handled by this demo (nDPI supports them)\n");

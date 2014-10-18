@@ -136,17 +136,8 @@ void ndpi_search_mail_pop_tcp(struct ndpi_detection_module_struct
 	
 //  struct ndpi_id_struct         *src=ndpi_struct->src;
 //  struct ndpi_id_struct         *dst=ndpi_struct->dst;
-
 	u_int8_t a = 0;
 	u_int8_t bit_count = 0;
-
-	u_int16_t dport = 0;
-	u_int16_t sport = 0;
-
-
-	sport = ntohs(packet->tcp->source);
-	dport = ntohs(packet->tcp->dest);
-
 
 	NDPI_LOG(NDPI_PROTOCOL_MAIL_POP, ndpi_struct, NDPI_LOG_DEBUG, "search mail_pop\n");
 

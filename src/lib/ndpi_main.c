@@ -1407,6 +1407,7 @@ static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *
 
 /* ******************************************************************** */
 
+#if 0
 #ifndef __KERNEL__
 static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port,
 				  ndpi_proto_defaults_t *def,
@@ -1449,6 +1450,7 @@ static int add_proto_default_port(u_int16_t **ports, u_int16_t new_port,
     return(0);
   }
 }
+#endif
 #endif
 
 /* ******************************************************************** */
@@ -4714,10 +4716,12 @@ u_int16_t ntohs_ndpi_bytestream_to_number(const u_int8_t * str, u_int16_t max_ch
 
 /* ****************************************************** */
 
+#if 0
 #ifndef __KERNEL__
 static u_int is_port(u_int16_t sport, u_int16_t dport, u_int16_t match_port) {
   return(((match_port == sport) || (match_port == dport)) ? 1 : 0);
 }
+#endif
 #endif
 
 /* ****************************************************** */

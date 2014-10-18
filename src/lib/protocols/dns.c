@@ -167,7 +167,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	i += 4;
 
 	if(header.answer_rrs > 0) {
-	  u_int16_t rsp_type, rsp_class;
+	  u_int16_t rsp_type /*, rsp_class */;
 	  u_int16_t num;
 
 	  for(num = 0; num < header.answer_rrs; num++) {
@@ -183,7 +183,7 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 	      i += data_len;
 	
 	    rsp_type = get16(&i, packet->payload);
-	    rsp_class = get16(&i, packet->payload);
+	    // rsp_class = get16(&i, packet->payload);
 
 	    i += 4;
 	    data_len = get16(&i, packet->payload);
