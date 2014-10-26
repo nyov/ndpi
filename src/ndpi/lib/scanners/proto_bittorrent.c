@@ -413,39 +413,25 @@ void ndpi_search_bittorrent(struct ndpi_detection_module_struct *ndpi_struct, st
 
       if(flow->bittorrent_stage < 10) {
 	if(packet->payload_packet_len > 19 /* min size */) {
-	  char *begin;
 
 	  if(ndpi_strnstr((const char *)packet->payload, ":target20:", packet->payload_packet_len)
 	     || ndpi_strnstr((const char *)packet->payload, ":find_node1:", packet->payload_packet_len)
 	     || ndpi_strnstr((const char *)packet->payload, "d1:ad2:id20:", packet->payload_packet_len)
 	     || ndpi_strnstr((const char *)packet->payload, ":info_hash20:", packet->payload_packet_len)
 	     || ndpi_strnstr((const char *)packet->payload, ":filter64", packet->payload_packet_len)
-	     || ndpi_strnstr((const char *)packet->payload, "d1:rd2:id20:", packet->payload_packet_len)) {
+	     || ndpi_strnstr((const char *)packet->payload, "d1:rd2:id20:", packet->payload_packet_len)
+	     || ndpi_strnstr((const char *)packet->payload, "BitTorrent protocol", packet->payload_packet_len)
+	     ) {
 	  bittorrent_found:
 	    NDPI_LOG(0, ndpi_struct, NDPI_LOG_TRACE, "BT: plain BitTorrent protocol detected\n");
 	    flow->ndpi_result_app = NDPI_RESULT_APP_BITTORRENT;
 	    flow->ndpi_excluded_app[NDPI_RESULT_APP_BITTORRENT] = 1;
 	    
 	    return;
-	  } else {
-          long offset = 0;
-          begin = (char *)packet->payload;
-          while((packet->payload_packet_len-19) > offset
-              && (begin = memchr(begin, 'B',  packet->payload_packet_len-19)) != NULL) {
-                offset = (u_long)begin - (u_long)packet->payload;
-            if((packet->payload_packet_len-19) > offset) {
-
-              if(memcmp(begin, "BitTorrent protocol", 19) == 0) {
-                goto bittorrent_found;
-              } else {
-                  begin++;
-              }
-            }
-          }
-      }
-    }
-
-    return;
+	  }
+        }
+        
+        return;
       }
 
       flow->ndpi_excluded_app[NDPI_RESULT_APP_BITTORRENT] = 1;

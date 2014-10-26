@@ -329,6 +329,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_register_proto_tvants (ndpi_mod);
   ndpi_register_proto_tvuplayer (ndpi_mod);
   ndpi_register_proto_veohtv (ndpi_mod);
+  ndpi_register_proto_vhua (ndpi_mod);
   ndpi_register_proto_winmx (ndpi_mod);
   ndpi_register_proto_xbox (ndpi_mod);
   ndpi_register_proto_zattoo (ndpi_mod);

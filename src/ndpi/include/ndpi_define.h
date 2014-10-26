@@ -30,9 +30,19 @@
   gcc -E -dM - < /dev/null |grep ENDIAN
 */
 
-#ifndef NDPI_ENABLE_DEBUG_MESSAGES
-//#define NDPI_ENABLE_DEBUG_MESSAGES
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#include <machine/endian.h>
 #endif
+
+#ifdef __OpenBSD__
+#include <endian.h>
+#define __BYTE_ORDER BYTE_ORDER
+#if BYTE_ORDER == LITTLE_ENDIAN
+#define __LITTLE_ENDIAN__
+#else
+#define __BIG_ENDIAN__
+#endif/* BYTE_ORDER */
+#endif/* __OPENBSD__ */
 
 #ifdef WIN32
 #define __LITTLE_ENDIAN__ 1
@@ -192,10 +202,10 @@
 /* new definitions to get little endian from network bytes */
 #define get_ul8(X,O) get_u_int8_t(X,O)
 
-#if defined(__LITTLE_ENDIAN__)
+#if defined(__LITTLE_ENDIAN__) || defined(_LITTLE_ENDIAN)
 #define get_l16(X,O)  get_u_int16_t(X,O)
 #define get_l32(X,O)  get_u_int32_t(X,O)
-#elif defined(__BIG_ENDIAN__)
+#elif defined(__BIG_ENDIAN__) || defined(__BIG_ENDIAN)
 /* convert the bytes from big to little endian */
 #ifndef __KERNEL__
 # define get_l16(X,O) bswap_16(get_u_int16_t(X,O))

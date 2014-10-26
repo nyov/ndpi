@@ -125,18 +125,8 @@ void ndpi_search_mail_pop(struct ndpi_detection_module_struct *ndpi_struct, stru
 
 	u_int8_t a = 0;
 	u_int8_t bit_count = 0;
-
-	u_int16_t dport = 0;
-	u_int16_t sport = 0;
-
-
-	sport = ntohs(packet->tcp->source);
-	dport = ntohs(packet->tcp->dest);
-
-
+	
 	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search mail_pop\n");
-
-
 
 	if ((packet->payload_packet_len > 3
 		 && (packet->payload[0] == '+' && (packet->payload[1] == 'O' || packet->payload[1] == 'o')

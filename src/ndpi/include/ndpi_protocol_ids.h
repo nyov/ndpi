@@ -204,6 +204,7 @@ typedef enum {
   NDPI_RESULT_APP_MEGACO, /* Gianluca Costa <g.costa@xplico.org> */
   NDPI_RESULT_APP_REDIS,
   NDPI_RESULT_APP_ZMQ,
+  NDPI_RESULT_APP_VHUA,
   NDPI_RESULT_APP_LAST
 } ndpi_result_app_t;
 

@@ -31,8 +31,11 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
+#ifndef WIN32
 #include <pthread.h>
+#endif
 #include <ctype.h>
+#include <time.h>
 #endif
 
 #ifndef WIN32
