@@ -9,18 +9,31 @@ LT_INIT
 AC_PROG_CC
 AX_PTHREAD
 
+if test -d ".svn"; then :
 SVN_RELEASE=`svn info . | grep "^Revision"|cut -d " " -f 2`
-AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
 SVN_DATE=`svn info . | grep "^Last Changed Date"|cut -d " " -f 4-`
+else
+SVN_RELEASE="${PACKAGE_VERSION}"
+SVN_DATE=`date`
+fi
+
+AC_DEFINE_UNQUOTED(NDPI_SVN_RELEASE, "r${SVN_RELEASE}", [SVN Release])
 AC_DEFINE_UNQUOTED(NDPI_SVN_DATE, "${SVN_DATE}", [Last SVN change])
 
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h unistd.h])
 
-PCAP_HOME=$HOME/PF_RING/userland/libpcap
-if test -f $PCAP_HOME/libpcap.a; then :
+PCAP_HOME=$HOME/PF_RING/userland
+
+if test -d $PCAP_HOME; then :
+   echo -n ""
+else
+   PCAP_HOME=`pwd`/../../PF_RING/userland
+fi
+
+if test -f $PCAP_HOME/libpcap/libpcap.a; then :
      echo "Using libpcap from $PCAP_HOME"
-     PCAP_INC="-I $PCAP_HOME"
-     PCAP_LIB="$PCAP_HOME/libpcap.a $HOME/PF_RING/userland/lib/libpfring.a -lnuma"
+     PCAP_INC="-I $PCAP_HOME/libpcap"
+     PCAP_LIB="$PCAP_HOME/libpcap/libpcap.a $PCAP_HOME/lib/libpfring.a -lnuma"
 
      AC_CHECK_LIB([rt], [clock_gettime],   [PCAP_LIB="$PCAP_LIB -lrt"])
      AC_CHECK_LIB([nl], [nl_handle_alloc], [PCAP_LIB="$PCAP_LIB -lnl"])
@@ -34,12 +47,6 @@ else
        exit
    fi
 fi
-
-AC_ARG_ENABLE([examples-dynamic-linking],
-             [AS_HELP_STRING([--enable-examples-dynamic-linking],
-                             [dynamically link examples against libndpi (default is no)])])
-
-AM_CONDITIONAL(EXAMPLES_DYNAMIC_LINK, [test "x$enable_examples_dynamic_linking" = "xyes"])  
 
 AC_CONFIG_FILES([Makefile src/ndpi/lib/Makefile example/Makefile libndpi.pc])
 AC_CONFIG_HEADERS(config.h)

@@ -4,8 +4,6 @@ AM_CPPFLAGS = -I$(top_srcdir)/src/ndpi/include @PCAP_INC@ -D_BSD_SOURCE
 AM_CFLAGS = @PTHREAD_CFLAGS@ -std=c99
 
 LDADD = $(top_builddir)/src/ndpi/lib/libndpi.la @PTHREAD_LIBS@ @PCAP_LIB@
-if !EXAMPLES_DYNAMIC_LINK
 AM_LDFLAGS = -static
-endif
 
 example_ndping_SOURCES = example_ndping.c
