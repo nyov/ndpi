@@ -9,33 +9,31 @@
 
 5. Invoke dissectors only when needed in a tree.
 
-6. All the processing functions from original .c files in this directory.
+6. Add ability to include user-defined protocols without prior re-compilation of the software.
 
-7. Add ability to include user-defined protocols without prior re-compilation of the software.
-
-8. Change the structure to include HTTPS as well:
+7. Change the structure to include HTTPS as well:
 SSL->HTTPS->Dropbox
 SSL->POPS
 
-9. Add proper certificates for TOR and other applications.
+8. Add proper certificates for TOR and other applications.
 
-10. Multiple contents / services per flow.
+9. Multiple contents / services per flow.
 
-11. Content and service providers
+10. Content and service providers
 
-12. Custom content types and providers for non defined domsins and fields.
+11. Custom content types and providers for non defined domsins and fields.
 
-13. Excluding protocols by a bitmask.
+12. Excluding protocols by a bitmask.
 
-14. Make it working in Windows / Linux kernel.
+13. Make it working in Windows / Linux kernel.
 
-15. The scanning process should stop when:
+14. The scanning process should stop when:
 - either all the scanners are already excluded
 - or every level is already detected.
 But sometimes some results from some scanners should be overwritten by another scanners, just by not excluding the levels.
 Make it conssitent in ndpi_main.c and the calling sample application.
 
-16. From protocols_osdpi.h remove all protocols which are not included in nDPIng. Afterwards, publish the list of supported protocols in README.
+15. From protocols_osdpi.h remove all protocols which are not included in nDPIng. Afterwards, publish the list of supported protocols in README.
 
 svn co https://svn.ntop.org/svn/ntop/trunk/nDPI/
 cd nDPI/

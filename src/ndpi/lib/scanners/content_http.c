@@ -67,6 +67,19 @@ static void flash_check_http_payload(struct ndpi_detection_module_struct *ndpi_s
   }
 }
 
+static void mpeg_check_http_payload(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+{
+  struct ndpi_packet_struct *packet = &flow->packet;
+  u_int8_t a;
+
+    for (a = 0; a < packet->parsed_lines; a++) {
+      if (packet->line[a].len > 11 && memcmp(packet->line[a].ptr, "Icy-MetaData", 12) == 0) {
+	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "MPEG: Icy-MetaData found.\n");
+	flow->ndpi_result_content = NDPI_RESULT_CONTENT_MPEG;
+	break;
+      }
+    }
+}
 
 static void avi_check_http_payload(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
@@ -144,6 +157,12 @@ void ndpi_search_http_content(struct ndpi_detection_module_struct *ndpi_struct, 
     }
     
     avi_check_http_payload(ndpi_struct, flow);
+  
+    if (flow->ndpi_result_content != NDPI_RESULT_CONTENT_STILL_UNKNOWN) {
+      return;
+    }
+    
+    mpeg_check_http_payload(ndpi_struct, flow);
   } 
 	
   /* Break after 10 packets. */
