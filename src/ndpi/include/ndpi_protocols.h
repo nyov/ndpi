@@ -156,6 +156,7 @@ void ndpi_register_proto_tvants (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_tvuplayer (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_veohtv (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_vhua (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_windows_update (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_winmx (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_xbox (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_zattoo (struct ndpi_detection_module_struct *mod);

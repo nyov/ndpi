@@ -24,7 +24,7 @@ They can work, but they do not need to. The code is not tested against
 those purposes.
 
 2. The library provides accurate results for the supported protocols and
-applications. The number of applications currently supported is almost the
+applications. The number of applications currently supported is exactly the
 same as the number of applications supported by nDPI.
 
 3. The current format of the obtained results is not the final one.

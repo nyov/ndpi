@@ -149,6 +149,7 @@ libndpi_la_SOURCES = \
 			scanners/proto_tvuplayer.c \
 			scanners/proto_veohtv.c \
 			scanners/proto_vhua.c \
+			scanners/proto_windows_update.c \
 			scanners/proto_winmx.c \
 			scanners/proto_xbox.c \
 			scanners/proto_zattoo.c
