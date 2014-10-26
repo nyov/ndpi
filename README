@@ -78,8 +78,4 @@ stand-alone application.
 8. No change log will be provided unless nDPIng reaches the first release
 stage.
 
-==========
-If you want to distribute a source tar file of nDPIng do:
-# make dist
-
 Tomasz Bujlow <tomasz@skatnet.dk>

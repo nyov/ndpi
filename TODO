@@ -33,7 +33,8 @@ SSL->POPS
 But sometimes some results from some scanners should be overwritten by another scanners, just by not excluding the levels.
 Make it conssitent in ndpi_main.c and the calling sample application.
 
-15. From protocols_osdpi.h remove all protocols which are not included in nDPIng. Afterwards, publish the list of supported protocols in README.
+
+----------------------------------------------------------------------------
 
 svn co https://svn.ntop.org/svn/ntop/trunk/nDPI/
 cd nDPI/

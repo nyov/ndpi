@@ -1,0 +1,40 @@
+
+================================
+ADDING NEW SCANNERS
+================================
+
+1. Add the new scanner identifier to:
+/src/ndpi/include/ndpi_protocol_ids.h
+
+2. Create a new scanner file in:
+/src/ndpi/lib/scanners/
+
+The scanner file should have a registration function like this:
+
+void ndpi_register_proto_name (struct ndpi_detection_module_struct *ndpi_mod) {
+
+  int tcp_ports[5] = {0, 0, 0, 0, 0};
+  int udp_ports[5] = {0, 0, 0, 0, 0};
+
+  ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_NAME, "AppName", _MASK_, tcp_ports, udp_ports, _FUNCTION_);
+}
+
+Set the discovery (or exclusion) of the particular protocols:
+
+flow->ndpi_result_app = NDPI_RESULT_APP_NAME;
+flow->ndpi_excluded_app[NDPI_RESULT_APP_NAME] = 1;
+
+OR
+
+flow->ndpi_excluded_app[NDPI_RESULT_APP_NAME] = 1;
+
+3. Add the scanner to:
+/code/src/ndpi/lib/Makefile.am
+
+4. Add the prototype of the scanner registration function to:
+/src/ndpi/include/ndpi_protocols.h
+
+5. Add the invocation of the new registration function to:
+/code/src/ndpi/lib/ndpi_main.c
+
+The invocation should be place in the ndpi_init_detection_module, just before void ndpi_exit_detection_module.
