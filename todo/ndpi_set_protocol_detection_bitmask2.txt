@@ -1,2 +1,0 @@
-  { "Xbox Live Client/",		NULL,		        NDPI_OLD_RESULT_APP_XBOX },
-  { "application/x-rtsp-tunnelled",	NULL,		        NDPI_OLD_RESULT_APP_RTSP },

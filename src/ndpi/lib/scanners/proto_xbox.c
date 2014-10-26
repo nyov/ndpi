@@ -29,10 +29,12 @@ void ndpi_search_xbox(struct ndpi_detection_module_struct *ndpi_struct, struct n
   
 	struct ndpi_packet_struct *packet = &flow->packet;
 	
-	/*
-	 * THIS IS TH XBOX UDP DETCTION ONLY !!!
-	 * the xbox tcp detection is done by http code
-	 */
+	/* Break after 20 packets. */
+	if (flow->packet_counter > 20) {
+	  NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Exclude Xbox.\n");
+	  flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
+	  return;
+	}
 
 	/* this detection also works for asymmetric xbox udp traffic */
 	if (packet->udp != NULL) {
@@ -79,13 +81,15 @@ void ndpi_search_xbox(struct ndpi_detection_module_struct *ndpi_struct, struct n
 			return;
 		}
 
-		/* exclude here all non matched udp traffic, exclude here tcp only if http has been excluded, because xbox could use http */
-		if (packet->tcp == NULL || (flow->ndpi_excluded_base[NDPI_RESULT_BASE_HTTP] == 1)) {
-			NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "xbox udp excluded.\n");
-			flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
-		}
+		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "xbox udp excluded.\n");
+		flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
+	} else if ((flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_PROXY) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_CONNECT)) {
+	    if (packet->user_agent_line.len >= 17 && memcmp(packet->user_agent_line.ptr, "Xbox Live Client/", 17) == 0) {
+	      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Xbox detected\n");
+	      flow->ndpi_result_app = NDPI_RESULT_APP_XBOX;
+	      flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
+	    }
 	}
-	/* to not exclude tcp traffic here, done by http code... */
 }
 
 void ndpi_register_proto_xbox (struct ndpi_detection_module_struct *ndpi_mod) {

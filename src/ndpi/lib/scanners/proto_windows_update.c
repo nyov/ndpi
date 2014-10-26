@@ -36,10 +36,12 @@ void ndpi_search_windows_update(struct ndpi_detection_module_struct *ndpi_struct
 
   NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search for Windows Update.\n");
   
-  if (packet->user_agent_line.len >= 20 && memcmp(packet->user_agent_line.ptr, "Windows-Update-Agent", 20) == 0) {
-    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Windows Update detected\n");
-    flow->ndpi_result_app = NDPI_RESULT_APP_WINDOWS_UPDATE;
-    flow->ndpi_excluded_app[NDPI_RESULT_APP_WINDOWS_UPDATE] = 1;
+  if ((flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_PROXY) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_CONNECT)) {
+    if (packet->user_agent_line.len >= 20 && memcmp(packet->user_agent_line.ptr, "Windows-Update-Agent", 20) == 0) {
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Windows Update detected\n");
+      flow->ndpi_result_app = NDPI_RESULT_APP_WINDOWS_UPDATE;
+      flow->ndpi_excluded_app[NDPI_RESULT_APP_WINDOWS_UPDATE] = 1;
+    }
   }
 }
 
