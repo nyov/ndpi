@@ -320,6 +320,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_register_proto_quake (ndpi_mod);
   ndpi_register_proto_shoutcast (ndpi_mod);
   ndpi_register_proto_skinny (ndpi_mod);
+  ndpi_register_proto_skyfile (ndpi_mod);
   ndpi_register_proto_socrates (ndpi_mod);
   ndpi_register_proto_soulseek (ndpi_mod);
   ndpi_register_proto_stun (ndpi_mod);

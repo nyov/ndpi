@@ -138,6 +138,7 @@ libndpi_la_SOURCES = \
 			scanners/proto_quake.c \
 			scanners/proto_shoutcast.c \
 			scanners/proto_skinny.c \
+			scanners/proto_skyfile.c \
 			scanners/proto_socrates.c \
 			scanners/proto_soulseek.c \
 			scanners/proto_stun.c \

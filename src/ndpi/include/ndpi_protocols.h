@@ -145,6 +145,7 @@ void ndpi_register_proto_qq (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_quake (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_shoutcast (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_skinny (struct ndpi_detection_module_struct *mod);
+void ndpi_register_proto_skyfile (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_socrates (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_soulseek (struct ndpi_detection_module_struct *mod);
 void ndpi_register_proto_stun (struct ndpi_detection_module_struct *mod);
