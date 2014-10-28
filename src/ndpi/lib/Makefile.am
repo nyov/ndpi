@@ -56,6 +56,7 @@ libndpi_la_SOURCES = \
 			scanners/content_raw.c \
 			scanners/content_http.c \
 			scanners/service_parser.c \
+			scanners/cdn_parser.c \
 			scanners/proto_bgp.c \
 			scanners/proto_dhcp.c \
 			scanners/proto_dhcpv6.c \

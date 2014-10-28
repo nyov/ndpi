@@ -40,12 +40,10 @@ void ndpi_search_rtsp(struct ndpi_detection_module_struct *ndpi_struct, struct n
   struct ndpi_id_struct *src = flow->src;
   struct ndpi_id_struct *dst = flow->dst;
   
-  if ((flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_PROXY) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_CONNECT)) {
-    if (packet->accept_line.len >= 28 && memcmp(packet->accept_line.ptr, "application/x-rtsp-tunnelled", 28) == 0) {
-      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "RTSP detected\n");
-      flow->ndpi_result_app = NDPI_RESULT_APP_RTSP;
-      flow->ndpi_excluded_app[NDPI_RESULT_APP_RTSP] = 1;
-    }
+  if (packet->accept_line.ptr != NULL && packet->accept_line.len >= 28 && memcmp(packet->accept_line.ptr, "application/x-rtsp-tunnelled", 28) == 0) {
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "RTSP detected\n");
+    flow->ndpi_result_app = NDPI_RESULT_APP_RTSP;
+    flow->ndpi_excluded_app[NDPI_RESULT_APP_RTSP] = 1;
   }
 
   if (flow->rtsprdt_stage == 0) {

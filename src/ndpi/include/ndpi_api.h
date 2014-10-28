@@ -124,6 +124,7 @@ extern "C" {
    char *ndpi_get_result_app (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_app_t id);
    char *ndpi_get_result_content (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_content_t id);
    char *ndpi_get_result_service (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_service_t id);
+   char *ndpi_get_result_cdn (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_cdn_t id);
 
 #ifdef __cplusplus
 }

@@ -86,6 +86,10 @@ char *ndpi_get_result_service (struct ndpi_detection_module_struct *ndpi_mod, nd
   return ndpi_mod->ndpi_scanners_service[id].name;
 }
 
+char *ndpi_get_result_cdn (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_cdn_t id) {
+  return ndpi_mod->ndpi_scanners_cdn[id].name;
+}
+
 void ndpi_initialize_scanner_ip (struct ndpi_detection_module_struct *mod, ndpi_result_ip_t id, char *name, void (*func)) {
   mod->ndpi_scanners_ip[id].id = id;
   mod->ndpi_scanners_ip[id].name = name;
@@ -144,6 +148,12 @@ void ndpi_initialize_scanner_service (struct ndpi_detection_module_struct *mod, 
   mod->ndpi_scanners_service[id].func = func;
 }
 
+void ndpi_initialize_scanner_cdn (struct ndpi_detection_module_struct *mod, ndpi_result_cdn_t id, char *name, void (*func)) {
+  mod->ndpi_scanners_cdn[id].id = id;
+  mod->ndpi_scanners_cdn[id].name = name;
+  mod->ndpi_scanners_cdn[id].func = func;
+}
+
 struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second,
 								void* (*__ndpi_malloc)(unsigned long size),
 								void  (*__ndpi_free)(void *ptr),
@@ -197,12 +207,14 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_STILL_UNKNOWN, "still_unknown", 255, tcp_ports, udp_ports, NULL);
   ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_STILL_UNKNOWN, "still_unknown", NULL);
   ndpi_initialize_scanner_service (ndpi_mod, NDPI_RESULT_SERVICE_STILL_UNKNOWN, "still_unknown", NULL);
+  ndpi_initialize_scanner_cdn (ndpi_mod, NDPI_RESULT_CDN_STILL_UNKNOWN, "still_unknown", NULL);
   
   ndpi_initialize_scanner_ip (ndpi_mod, NDPI_RESULT_IP_UNKNOWN, "unknown", NULL);
   ndpi_initialize_scanner_base (ndpi_mod, NDPI_RESULT_BASE_UNKNOWN, "unknown", 255, tcp_ports, udp_ports, NULL);
   ndpi_initialize_scanner_app (ndpi_mod, NDPI_RESULT_APP_UNKNOWN, "unknown", 255, tcp_ports, udp_ports, NULL);
   ndpi_initialize_scanner_content (ndpi_mod, NDPI_RESULT_CONTENT_UNKNOWN, "unknown", NULL);
   ndpi_initialize_scanner_service (ndpi_mod, NDPI_RESULT_SERVICE_UNKNOWN, "unknown", NULL);
+  ndpi_initialize_scanner_cdn (ndpi_mod, NDPI_RESULT_CDN_UNKNOWN, "unknown", NULL);
   
   ndpi_register_ip_protocols (ndpi_mod);
   
@@ -340,6 +352,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_register_content_http (ndpi_mod);
   
   ndpi_register_service_parser (ndpi_mod);
+  ndpi_register_cdn_parser (ndpi_mod);
 
   return ndpi_mod;
 }
@@ -351,6 +364,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct
   if(ndpi_struct != NULL) {
     ndpi_unregister_content_http (ndpi_struct);
     ndpi_unregister_service_parser (ndpi_struct);
+    ndpi_unregister_cdn_parser (ndpi_struct);
     ndpi_free(ndpi_struct);
   }
 }
@@ -595,7 +609,8 @@ static int ndpi_init_packet_header(struct ndpi_detection_module_struct *ndpi_str
 	 && ((flow->ndpi_result_base == NDPI_RESULT_BASE_STILL_UNKNOWN) || (flow->ndpi_result_base == NDPI_RESULT_BASE_UNKNOWN))
 	 && ((flow->ndpi_result_app == NDPI_RESULT_APP_STILL_UNKNOWN) || (flow->ndpi_result_app == NDPI_RESULT_APP_STILL_UNKNOWN))
 	 && ((flow->ndpi_result_content == NDPI_RESULT_CONTENT_STILL_UNKNOWN) || (flow->ndpi_result_content == NDPI_RESULT_CONTENT_UNKNOWN))
-	 && ((flow->ndpi_result_service == NDPI_RESULT_SERVICE_STILL_UNKNOWN) || (flow->ndpi_result_service == NDPI_RESULT_SERVICE_UNKNOWN))) {
+	 && ((flow->ndpi_result_service == NDPI_RESULT_SERVICE_STILL_UNKNOWN) || (flow->ndpi_result_service == NDPI_RESULT_SERVICE_UNKNOWN))
+	 && ((flow->ndpi_result_cdn == NDPI_RESULT_CDN_STILL_UNKNOWN) || (flow->ndpi_result_cdn == NDPI_RESULT_CDN_UNKNOWN))) {
 
 	memset(flow, 0, sizeof(*(flow)));
 
@@ -1014,7 +1029,8 @@ void ndpi_detection_process_packet(struct ndpi_detection_module_struct *ndpi_str
     (flow->ndpi_result_base != NDPI_RESULT_BASE_STILL_UNKNOWN) &&
     (flow->ndpi_result_app != NDPI_RESULT_APP_STILL_UNKNOWN) &&
     (flow->ndpi_result_content != NDPI_RESULT_CONTENT_STILL_UNKNOWN) &&
-    (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN)) {
+    (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) &&
+    (flow->ndpi_result_cdn != NDPI_RESULT_CDN_STILL_UNKNOWN)) {
     
     return;
   }
@@ -1096,6 +1112,7 @@ void ndpi_detection_process_packet(struct ndpi_detection_module_struct *ndpi_str
     flow->ndpi_result_app = NDPI_RESULT_APP_UNKNOWN;
     flow->ndpi_result_content = NDPI_RESULT_CONTENT_UNKNOWN;
     flow->ndpi_result_service = NDPI_RESULT_SERVICE_UNKNOWN;
+    flow->ndpi_result_cdn = NDPI_RESULT_CDN_UNKNOWN;
     
     return;
   }
@@ -1184,7 +1201,26 @@ void ndpi_detection_process_packet(struct ndpi_detection_module_struct *ndpi_str
 	break;
       }
     }
-  }  
+  }
+  
+    /* Now try to find the content delivery network. */
+  
+  if ((flow->ndpi_result_cdn == NDPI_RESULT_CDN_STILL_UNKNOWN) && (flow->packet_counter > 20)) {
+    flow->ndpi_result_cdn = NDPI_RESULT_CDN_UNKNOWN;
+  }
+  
+  if (flow->ndpi_excluded_cdn == 0) {
+    
+    for (i = 0; i < NDPI_RESULT_CDN_LAST; i++) {
+      if (ndpi_struct->ndpi_scanners_cdn[i].func != NULL) {
+	(*ndpi_struct->ndpi_scanners_cdn[i].func)(ndpi_struct, flow);
+      }
+      
+      if (flow->ndpi_excluded_cdn == 1) {
+	break;
+      }
+    }
+  }
   
 }
 

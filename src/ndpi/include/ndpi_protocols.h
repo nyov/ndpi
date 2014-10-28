@@ -169,4 +169,7 @@ void ndpi_unregister_content_http (struct ndpi_detection_module_struct *mod);
 void ndpi_register_service_parser (struct ndpi_detection_module_struct *mod);
 void ndpi_unregister_service_parser (struct ndpi_detection_module_struct *mod);
 
+void ndpi_register_cdn_parser (struct ndpi_detection_module_struct *mod);
+void ndpi_unregister_cdn_parser (struct ndpi_detection_module_struct *mod);
+
 #endif /* __NDPI_PROTOCOLS_INCLUDE_FILE__ */

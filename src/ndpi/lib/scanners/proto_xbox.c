@@ -83,12 +83,10 @@ void ndpi_search_xbox(struct ndpi_detection_module_struct *ndpi_struct, struct n
 
 		NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "xbox udp excluded.\n");
 		flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
-	} else if ((flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_PROXY) || (flow->ndpi_result_base == NDPI_RESULT_BASE_HTTP_CONNECT)) {
-	    if (packet->user_agent_line.len >= 17 && memcmp(packet->user_agent_line.ptr, "Xbox Live Client/", 17) == 0) {
-	      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Xbox detected\n");
-	      flow->ndpi_result_app = NDPI_RESULT_APP_XBOX;
-	      flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
-	    }
+	} else if (packet->user_agent_line.ptr != NULL && packet->user_agent_line.len >= 17 && memcmp(packet->user_agent_line.ptr, "Xbox Live Client/", 17) == 0) {
+	    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Xbox detected\n");
+	    flow->ndpi_result_app = NDPI_RESULT_APP_XBOX;
+	    flow->ndpi_excluded_app[NDPI_RESULT_APP_XBOX] = 1;
 	}
 }
 

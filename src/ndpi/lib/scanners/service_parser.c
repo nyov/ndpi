@@ -50,68 +50,6 @@ static void ndpi_match_service(struct ndpi_detection_module_struct *ndpi_struct,
   }
 }
 
-void ndpi_search_service_by_ip(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, u_int32_t saddr, u_int32_t daddr) { /* host endianess */
-  
-    /*
-      Apple (FaceTime, iMessage,...)
-      17.0.0.0/8
-    */
-    if(((saddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
-       || ((daddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_APPLE;
-      return;
-    }
-
-    /* 
-       Skype
-       157.56.0.0/14, 157.60.0.0/16, 157.54.0.0/15
-    */
-    if(
-       (((saddr & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000 /* 157.56.0.0/ */) || ((daddr & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000))
-       || (((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3C0000 /* 157.60.0.0/ */) || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3D0000))
-       || (((saddr & 0xFF7F0000 /* 255.255.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFF7F0000 /* 255.127.0.0 */) == 0x9D360000))
-       || (((saddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000))
-       ) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_SKYPE;
-      return;
-    }
-  
-    /*
-      Google
-      173.194.0.0/16
-    */
-    if(((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
-       || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xADC20000 /* 173.194.0.0 */)) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_GOOGLE;
-      return;
-    }
-    
-    /* 
-       Twitter Inc.
-    */
-    
-    if (ndpi_ips_match(saddr, daddr, 0xC0854C00, 22)     /* 192.133.76.0/22 */
-      || ndpi_ips_match(saddr, daddr, 0xC7109C00, 22)  /* 199.16.156.0/22 */
-      || ndpi_ips_match(saddr, daddr, 0xC73B9400, 22)  /* 199.59.148.0/22 */
-      || ndpi_ips_match(saddr, daddr, 0xC7603A00, 23)  /* 199.96.58.0/23  */
-      || ndpi_ips_match(saddr, daddr, 0xC7603E00, 23)  /* 199.96.62.0/23  */
-    ) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_TWITTER;
-      return;
-    }
-    
-    /* 
-       CIDR:           69.53.224.0/19
-       OriginAS:       AS2906
-       NetName:        NETFLIX-INC
-    */
-    if(((saddr & 0xFFFFE000 /* 255.255.224.0 */) == 0x4535E000 /* 69.53.224.0 */)
-       || ((daddr & 0xFFFFE000 /* 255.255.224.0 */) == 0x4535E000 /* 69.53.224.0 */)) {
-      flow->ndpi_result_service = NDPI_RESULT_SERVICE_NETFLIX;
-      return;
-    }    
-}
-
 void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
   struct ndpi_packet_struct *packet = &flow->packet;
   
@@ -127,33 +65,12 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
     return;
   }
   
-  if (flow->server_certificate != NULL && strlen(flow->server_certificate) != 0) {
-    ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, flow->server_certificate, strlen(flow->server_certificate));
-  }
-  
-  if (flow->ndpi_excluded_service == 1) {
-    return;
-  }
-  
-  if (flow->client_certificate != NULL && strlen(flow->client_certificate) != 0) {
-    ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, flow->client_certificate, strlen(flow->client_certificate));
-  }
-  
-  if (flow->ndpi_excluded_service == 1) {
-    return;
-  }  
-  
-  /* Do not excluded the service based on the IP header detection! */
-  if (packet->iph /* IPv4 Only: we need to support packet->iphv6 at some point. */) {
-    ndpi_search_service_by_ip(ndpi_struct, flow, ntohl(packet->iph->saddr), ntohl(packet->iph->daddr));
-  }
-  
   /* Exclude the service and break after 20 packets. */
   if (flow->packet_counter > 20) { 
     flow->ndpi_excluded_service = 1;
     
     if (flow->ndpi_result_service == NDPI_RESULT_SERVICE_STILL_UNKNOWN) {
-      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Could not find any HTTP service.\n");
+      NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "Could not find any service.\n");
       flow->ndpi_result_service = NDPI_RESULT_SERVICE_UNKNOWN;
     }
     

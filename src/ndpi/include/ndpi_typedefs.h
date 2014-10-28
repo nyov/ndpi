@@ -286,6 +286,12 @@ typedef struct ndpi_scanner_service {
   void (*func) (struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 } ndpi_scanner_service_t;
 
+typedef struct ndpi_scanner_cdn {
+  ndpi_result_cdn_t id;
+  char *name;
+  void (*func) (struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+} ndpi_scanner_cdn_t;
+
 typedef struct ndpi_detection_module_struct {
   u_int32_t current_ts;
   u_int32_t ticks_per_second;
@@ -295,6 +301,7 @@ typedef struct ndpi_detection_module_struct {
   ndpi_scanner_app_t ndpi_scanners_app[NDPI_RESULT_APP_LAST];
   ndpi_scanner_content_t ndpi_scanners_content[NDPI_RESULT_CONTENT_LAST];
   ndpi_scanner_service_t ndpi_scanners_service[NDPI_RESULT_SERVICE_LAST];
+  ndpi_scanner_cdn_t ndpi_scanners_cdn[NDPI_RESULT_CDN_LAST];
   
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
   void *user_data;
@@ -310,7 +317,7 @@ typedef struct ndpi_detection_module_struct {
   u_int32_t tcp_max_retransmission_window_size;
 
   /* Pattern matching */
-  ndpi_automa http_content_automa, service_automa;
+  ndpi_automa http_content_automa, service_automa, cdn_automa;
 
   u_int32_t directconnect_connection_ip_tick_timeout;
   u_int32_t irc_timeout;
@@ -353,10 +360,12 @@ typedef struct ndpi_flow_struct {
   ndpi_result_app_t ndpi_result_app;
   ndpi_result_content_t ndpi_result_content;
   ndpi_result_service_t ndpi_result_service;
+  ndpi_result_cdn_t ndpi_result_cdn;
   
   u_int8_t ndpi_excluded_base[NDPI_RESULT_BASE_LAST];
   u_int8_t ndpi_excluded_app[NDPI_RESULT_APP_LAST];
   u_int8_t ndpi_excluded_service;
+  u_int8_t ndpi_excluded_cdn;
 
   u_char host_server_name[256]; /* HTTP host or DNS query */
   u_char detected_os[32];       /* Via HTTP User-Agent    */

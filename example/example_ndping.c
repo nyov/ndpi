@@ -110,6 +110,11 @@ void handle_pcap_file(char *pcap_file_name) {
 	  strcat(result, ndpi_get_result_service(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_service));
 	}
 	
+	if ((ndpi_flow_struct_pointer->ndpi_result_cdn != NDPI_RESULT_CDN_STILL_UNKNOWN) && (ndpi_flow_struct_pointer->ndpi_result_cdn != NDPI_RESULT_CDN_UNKNOWN)) {
+	  strcat(result, ", cdn: ");
+	  strcat(result, ndpi_get_result_cdn(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_cdn));
+	}
+	
 	int len = strlen(result);
 	
 	for (int i = 0; i < (150 - len); i++) {

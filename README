@@ -13,7 +13,7 @@ inspected by the classifier:
 - service provider
 - content provider
 
-The project is now in an early development alpha stage. This means that
+The project is now in a development alpha stage. This means that
 NOTHING works besides the features pointed out below. However, every week
 the library is enhanced by including new features and supporting more
 protocols and applications.
@@ -36,11 +36,8 @@ c) service (if detected). The service is defined as the well-known name of
 the remote host. So, for example, it could be "Facebook" for web browser
 flows from Facebook. The only exception is DNS - service is defined as the
 queried host name, not the name of the DNS server itself.
-
-For now, the "service" is a mix of "service providers" and "content
-providers". This is going to be fixed in new versions, so these two values
-will be separated from each other. Direct domain names will be provided in
-case if the matching to the predefined provider names is not successful.
+d) cdn (content provider) - the entity which physically is involved in the
+communication.
 
 Few examples of the currently obtained results:
 
@@ -50,13 +47,16 @@ is an encrypted POP3 session with a Google mail server.
 encrypted connection to a Twitter server.
 - "proto: TCP->FTP_Data, content: JPG" means that it is file-transfer FTP
 session, which carries a JPG image.
-- "proto: TCP->SSL_with_certificate->Dropbox, service: Dropbox" means that
+- "proto: TCP->SSL_with_certificate->Dropbox, cdn: Dropbox" means that
 this is an encrypted Dropbox session (the application is Dropbox) with the
-Dropbox server, while "proto: TCP->SSL_with_certificate, service: Dropbox"
+Dropbox server, while "proto: TCP->SSL_with_certificate, cdn: Dropbox"
 informs about an encrypted session with a Dropbox server, while the
 application is unknown (it can be a web browser connection).
-- "proto: TCP->HTTP, content: WebM, service: YouTube" informs about a flow
-from YouTube, which transports WebM movie.
+- "proto: TCP->HTTP, content: WebM, service: YouTube, cdn: Google" informs
+about a flow from YouTube coming from Google server, which transports WebM
+movie.
+- "proto: TCP->HTTP, service: Google, cdn: Google" means that it is an HTTP
+flow from Google, obtained from the Google server.
 
 4. No extensions available in nDPI (as excluding specific protocols,
 user-defined protocols, etc) are available.
