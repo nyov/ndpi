@@ -59,6 +59,10 @@ void ndpi_search_service(struct ndpi_detection_module_struct *ndpi_struct, struc
   
   if (((char *)flow->host_server_name) != NULL && strlen((const char*)flow->host_server_name) != 0) {
     ndpi_match_service(ndpi_struct, &ndpi_struct->service_automa, flow, (char *)flow->host_server_name, strlen((const char*)flow->host_server_name));
+    
+    if (flow->domain_service != NULL && strlen(flow->domain_service) == 0) {
+      strcpy(flow->domain_service, flow->host_server_name);
+    }
   }
   
   if (flow->ndpi_excluded_service == 1) {

@@ -362,6 +362,9 @@ typedef struct ndpi_flow_struct {
   ndpi_result_service_t ndpi_result_service;
   ndpi_result_cdn_t ndpi_result_cdn;
   
+  u_char domain_service[256];
+  u_char domain_cdn[256];
+  
   u_int8_t ndpi_excluded_base[NDPI_RESULT_BASE_LAST];
   u_int8_t ndpi_excluded_app[NDPI_RESULT_APP_LAST];
   u_int8_t ndpi_excluded_service;
@@ -370,8 +373,8 @@ typedef struct ndpi_flow_struct {
   u_char host_server_name[256]; /* HTTP host or DNS query */
   u_char detected_os[32];       /* Via HTTP User-Agent    */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
-  char client_certificate[64];
-  char server_certificate[64];
+  u_char client_certificate[64];
+  u_char server_certificate[64];
 
   union {
     struct {

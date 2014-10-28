@@ -121,6 +121,10 @@ void ndpi_search_cdn(struct ndpi_detection_module_struct *ndpi_struct, struct nd
   
   if (flow->server_certificate != NULL && strlen(flow->server_certificate) != 0) {
     ndpi_match_cdn(ndpi_struct, &ndpi_struct->cdn_automa, flow, flow->server_certificate, strlen(flow->server_certificate));
+    
+    if (flow->domain_cdn != NULL && strlen(flow->domain_cdn) == 0) {
+      strcpy(flow->domain_cdn, flow->server_certificate);
+    }
   }
   
   if (flow->ndpi_excluded_cdn == 1) {
@@ -129,6 +133,10 @@ void ndpi_search_cdn(struct ndpi_detection_module_struct *ndpi_struct, struct nd
   
   if (flow->client_certificate != NULL && strlen(flow->client_certificate) != 0) {
     ndpi_match_cdn(ndpi_struct, &ndpi_struct->cdn_automa, flow, flow->client_certificate, strlen(flow->client_certificate));
+    
+    if (flow->domain_cdn != NULL && strlen(flow->domain_cdn) == 0) {
+      strcpy(flow->domain_cdn, flow->client_certificate);
+    }
   }
   
   if (flow->ndpi_excluded_cdn == 1) {
