@@ -50,7 +50,7 @@ int  node_has_matchstr (AC_NODE_t * thiz, AC_PATTERN_t * newstr);
  ******************************************************************************/
 AC_NODE_t * node_create(void)
 {
-  AC_NODE_t * thiz =  (AC_NODE_t *) ndpi_malloc (sizeof(AC_NODE_t));
+  AC_NODE_t * thiz =  (AC_NODE_t *) malloc (sizeof(AC_NODE_t));
   node_init(thiz);
   node_assign_id(thiz);
   return thiz;
@@ -65,11 +65,11 @@ void node_init(AC_NODE_t * thiz)
   memset(thiz, 0, sizeof(AC_NODE_t));
 
   thiz->outgoing_max = REALLOC_CHUNK_OUTGOING;
-  thiz->outgoing = (struct edge *) ndpi_malloc
+  thiz->outgoing = (struct edge *) malloc
     (thiz->outgoing_max*sizeof(struct edge));
 
   thiz->matched_patterns_max = REALLOC_CHUNK_MATCHSTR;
-  thiz->matched_patterns = (AC_PATTERN_t *) ndpi_malloc
+  thiz->matched_patterns = (AC_PATTERN_t *) malloc
     (thiz->matched_patterns_max*sizeof(AC_PATTERN_t));
 }
 
@@ -79,9 +79,9 @@ void node_init(AC_NODE_t * thiz)
  ******************************************************************************/
 void node_release(AC_NODE_t * thiz)
 {
-  ndpi_free(thiz->matched_patterns);
-  ndpi_free(thiz->outgoing);
-  ndpi_free(thiz);
+  free(thiz->matched_patterns);
+  free(thiz->outgoing);
+  free(thiz);
 }
 
 /******************************************************************************

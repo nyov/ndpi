@@ -155,16 +155,11 @@ void ndpi_initialize_scanner_cdn (struct ndpi_detection_module_struct *mod, ndpi
 }
 
 struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second,
-								void* (*__ndpi_malloc)(unsigned long size),
-								void  (*__ndpi_free)(void *ptr),
 								ndpi_debug_function_ptr ndpi_debug_printf)
 {
   struct ndpi_detection_module_struct *ndpi_mod;
 
-  _ndpi_malloc = __ndpi_malloc;
-  _ndpi_free = __ndpi_free;
-
-  ndpi_mod = ndpi_malloc(sizeof(struct ndpi_detection_module_struct));
+  ndpi_mod = malloc(sizeof(struct ndpi_detection_module_struct));
 
   if(ndpi_mod == NULL) {
     ndpi_debug_printf(0, NULL, NDPI_LOG_DEBUG, "ndpi_init_detection_module initial malloc failed\n");
@@ -359,13 +354,13 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 
 /* ****************************************************** */
 
-void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct, void (*ndpi_free) (void *ptr))
+void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct)
 {
   if(ndpi_struct != NULL) {
     ndpi_unregister_content_http (ndpi_struct);
     ndpi_unregister_service_parser (ndpi_struct);
     ndpi_unregister_cdn_parser (ndpi_struct);
-    ndpi_free(ndpi_struct);
+    free(ndpi_struct);
   }
 }
 

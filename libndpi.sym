@@ -1,6 +1,4 @@
-ndpi_malloc
 ndpi_calloc
-ndpi_free
 ndpi_realloc
 ndpi_strdup
 ndpi_strnstr

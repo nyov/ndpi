@@ -37,14 +37,6 @@
 struct ndpi_detection_module_struct *ndpi_detection_module_struct_pointer = NULL;
 struct ndpi_flow_struct *ndpi_flow_struct_pointer = NULL;
 
-void *malloc_wrapper(unsigned long size) {
-	return malloc(size);
-}
-
-void free_wrapper(void *freeable) {
-	free(freeable);
-}
-
 void process_packet_by_ndpi(u_int64_t time, bpf_u_int32 header_len, u_char *packet) {
 
 	const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
@@ -146,7 +138,7 @@ void handle_pcap_file(char *pcap_file_name) {
 
 int main(int argc, char **argv) {
 
-	ndpi_detection_module_struct_pointer = ndpi_init_detection_module(1000000, malloc_wrapper, free_wrapper, NULL);
+	ndpi_detection_module_struct_pointer = ndpi_init_detection_module(1000000, NULL);
 	ndpi_flow_struct_pointer = calloc(1, ndpi_detection_get_sizeof_ndpi_flow_struct());
 
 	DIR *dir1, *dir2;
@@ -187,7 +179,7 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-	ndpi_free(ndpi_flow_struct_pointer);
+	free(ndpi_flow_struct_pointer);
 	ndpi_flow_struct_pointer = NULL;
-	ndpi_exit_detection_module(ndpi_detection_module_struct_pointer, free_wrapper);
+	ndpi_exit_detection_module(ndpi_detection_module_struct_pointer);
 }

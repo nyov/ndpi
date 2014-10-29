@@ -142,20 +142,9 @@ int atoi(const char *str) {
 
 /* ****************************************** */
 
-static void *(*_ndpi_malloc)(unsigned long size);
-static void  (*_ndpi_free)(void *ptr);
-
-void* ndpi_malloc(unsigned long size) {
-  return(_ndpi_malloc(size));
-}
-
-void ndpi_free(void *ptr) {
-  _ndpi_free(ptr);
-}
-
 void* ndpi_calloc(unsigned long count, unsigned long size) {
   unsigned long len = count*size;
-  void *p = ndpi_malloc(len);
+  void *p = malloc(len);
 
   if(p)
     memset(p, 0, len);
@@ -164,13 +153,13 @@ void* ndpi_calloc(unsigned long count, unsigned long size) {
 }
 
 void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size) {
-  void *ret = ndpi_malloc(new_size);
+  void *ret = malloc(new_size);
 
   if(!ret)
     return(ret);
   else {
     memcpy(ret, ptr, old_size);
-    ndpi_free(ptr);
+    free(ptr);
     return(ret);
   }
 }
@@ -178,7 +167,7 @@ void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size) {
 
 char *ndpi_strdup(const char *s) {
   int len = strlen(s);
-  char *m = ndpi_malloc(len+1);
+  char *m = malloc(len+1);
 
   if(m) {
     memcpy(m, s, len);

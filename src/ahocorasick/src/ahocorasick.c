@@ -51,11 +51,11 @@ static void ac_automata_traverse_setfailure
  ******************************************************************************/
 AC_AUTOMATA_t * ac_automata_init (MATCH_CALBACK_f mc)
 {
-  AC_AUTOMATA_t * thiz = (AC_AUTOMATA_t *)ndpi_malloc(sizeof(AC_AUTOMATA_t));
+  AC_AUTOMATA_t * thiz = (AC_AUTOMATA_t *)malloc(sizeof(AC_AUTOMATA_t));
   memset (thiz, 0, sizeof(AC_AUTOMATA_t));
   thiz->root = node_create ();
   thiz->all_nodes_max = REALLOC_CHUNK_ALLNODES;
-  thiz->all_nodes = (AC_NODE_t **) ndpi_malloc (thiz->all_nodes_max*sizeof(AC_NODE_t *));
+  thiz->all_nodes = (AC_NODE_t **) malloc (thiz->all_nodes_max*sizeof(AC_NODE_t *));
   thiz->match_callback = mc;
   ac_automata_register_nodeptr (thiz, thiz->root);
   ac_automata_reset (thiz);
@@ -131,7 +131,7 @@ void ac_automata_finalize (AC_AUTOMATA_t * thiz)
   AC_ALPHABET_t *alphas;
   AC_NODE_t * node;
 
-  if((alphas = ndpi_malloc(AC_PATTRN_MAX_LENGTH)) != NULL) {
+  if((alphas = malloc(AC_PATTRN_MAX_LENGTH)) != NULL) {
     ac_automata_traverse_setfailure (thiz, thiz->root, alphas);
 
     for (i=0; i < thiz->all_nodes_num; i++)
@@ -141,7 +141,7 @@ void ac_automata_finalize (AC_AUTOMATA_t * thiz)
 	node_sort_edges (node);
       }
     thiz->automata_open = 0; /* do not accept patterns any more */
-    ndpi_free(alphas);
+    free(alphas);
   }
 }
 
@@ -241,8 +241,8 @@ void ac_automata_release (AC_AUTOMATA_t * thiz)
       n = thiz->all_nodes[i];
       node_release(n);
     }
-  ndpi_free(thiz->all_nodes);
-  ndpi_free(thiz);
+  free(thiz->all_nodes);
+  free(thiz);
 }
 
 #ifndef __KERNEL__

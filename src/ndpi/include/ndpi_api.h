@@ -48,10 +48,8 @@ extern "C" {
   u_int32_t ndpi_detection_get_sizeof_ndpi_id_struct(void);
 
 
-  /* Public malloc/free */
-  void* ndpi_malloc(unsigned long size);
+  /* Public memory functions. */
   void* ndpi_calloc(unsigned long count, unsigned long size);
-  void  ndpi_free(void *ptr);
   void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size);
   char *ndpi_strdup(const char *s);
  /*
@@ -63,21 +61,17 @@ extern "C" {
   /**
    * This function returns a new initialized detection module. 
    * @param ticks_per_second the timestamp resolution per second (like 1000 for millisecond resolution)
-   * @param ndpi_malloc function pointer to a memory allocator
    * @param ndpi_debug_printf a function pointer to a debug output function, use NULL in productive envionments
    * @return the initialized detection module
    */
   struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second,
-								  void* (*__ndpi_malloc)(unsigned long size),
-								  void  (*__ndpi_free)(void *ptr),
 								  ndpi_debug_function_ptr ndpi_debug_printf);
 
   /**
    * This function destroys the detection module
    * @param ndpi_struct the to clearing detection module
-   * @param ndpi_free function pointer to a memory free function
    */
-  void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct, void (*ndpi_free) (void *ptr));
+  void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct);
   
   /**
    * This function will processes one packet and returns the ID of the detected protocol.
