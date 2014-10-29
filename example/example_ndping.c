@@ -79,26 +79,26 @@ void handle_pcap_file(char *pcap_file_name) {
 	}
 	
 	strcat(result, "proto: ");
-	strcat(result, ndpi_get_result_ip(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_ip));
+	strcat(result, ndpi_get_result_ip_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	
-	if ((ndpi_flow_struct_pointer->ndpi_result_base != NDPI_RESULT_BASE_STILL_UNKNOWN) && (ndpi_flow_struct_pointer->ndpi_result_base != NDPI_RESULT_BASE_UNKNOWN)) {
+	if ((ndpi_get_result_base_id(ndpi_flow_struct_pointer) != NDPI_RESULT_BASE_STILL_UNKNOWN) && (ndpi_get_result_base_id(ndpi_flow_struct_pointer) != NDPI_RESULT_BASE_UNKNOWN)) {
 	  strcat(result, "->");
-	  strcat(result, ndpi_get_result_base(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_base));
+	  strcat(result, ndpi_get_result_base_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	}
 	
-	if ((ndpi_flow_struct_pointer->ndpi_result_app != NDPI_RESULT_APP_STILL_UNKNOWN) && (ndpi_flow_struct_pointer->ndpi_result_app != NDPI_RESULT_APP_UNKNOWN)) {
+	if ((ndpi_get_result_app_id(ndpi_flow_struct_pointer) != NDPI_RESULT_APP_STILL_UNKNOWN) && (ndpi_get_result_app_id(ndpi_flow_struct_pointer) != NDPI_RESULT_APP_UNKNOWN)) {
 	  strcat(result, "->");
-	  strcat(result, ndpi_get_result_app(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_app));
+	  strcat(result, ndpi_get_result_app_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	}
 	
-	if ((ndpi_flow_struct_pointer->ndpi_result_content != NDPI_RESULT_CONTENT_STILL_UNKNOWN) && (ndpi_flow_struct_pointer->ndpi_result_content != NDPI_RESULT_CONTENT_UNKNOWN)) {
+	if ((ndpi_get_result_content_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CONTENT_STILL_UNKNOWN) && (ndpi_get_result_content_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CONTENT_UNKNOWN)) {
 	  strcat(result, ", content: ");
-	  strcat(result, ndpi_get_result_content(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_content));
+	  strcat(result, ndpi_get_result_content_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	}
 	
-	if (((ndpi_flow_struct_pointer->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) && (ndpi_flow_struct_pointer->ndpi_result_service != NDPI_RESULT_SERVICE_UNKNOWN)) || (strlen(ndpi_flow_struct_pointer->domain_service) > 0)) {
+	if (((ndpi_get_result_service_id(ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_STILL_UNKNOWN) && (ndpi_get_result_service_id(ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_UNKNOWN)) || (strlen(ndpi_flow_struct_pointer->domain_service) > 0)) {
 	  strcat(result, ", service: ");
-	  strcat(result, ndpi_get_result_service(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_service));
+	  strcat(result, ndpi_get_result_service_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	  
 	  if (strlen(ndpi_flow_struct_pointer->domain_service) > 0) {
 	    strcat(result, " [");
@@ -107,9 +107,9 @@ void handle_pcap_file(char *pcap_file_name) {
 	  }
 	}
 	
-	if (((ndpi_flow_struct_pointer->ndpi_result_cdn != NDPI_RESULT_CDN_STILL_UNKNOWN) && (ndpi_flow_struct_pointer->ndpi_result_cdn != NDPI_RESULT_CDN_UNKNOWN)) || (strlen(ndpi_flow_struct_pointer->domain_cdn) > 0)) {
+	if (((ndpi_get_result_cdn_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CDN_STILL_UNKNOWN) && (ndpi_get_result_cdn_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CDN_UNKNOWN)) || (strlen(ndpi_flow_struct_pointer->domain_cdn) > 0)) {
 	  strcat(result, ", cdn: ");
-	  strcat(result, ndpi_get_result_cdn(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer->ndpi_result_cdn));
+	  strcat(result, ndpi_get_result_cdn_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	  
 	  if (strlen(ndpi_flow_struct_pointer->domain_cdn) > 0) {
 	    strcat(result, " [");

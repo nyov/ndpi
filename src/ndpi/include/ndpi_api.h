@@ -117,12 +117,19 @@ extern "C" {
 
   char* ndpi_revision(void);
    
-   char *ndpi_get_result_ip (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_ip_t id);
-   char *ndpi_get_result_base (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_base_t id);
-   char *ndpi_get_result_app (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_app_t id);
-   char *ndpi_get_result_content (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_content_t id);
-   char *ndpi_get_result_service (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_service_t id);
-   char *ndpi_get_result_cdn (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_cdn_t id);
+   ndpi_result_ip_t ndpi_get_result_ip_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   ndpi_result_base_t ndpi_get_result_base_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   ndpi_result_app_t ndpi_get_result_app_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   ndpi_result_content_t ndpi_get_result_content_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   ndpi_result_service_t ndpi_get_result_service_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   ndpi_result_cdn_t ndpi_get_result_cdn_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   
+   char *ndpi_get_result_ip_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   char *ndpi_get_result_base_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   char *ndpi_get_result_app_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   char *ndpi_get_result_content_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   char *ndpi_get_result_service_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   char *ndpi_get_result_cdn_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
 
 #ifdef __cplusplus
 }

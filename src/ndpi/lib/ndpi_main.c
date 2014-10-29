@@ -81,29 +81,57 @@ void delete_ndpi_flow_struct_pointer(struct ndpi_flow_struct *ndpi_flow_struct_p
 
 /* ******************************************************************** */
 
-char *ndpi_get_result_ip (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_ip_t id) {
-  return ndpi_mod->ndpi_scanners_ip[id].name;
+ndpi_result_ip_t ndpi_get_result_ip_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->ndpi_result_ip;
 }
 
-char *ndpi_get_result_base (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_base_t id) {
-  return ndpi_mod->ndpi_scanners_base[id].name;
+ndpi_result_base_t ndpi_get_result_base_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->ndpi_result_base;
 }
 
-char *ndpi_get_result_app (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_app_t id) {
-  return ndpi_mod->ndpi_scanners_app[id].name;
+ndpi_result_app_t ndpi_get_result_app_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->ndpi_result_app;
 }
 
-char *ndpi_get_result_content (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_content_t id) {
-  return ndpi_mod->ndpi_scanners_content[id].name;
+ndpi_result_content_t ndpi_get_result_content_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->ndpi_result_content;
 }
 
-char *ndpi_get_result_service (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_service_t id) {
-  return ndpi_mod->ndpi_scanners_service[id].name;
+ndpi_result_service_t ndpi_get_result_service_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->ndpi_result_service;
 }
 
-char *ndpi_get_result_cdn (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_cdn_t id) {
-  return ndpi_mod->ndpi_scanners_cdn[id].name;
+ndpi_result_cdn_t ndpi_get_result_cdn_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->ndpi_result_cdn;
 }
+
+/* ******************************************************************** */
+
+char *ndpi_get_result_ip_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_mod->ndpi_scanners_ip[ndpi_flow_struct_pointer->ndpi_result_ip].name;
+}
+
+char *ndpi_get_result_base_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_mod->ndpi_scanners_base[ndpi_flow_struct_pointer->ndpi_result_base].name;
+}
+
+char *ndpi_get_result_app_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_mod->ndpi_scanners_app[ndpi_flow_struct_pointer->ndpi_result_app].name;
+}
+
+char *ndpi_get_result_content_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_mod->ndpi_scanners_content[ndpi_flow_struct_pointer->ndpi_result_content].name;
+}
+
+char *ndpi_get_result_service_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_mod->ndpi_scanners_service[ndpi_flow_struct_pointer->ndpi_result_service].name;
+}
+
+char *ndpi_get_result_cdn_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_mod->ndpi_scanners_cdn[ndpi_flow_struct_pointer->ndpi_result_cdn].name;
+}
+
+/* ******************************************************************** */
 
 void ndpi_initialize_scanner_ip (struct ndpi_detection_module_struct *mod, ndpi_result_ip_t id, char *name, void (*func)) {
   mod->ndpi_scanners_ip[id].id = id;
