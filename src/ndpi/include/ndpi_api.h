@@ -89,7 +89,7 @@ extern "C" {
    * @param src void pointer to the source subscriber state machine
    * @param dst void pointer to the destination subscriber state machine
    */
-  void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
+  int ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
 				struct ndpi_flow_struct *flow,
 				const unsigned char *packet,
 				const unsigned short packetlen,

@@ -37,7 +37,7 @@
 struct ndpi_detection_module_struct *ndpi_detection_module_struct_pointer = NULL;
 struct ndpi_flow_struct *ndpi_flow_struct_pointer = NULL;
 
-void process_packet_by_ndpi(u_int64_t time, bpf_u_int32 header_len, u_char *packet) {
+int process_packet_by_ndpi(u_int64_t time, bpf_u_int32 header_len, u_char *packet) {
 
 	const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
 	u_int16_t ip_offset = sizeof(struct ndpi_ethhdr);
@@ -49,7 +49,7 @@ void process_packet_by_ndpi(u_int64_t time, bpf_u_int32 header_len, u_char *pack
 	struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[ip_offset];
 	u_int16_t ipsize = header_len - ip_offset;
 
-	ndpi_process_ip_packet(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time, NULL, NULL);
+	return ndpi_process_ip_packet(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time, NULL, NULL);
 }
 
 void handle_pcap_file(char *pcap_file_name) {
@@ -63,11 +63,18 @@ void handle_pcap_file(char *pcap_file_name) {
 	const u_char *packet;
 	
 	unsigned long processed_packets_by_ndpi = 0;
+	unsigned long processed_packets = 0;
+	int flow_detected = 0;
 	
 	while (packet = pcap_next(pcap_handle, &header)) {
 		u_int64_t time = ((uint64_t) header.ts.tv_sec) * 1000000 + header.ts.tv_usec;
-		process_packet_by_ndpi(time, header.len, (u_char *) packet);
-		processed_packets_by_ndpi++;
+		
+		if (!flow_detected) {
+		  flow_detected = process_packet_by_ndpi(time, header.len, (u_char *) packet);
+		  processed_packets_by_ndpi++;
+		}
+		
+		processed_packets++;
 	}
 	
 	char no_of_packets[15];
@@ -128,6 +135,10 @@ void handle_pcap_file(char *pcap_file_name) {
 	
 	sprintf(no_of_packets, "%lu", processed_packets_by_ndpi);
 	
+	strcat(result, no_of_packets);
+	strcat(result, "/");
+	
+	sprintf(no_of_packets, "%lu", processed_packets);
 	strcat(result, no_of_packets);
 	
 	printf("%s\n", result);

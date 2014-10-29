@@ -1062,7 +1062,7 @@ void ndpi_detect_level_app(struct ndpi_detection_module_struct *ndpi_struct, str
   
 }
 
-void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
+int ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
 					   struct ndpi_flow_struct *flow,
 					   const unsigned char *packet,
 					   const unsigned short packetlen,
@@ -1076,7 +1076,7 @@ void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
   NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_packet;
 
   if (flow == NULL)
-    return;
+    return 0;
 
   /* Stop if everything is already detected. */
   if ((flow->ndpi_result_ip != NDPI_RESULT_IP_STILL_UNKNOWN) &&
@@ -1086,12 +1086,12 @@ void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
     (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) &&
     (flow->ndpi_result_cdn != NDPI_RESULT_CDN_STILL_UNKNOWN)) {
     
-    return;
+    return 1;
   }
 
   /* We need at least 20 bytes for the IP header. */
   if (packetlen < 20) {
-    return;
+    return 0;
   }
   
   /* Clear the packet strcucture. */
@@ -1103,14 +1103,14 @@ void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
   flow->packet.iph = (struct ndpi_iphdr *) packet;
   
   if (ndpi_init_packet_header(ndpi_struct, flow, packetlen) != 0)
-    return;
+    return 0;
 
   flow->src = src, flow->dst = dst;
 
   ndpi_connection_tracking(ndpi_struct, flow);
 
   if (flow == NULL && (flow->packet.tcp != NULL || flow->packet.udp != NULL)) {
-    return;
+    return 0;
   }
 
   /* Build ndpi_selction packet bitmask */
@@ -1168,7 +1168,7 @@ void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
     flow->ndpi_result_service = NDPI_RESULT_SERVICE_UNKNOWN;
     flow->ndpi_result_cdn = NDPI_RESULT_CDN_UNKNOWN;
     
-    return;
+    return 1;
   }
   
   /* The BASE level. */
@@ -1275,6 +1275,18 @@ void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
       }
     }
   }
+  
+  if ((flow->ndpi_result_ip != NDPI_RESULT_IP_STILL_UNKNOWN) &&
+    (flow->ndpi_result_base != NDPI_RESULT_BASE_STILL_UNKNOWN) &&
+    (flow->ndpi_result_app != NDPI_RESULT_APP_STILL_UNKNOWN) &&
+    (flow->ndpi_result_content != NDPI_RESULT_CONTENT_STILL_UNKNOWN) &&
+    (flow->ndpi_result_service != NDPI_RESULT_SERVICE_STILL_UNKNOWN) &&
+    (flow->ndpi_result_cdn != NDPI_RESULT_CDN_STILL_UNKNOWN)) {
+    
+    return 1;
+  }
+  
+  return 0;
   
 }
 
