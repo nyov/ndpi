@@ -133,6 +133,22 @@ char *ndpi_get_result_cdn_name (struct ndpi_detection_module_struct *ndpi_mod, s
 
 /* ******************************************************************** */
 
+char *ndpi_get_result_domain_service_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  return ndpi_flow_struct_pointer->host_server_name;
+}
+
+char *ndpi_get_result_domain_cdn_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  
+  if (ndpi_flow_struct_pointer->server_certificate != NULL && strlen(ndpi_flow_struct_pointer->server_certificate) > 0) {
+    return ndpi_flow_struct_pointer->server_certificate;
+  } else {
+    return ndpi_flow_struct_pointer->client_certificate;
+  }
+  
+}
+
+/* ******************************************************************** */
+
 void ndpi_initialize_scanner_ip (struct ndpi_detection_module_struct *mod, ndpi_result_ip_t id, char *name, void (*func)) {
   mod->ndpi_scanners_ip[id].id = id;
   mod->ndpi_scanners_ip[id].name = name;

@@ -96,24 +96,24 @@ void handle_pcap_file(char *pcap_file_name) {
 	  strcat(result, ndpi_get_result_content_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	}
 	
-	if (((ndpi_get_result_service_id(ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_STILL_UNKNOWN) && (ndpi_get_result_service_id(ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_UNKNOWN)) || (strlen(ndpi_flow_struct_pointer->domain_service) > 0)) {
+	if (((ndpi_get_result_service_id(ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_STILL_UNKNOWN) && (ndpi_get_result_service_id(ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_UNKNOWN)) || (strlen(ndpi_get_result_domain_service_name(ndpi_flow_struct_pointer)) > 0)) {
 	  strcat(result, ", service: ");
 	  strcat(result, ndpi_get_result_service_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	  
-	  if (strlen(ndpi_flow_struct_pointer->domain_service) > 0) {
+	  if (strlen(ndpi_get_result_domain_service_name(ndpi_flow_struct_pointer)) > 0) {
 	    strcat(result, " [");
-	    strcat(result, ndpi_flow_struct_pointer->domain_service);
+	    strcat(result, ndpi_get_result_domain_service_name(ndpi_flow_struct_pointer));
 	    strcat(result, "]");
 	  }
 	}
 	
-	if (((ndpi_get_result_cdn_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CDN_STILL_UNKNOWN) && (ndpi_get_result_cdn_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CDN_UNKNOWN)) || (strlen(ndpi_flow_struct_pointer->domain_cdn) > 0)) {
+	if (((ndpi_get_result_cdn_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CDN_STILL_UNKNOWN) && (ndpi_get_result_cdn_id(ndpi_flow_struct_pointer) != NDPI_RESULT_CDN_UNKNOWN)) || (strlen(ndpi_get_result_domain_cdn_name(ndpi_flow_struct_pointer)) > 0)) {
 	  strcat(result, ", cdn: ");
 	  strcat(result, ndpi_get_result_cdn_name(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer));
 	  
-	  if (strlen(ndpi_flow_struct_pointer->domain_cdn) > 0) {
+	  if (strlen(ndpi_get_result_domain_cdn_name(ndpi_flow_struct_pointer)) > 0) {
 	    strcat(result, " [");
-	    strcat(result, ndpi_flow_struct_pointer->domain_cdn);
+	    strcat(result, ndpi_get_result_domain_cdn_name(ndpi_flow_struct_pointer));
 	    strcat(result, "]");
 	  }
 	}

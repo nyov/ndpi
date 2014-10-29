@@ -24,3 +24,5 @@ ndpi_get_result_app_name
 ndpi_get_result_content_name
 ndpi_get_result_service_name
 ndpi_get_result_cdn_name
+ndpi_get_result_domain_service_name
+ndpi_get_result_domain_cdn_name

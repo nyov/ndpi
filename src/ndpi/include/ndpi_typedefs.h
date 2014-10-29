@@ -362,9 +362,6 @@ typedef struct ndpi_flow_struct {
   ndpi_result_service_t ndpi_result_service;
   ndpi_result_cdn_t ndpi_result_cdn;
   
-  u_char domain_service[256];
-  u_char domain_cdn[256];
-  
   u_int8_t ndpi_excluded_base[NDPI_RESULT_BASE_LAST];
   u_int8_t ndpi_excluded_app[NDPI_RESULT_APP_LAST];
   u_int8_t ndpi_excluded_service;

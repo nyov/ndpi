@@ -130,6 +130,9 @@ extern "C" {
    char *ndpi_get_result_content_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
    char *ndpi_get_result_service_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
    char *ndpi_get_result_cdn_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   
+   char *ndpi_get_result_domain_service_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+   char *ndpi_get_result_domain_cdn_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
 
 #ifdef __cplusplus
 }
