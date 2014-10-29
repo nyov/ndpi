@@ -66,6 +66,21 @@ u_int32_t ndpi_detection_get_sizeof_ndpi_id_struct(void)
 
 /* ******************************************************************** */
 
+struct ndpi_flow_struct *create_ndpi_flow_struct_pointer(void) {
+  return ndpi_calloc(1, ndpi_detection_get_sizeof_ndpi_flow_struct());
+}
+
+void clear_ndpi_flow_struct_pointer(struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  memset(ndpi_flow_struct_pointer, 0, ndpi_detection_get_sizeof_ndpi_flow_struct());
+}
+
+void delete_ndpi_flow_struct_pointer(struct ndpi_flow_struct *ndpi_flow_struct_pointer) {
+  free(ndpi_flow_struct_pointer);
+  ndpi_flow_struct_pointer = NULL;
+}
+
+/* ******************************************************************** */
+
 char *ndpi_get_result_ip (struct ndpi_detection_module_struct *ndpi_mod, ndpi_result_ip_t id) {
   return ndpi_mod->ndpi_scanners_ip[id].name;
 }
@@ -154,7 +169,7 @@ void ndpi_initialize_scanner_cdn (struct ndpi_detection_module_struct *mod, ndpi
   mod->ndpi_scanners_cdn[id].func = func;
 }
 
-struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second,
+struct ndpi_detection_module_struct *create_ndpi_detection_module_struct_pointer(u_int32_t ticks_per_second,
 								ndpi_debug_function_ptr ndpi_debug_printf)
 {
   struct ndpi_detection_module_struct *ndpi_mod;
@@ -162,7 +177,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   ndpi_mod = malloc(sizeof(struct ndpi_detection_module_struct));
 
   if(ndpi_mod == NULL) {
-    ndpi_debug_printf(0, NULL, NDPI_LOG_DEBUG, "ndpi_init_detection_module initial malloc failed\n");
+    ndpi_debug_printf(0, NULL, NDPI_LOG_DEBUG, "create_ndpi_detection_module_struct_pointer initial malloc failed\n");
     return NULL;
   }
   
@@ -354,7 +369,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 
 /* ****************************************************** */
 
-void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct)
+void delete_ndpi_detection_module_struct_pointer(struct ndpi_detection_module_struct *ndpi_struct)
 {
   if(ndpi_struct != NULL) {
     ndpi_unregister_content_http (ndpi_struct);
@@ -1003,7 +1018,7 @@ void ndpi_detect_level_app(struct ndpi_detection_module_struct *ndpi_struct, str
   
 }
 
-void ndpi_detection_process_packet(struct ndpi_detection_module_struct *ndpi_struct,
+void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
 					   struct ndpi_flow_struct *flow,
 					   const unsigned char *packet,
 					   const unsigned short packetlen,

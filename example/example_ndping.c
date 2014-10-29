@@ -49,13 +49,12 @@ void process_packet_by_ndpi(u_int64_t time, bpf_u_int32 header_len, u_char *pack
 	struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[ip_offset];
 	u_int16_t ipsize = header_len - ip_offset;
 
-	ndpi_detection_process_packet(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time, NULL, NULL);
+	ndpi_process_ip_packet(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time, NULL, NULL);
 }
 
 void handle_pcap_file(char *pcap_file_name) {
 
-	// Detected protocol field + clear the flow structure to handle a new flow
-	memset(ndpi_flow_struct_pointer, 0, ndpi_detection_get_sizeof_ndpi_flow_struct());
+	clear_ndpi_flow_struct_pointer(ndpi_flow_struct_pointer);
 
 	char pcap_error_buffer[PCAP_ERRBUF_SIZE];
 	pcap_t *pcap_handle = pcap_open_offline(pcap_file_name, pcap_error_buffer);
@@ -138,8 +137,8 @@ void handle_pcap_file(char *pcap_file_name) {
 
 int main(int argc, char **argv) {
 
-	ndpi_detection_module_struct_pointer = ndpi_init_detection_module(1000000, NULL);
-	ndpi_flow_struct_pointer = calloc(1, ndpi_detection_get_sizeof_ndpi_flow_struct());
+	ndpi_detection_module_struct_pointer = create_ndpi_detection_module_struct_pointer(1000000, NULL);
+	ndpi_flow_struct_pointer = create_ndpi_flow_struct_pointer();
 
 	DIR *dir1, *dir2;
 	struct dirent *ent1, *ent2;
@@ -179,7 +178,6 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-	free(ndpi_flow_struct_pointer);
-	ndpi_flow_struct_pointer = NULL;
-	ndpi_exit_detection_module(ndpi_detection_module_struct_pointer);
+	delete_ndpi_flow_struct_pointer(ndpi_flow_struct_pointer);
+	delete_ndpi_detection_module_struct_pointer(ndpi_detection_module_struct_pointer);
 }

@@ -52,6 +52,11 @@ extern "C" {
   void* ndpi_calloc(unsigned long count, unsigned long size);
   void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size);
   char *ndpi_strdup(const char *s);
+  
+  struct ndpi_flow_struct *create_ndpi_flow_struct_pointer(void);
+  void clear_ndpi_flow_struct_pointer(struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  void delete_ndpi_flow_struct_pointer(struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  
  /*
  * Find the first occurrence of find in s, where the search is limited to the
  * first slen characters of s.
@@ -64,14 +69,13 @@ extern "C" {
    * @param ndpi_debug_printf a function pointer to a debug output function, use NULL in productive envionments
    * @return the initialized detection module
    */
-  struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second,
-								  ndpi_debug_function_ptr ndpi_debug_printf);
+  struct ndpi_detection_module_struct *create_ndpi_detection_module_struct_pointer(u_int32_t ticks_per_second, ndpi_debug_function_ptr ndpi_debug_printf);
 
   /**
    * This function destroys the detection module
    * @param ndpi_struct the to clearing detection module
    */
-  void ndpi_exit_detection_module(struct ndpi_detection_module_struct *ndpi_struct);
+  void delete_ndpi_detection_module_struct_pointer(struct ndpi_detection_module_struct *ndpi_struct);
   
   /**
    * This function will processes one packet and returns the ID of the detected protocol.
@@ -85,7 +89,7 @@ extern "C" {
    * @param src void pointer to the source subscriber state machine
    * @param dst void pointer to the destination subscriber state machine
    */
-  void ndpi_detection_process_packet(struct ndpi_detection_module_struct *ndpi_struct,
+  void ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
 				struct ndpi_flow_struct *flow,
 				const unsigned char *packet,
 				const unsigned short packetlen,
