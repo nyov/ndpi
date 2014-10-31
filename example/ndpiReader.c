@@ -369,7 +369,7 @@ static void *malloc_wrapper(unsigned long size) {
 
   if(current_ndpi_memory > max_ndpi_memory)
     max_ndpi_memory = current_ndpi_memory;
-  
+
   return malloc(size);
 }
 
@@ -1078,6 +1078,7 @@ static void printResults(u_int64_t tot_usec) {
   FILE *json_fp;
   json_object *jObj_main, *jObj_trafficStats, *jArray_detProto, *jObj;
 #endif
+  long long unsigned int breed_stats[NUM_BREEDS] = { 0 };
 
   memset(&cumulative_stats, 0, sizeof(cumulative_stats));
 
@@ -1204,7 +1205,11 @@ static void printResults(u_int64_t tot_usec) {
 
   if(!json_flag) printf("\n\nDetected protocols:\n");
   for(i = 0; i <= ndpi_get_num_supported_protocols(ndpi_thread_info[0].ndpi_struct); i++) {
+    ndpi_protocol_breed_t breed = ndpi_get_proto_breed(ndpi_thread_info[0].ndpi_struct, i);
+
     if(cumulative_stats.protocol_counter[i] > 0) {
+      breed_stats[breed] += (long long unsigned int)cumulative_stats.protocol_counter_bytes[i];
+
       if(!json_flag) {
 	printf("\t%-20s packets: %-13llu bytes: %-13llu "
 	       "flows: %-13u\n",
@@ -1217,6 +1222,7 @@ static void printResults(u_int64_t tot_usec) {
 	jObj = json_object_new_object();
 
 	json_object_object_add(jObj,"name",json_object_new_string(ndpi_get_proto_name(ndpi_thread_info[0].ndpi_struct, i)));
+	json_object_object_add(jObj,"breed",json_object_new_string(ndpi_get_proto_breed_name(ndpi_thread_info[0].ndpi_struct, breed)));
 	json_object_object_add(jObj,"packets",json_object_new_int64(cumulative_stats.protocol_counter[i]));
 	json_object_object_add(jObj,"bytes",json_object_new_int64(cumulative_stats.protocol_counter_bytes[i]));
 	json_object_object_add(jObj,"flows",json_object_new_int(cumulative_stats.protocol_flows[i]));
@@ -1226,6 +1232,18 @@ static void printResults(u_int64_t tot_usec) {
       }
 
       total_flow_bytes += cumulative_stats.protocol_counter_bytes[i];
+    }
+  }
+
+  if(!json_flag) {
+    printf("\n\nProtocol statistics:\n");
+
+    for(i=0; i < NUM_BREEDS; i++) {
+      if(breed_stats[i] > 0) {
+	printf("\t%-20s %13llu bytes\n",
+	       ndpi_get_proto_breed_name(ndpi_thread_info[0].ndpi_struct, i),
+	       breed_stats[i]);
+      }
     }
   }
 
@@ -1354,7 +1372,7 @@ static void openPcapFileOrDevice(u_int16_t thread_id) {
   /* trying to open a live interface */
   if((ndpi_thread_info[thread_id]._pcap_handle = pcap_open_live(_pcap_file[thread_id], snaplen, promisc, 500, errbuf)) == NULL) {
     capture_for = capture_until = 0;
-    
+
     live_capture = 0;
     num_threads = 1; /* Open pcap files in single threads mode */
 

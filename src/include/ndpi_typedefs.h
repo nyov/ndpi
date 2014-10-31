@@ -481,10 +481,22 @@ typedef struct {
   u_int16_t port_low, port_high;
 } ndpi_port_range;
 
+typedef enum {
+  NDPI_PROTOCOL_SAFE = 0, /* Safe protocol with encryption */
+  NDPI_PROTOCOL_ACCEPTABLE, /* Ok but not encrypted */
+  NDPI_PROTOCOL_FUN, /* Pure fun protocol */
+  NDPI_PROTOCOL_UNSAFE, /* Protocol with a safe version existing  what should be used instead */
+  NDPI_PROTOCOL_POTENTIALLY_DANGEROUS, /* Be prepared to troubles */
+  NDPI_PROTOCOL_UNRATED /* No idea */
+} ndpi_protocol_breed_t;
+
+#define NUM_BREEDS (NDPI_PROTOCOL_UNRATED+1)
+
 /* ntop extensions */
 typedef struct ndpi_proto_defaults {
   char *protoName;
   u_int16_t protoId, protoIdx;
+  ndpi_protocol_breed_t protoBreed;
   void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow);
 } ndpi_proto_defaults_t;
 
@@ -735,7 +747,6 @@ typedef enum {
   NDPI_REAL_PROTOCOL = 0,
   NDPI_CORRELATED_PROTOCOL = 1
 } ndpi_protocol_type_t;
-
 
 typedef enum {
   NDPI_LOG_ERROR,

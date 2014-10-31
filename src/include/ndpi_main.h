@@ -121,6 +121,7 @@ extern void ndpi_int_change_protocol(struct ndpi_detection_module_struct *ndpi_s
 				     u_int16_t detected_protocol,
 				     ndpi_protocol_type_t protocol_type);
 extern void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
+				    ndpi_protocol_breed_t protoBreed,
 				    u_int16_t protoId, char *protoName,
 				    ndpi_port_range *tcpDefPorts, ndpi_port_range *udpDefPorts);
 extern void ndpi_int_reset_packet_protocol(struct ndpi_packet_struct *packet);
