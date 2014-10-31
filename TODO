@@ -33,6 +33,9 @@ SSL->POPS
 But sometimes some results from some scanners should be overwritten by another scanners, just by not excluding the levels.
 Make it conssitent in ndpi_main.c and the calling sample application.
 
+15. Add support for IPv6 in the sample application.
+
+16. Clean the src/dst state machine in the particular protocols and delete the entire structure.
 
 ----------------------------------------------------------------------------
 

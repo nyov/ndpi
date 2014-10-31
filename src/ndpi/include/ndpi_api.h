@@ -86,16 +86,12 @@ extern "C" {
    * @param packet the packet as unsigned char pointer with the length of packetlen. the pointer must point to the Layer 3 (IP header)
    * @param packetlen the length of the packet
    * @param current_tick the current timestamp for the packet
-   * @param src void pointer to the source subscriber state machine
-   * @param dst void pointer to the destination subscriber state machine
    */
   int ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
 				struct ndpi_flow_struct *flow,
 				const unsigned char *packet,
 				const unsigned short packetlen,
-				const u_int32_t current_tick, 
-				struct ndpi_id_struct *src, 
-				struct ndpi_id_struct *dst
+				const u_int32_t current_tick
  			      );
 
 #define NDPI_DETECTION_ONLY_IPV4 ( 1 << 0 )
@@ -115,24 +111,24 @@ extern "C" {
   u_int8_t ndpi_detection_get_l4(const u_int8_t * l3, u_int16_t l3_len, const u_int8_t ** l4_return, u_int16_t * l4_len_return,
 				 u_int8_t * l4_protocol_return, u_int32_t flags);
 
-  char* ndpi_revision(void);
-   
-   ndpi_result_ip_t ndpi_get_result_ip_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   ndpi_result_base_t ndpi_get_result_base_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   ndpi_result_app_t ndpi_get_result_app_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   ndpi_result_content_t ndpi_get_result_content_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   ndpi_result_service_t ndpi_get_result_service_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   ndpi_result_cdn_t ndpi_get_result_cdn_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   
-   char *ndpi_get_result_ip_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   char *ndpi_get_result_base_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   char *ndpi_get_result_app_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   char *ndpi_get_result_content_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   char *ndpi_get_result_service_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   char *ndpi_get_result_cdn_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   
-   char *ndpi_get_result_domain_service_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
-   char *ndpi_get_result_domain_cdn_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_revision(void);
+  
+  ndpi_result_ip_t ndpi_get_result_ip_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  ndpi_result_base_t ndpi_get_result_base_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  ndpi_result_app_t ndpi_get_result_app_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  ndpi_result_content_t ndpi_get_result_content_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  ndpi_result_service_t ndpi_get_result_service_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  ndpi_result_cdn_t ndpi_get_result_cdn_id (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  
+  char *ndpi_get_result_ip_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_get_result_base_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_get_result_app_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_get_result_content_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_get_result_service_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_get_result_cdn_name (struct ndpi_detection_module_struct *ndpi_mod, struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  
+  char *ndpi_get_result_domain_service_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
+  char *ndpi_get_result_domain_cdn_name (struct ndpi_flow_struct *ndpi_flow_struct_pointer);
 
 #ifdef __cplusplus
 }

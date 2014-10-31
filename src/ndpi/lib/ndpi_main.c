@@ -213,14 +213,11 @@ void ndpi_initialize_scanner_cdn (struct ndpi_detection_module_struct *mod, ndpi
   mod->ndpi_scanners_cdn[id].func = func;
 }
 
-struct ndpi_detection_module_struct *create_ndpi_detection_module_struct_pointer(u_int32_t ticks_per_second,
-								ndpi_debug_function_ptr ndpi_debug_printf)
-{
-  struct ndpi_detection_module_struct *ndpi_mod;
+struct ndpi_detection_module_struct *create_ndpi_detection_module_struct_pointer(u_int32_t ticks_per_second, ndpi_debug_function_ptr ndpi_debug_printf) {
+  
+  struct ndpi_detection_module_struct *ndpi_mod = malloc(sizeof(struct ndpi_detection_module_struct));
 
-  ndpi_mod = malloc(sizeof(struct ndpi_detection_module_struct));
-
-  if(ndpi_mod == NULL) {
+  if (ndpi_mod == NULL) {
     ndpi_debug_printf(0, NULL, NDPI_LOG_DEBUG, "create_ndpi_detection_module_struct_pointer initial malloc failed\n");
     return NULL;
   }
@@ -1066,9 +1063,7 @@ int ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
 					   struct ndpi_flow_struct *flow,
 					   const unsigned char *packet,
 					   const unsigned short packetlen,
-					   const u_int32_t current_tick,
-					   struct ndpi_id_struct *src,
-					   struct ndpi_id_struct *dst
+					   const u_int32_t current_tick
 					  )
 {
   
@@ -1104,8 +1099,6 @@ int ndpi_process_ip_packet(struct ndpi_detection_module_struct *ndpi_struct,
   
   if (ndpi_init_packet_header(ndpi_struct, flow, packetlen) != 0)
     return 0;
-
-  flow->src = src, flow->dst = dst;
 
   ndpi_connection_tracking(ndpi_struct, flow);
 

@@ -49,7 +49,7 @@ int process_packet_by_ndpi(u_int64_t time, bpf_u_int32 header_len, u_char *packe
 	struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[ip_offset];
 	u_int16_t ipsize = header_len - ip_offset;
 
-	return ndpi_process_ip_packet(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time, NULL, NULL);
+	return ndpi_process_ip_packet(ndpi_detection_module_struct_pointer, ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time);
 }
 
 void handle_pcap_file(char *pcap_file_name) {
