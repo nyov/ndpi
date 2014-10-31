@@ -1141,6 +1141,9 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_UPNP, "UPnP",
 			  ndpi_build_default_ports(ports_a, 1780, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 1900, 0, 0, 0, 0) /* UDP */); /* Missing dissector: port based only */
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_TELEGRAM, "Telegram",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
 
   /* http://en.wikipedia.org/wiki/Link-local_Multicast_Name_Resolution */
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_LLMNR, "LLMNR",
@@ -2954,6 +2957,15 @@ void ndpi_set_protocol_detection_bitmask2(struct ndpi_detection_module_struct *n
 				      NDPI_SERVICE_TWITTER,
 				      ndpi_search_twitter,
 				      NDPI_SELECTION_BITMASK_PROTOCOL_TCP,
+				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
+				      ADD_TO_DETECTION_BITMASK);
+#endif
+
+#ifdef NDPI_PROTOCOL_TELEGRAM
+  ndpi_set_bitmask_protocol_detection("TELEGRAM", ndpi_struct, detection_bitmask, a++,
+				      NDPI_PROTOCOL_TELEGRAM,
+				      ndpi_search_telegram,
+				      NDPI_SELECTION_BITMASK_PROTOCOL_V4_V6_TCP_OR_UDP,
 				      SAVE_DETECTION_BITMASK_AS_UNKNOWN,
 				      ADD_TO_DETECTION_BITMASK);
 #endif

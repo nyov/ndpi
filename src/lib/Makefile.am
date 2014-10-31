@@ -124,6 +124,7 @@ libndpi_la_SOURCES = ndpi_content_match.c.inc \
 		     protocols/tds.c \
 		     protocols/teamspeak.c \
 		     protocols/teamviewer.c \
+		     protocols/telegram.c \
 		     protocols/telnet.c \
 		     protocols/tftp.c \
 		     protocols/thunder.c \
