@@ -10,6 +10,13 @@ content, and services. Each PCAP file in this directory contain exactly one flow
 The flows are truncated after the 20th packet. However, this example application
 supports multiple flows per PCAP file.
 
+------------------------------------------------------------------------------------------
+
+If you want to get verbose output (domains for both service and content providers),
+set #define VERBOSE_OUTPUT to 1.
+
+------------------------------------------------------------------------------------------
+
 In order to capture packets from an interface, you need to:
 
 1. Edit #defines.
@@ -21,3 +28,5 @@ number of packets is captured.
 2. Re-compile the source code (make).
 
 3. Runt it using superuser privileges (change to root).
+
+------------------------------------------------------------------------------------------

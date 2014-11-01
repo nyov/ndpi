@@ -38,6 +38,8 @@
 /* CONFIGURATION!!! */
 /* ************************************************************************************************************************************************ */
 
+#define VERBOSE_OUTPUT 0
+
 #define LIVE_CAPTURE 0
 #define LIVE_CAPTURE_PACKETS 10000
 #define LIVE_CAPTURE_INTERFACE "wlan0"
@@ -399,7 +401,7 @@ void print_flow(char *pcap_file_name, struct ndpi_flow *flow) {
 	  strcat(result, ", service: ");
 	  strcat(result, ndpi_get_result_service_name(ndpi_detection_module_struct_pointer, flow->ndpi_flow_struct_pointer));
 	  
-	  if (strlen(ndpi_get_result_domain_service_name(flow->ndpi_flow_struct_pointer)) > 0) {
+	  if (VERBOSE_OUTPUT && (strlen(ndpi_get_result_domain_service_name(flow->ndpi_flow_struct_pointer)) > 0)) {
 	    strcat(result, " [");
 	    strcat(result, ndpi_get_result_domain_service_name(flow->ndpi_flow_struct_pointer));
 	    strcat(result, "]");
@@ -410,7 +412,7 @@ void print_flow(char *pcap_file_name, struct ndpi_flow *flow) {
 	  strcat(result, ", cdn: ");
 	  strcat(result, ndpi_get_result_cdn_name(ndpi_detection_module_struct_pointer, flow->ndpi_flow_struct_pointer));
 	  
-	  if (strlen(ndpi_get_result_domain_cdn_name(flow->ndpi_flow_struct_pointer)) > 0) {
+	  if (VERBOSE_OUTPUT && (strlen(ndpi_get_result_domain_cdn_name(flow->ndpi_flow_struct_pointer)) > 0)) {
 	    strcat(result, " [");
 	    strcat(result, ndpi_get_result_domain_cdn_name(flow->ndpi_flow_struct_pointer));
 	    strcat(result, "]");
