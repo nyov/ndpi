@@ -35,6 +35,14 @@
 #include "ndpi_main.h"
 
 /* ************************************************************************************************************************************************ */
+/* CONFIGURATION!!! */
+/* ************************************************************************************************************************************************ */
+
+#define LIVE_CAPTURE 0
+#define LIVE_CAPTURE_PACKETS 10000
+#define LIVE_CAPTURE_INTERFACE "wlan0"
+
+/* ************************************************************************************************************************************************ */
 /* STUFF ASSOCIATED WITH THE TREE OF GENERATED RESULTS */
 /* ************************************************************************************************************************************************ */
 
@@ -423,6 +431,73 @@ static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, 
 	print_flow((char *) pcap_file_name, flow);
 }
 
+void handle_pcap_live_interface() {
+
+	char pcap_error_buffer[PCAP_ERRBUF_SIZE];
+	pcap_t *pcap_handle = pcap_open_live(LIVE_CAPTURE_INTERFACE, 1514, 1, 500, pcap_error_buffer);
+	
+	struct pcap_pkthdr header;
+	const u_char *packet;
+	int processed_packets_from_live_interface = 0;
+	
+	while (processed_packets_from_live_interface < LIVE_CAPTURE_PACKETS) {
+	  
+	  	if (processed_packets_from_live_interface >= LIVE_CAPTURE_PACKETS) {
+			break;
+		}
+		
+		while (packet = pcap_next(pcap_handle, &header)) {
+			
+			processed_packets_from_live_interface++;
+			
+			if (processed_packets_from_live_interface >= LIVE_CAPTURE_PACKETS) {
+				break;
+			}
+		  
+			u_int64_t time = ((uint64_t) header.ts.tv_sec) * 1000000 + header.ts.tv_usec;
+			const struct ndpi_ethhdr *ethernet = (struct ndpi_ethhdr *) packet;
+			u_int16_t ip_offset = sizeof(struct ndpi_ethhdr);
+			
+			if (ntohs(ethernet->h_proto) == 0x8100 /* VLAN */) {
+				ip_offset += 4;
+			}
+			
+			struct ndpi_iphdr *iph = (struct ndpi_iphdr *) &packet[ip_offset];
+			u_int16_t ipsize = header.len - ip_offset;
+			
+			struct ndpi_flow *flow = get_ndpi_flow(iph, ipsize, ntohs(iph->tot_len) - (iph->ihl * 4));
+			
+			if (flow == NULL) {
+			  continue;
+			}
+			
+			if (flow->detection_completed) {
+			  continue;
+			}
+			
+			flow->processed_packets++;
+			
+			flow->detection_completed = ndpi_process_ip_packet(ndpi_detection_module_struct_pointer, flow->ndpi_flow_struct_pointer, (uint8_t *) iph, ipsize, time);
+			
+			if (flow->detection_completed) {
+			  print_flow(LIVE_CAPTURE_INTERFACE, flow);
+			  free_ndpi_flow(flow);
+			}
+		}
+	}
+	
+	pcap_close(pcap_handle);
+	
+	for (int i = 0; i < NUM_ROOTS; i++) {
+		ndpi_twalk(ndpi_flows_root[i], node_print_unknown_proto_walker, LIVE_CAPTURE_INTERFACE);
+	}
+	
+	for (int i = 0; i < NUM_ROOTS; i++) {
+		ndpi_tdestroy(ndpi_flows_root[i], ndpi_flow_freer);
+		ndpi_flows_root[i] = NULL;
+	}
+}
+
 void handle_pcap_file(char *pcap_file_name) {
 
 	char pcap_error_buffer[PCAP_ERRBUF_SIZE];
@@ -479,7 +554,12 @@ void handle_pcap_file(char *pcap_file_name) {
 int main(int argc, char **argv) {
 
 	ndpi_detection_module_struct_pointer = create_ndpi_detection_module_struct_pointer(1000000, NULL);
-
+	
+	if (LIVE_CAPTURE) {
+		handle_pcap_live_interface();
+		exit(0);
+	}
+	
 	DIR *dir1, *dir2;
 	struct dirent *ent1, *ent2;
 	char directory_string[500];

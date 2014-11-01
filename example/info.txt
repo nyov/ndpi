@@ -6,11 +6,18 @@ In order to compile the example application, type "make".
 
 The application uses the "flows" directory, which contains flows generated
 by various applications and representing various protocols, types of the
-content, and services. Each PCAP file contain exactly one flow. The flows are
-truncated after the 20th packet.
+content, and services. Each PCAP file in this directory contain exactly one flow.
+The flows are truncated after the 20th packet. However, this example application
+supports multiple flows per PCAP file.
 
-In the real-life scenario, when capturing the traffic from the network, the
-user's application is responsible for building the flows using the 5-tuple
-and providing the flows to the nDPIng library (the situation was exactly the
-same with original nDPI). Therefore, here, to simplify the scenario, each flow
-is contained by a separate PCAP file.
+In order to capture packets from an interface, you need to:
+
+1. Edit #defines.
+- #define LIVE_CAPTURE -> set to 1.
+- #define LIVE_CAPTURE_PACKETS -> the capture will be taking place unless this
+number of packets is captured.
+- #define LIVE_CAPTURE_INTERFACE -> set it to the interface used for capture.
+
+2. Re-compile the source code (make).
+
+3. Runt it using superuser privileges (change to root).
