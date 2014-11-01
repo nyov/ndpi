@@ -21,7 +21,7 @@ SSL->POPS
 
 10. Content and service providers
 
-11. Custom content types and providers for non defined domsins and fields.
+11. Custom content types and providers for non defined domains and fields.
 
 12. Excluding protocols by a bitmask.
 
