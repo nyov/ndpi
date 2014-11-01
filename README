@@ -33,10 +33,9 @@ a) protocol - beginning from TCP/UDP, then going into higher levels;
 b) content (if detected);
 c) service (if detected). The service is defined as the well-known name of
 the remote host. So, for example, it could be "Facebook" for web browser
-flows from Facebook. The only exception is DNS - service is defined as the
-queried host name, not the name of the DNS server itself.
+flows from Facebook.
 d) content provider (content delivery network: cdn) - the entity which
-physically is involved in the communication.
+physically is involved in the communication, for example, Akamai or Google.
 
 Few examples of the currently obtained results:
 

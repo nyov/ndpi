@@ -398,13 +398,23 @@ void print_flow(char *pcap_file_name, struct ndpi_flow *flow) {
 	}
 	
 	if (((ndpi_get_result_service_id(flow->ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_STILL_UNKNOWN) && (ndpi_get_result_service_id(flow->ndpi_flow_struct_pointer) != NDPI_RESULT_SERVICE_UNKNOWN)) || (strlen(ndpi_get_result_domain_service_name(flow->ndpi_flow_struct_pointer)) > 0)) {
-	  strcat(result, ", service: ");
+	  
+	  if (ndpi_get_result_app_id(flow->ndpi_flow_struct_pointer) == NDPI_RESULT_APP_DNS) {
+	    strcat(result, " (queried about service: ");
+	  } else {
+	    strcat(result, ", service: ");
+	  }
+	  
 	  strcat(result, ndpi_get_result_service_name(ndpi_detection_module_struct_pointer, flow->ndpi_flow_struct_pointer));
 	  
 	  if (VERBOSE_OUTPUT && (strlen(ndpi_get_result_domain_service_name(flow->ndpi_flow_struct_pointer)) > 0)) {
 	    strcat(result, " [");
 	    strcat(result, ndpi_get_result_domain_service_name(flow->ndpi_flow_struct_pointer));
 	    strcat(result, "]");
+	  }
+	  
+	  if (ndpi_get_result_app_id(flow->ndpi_flow_struct_pointer) == NDPI_RESULT_APP_DNS) {
+	    strcat(result, ")");
 	  }
 	}
 	
