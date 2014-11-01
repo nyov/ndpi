@@ -17,7 +17,8 @@ set #define VERBOSE_OUTPUT to 1.
 
 ------------------------------------------------------------------------------------------
 
-In order to capture packets from an interface, you need to:
+In order to capture packets from an interface instead of using the PCAP files,
+you need to:
 
 1. Edit #defines.
 - #define LIVE_CAPTURE -> set to 1.
@@ -28,5 +29,13 @@ number of packets is captured.
 2. Re-compile the source code (make).
 
 3. Runt it using superuser privileges (change to root).
+
+------------------------------------------------------------------------------------------
+
+This sample application supports only a certain number of flows captured from
+each PCAP file / an interface. You can change the number by setting
+#define MAX_NDPI_FLOWS. Remember that the structures containing the flows are not
+deleted before the PCAP file is closed or capture from an interface is finished.
+Therefore, setting this value too high, can exhast available RAM and cause errors!
 
 ------------------------------------------------------------------------------------------

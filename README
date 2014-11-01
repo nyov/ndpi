@@ -11,12 +11,11 @@ inspected by the classifier:
 - all the application-layer protocols
 - type of the content
 - service provider
-- content provider
+- content provider (content delivery network: cdn)
 
 The project is now in a development alpha stage. This means that
 NOTHING works besides the features pointed out below. However, every week
-the library is enhanced by including new features and supporting more
-protocols and applications.
+the library is enhanced by including new features.
 
 1. The code of the library compiles on Linux as a stand-alone library.
 Linux kernel version and Windows versions are not officially supported.
@@ -36,8 +35,8 @@ c) service (if detected). The service is defined as the well-known name of
 the remote host. So, for example, it could be "Facebook" for web browser
 flows from Facebook. The only exception is DNS - service is defined as the
 queried host name, not the name of the DNS server itself.
-d) cdn (content provider) - the entity which physically is involved in the
-communication.
+d) content provider (content delivery network: cdn) - the entity which
+physically is involved in the communication.
 
 Few examples of the currently obtained results:
 
@@ -58,8 +57,11 @@ movie.
 - "proto: TCP->HTTP, service: Google, cdn: Google" means that it is an HTTP
 flow from Google, obtained from the Google server.
 
+There is a possibility to obtain the domain names which are associated with
+the service and content providers - see the example application.
+
 4. No extensions available in nDPI (as excluding specific protocols,
-user-defined protocols, etc) are available.
+user-defined protocols, etc) are available so far in nDPIng.
 
 5. The documentation built for nDPI is no longer valid, as the nDPIng API is
 different. No documentation for nDPIng will be provided unless nDPIng reaches
@@ -73,7 +75,8 @@ revision it can (and many times will) change without any prior notice.
 7. An example Linux application using nDPIng is included in the "example"
 folder. The compilation instructions and the documentation is contained in
 the folder. The code of the example application compiles on Linux as a
-stand-alone application.
+stand-alone application. The example application can be customized by
+changing #defines - look at the documentation.
 
 8. No change log will be provided unless nDPIng reaches the first release
 stage.
