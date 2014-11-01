@@ -1,11 +1,12 @@
 
-1. Missing function to select (or exclude) protocols from the search.
+1. Finish clean-ups and code separation (every scanner-related issues should be contained by the scanners). Including:
+- Clean the src/dst state machine in the particular protocols and delete the entire structure.
 
-2. Missing function to guess a protocol based on the port number, when no protocol was found.
+2. Missing function to select (or exclude) protocols from the search.
 
 3. Missing "first guess" to start examinating packets from a protocol, which fits regarding the port numbers.
 
-4. Debug functions do not work so far.
+4. Debug functions do not work so far and they are very messy - we need to clean them up.
 
 5. Invoke dissectors only when needed in a tree.
 
@@ -15,29 +16,24 @@
 SSL->HTTPS->Dropbox
 SSL->POPS
 
-8. Add proper certificates for TOR and other applications.
+8. Improve detection of TOR and other applications.
 
-9. Multiple contents / services per flow.
+9. Make it working in Windows / Linux kernel.
 
-10. Content and service providers
-
-11. Custom content types and providers for non defined domains and fields.
-
-12. Excluding protocols by a bitmask.
-
-13. Make it working in Windows / Linux kernel.
-
-14. The scanning process should stop when:
+10. The scanning process should stop when:
 - either all the scanners are already excluded
 - or every level is already detected.
-But sometimes some results from some scanners should be overwritten by another scanners, just by not excluding the levels.
-Make it conssitent in ndpi_main.c and the calling sample application.
+But sometimes some results from some scanners should be overwritten by another scanners, just by not excluding the levels (as RTMP and H323).
 
-15. Add support for IPv6 in the sample application.
+11. The sample application:
+- Add support for IPv6.
+- Add ability for non-limited number of flows.
 
-16. Clean the src/dst state machine in the particular protocols and delete the entire structure.
+12. Add DNS caching in order to detect service providers based on DNS replies.
 
 ----------------------------------------------------------------------------
+
+* Importing changes in order to sychronize with nDPI:
 
 svn co https://svn.ntop.org/svn/ntop/trunk/nDPI/
 cd nDPI/
