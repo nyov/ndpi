@@ -39,22 +39,21 @@ physically is involved in the communication, for example, Akamai or Google.
 
 Few examples of the currently obtained results:
 
-- "proto: TCP->SSL_with_certificate->POP3S, service: Google" means that it
-is an encrypted POP3 session with a Google mail server.
-- "proto: TCP->SSL_with_certificate, service: Twitter" means that it is an
-encrypted connection to a Twitter server.
-- "proto: TCP->FTP_Data, content: JPG" means that it is file-transfer FTP
-session, which carries a JPG image.
-- "proto: TCP->SSL_with_certificate->Dropbox, cdn: Dropbox" means that
-this is an encrypted Dropbox session (the application is Dropbox) with the
-Dropbox server, while "proto: TCP->SSL_with_certificate, cdn: Dropbox"
-informs about an encrypted session with a Dropbox server, while the
-application is unknown (it can be a web browser connection).
-- "proto: TCP->HTTP, content: WebM, service: YouTube, cdn: Google" informs
-about a flow from YouTube coming from Google server, which transports WebM
-movie.
-- "proto: TCP->HTTP, service: Google, cdn: Google" means that it is an HTTP
-flow from Google, obtained from the Google server.
+- "proto: TCP->SSL_with_certificate->POP3S, service: Google" - an encrypted
+POP3 session with a Google mail server.
+- "proto: TCP->SSL_with_certificate, service: Twitter" - an encrypted
+connection to a Twitter server.
+- "proto: TCP->FTP_Data, content: JPG" - a file-transfer FTP session, which
+carries a JPG image.
+- "proto: TCP->SSL_with_certificate->Dropbox, cdn: Dropbox" - an encrypted
+Dropbox session (the application is Dropbox) with the Dropbox server.
+- "proto: TCP->SSL_with_certificate, cdn: Dropbox" - an encrypted session
+with a Dropbox server, while the application is unknown (it can be a web
+browser connection).
+- "proto: TCP->HTTP, content: WebM, service: YouTube, cdn: Google" - a flow
+from YouTube coming from Google server, which transports WebM movie.
+- "proto: TCP->HTTP, service: Google, cdn: Google" - an HTTP flow from Google,
+obtained from the Google server.
 
 There is a possibility to obtain the domain names which are associated with
 the service and content providers - see the example application.
