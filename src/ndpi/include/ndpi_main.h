@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
- * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
+ * Copyright (C) 2014 Tomasz Bujlow <tomasz@bujlow.com>
  *
  * This file is part of nDPIng, an open source deep packet inspection
  * library based on nDPI, OpenDPI, and PACE technology by ipoque GmbH

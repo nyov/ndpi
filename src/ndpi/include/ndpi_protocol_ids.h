@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2011-13 - ntop.org
- * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
+ * Copyright (C) 2014 Tomasz Bujlow <tomasz@bujlow.com>
  *
  * This file is part of nDPIng, an open source deep packet inspection
  * library based on nDPI, OpenDPI, and PACE technology by ipoque GmbH
@@ -33,8 +33,8 @@
 typedef enum {
   NDPI_RESULT_IP_STILL_UNKNOWN,
   NDPI_RESULT_IP_UNKNOWN,
-  NDPI_RESULT_IP_TCP, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_IP_UDP, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_IP_TCP, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_IP_UDP, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_IP_VRRP,
   NDPI_RESULT_IP_IPSEC,
   NDPI_RESULT_IP_GRE,
@@ -62,8 +62,8 @@ typedef enum {
   NDPI_RESULT_BASE_HTTP_PROXY,
   NDPI_RESULT_BASE_SSL,
   NDPI_RESULT_BASE_SSL_NO_CERT, /* SSL without certificate (Skype, Ultrasurf?) - ntop.org */
-  NDPI_RESULT_BASE_SOCKS4, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_BASE_SOCKS5, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_BASE_SOCKS4, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_BASE_SOCKS5, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_BASE_CISCOVPN, /* Remy Mudingay <mudingay@ill.fr> */
   NDPI_RESULT_BASE_OPENVPN, /* Remy Mudingay <mudingay@ill.fr> */
   NDPI_RESULT_BASE_TOR, /* Remy Mudingay <mudingay@ill.fr> */
@@ -73,7 +73,7 @@ typedef enum {
 typedef enum {
   NDPI_RESULT_APP_STILL_UNKNOWN,
   NDPI_RESULT_APP_UNKNOWN,
-  NDPI_RESULT_APP_FTP_CONTROL, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_APP_FTP_CONTROL, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_APP_POP,
   NDPI_RESULT_APP_SMTP,
   NDPI_RESULT_APP_IMAP,
@@ -107,14 +107,14 @@ typedef enum {
   NDPI_RESULT_APP_OPENFT,
   NDPI_RESULT_APP_FASTTRACK,
   NDPI_RESULT_APP_GNUTELLA,
-  NDPI_RESULT_APP_EDONKEY, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_APP_EDONKEY, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_APP_BITTORRENT,
   NDPI_RESULT_APP_XBOX,
   NDPI_RESULT_APP_QQ,
   NDPI_RESULT_APP_RTSP,
   NDPI_RESULT_APP_IMAPS,
   NDPI_RESULT_APP_ICECAST,
-  NDPI_RESULT_APP_PPLIVE, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_APP_PPLIVE, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_APP_PPSTREAM,
   NDPI_RESULT_APP_ZATTOO,
   NDPI_RESULT_APP_SHOUTCAST,
@@ -132,7 +132,7 @@ typedef enum {
   NDPI_RESULT_APP_YAHOO_MESSENGER,
   NDPI_RESULT_APP_BATTLEFIELD,
   NDPI_RESULT_APP_QUAKE,
-  NDPI_RESULT_APP_STEAM, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_APP_STEAM, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_APP_HALFLIFE2,
   NDPI_RESULT_APP_WORLDOFWARCRAFT,
   NDPI_RESULT_APP_TELNET,
@@ -192,9 +192,9 @@ typedef enum {
   NDPI_RESULT_APP_CORBA, /* Remy Mudingay <mudingay@ill.fr> */
   NDPI_RESULT_APP_WHOIS_DAS,
   NDPI_RESULT_APP_COLLECTD,
-  NDPI_RESULT_APP_RTMP, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_APP_FTP_DATA, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_APP_PANDO, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_APP_RTMP, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_APP_FTP_DATA, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_APP_PANDO, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_APP_SKYPE,
   NDPI_RESULT_APP_MEGACO, /* Gianluca Costa <g.costa@xplico.org> */
   NDPI_RESULT_APP_REDIS,
@@ -258,15 +258,15 @@ typedef enum {
   NDPI_RESULT_SERVICE_APPLE_ICLOUD,
   NDPI_RESULT_SERVICE_APPLE_ITUNES,
   NDPI_RESULT_SERVICE_TUENTI,
-  NDPI_RESULT_SERVICE_WIKIPEDIA, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_MSN, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_AMAZON, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_EBAY, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_CNN, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_DROPBOX, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_SKYPE, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_VIBER, /* Tomasz Bujlow <tomasz@skatnet.dk> */
-  NDPI_RESULT_SERVICE_YAHOO, /* Tomasz Bujlow <tomasz@skatnet.dk> */
+  NDPI_RESULT_SERVICE_WIKIPEDIA, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_MSN, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_AMAZON, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_EBAY, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_CNN, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_DROPBOX, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_SKYPE, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_VIBER, /* Tomasz Bujlow <tomasz@bujlow.com> */
+  NDPI_RESULT_SERVICE_YAHOO, /* Tomasz Bujlow <tomasz@bujlow.com> */
   NDPI_RESULT_SERVICE_LAST
 } ndpi_result_service_t;
 

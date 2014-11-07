@@ -1,7 +1,7 @@
 /*
  * proto_skyfile.c
  *
- * Copyright (C) 2014 Tomasz Bujlow <tomasz@skatnet.dk>
+ * Copyright (C) 2014 Tomasz Bujlow <tomasz@bujlow.com>
  *
  * This file is part of nDPIng, an open source deep packet inspection
  * library based on nDPI, OpenDPI, and PACE technology by ipoque GmbH
