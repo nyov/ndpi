@@ -164,7 +164,7 @@ extern "C" {
 				     char *string_to_match, u_int string_to_match_len);
   char* ndpi_get_proto_name(struct ndpi_detection_module_struct *mod, u_int16_t proto_id);
   ndpi_protocol_breed_t ndpi_get_proto_breed(struct ndpi_detection_module_struct *ndpi_struct, u_int16_t proto);
-  char* ndpi_get_proto_breed_name(struct ndpi_detection_module_struct *ndpi_struct, u_int8_t breed_id);
+  char* ndpi_get_proto_breed_name(struct ndpi_detection_module_struct *ndpi_struct, ndpi_protocol_breed_t breed_id);
   int ndpi_get_protocol_id(struct ndpi_detection_module_struct *ndpi_mod, char *proto);
   void ndpi_dump_protocols(struct ndpi_detection_module_struct *mod);
   int matchStringProtocol(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow,

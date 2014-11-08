@@ -644,7 +644,8 @@ static int removeDefaultPort(ndpi_port_range *range,
 
 static int ndpi_string_to_automa(struct ndpi_detection_module_struct *ndpi_struct,
 				 ndpi_automa *automa,
-				 char *value, int protocol_id) {
+				 char *value, int protocol_id,
+				 ndpi_protocol_breed_t breed) {
   AC_PATTERN_t ac_pattern;
 
   if(protocol_id >= (NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS)) {
@@ -664,16 +665,18 @@ static int ndpi_string_to_automa(struct ndpi_detection_module_struct *ndpi_struc
 /* ****************************************************** */
 
 static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-					 char *value, int protocol_id) {
+					 char *value, int protocol_id,
+					 ndpi_protocol_breed_t breed) {
   return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->host_automa,
-			       value, protocol_id));
+			       value, protocol_id, breed));
 }
 
 /* ****************************************************** */
 
 int ndpi_add_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-				 char *value, int protocol_id) {
-  return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->content_automa, value, protocol_id));
+				 char *value, int protocol_id, 
+				 ndpi_protocol_breed_t breed) {
+  return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->content_automa, value, protocol_id, breed));
 }
 
 /* ****************************************************** */
@@ -697,16 +700,20 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
   int i;
 
   for(i=0; host_match[i].string_to_match != NULL; i++) {
-    ndpi_add_host_url_subprotocol(ndpi_mod, host_match[i].string_to_match, host_match[i].protocol_id);
+    ndpi_add_host_url_subprotocol(ndpi_mod, host_match[i].string_to_match, 
+				  host_match[i].protocol_id, host_match[i].protocol_breed);
 
     if(ndpi_mod->proto_defaults[host_match[i].protocol_id].protoName == NULL) {
       ndpi_mod->proto_defaults[host_match[i].protocol_id].protoName = ndpi_strdup(host_match[i].proto_name);
       ndpi_mod->proto_defaults[host_match[i].protocol_id].protoId = host_match[i].protocol_id;
+      ndpi_mod->proto_defaults[host_match[i].protocol_id].protoBreed = host_match[i].protocol_breed;
     }
   }
 
   for(i=0; content_match[i].string_to_match != NULL; i++)
-    ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match, content_match[i].protocol_id);
+    ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match, 
+				 content_match[i].protocol_id,
+				 content_match[i].protocol_breed);
 }
 
 /* ******************************************************************** */
@@ -1535,7 +1542,7 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
 	removeDefaultPort(&range, def, is_tcp ? &ndpi_mod->tcpRoot : &ndpi_mod->udpRoot);
     } else {
       if(do_add)
-	ndpi_add_host_url_subprotocol(ndpi_mod, value, subprotocol_id);
+	ndpi_add_host_url_subprotocol(ndpi_mod, value, subprotocol_id, NDPI_PROTOCOL_ACCEPTABLE);
       else
 	ndpi_remove_host_url_subprotocol(ndpi_mod, value, subprotocol_id);
     }
@@ -4804,7 +4811,7 @@ ndpi_protocol_breed_t ndpi_get_proto_breed(struct ndpi_detection_module_struct *
 /* ****************************************************** */
 
 char* ndpi_get_proto_breed_name(struct ndpi_detection_module_struct *ndpi_mod,
-				u_int8_t breed_id) {
+				ndpi_protocol_breed_t breed_id) {
   switch(breed_id) {
   case NDPI_PROTOCOL_SAFE:
     return("Safe");
