@@ -145,6 +145,9 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
       }
     } else {
       /* DNS Reply */
+
+      flow->server_id = flow->dst;
+
       if((header.num_queries <= NDPI_MAX_DNS_REQUESTS) /* Don't assume that num_queries must be zero */
 	 && (((header.answer_rrs > 0) && (header.answer_rrs <= NDPI_MAX_DNS_REQUESTS))
 	     || ((header.authority_rrs > 0) && (header.authority_rrs <= NDPI_MAX_DNS_REQUESTS))
@@ -262,7 +265,9 @@ void ndpi_search_dns(struct ndpi_detection_module_struct *ndpi_struct, struct nd
 #endif
 
 	if(ndpi_struct->match_dns_host_names)
-	  ndpi_match_string_subprotocol(ndpi_struct, flow, (char *)flow->host_server_name, strlen((const char*)flow->host_server_name));
+	  ndpi_match_string_subprotocol(ndpi_struct, flow, 
+					(char *)flow->host_server_name,
+					strlen((const char*)flow->host_server_name));
       }
 
       i++;

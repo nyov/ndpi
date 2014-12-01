@@ -626,6 +626,11 @@ typedef struct ndpi_flow_struct {
 
   u_int8_t protocol_id_already_guessed;
   u_int16_t guessed_protocol_id;
+  struct ndpi_id_struct *server_id; /* 
+				       Pointer to src or dst
+				       that identifies the 
+				       server of this connection
+				     */
   u_char host_server_name[256]; /* HTTP host or DNS query   */ 
   u_char detected_os[32];       /* Via HTTP User-Agent      */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */

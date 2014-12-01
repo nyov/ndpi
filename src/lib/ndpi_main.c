@@ -3650,6 +3650,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
   if(flow == NULL)
     return NDPI_PROTOCOL_UNKNOWN;
 
+  if(flow->server_id == NULL) flow->server_id = dst; /* Default */
   if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
     return(flow->detected_protocol_stack[0]); /* Stop after detecting the first protocol */
 

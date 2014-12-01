@@ -309,7 +309,7 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     /* Copy result for nDPI apps */
     len = ndpi_min(packet->host_line.len, sizeof(flow->host_server_name)-1);
     strncpy((char*)flow->host_server_name, (char*)packet->host_line.ptr, len);
-    flow->host_server_name[len] = '\0';
+    flow->host_server_name[len] = '\0', flow->server_id = flow->dst;
 
     len = ndpi_min(packet->forwarded_line.len, sizeof(flow->nat_ip)-1);
     strncpy((char*)flow->nat_ip, (char*)packet->forwarded_line.ptr, len);
@@ -318,7 +318,9 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
     parseHttpSubprotocol(ndpi_struct, flow);
 
     if(flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
-      ndpi_match_string_subprotocol(ndpi_struct, flow, (char *)flow->host_server_name, strlen((const char *)flow->host_server_name));
+      ndpi_match_string_subprotocol(ndpi_struct, flow, 
+				    (char *)flow->host_server_name, 
+				    strlen((const char *)flow->host_server_name));
 
     if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN) {
       if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
