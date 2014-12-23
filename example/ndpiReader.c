@@ -169,7 +169,9 @@ typedef struct ndpi_flow {
 
   u_int64_t last_seen;
 
-  u_int32_t packets, bytes;
+  u_int64_t bytes;
+  u_int32_t packets;
+
   // result only, not used for flow identification
   u_int32_t detected_protocol;
 
@@ -462,7 +464,7 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 	   flow->lower_name, ntohs(flow->lower_port),
 	   flow->upper_name, ntohs(flow->upper_port));
 
-    printf("[proto: %u/%s][%u pkts/%u bytes]",
+    printf("[proto: %u/%s][%u pkts/%llu bytes]",
 	   flow->detected_protocol,
 	   ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol),
 	   flow->packets, flow->bytes);
@@ -1365,7 +1367,7 @@ static void configurePcapHandle(u_int16_t thread_id) {
 /* ***************************************************** */
 
 static void openPcapFileOrDevice(u_int16_t thread_id) {
-  u_int snaplen = 1514;
+  u_int snaplen = 1536;
   int promisc = 1;
   char errbuf[PCAP_ERRBUF_SIZE];
 
