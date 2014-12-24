@@ -906,7 +906,8 @@ static unsigned int packet_processing(u_int16_t thread_id,
 				      const struct ndpi_iphdr *iph,
 				      struct ndpi_ip6_hdr *iph6,
 				      u_int16_t ip_offset,
-				      u_int16_t ipsize, u_int16_t rawsize) {
+				      u_int16_t ipsize, u_int16_t rawsize,
+				      int direction) {
   struct ndpi_id_struct *src, *dst;
   struct ndpi_flow *flow;
   struct ndpi_flow_struct *ndpi_flow = NULL;
@@ -934,7 +935,8 @@ static unsigned int packet_processing(u_int16_t thread_id,
 
   protocol = (const u_int32_t)ndpi_detection_process_packet(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow,
 							    iph ? (uint8_t *)iph : (uint8_t *)iph6,
-							    ipsize, time, src, dst);
+							    ipsize, time, src, dst,
+							    direction);
 
   flow->detected_protocol = protocol;
 
@@ -1423,6 +1425,7 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
   u_int16_t frag_off = 0;
   u_int8_t proto = 0, vlan_packet = 0;
   u_int16_t thread_id = *((u_int16_t*)args);
+  int direction;
 
   // printf("[ndpiReader] pcap_packet_callback : [%u.%u.%u.%u.%u -> %u.%u.%u.%u.%u]\n", ethernet->h_dest[1],ethernet->h_dest[2],ethernet->h_dest[3],ethernet->h_dest[4],ethernet->h_dest[5],ethernet->h_source[1],ethernet->h_source[2],ethernet->h_source[3],ethernet->h_source[4],ethernet->h_source[5]);
   ndpi_thread_info[thread_id].stats.raw_packet_count++;
@@ -1567,9 +1570,14 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
       }
     }
   }
+  direction = 1;
+  if (proto == IPPROTO_TCP) {
+    struct ndpi_tcphdr *tcp = (struct ndpi_tcphdr *)&packet[ip_offset+ip_len];
+    direction = (tcp->source < tcp->dest) ? 1 : 0;
+  }
 
   // process the packet
-  packet_processing(thread_id, time, iph, iph6, ip_offset, header->len - ip_offset, header->len);
+  packet_processing(thread_id, time, iph, iph6, ip_offset, header->len - ip_offset, header->len, direction);
 }
 
 /* ******************************************************************** */

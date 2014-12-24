@@ -3340,10 +3340,6 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 {
   /* const for gcc code optimisation and cleaner code */
   struct ndpi_packet_struct *packet = &flow->packet;
-  const struct ndpi_iphdr *iph = packet->iph;
-#ifdef NDPI_DETECTION_SUPPORT_IPV6
-  const struct ndpi_ipv6hdr *iphv6 = packet->iphv6;
-#endif
   const struct ndpi_tcphdr *tcph = packet->tcp;
   const struct ndpi_udphdr *udph = flow->packet.udp;
 
@@ -3352,15 +3348,7 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 
   u_int8_t proxy_enabled = 0;
 
-  packet->tcp_retransmission = 0, packet->packet_direction = 0;
-
-  if(iph != NULL && iph->saddr < iph->daddr)
-    packet->packet_direction = 1;
-
-#ifdef NDPI_DETECTION_SUPPORT_IPV6
-  if(iphv6 != NULL && NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(&iphv6->saddr, &iphv6->daddr) != 0)
-    packet->packet_direction = 1;
-#endif
+  packet->tcp_retransmission = 0;
 
   packet->packet_lines_parsed_complete = 0;
   packet->packet_unix_lines_parsed_complete = 0;
@@ -3375,8 +3363,6 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
   if(tcph != NULL) {
     /* reset retried bytes here before setting it */
     packet->num_retried_bytes = 0;
-
-    packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
 
     if(tcph->syn != 0 && tcph->ack == 0 && flow->l4.tcp.seen_syn == 0 && flow->l4.tcp.seen_syn_ack == 0
        && flow->l4.tcp.seen_ack == 0) {
@@ -3498,7 +3484,8 @@ void check_ndpi_other_flow_func(struct ndpi_detection_module_struct *ndpi_struct
        && NDPI_BITMASK_COMPARE(ndpi_struct->callback_buffer_non_tcp_udp[a].detection_bitmask,
 			       detection_bitmask) != 0) {
 
-      ndpi_struct->callback_buffer_non_tcp_udp[a].func(ndpi_struct, flow);
+      if(ndpi_struct->callback_buffer_non_tcp_udp[a].func != NULL)
+	ndpi_struct->callback_buffer_non_tcp_udp[a].func(ndpi_struct, flow);
 
       if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	break; /* Stop after detecting the first protocol */
@@ -3640,9 +3627,10 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 					   struct ndpi_flow_struct *flow,
 					   const unsigned char *packet,
 					   const unsigned short packetlen,
-					   const u_int32_t current_tick,
+					   const u_int64_t current_tick_l,
 					   struct ndpi_id_struct *src,
-					   struct ndpi_id_struct *dst)
+					   struct ndpi_id_struct *dst,
+					   int direction)
 {
   NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_packet;
   u_int32_t a;
@@ -3651,7 +3639,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     return NDPI_PROTOCOL_UNKNOWN;
 
   if(flow->server_id == NULL) flow->server_id = dst; /* Default */
-  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
+  if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN && !flow->no_cache_protocol)
     return(flow->detected_protocol_stack[0]); /* Stop after detecting the first protocol */
 
   /* need at least 20 bytes for ip header */
@@ -3662,7 +3650,16 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     return NDPI_PROTOCOL_UNKNOWN;
   }
 
-  flow->packet.tick_timestamp = current_tick;
+  flow->packet.tick_timestamp_l = current_tick_l;
+#ifdef __KERNEL__
+  {
+  u_int64_t d = current_tick_l;
+  do_div(d,1000);
+  flow->packet.tick_timestamp = d;
+  }
+#else
+  flow->packet.tick_timestamp = current_tick_l/1000;
+#endif
 
   /* parse packet */
   flow->packet.iph = (struct ndpi_iphdr *) packet;
@@ -3675,6 +3672,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
   flow->src = src, flow->dst = dst;
 
+  flow->packet.packet_direction = direction;
   ndpi_connection_tracking(ndpi_struct, flow);
 
   /* build ndpi_selction packet bitmask */
@@ -3704,14 +3702,21 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 #endif							/* NDPI_DETECTION_SUPPORT_IPV6 */
 
   if((!flow->protocol_id_already_guessed)
-     && (flow->packet.iphv6 || flow->packet.iph)) {
+     && (
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+	     flow->packet.iphv6 ||
+#endif
+	     flow->packet.iph)) {
     u_int16_t sport, dport;
     u_int8_t protocol;
     u_int32_t saddr, daddr;
 
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
     if(flow->packet.iphv6 != NULL) {
       protocol = flow->packet.iphv6->nexthdr, saddr = 0, daddr = 0;
-    } else {
+    } else
+#endif
+    {
       protocol = flow->packet.iph->protocol;
       saddr = ntohl(flow->packet.iph->saddr);
       daddr = ntohl(flow->packet.iph->daddr);
@@ -3724,6 +3729,13 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     flow->guessed_protocol_id = (int16_t)ndpi_guess_protocol_id(ndpi_struct, protocol,
 								saddr, sport, daddr, dport);
     flow->protocol_id_already_guessed = 1;
+  }
+
+  a = flow->detected_protocol_stack[0];
+  if(a != NDPI_PROTOCOL_UNKNOWN && flow->no_cache_protocol) {
+    NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_TRACE, "PROCESS KNOWN PROTOCOL\n");
+    ndpi_struct->proto_defaults[a].func(ndpi_struct, flow);
+    return a;
   }
 
   check_ndpi_flow_func(ndpi_struct, flow, &ndpi_selection_packet);

@@ -26,6 +26,16 @@
 #define __NDPI_TYPEDEFS_FILE__
 
 typedef enum {
+  NDPI_LOG_ERROR,
+  NDPI_LOG_TRACE,
+  NDPI_LOG_DEBUG
+} ndpi_log_level_t;
+
+typedef void (*ndpi_debug_function_ptr) (u_int32_t protocol,
+              void *module_struct, ndpi_log_level_t log_level,
+              const char *format, ...);
+
+typedef enum {
   ndpi_preorder,
   ndpi_postorder,
   ndpi_endorder,
@@ -402,6 +412,7 @@ typedef struct ndpi_packet_struct {
   const u_int8_t *payload;
 
   u_int32_t tick_timestamp;
+  u_int64_t tick_timestamp_l;
 
   u_int16_t detected_protocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
   u_int8_t detected_subprotocol_stack[NDPI_PROTOCOL_HISTORY_SIZE];
@@ -611,6 +622,10 @@ typedef struct ndpi_flow_struct {
 #endif
 
   /* init parameter, internal used to set up timestamp,... */
+  u_int16_t guessed_protocol_id;
+
+  u_int8_t protocol_id_already_guessed:1;
+  u_int8_t no_cache_protocol:1;
   u_int8_t init_finished:1;
   u_int8_t setup_packet_direction:1;
   /* tcp sequence number connection tracking */
@@ -624,14 +639,16 @@ typedef struct ndpi_flow_struct {
     struct ndpi_flow_udp_struct udp;
   } l4;
 
-  u_int8_t protocol_id_already_guessed;
-  u_int16_t guessed_protocol_id;
   struct ndpi_id_struct *server_id; /* 
 				       Pointer to src or dst
 				       that identifies the 
 				       server of this connection
 				     */
+#ifndef __KERNEL__
   u_char host_server_name[256]; /* HTTP host or DNS query   */ 
+#else
+  u_char host_server_name[160];
+#endif
   u_char detected_os[32];       /* Via HTTP User-Agent      */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
 
@@ -752,11 +769,5 @@ typedef enum {
   NDPI_REAL_PROTOCOL = 0,
   NDPI_CORRELATED_PROTOCOL = 1
 } ndpi_protocol_type_t;
-
-typedef enum {
-  NDPI_LOG_ERROR,
-  NDPI_LOG_TRACE,
-  NDPI_LOG_DEBUG
-} ndpi_log_level_t;
 
 #endif/* __NDPI_TYPEDEFS_FILE__ */

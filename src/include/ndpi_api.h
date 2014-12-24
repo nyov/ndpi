@@ -32,9 +32,6 @@
 extern "C" {
 #endif
 
-  typedef void (*ndpi_debug_function_ptr) (u_int32_t protocol,
-					   void *module_struct, ndpi_log_level_t log_level, const char *format, ...);
-
   /**
    * This function returns the size of the flow struct
    * @return the size of the flow struct
@@ -114,9 +111,10 @@ extern "C" {
 				struct ndpi_flow_struct *flow,
 				const unsigned char *packet,
 				const unsigned short packetlen,
-				const u_int32_t current_tick,
+				const u_int64_t current_tick,
 				struct ndpi_id_struct *src,
-				struct ndpi_id_struct *dst);
+				struct ndpi_id_struct *dst,
+				int dir);
 
 #define NDPI_DETECTION_ONLY_IPV4 ( 1 << 0 )
 #define NDPI_DETECTION_ONLY_IPV6 ( 1 << 1 )
