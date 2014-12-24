@@ -34,6 +34,7 @@ typedef enum {
 typedef void (*ndpi_debug_function_ptr) (u_int32_t protocol,
               void *module_struct, ndpi_log_level_t log_level,
               const char *format, ...);
+#define BT_ANNOUNCE
 
 typedef enum {
   ndpi_preorder,
@@ -98,6 +99,49 @@ typedef union {
 } ndpi_ip_addr_t;
 
 
+#ifdef NDPI_PROTOCOL_BITTORRENT
+#ifndef __KERNEL__
+typedef struct spinlock {
+        volatile int    val;
+} spinlock_t;
+typedef struct atomic {
+	volatile int counter;
+} atomic_t;
+
+#endif
+
+struct hash_ip4p_node {
+        struct hash_ip4p_node   *next,*prev;
+        time_t                  lchg;
+        u_int16_t               port,count:12,flag:4;
+        u_int32_t               ip;
+	// + 12 bytes for ipv6
+};
+
+struct hash_ip4p {
+        struct hash_ip4p_node   *top;
+        spinlock_t              lock;
+        size_t                  len;
+};
+
+struct hash_ip4p_table {
+        size_t                  size;
+	int			ipv6;
+        spinlock_t              lock;
+        atomic_t                count;
+        struct hash_ip4p        tbl[0];
+};
+
+struct bt_announce { // 192 bytes
+	u_int32_t		hash[5];
+	u_int32_t		ip[4];
+	u_int32_t		time;
+	u_int16_t		port;
+	u_int8_t		name_len,
+				name[192 - 4*10 - 2 - 1]; // 149 bytes
+};
+#endif
+
 typedef struct ndpi_id_struct {
   /* detected_protocol_bitmask:
    * access this bitmask to find out whether an id has used skype or not
@@ -118,10 +162,11 @@ typedef struct ndpi_id_struct {
   u_int32_t yahoo_video_lan_timer;
 #endif
 #endif
+/* NDPI_PROTOCOL_IRC_MAXPORT % 2 must be 0 */
 #ifdef NDPI_PROTOCOL_IRC
-  u_int32_t last_time_port_used[16];
-#endif
-#ifdef NDPI_PROTOCOL_IRC
+#define NDPI_PROTOCOL_IRC_MAXPORT 8
+  u_int16_t irc_port[NDPI_PROTOCOL_IRC_MAXPORT];
+  u_int32_t last_time_port_used[NDPI_PROTOCOL_IRC_MAXPORT];
   u_int32_t irc_ts;
 #endif
 #ifdef NDPI_PROTOCOL_GNUTELLA
@@ -160,8 +205,10 @@ typedef struct ndpi_id_struct {
   u_int16_t detected_directconnect_udp_port;
   u_int16_t detected_directconnect_ssl_port;
 #endif
-#ifdef NDPI_PROTOCOL_IRC
-  u_int16_t irc_port[16];
+#ifdef NDPI_PROTOCOL_BITTORRENT
+#define NDPI_BT_PORTS 8
+  u_int16_t bt_port_t[NDPI_BT_PORTS];
+  u_int16_t bt_port_u[NDPI_BT_PORTS];
 #endif
 #ifdef NDPI_PROTOCOL_GADUGADU
   u_int16_t gg_ft_port;
@@ -598,6 +645,17 @@ typedef struct ndpi_detection_module_struct {
 #endif
   u_int8_t ip_version_limit;
   /* ********************* */
+#ifdef NDPI_PROTOCOL_BITTORRENT
+  struct hash_ip4p_table *bt_ht;
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+  struct hash_ip4p_table *bt6_ht;
+#endif
+#ifdef BT_ANNOUNCE
+  struct bt_announce *bt_ann;
+  int    bt_ann_len;
+#endif
+#endif
+
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
 
   u_int8_t match_dns_host_names:1;

@@ -28,7 +28,7 @@
 #ifdef NDPI_PROTOCOL_IRC
 #define NDPI_IRC_FIND_LESS(time_err,less) {int t1 = 0;	\
     u_int32_t timestamp = time_err[0];			\
-    for(t1=0;t1 < 16;t1++) {				\
+    for(t1=0;t1 < NDPI_PROTOCOL_IRC_MAXPORT;t1++) {	\
       if(timestamp > time_err[t1]) {			\
 	timestamp = time_err[t1];			\
 	less = t1;}}}
@@ -722,10 +722,10 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 			       port);
 		      j = k;
 		      // hier jetzt überlegen, wie die ports abgespeichert werden sollen
-		      if (src->irc_number_of_port < 16)
+		      if (src->irc_number_of_port < NDPI_PROTOCOL_IRC_MAXPORT)
 			NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE,
-				 "src->irc_number_of_port < 16.");
-		      if (src->irc_number_of_port < 16 && port != 0) {
+				 "src->irc_number_of_port < NDPI_PROTOCOL_IRC_MAXPORT.");
+		      if (src->irc_number_of_port < NDPI_PROTOCOL_IRC_MAXPORT && port != 0) {
 			if (!ndpi_is_duplicate(src, port)) {
 			  src->irc_port[src->irc_number_of_port]
 			    = port;
@@ -739,7 +739,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 				   "jjeeeeeeeeeeeeeeeeeeeeeeeee");
 			}
 			src->irc_ts = packet->tick_timestamp;
-		      } else if (port != 0 && src->irc_number_of_port == 16) {
+		      } else if (port != 0 && src->irc_number_of_port == NDPI_PROTOCOL_IRC_MAXPORT) {
 			if (!ndpi_is_duplicate(src, port)) {
 			  less = 0;
 			  NDPI_IRC_FIND_LESS(src->last_time_port_used, less);
@@ -762,11 +762,11 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 		      NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE, "port %u.",
 			       port);
 		      // hier das gleiche wie oben.
-		      /* hier werden 16 ports pro irc flows mitgespeichert. könnte man denn nicht ein-
+		      /* hier werden NDPI_PROTOCOL_IRC_MAXPORT ports pro irc flows mitgespeichert. könnte man denn nicht ein-
 		       * fach an die dst oder src einen flag setzten, dass dieser port für eine bestimmte
 		       * zeit ein irc-port bleibt?
 		       */
-		      if (dst->irc_number_of_port < 16 && port != 0) {
+		      if (dst->irc_number_of_port < NDPI_PROTOCOL_IRC_MAXPORT && port != 0) {
 			if (!ndpi_is_duplicate(dst, port)) {
 			  dst->irc_port[dst->irc_number_of_port]
 			    = port;
@@ -780,7 +780,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 				   "juuuuuuuuuuuuuuuu");
 			}
 			dst->irc_ts = packet->tick_timestamp;
-		      } else if (port != 0 && dst->irc_number_of_port == 16) {
+		      } else if (port != 0 && dst->irc_number_of_port == NDPI_PROTOCOL_IRC_MAXPORT) {
 			if (!ndpi_is_duplicate(dst, port)) {
 			  less = 0;
 			  NDPI_IRC_FIND_LESS(dst->last_time_port_used, less);

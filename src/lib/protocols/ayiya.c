@@ -52,12 +52,9 @@ void ndpi_search_ayiya(struct ndpi_detection_module_struct *ndpi_struct, struct 
       struct ayiya *a = (struct ayiya*)packet->payload;
       u_int32_t epoch = ntohl(a->epoch), now;
       u_int32_t fireyears = 86400 * 365 * 5;
-      
-#ifndef __KERNEL__
-      now = (u_int32_t)time(NULL);
-#else
-      now = 1402729042; /* Dummy workaround */
-#endif
+
+      now = flow->packet.tick_timestamp;
+
       if((epoch >= (now - fireyears)) && (epoch <= (now+86400 /* 1 day */)))      
 	ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_AYIYA, NDPI_REAL_PROTOCOL);
 
