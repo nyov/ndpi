@@ -467,7 +467,7 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
     printf("[proto: %u/%s][%u pkts/%llu bytes]",
 	   flow->detected_protocol,
 	   ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol),
-	   flow->packets, flow->bytes);
+	   flow->packets, (long long unsigned int)flow->bytes);
 
     if(flow->host_server_name[0] != '\0') printf("[Host: %s]", flow->host_server_name);
     if(flow->ssl.client_certificate[0] != '\0') printf("[SSL client: %s]", flow->ssl.client_certificate);
