@@ -3343,6 +3343,10 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 {
   /* const for gcc code optimisation and cleaner code */
   struct ndpi_packet_struct *packet = &flow->packet;
+  const struct ndpi_iphdr *iph = packet->iph;
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+  const struct ndpi_ipv6hdr *iphv6 = packet->iphv6;
+#endif
   const struct ndpi_tcphdr *tcph = packet->tcp;
   const struct ndpi_udphdr *udph = flow->packet.udp;
 
@@ -3351,7 +3355,15 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 
   u_int8_t proxy_enabled = 0;
 
-  packet->tcp_retransmission = 0;
+  packet->tcp_retransmission = 0, packet->packet_direction = 0;
+
+  if(iph != NULL && iph->saddr < iph->daddr)
+    packet->packet_direction = 1;
+
+#ifdef NDPI_DETECTION_SUPPORT_IPV6
+  if(iphv6 != NULL && NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(&iphv6->saddr, &iphv6->daddr) != 0)
+    packet->packet_direction = 1;
+#endif
 
   packet->packet_lines_parsed_complete = 0;
   packet->packet_unix_lines_parsed_complete = 0;
@@ -3366,6 +3378,8 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
   if(tcph != NULL) {
     /* reset retried bytes here before setting it */
     packet->num_retried_bytes = 0;
+
+    packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
 
     if(tcph->syn != 0 && tcph->ack == 0 && flow->l4.tcp.seen_syn == 0 && flow->l4.tcp.seen_syn_ack == 0
        && flow->l4.tcp.seen_ack == 0) {
@@ -3632,8 +3646,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 					   const unsigned short packetlen,
 					   const u_int64_t current_tick_l,
 					   struct ndpi_id_struct *src,
-					   struct ndpi_id_struct *dst,
-					   int direction)
+					   struct ndpi_id_struct *dst)
 {
   NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_packet;
   u_int32_t a;
@@ -3675,7 +3688,6 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
 
   flow->src = src, flow->dst = dst;
 
-  flow->packet.packet_direction = direction;
   ndpi_connection_tracking(ndpi_struct, flow);
 
   /* build ndpi_selction packet bitmask */

@@ -113,8 +113,7 @@ extern "C" {
 				const unsigned short packetlen,
 				const u_int64_t current_tick,
 				struct ndpi_id_struct *src,
-				struct ndpi_id_struct *dst,
-				int dir);
+				struct ndpi_id_struct *dst);
 
 #define NDPI_DETECTION_ONLY_IPV4 ( 1 << 0 )
 #define NDPI_DETECTION_ONLY_IPV6 ( 1 << 1 )
