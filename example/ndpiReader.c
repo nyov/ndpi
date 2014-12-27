@@ -75,6 +75,7 @@ static char *_jsonFilePath    = NULL; /**< JSON file path  */
 static json_object *jArray_known_flows, *jArray_unknown_flows;
 #endif
 static u_int8_t live_capture = 0;
+static u_int8_t undetected_flows_deleted = 0;
 /**
  * User preferences
  */
@@ -626,6 +627,9 @@ static void node_idle_scan_walker(const void *node, ndpi_VISIT which, int depth,
       /* update stats */
       node_proto_guess_walker(node, which, depth, user_data);
 
+      if (flow->detected_protocol == 0 /* UNKNOWN */ && !undetected_flows_deleted)
+        undetected_flows_deleted = 1;
+ 
       free_ndpi_flow(flow);
       ndpi_thread_info[thread_id].stats.ndpi_flow_count--;
 
@@ -1262,7 +1266,9 @@ static void printResults(u_int64_t tot_usec) {
 
     for(thread_id = 0; thread_id < num_threads; thread_id++) {
       if(ndpi_thread_info[thread_id].stats.protocol_counter[0 /* 0 = Unknown */] > 0) {
-        if(!json_flag) printf("\n\nUndetected flows:\n");
+        if(!json_flag) {
+          printf("\n\nUndetected flows:%s\n", undetected_flows_deleted ? " (expired flows are not listed below)" : "");
+        }
 
 	if(json_flag)
 	  json_flag = 2;
