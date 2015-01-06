@@ -25,7 +25,7 @@
 void ndpi_search_whois_das(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  u_int16_t sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest), ok = 0;
+  u_int16_t sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
 
   if ((packet->tcp != NULL)
       && (
