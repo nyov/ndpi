@@ -26,6 +26,22 @@
 #include "ndpi_api.h"
 
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
+struct jabber_string {
+  char *string;
+  u_int ndpi_protocol;
+};
+
+static struct jabber_string jabber_strings[] = {
+#ifdef NDPI_PROTOCOL_TRUPHONE
+  { "='im.truphone.com'",     NDPI_PROTOCOL_TRUPHONE },
+  { "=\"im.truphone.com\"",   NDPI_PROTOCOL_TRUPHONE },
+#endif
+
+#ifdef NDPI_SERVICE_FACEBOOK_CHAT
+  { "to='chat.facebook.com'", NDPI_SERVICE_FACEBOOK_CHAT },
+#endif
+  { NULL, 0 }
+};
 
 static void ndpi_int_jabber_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					   struct ndpi_flow_struct *flow,
@@ -37,25 +53,17 @@ static void ndpi_int_jabber_add_connection(struct ndpi_detection_module_struct *
 static void check_content_type_and_change_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 						   struct ndpi_flow_struct *flow, u_int16_t x)
 {
-#if defined( NDPI_PROTOCOL_TANGO ) || defined( NDPI_PROTOCOL_TRUPHONE ) || defined( NDPI_SERVICE_WHATSAPP )
   struct ndpi_packet_struct *packet = &flow->packet;
-#endif
+  int i, left = packet->payload_packet_len-x;
 
-#ifdef NDPI_PROTOCOL_TRUPHONE
-  if (packet->payload_packet_len > x + 18 && packet->payload_packet_len > x && packet->payload_packet_len > 18) {
-    const u_int16_t lastlen = packet->payload_packet_len - 18;
-    for (x = 0; x < lastlen; x++) {
-      if (memcmp(&packet->payload[x], "=\"im.truphone.com\"", 18) == 0 ||
-	  memcmp(&packet->payload[x], "='im.truphone.com'", 18) == 0) {
-	NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_TRACE, "changed to TRUPHONE.\n");
+  if(left <= 0) return;
 
-	ndpi_int_jabber_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TRUPHONE, NDPI_CORRELATED_PROTOCOL);
-      }
+  for(i=0; jabber_strings[i].string != NULL; i++) {
+    if(ndpi_strnstr((const char*)&packet->payload[x], jabber_strings[i].string, left) != NULL) {    
+      ndpi_int_jabber_add_connection(ndpi_struct, flow, jabber_strings[i].ndpi_protocol, NDPI_CORRELATED_PROTOCOL);
+      return;
     }
-  }
-#endif
-
-  return;
+  }  
 }
 
 void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
@@ -272,29 +280,20 @@ void ndpi_search_jabber_tcp(struct ndpi_detection_module_struct *ndpi_struct, st
   if ((packet->payload_packet_len > 13 && memcmp(packet->payload, "<?xml version=", 14) == 0)
       || (packet->payload_packet_len >= NDPI_STATICSTRING_LEN("<stream:stream ")
 	  && memcmp(packet->payload, "<stream:stream ", NDPI_STATICSTRING_LEN("<stream:stream ")) == 0)) {
+    int start = packet->payload_packet_len-13;
 
-    if (packet->payload_packet_len > 47) {
-      const u_int16_t lastlen = packet->payload_packet_len - 47;
-      for (x = 0; x < lastlen; x++) {
-	if (memcmp
-	    (&packet->payload[x],
-	     "xmlns:stream='http://etherx.jabber.org/streams'", 47) == 0
-	    || memcmp(&packet->payload[x], "xmlns:stream=\"http://etherx.jabber.org/streams\"", 47) == 0) {
-	  NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct, NDPI_LOG_TRACE, "found JABBER.\n");
-	  x += 47;
+    if(ndpi_strnstr((const char *)&packet->payload[13], "xmlns:stream='http://etherx.jabber.org/streams'", start)
+       || ndpi_strnstr((const char *)&packet->payload[13], "xmlns:stream=\"http://etherx.jabber.org/streams\"", start)) {
+  
+      /* Protocol family */
+      ndpi_int_jabber_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_UNENCRYPED_JABBER, NDPI_REAL_PROTOCOL);
 
-	  ndpi_int_jabber_add_connection(ndpi_struct, flow,
-					 NDPI_PROTOCOL_UNENCRYPED_JABBER, NDPI_REAL_PROTOCOL);
-
-
-
-	  /* search for other protocols: Truphone */
-	  check_content_type_and_change_protocol(ndpi_struct, flow, x);
-	  return;
-	}
-      }
+      /* search for subprotocols */
+      check_content_type_and_change_protocol(ndpi_struct, flow, 13);
+      return;
     }
   }
+  
   if (flow->packet_counter < 3) {
     NDPI_LOG(NDPI_PROTOCOL_UNENCRYPED_JABBER, ndpi_struct,
 	     NDPI_LOG_DEBUG, "packet_counter: %u\n", flow->packet_counter);

@@ -177,17 +177,36 @@ static struct net_mask asn8075[] = {
   { 0, 0 }
 };
 
-u_int is_skype_host(u_int32_t host) {
+u_int8_t is_skype_host(u_int32_t host) {
   /* Check if it belongs to ASN 8075 */
   int i;
+
+  // printf("%s(%08X)\n", __FUNCTION__, host);
 
   for(i=0; asn8075[i].mask != 0; i++)
     if((host & asn8075[i].mask) == asn8075[i].network)
       return(1);
-
+  
   return(0);
 }
 
+u_int8_t is_skype_flow(struct ndpi_detection_module_struct *ndpi_struct,
+		       struct ndpi_flow_struct *flow) {
+  struct ndpi_packet_struct *packet = &flow->packet;
+	
+  if(packet->iph) {
+    /*
+      Skype connections are identified by some SSL-like communications
+      without SSL certificate being exchanged
+    */	
+    if(is_skype_host(ntohl(packet->iph->saddr))
+       || is_skype_host(ntohl(packet->iph->daddr))) {
+      return(1);
+    }
+  }
+
+  return(0);
+}
 
 #if 0
 static u_int is_private_addr(u_int32_t addr) {

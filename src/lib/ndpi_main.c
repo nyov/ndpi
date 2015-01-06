@@ -1239,6 +1239,12 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FUN, NDPI_PROTOCOL_VHUA, "VHUA",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 58267, 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FUN, NDPI_SERVICE_FACEBOOK, "Facebook",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0 , 0, 0, 0, 0) /* UDP */);
+  ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_FUN, NDPI_SERVICE_FACEBOOK_CHAT, "FacebookChat",
+			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_b, 0 , 0, 0, 0, 0) /* UDP */);
 
 
   init_string_based_protocols(ndpi_mod);
@@ -4812,6 +4818,9 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 
     rc = ndpi_find_port_based_protocol(ndpi_struct, proto, shost, sport, dhost, dport);
     if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
+ 
+    if(is_skype_host(shost) || is_skype_host(dhost))
+      return(NDPI_PROTOCOL_SKYPE);
 
     return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport));
   } else {
