@@ -1336,8 +1336,7 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 /* ****************************************************** */
 
 void ndpi_exit_detection_module(struct ndpi_detection_module_struct
-				*ndpi_struct, void (*ndpi_free) (void *ptr))
-{
+				*ndpi_struct, void (*ndpi_free) (void *ptr)) {
   if(ndpi_struct != NULL) {
     int i;
 
@@ -1345,9 +1344,6 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
       if(ndpi_struct->proto_defaults[i].protoName)
 	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
-#ifdef NDPI_PROTOCOL_BITTORRENT
-    ndpi_bittorrent_done(ndpi_struct);
-#endif
 
     ndpi_tdestroy(ndpi_struct->udpRoot, ndpi_free);
     ndpi_tdestroy(ndpi_struct->tcpRoot, ndpi_free);
