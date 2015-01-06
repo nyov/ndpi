@@ -309,17 +309,17 @@ void ndpi_tdestroy(void *vrootp, void (*freefct)(void *)) {
 /* ****************************************** */
 
 u_int8_t ndpi_net_match(u_int32_t ip_to_check,
-			u_int32_t net, 
+			u_int32_t net,
 			u_int32_t num_bits) {
   u_int32_t mask = 0;
 
   mask = ~(~mask >> num_bits);
-  
+
   return(((ip_to_check & mask) == (net & mask)) ? 1 : 0);
 }
 
 u_int8_t ndpi_ips_match(u_int32_t src, u_int32_t dst,
-			u_int32_t net, u_int32_t num_bits) {  
+			u_int32_t net, u_int32_t num_bits) {
   return(ndpi_net_match(src, net, num_bits) || ndpi_net_match(dst, net, num_bits));
 }
 
@@ -674,7 +674,7 @@ static int ndpi_add_host_url_subprotocol(struct ndpi_detection_module_struct *nd
 /* ****************************************************** */
 
 int ndpi_add_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
-				 char *value, int protocol_id, 
+				 char *value, int protocol_id,
 				 ndpi_protocol_breed_t breed) {
   return(ndpi_string_to_automa(ndpi_struct, &ndpi_struct->content_automa, value, protocol_id, breed));
 }
@@ -700,7 +700,7 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
   int i;
 
   for(i=0; host_match[i].string_to_match != NULL; i++) {
-    ndpi_add_host_url_subprotocol(ndpi_mod, host_match[i].string_to_match, 
+    ndpi_add_host_url_subprotocol(ndpi_mod, host_match[i].string_to_match,
 				  host_match[i].protocol_id, host_match[i].protocol_breed);
 
     if(ndpi_mod->proto_defaults[host_match[i].protocol_id].protoName == NULL) {
@@ -711,7 +711,7 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
   }
 
   for(i=0; content_match[i].string_to_match != NULL; i++)
-    ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match, 
+    ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match,
 				 content_match[i].protocol_id,
 				 content_match[i].protocol_breed);
 }
@@ -3245,7 +3245,7 @@ static int ndpi_init_packet_header(struct ndpi_detection_module_struct *ndpi_str
     ndpi_int_reset_packet_protocol(&flow->packet);
   }
 
-  l3len =flow->packet.l3_packet_len;
+  l3len = flow->packet.l3_packet_len;
 
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
   if(flow->packet.iph != NULL) {
@@ -3469,8 +3469,8 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
   }
 }
 
-void check_ndpi_other_flow_func(struct ndpi_detection_module_struct *ndpi_struct,  
-				struct ndpi_flow_struct *flow, 
+void check_ndpi_other_flow_func(struct ndpi_detection_module_struct *ndpi_struct,
+				struct ndpi_flow_struct *flow,
 				NDPI_SELECTION_BITMASK_PROTOCOL_SIZE *ndpi_selection_packet) {
   void *func = NULL;
   u_int32_t a;
@@ -3515,8 +3515,8 @@ void check_ndpi_other_flow_func(struct ndpi_detection_module_struct *ndpi_struct
 }
 
 
-void check_ndpi_udp_flow_func(struct ndpi_detection_module_struct *ndpi_struct,  
-			      struct ndpi_flow_struct *flow, 
+void check_ndpi_udp_flow_func(struct ndpi_detection_module_struct *ndpi_struct,
+			      struct ndpi_flow_struct *flow,
 			      NDPI_SELECTION_BITMASK_PROTOCOL_SIZE *ndpi_selection_packet) {
   void *func = NULL;
   u_int32_t a;
@@ -3552,14 +3552,14 @@ void check_ndpi_udp_flow_func(struct ndpi_detection_module_struct *ndpi_struct,
       if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN)
 	break; /* Stop after detecting the first protocol */
     } else
-      NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_DEBUG, 
+      NDPI_LOG(NDPI_PROTOCOL_UNKNOWN, ndpi_struct, NDPI_LOG_DEBUG,
 	       "[UDP,SKIP] dissector of protocol as callback_buffer idx =  %d\n",a);
   }
 }
 
 
-void check_ndpi_tcp_flow_func(struct ndpi_detection_module_struct *ndpi_struct,  
-			      struct ndpi_flow_struct *flow, 
+void check_ndpi_tcp_flow_func(struct ndpi_detection_module_struct *ndpi_struct,
+			      struct ndpi_flow_struct *flow,
 			      NDPI_SELECTION_BITMASK_PROTOCOL_SIZE *ndpi_selection_packet) {
   void *func = NULL;
   u_int32_t a;
@@ -3630,15 +3630,15 @@ void check_ndpi_tcp_flow_func(struct ndpi_detection_module_struct *ndpi_struct,
 	  break; /* Stop after detecting the first protocol */
       }
     }
-  }  
+  }
 }
 
-void check_ndpi_flow_func(struct ndpi_detection_module_struct *ndpi_struct,  
-			  struct ndpi_flow_struct *flow, 
+void check_ndpi_flow_func(struct ndpi_detection_module_struct *ndpi_struct,
+			  struct ndpi_flow_struct *flow,
 			  NDPI_SELECTION_BITMASK_PROTOCOL_SIZE *ndpi_selection_packet) {
   if(flow->packet.tcp != NULL)
     check_ndpi_tcp_flow_func(ndpi_struct, flow, ndpi_selection_packet);
-  else if(flow->packet.udp != NULL) 
+  else if(flow->packet.udp != NULL)
     check_ndpi_udp_flow_func(ndpi_struct, flow, ndpi_selection_packet);
   else
     check_ndpi_other_flow_func(ndpi_struct, flow, ndpi_selection_packet);
@@ -4799,22 +4799,24 @@ unsigned int ndpi_find_port_based_protocol(struct ndpi_detection_module_struct *
 
 unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 					    u_int8_t proto,
-					    u_int32_t shost, u_int16_t sport,
-					    u_int32_t dhost, u_int16_t dport) {
+					    u_int32_t shost /* host byte order */, u_int16_t sport,
+					    u_int32_t dhost /* host byte order */, u_int16_t dport) {
   unsigned int rc;
 
-  rc = ndpi_search_tcp_or_udp_raw(ndpi_struct, proto,
-				  shost, dhost, sport, dport);
+  if((proto == IPPROTO_TCP) || (proto == IPPROTO_UDP)) {
+    rc = ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport);
+    if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
 
-  if(rc == NDPI_PROTOCOL_UNKNOWN)
-    rc = ndpi_guess_protocol_id(ndpi_struct, proto,
-				shost, sport, dhost, dport);
+    rc = ndpi_guess_protocol_id(ndpi_struct, proto, shost, sport, dhost, dport);
+    if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
 
-  if(rc != NDPI_PROTOCOL_UNKNOWN)
-    return(rc);
+    rc = ndpi_find_port_based_protocol(ndpi_struct, proto, shost, sport, dhost, dport);
+    if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
 
-  return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto,
-				    shost, dhost, sport, dport));
+    return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport));
+  } else {
+    return(ndpi_guess_protocol_id(ndpi_struct, proto, shost, sport, dhost, dport));
+  }
 }
 
 /* ****************************************************** */

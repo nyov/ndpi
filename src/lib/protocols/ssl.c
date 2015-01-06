@@ -40,6 +40,11 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
     struct ndpi_packet_struct *packet = &flow->packet;
 
     if(packet->tcp != NULL) {
+      if(protocol == NDPI_PROTOCOL_SSL) {
+	if(flow->host_server_name[0] == '\0')
+	  protocol = NDPI_PROTOCOL_SSL_NO_CERT;
+      }
+
       switch(protocol) {
       case NDPI_PROTOCOL_SSL:
       case NDPI_PROTOCOL_SSL_NO_CERT:
@@ -56,7 +61,7 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
 	  else if((sport == 995) || (dport == 995)) protocol = NDPI_PROTOCOL_MAIL_POPS;
 	}
 	break;
-      }
+      }      
     }
 
     ndpi_int_add_connection(ndpi_struct, flow, protocol, NDPI_REAL_PROTOCOL);
