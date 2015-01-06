@@ -4814,15 +4814,21 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
     if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
 
     rc = ndpi_guess_protocol_id(ndpi_struct, proto, shost, sport, dhost, dport);
-    if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
+    if(rc != NDPI_PROTOCOL_UNKNOWN) {
+      if(rc == NDPI_PROTOCOL_SSL)
+	goto check_guessed_skype;
+      else
+	return(rc);
+    }
 
     rc = ndpi_find_port_based_protocol(ndpi_struct, proto, shost, sport, dhost, dport);
     if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
  
+  check_guessed_skype:
     if(is_skype_host(shost) || is_skype_host(dhost))
       return(NDPI_PROTOCOL_SKYPE);
 
-    return(ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport));
+    return(rc);
   } else {
     return(ndpi_guess_protocol_id(ndpi_struct, proto, shost, sport, dhost, dport));
   }

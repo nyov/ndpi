@@ -184,10 +184,6 @@ typedef struct ndpi_id_struct {
 #ifdef NDPI_PROTOCOL_OSCAR
   u_int32_t oscar_last_safe_access_time;
 #endif
-#ifdef NDPI_PROTOCOL_GADUGADU
-  u_int32_t gg_ft_ip_address;
-  u_int32_t gg_timeout;
-#endif
 #ifdef NDPI_PROTOCOL_ZATTOO
   u_int32_t zattoo_ts;
 #endif
@@ -210,9 +206,6 @@ typedef struct ndpi_id_struct {
   u_int16_t bt_port_t[NDPI_BT_PORTS];
   u_int16_t bt_port_u[NDPI_BT_PORTS];
 #endif
-#ifdef NDPI_PROTOCOL_GADUGADU
-  u_int16_t gg_ft_port;
-#endif
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
 #define JABBER_MAX_STUN_PORTS 6
   u_int16_t jabber_voice_stun_port[JABBER_MAX_STUN_PORTS];
@@ -233,10 +226,6 @@ typedef struct ndpi_id_struct {
 #endif
 #ifdef NDPI_PROTOCOL_OSCAR
   u_int8_t oscar_ssl_session_id[33];
-#endif
-#ifdef NDPI_PROTOCOL_GADUGADU
-  u_int8_t gg_call_id[2][7];
-  u_int8_t gg_fmnumber[8];
 #endif
 #ifdef NDPI_PROTOCOL_UNENCRYPED_JABBER
   u_int8_t jabber_voice_stun_used_ports;

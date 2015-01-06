@@ -295,9 +295,8 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
     }
 
     if((packet->ssl_certificate_num_checks >= 2)
-       && (certificate[0] != '\0')
        && flow->l4.tcp.seen_syn && flow->l4.tcp.seen_syn_ack && flow->l4.tcp.seen_ack) /* We have seen the 3-way handshake */
-      ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
+      ndpi_int_ssl_add_connection(ndpi_struct, flow, (certificate[0] != '\0') ? NDPI_PROTOCOL_SSL : NDPI_PROTOCOL_SSL_NO_CERT);
   }
 
   return(0);
@@ -307,12 +306,8 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 							    ndpi_detection_module_struct
 							    *ndpi_struct, struct ndpi_flow_struct *flow)
 {
-#if defined(NDPI_PROTOCOL_SOFTETHER) || defined(NDPI_PROTOCOL_MEEBO)|| defined(NDPI_PROTOCOL_TOR) || defined(NDPI_PROTOCOL_VPN_X) || defined(NDPI_PROTOCOL_UNENCRYPED_JABBER) || defined (NDPI_PROTOCOL_OOVOO) || defined (NDPI_PROTOCOL_ISKOOT) || defined (NDPI_PROTOCOL_OSCAR) || defined (NDPI_PROTOCOL_ITUNES) || defined (NDPI_SERVICE_GMAIL)
-
+#if defined(NDPI_PROTOCOL_MEEBO)|| defined(NDPI_PROTOCOL_TOR) || defined(NDPI_PROTOCOL_VPN_X) || defined(NDPI_PROTOCOL_UNENCRYPED_JABBER) || defined (NDPI_PROTOCOL_OSCAR) || defined (NDPI_PROTOCOL_ITUNES) || defined (NDPI_SERVICE_GMAIL)
   struct ndpi_packet_struct *packet = &flow->packet;
-#ifdef NDPI_PROTOCOL_ISKOOT
-
-#endif
   //      struct ndpi_id_struct         *src=flow->src;
   //      struct ndpi_id_struct         *dst=flow->dst;
   u_int32_t a;
@@ -323,10 +318,6 @@ static void ssl_mark_and_payload_search_for_other_protocols(struct
 #endif
 #if defined(NDPI_PROTOCOL_OSCAR)
   if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_OSCAR) != 0)
-    goto check_for_ssl_payload;
-#endif
-#if defined(NDPI_PROTOCOL_GADUGADU)
-  if (NDPI_COMPARE_PROTOCOL_TO_BITMASK(ndpi_struct->detection_bitmask, NDPI_PROTOCOL_GADUGADU) != 0)
     goto check_for_ssl_payload;
 #endif
   goto no_check_for_ssl_payload;
