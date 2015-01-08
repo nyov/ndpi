@@ -263,6 +263,9 @@ struct ndpi_flow_tcp_struct {
   u_int8_t irc_stage;
   u_int8_t irc_port;
 #endif
+#ifdef NDPI_PROTOCOL_H323
+  u_int8_t h323_valid_packets;
+#endif
 #ifdef NDPI_PROTOCOL_GNUTELLA
   u_int8_t gnutella_msg_id[3];
 #endif

@@ -40,12 +40,14 @@ static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndp
   } else {
     struct ndpi_packet_struct *packet = &flow->packet;
 
-    if(packet->tcp != NULL) {
-      if(protocol == NDPI_PROTOCOL_SSL) {
-	if(flow->host_server_name[0] == '\0')
-	  protocol = NDPI_PROTOCOL_SSL_NO_CERT;
-      }
+    if((flow->protos.ssl.client_certificate[0] != '\0')
+       || (flow->protos.ssl.server_certificate[0] != '\0')
+       || (flow->host_server_name[0] != '\0'))
+      protocol = NDPI_PROTOCOL_SSL;
+    else
+      protocol =  NDPI_PROTOCOL_SSL_NO_CERT;
 
+    if(packet->tcp != NULL) {
       switch(protocol) {
       case NDPI_PROTOCOL_SSL:
       case NDPI_PROTOCOL_SSL_NO_CERT:
@@ -286,7 +288,7 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
     packet->ssl_certificate_num_checks++;
 
     if(rc > 0) {
-      packet->ssl_certificate_detected = 1;
+      packet->ssl_certificate_detected++;
 #ifdef CERTIFICATE_DEBUG
       printf("***** [SSL] %s\n", certificate);
 #endif
@@ -294,9 +296,14 @@ int sslDetectProtocolFromCertificate(struct ndpi_detection_module_struct *ndpi_s
 	return(rc); /* Fix courtesy of Gianluca Costa <g.costa@xplico.org> */
     }
 
-    if((packet->ssl_certificate_num_checks >= 2)
-       && flow->l4.tcp.seen_syn && flow->l4.tcp.seen_syn_ack && flow->l4.tcp.seen_ack) /* We have seen the 3-way handshake */
-      ndpi_int_ssl_add_connection(ndpi_struct, flow, (certificate[0] != '\0') ? NDPI_PROTOCOL_SSL : NDPI_PROTOCOL_SSL_NO_CERT);
+    if(((packet->ssl_certificate_num_checks >= 2)
+	&& flow->l4.tcp.seen_syn
+	&& flow->l4.tcp.seen_syn_ack
+	&& flow->l4.tcp.seen_ack /* We have seen the 3-way handshake */)
+       || (flow->protos.ssl.server_certificate[0] != '\0')
+       || (flow->protos.ssl.client_certificate[0] != '\0')
+       )
+      ndpi_int_ssl_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_SSL);
   }
 
   return(0);
