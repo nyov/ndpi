@@ -108,7 +108,7 @@ void ndpi_int_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
  *  - host, user agent, empty line,....
  */
 extern void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
-extern void ndpi_parse_packet_line_info_unix(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
+extern void ndpi_parse_packet_line_info_any(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 extern u_int16_t ndpi_check_for_email_address(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow, u_int16_t counter);
 extern void ndpi_int_change_packet_protocol(struct ndpi_detection_module_struct *ndpi_struct,
 					    struct ndpi_flow_struct *flow,

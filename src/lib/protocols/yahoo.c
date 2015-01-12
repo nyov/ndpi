@@ -361,14 +361,14 @@ static void ndpi_search_yahoo_tcp(struct ndpi_detection_module_struct *ndpi_stru
       }
       if (flow->l4.tcp.yahoo_http_proxy_stage == 2 - packet->packet_direction) {
 
-	ndpi_parse_packet_line_info_unix(ndpi_struct, flow);
+	ndpi_parse_packet_line_info_any(ndpi_struct, flow);
 
-	if (packet->parsed_unix_lines >= 9) {
+	if (packet->parsed_lines >= 9) {
 
-	  if (packet->unix_line[4].ptr != NULL && packet->unix_line[4].len >= 9 &&
-	      packet->unix_line[8].ptr != NULL && packet->unix_line[8].len >= 6 &&
-	      memcmp(packet->unix_line[4].ptr, "<Session ", 9) == 0 &&
-	      memcmp(packet->unix_line[8].ptr, "<Ymsg ", 6) == 0) {
+	  if (packet->line[4].ptr != NULL && packet->line[4].len >= 9 &&
+	      packet->line[8].ptr != NULL && packet->line[8].len >= 6 &&
+	      memcmp(packet->line[4].ptr, "<Session ", 9) == 0 &&
+	      memcmp(packet->line[8].ptr, "<Ymsg ", 6) == 0) {
 
 	    NDPI_LOG(NDPI_PROTOCOL_YAHOO, ndpi_struct, NDPI_LOG_DEBUG, "found YAHOO over HTTP proxy");
 	    ndpi_int_yahoo_add_connection(ndpi_struct, flow, NDPI_CORRELATED_PROTOCOL);

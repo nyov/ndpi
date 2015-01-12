@@ -486,13 +486,7 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
       if (memcmp(packet->payload, ":", 1) == 0) {
 	if (packet->payload[packet->payload_packet_len - 2] != 0x0d
 	    && packet->payload[packet->payload_packet_len - 1] == 0x0a) {
-	  ndpi_parse_packet_line_info_unix(ndpi_struct, flow);
-	  packet->parsed_lines = packet->parsed_unix_lines;
-	  for (i = 0; i < packet->parsed_lines; i++) {
-	    packet->line[i] = packet->unix_line[i];
-	    packet->line[i].ptr = packet->unix_line[i].ptr;
-	    packet->line[i].len = packet->unix_line[i].len;
-	  }
+	  ndpi_parse_packet_line_info_any(ndpi_struct, flow);
 	} else if (packet->payload[packet->payload_packet_len - 2] == 0x0d) {
 	  ndpi_parse_packet_line_info(ndpi_struct, flow);
 	} else {
@@ -559,13 +553,13 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
 	  }
 
 	} else if (packet->payload[packet->payload_packet_len - 1] == 0x0a) {
-	  ndpi_parse_packet_line_info_unix(ndpi_struct, flow);
-	  if (packet->parsed_unix_lines > 1) {
+	  ndpi_parse_packet_line_info_any(ndpi_struct, flow);
+	  if (packet->parsed_lines > 1) {
 	    NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE,
 		     "packet contains more than one line");
-	    for (c = 1; c < packet->parsed_unix_lines; c++) {
-	      if (packet->unix_line[c].len > 4 && (memcmp(packet->unix_line[c].ptr, "NICK ", 5) == 0
-						   || memcmp(packet->unix_line[c].ptr, "USER ",
+	    for (c = 1; c < packet->parsed_lines; c++) {
+	      if (packet->line[c].len > 4 && (memcmp(packet->line[c].ptr, "NICK ", 5) == 0
+						   || memcmp(packet->line[c].ptr, "USER ",
 							     5) == 0)) {
 		NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_TRACE,
 			 "two icq signal words in the same packet");
@@ -634,14 +628,8 @@ void ndpi_search_irc_tcp(struct ndpi_detection_module_struct *ndpi_struct, struc
     if (packet->payload[packet->payload_packet_len - 2] != 0x0d
 	&& packet->payload[packet->payload_packet_len - 1] == 0x0a) {
       NDPI_LOG(NDPI_PROTOCOL_IRC, ndpi_struct, NDPI_LOG_DEBUG,
-	       "ndpi_parse_packet_line_info_unix(ndpi_struct, flow);");
-      ndpi_parse_packet_line_info_unix(ndpi_struct, flow);
-      packet->parsed_lines = packet->parsed_unix_lines;
-      for (i = 0; i < packet->parsed_lines; i++) {
-	packet->line[i] = packet->unix_line[i];
-	packet->line[i].ptr = packet->unix_line[i].ptr;
-	packet->line[i].len = packet->unix_line[i].len;
-      }
+	       "ndpi_parse_packet_line_info_any(ndpi_struct, flow);");
+      ndpi_parse_packet_line_info_any(ndpi_struct, flow);
     } else if (packet->payload[packet->payload_packet_len - 2] == 0x0d) {
       ndpi_parse_packet_line_info(ndpi_struct, flow);
     } else {

@@ -42,18 +42,18 @@ void ndpi_search_icecast_tcp(struct ndpi_detection_module_struct *ndpi_struct, s
   if ((packet->payload_packet_len < 500 &&
        packet->payload_packet_len >= 7 && memcmp(packet->payload, "SOURCE ", 7) == 0)
       || flow->l4.tcp.icecast_stage) {
-    ndpi_parse_packet_line_info_unix(ndpi_struct, flow);
-    NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast lines=%d\n", packet->parsed_unix_lines);
-    for (i = 0; i < packet->parsed_unix_lines; i++) {
-      if (packet->unix_line[i].ptr != NULL && packet->unix_line[i].len > 4
-	  && memcmp(packet->unix_line[i].ptr, "ice-", 4) == 0) {
+    ndpi_parse_packet_line_info_any(ndpi_struct, flow);
+    NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast lines=%d\n", packet->parsed_lines);
+    for (i = 0; i < packet->parsed_lines; i++) {
+      if (packet->line[i].ptr != NULL && packet->line[i].len > 4
+	  && memcmp(packet->line[i].ptr, "ice-", 4) == 0) {
 	NDPI_LOG(NDPI_PROTOCOL_ICECAST, ndpi_struct, NDPI_LOG_DEBUG, "Icecast detected.\n");
 	ndpi_int_icecast_add_connection(ndpi_struct, flow);
 	return;
       }
     }
 
-    if (packet->parsed_unix_lines < 1 && !flow->l4.tcp.icecast_stage) {
+    if (packet->parsed_lines < 1 && !flow->l4.tcp.icecast_stage) {
       flow->l4.tcp.icecast_stage = 1;
       return;
     }

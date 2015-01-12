@@ -476,7 +476,6 @@ typedef struct ndpi_packet_struct {
 #endif
 
   struct ndpi_int_one_line_struct line[NDPI_MAX_PARSE_LINES_PER_PACKET];
-  struct ndpi_int_one_line_struct unix_line[NDPI_MAX_PARSE_LINES_PER_PACKET];
   struct ndpi_int_one_line_struct host_line;
   struct ndpi_int_one_line_struct forwarded_line;
   struct ndpi_int_one_line_struct referer_line;
@@ -504,11 +503,10 @@ typedef struct ndpi_packet_struct {
   u_int8_t tcp_retransmission;
   u_int8_t l4_protocol;
 
-  u_int8_t packet_lines_parsed_complete;
-  u_int8_t packet_unix_lines_parsed_complete;
-  u_int8_t empty_line_position_set;
-  u_int8_t packet_direction:1;
   u_int8_t ssl_certificate_detected:4, ssl_certificate_num_checks:4;
+  u_int8_t packet_lines_parsed_complete:1,
+	   packet_direction:1,
+	   empty_line_position_set:1;
 } ndpi_packet_struct_t;
 
 struct ndpi_detection_module_struct;
@@ -651,6 +649,7 @@ typedef struct ndpi_detection_module_struct {
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
 
   u_int8_t match_dns_host_names:1;
+  u_int8_t direction_detect_disable:1; /* disable internal detection of packet direction */
 } ndpi_detection_module_struct_t;
 
 typedef struct ndpi_flow_struct {
@@ -678,6 +677,7 @@ typedef struct ndpi_flow_struct {
   u_int8_t no_cache_protocol:1;
   u_int8_t init_finished:1;
   u_int8_t setup_packet_direction:1;
+  u_int8_t packet_direction:1; /* if ndpi_struct->direction_detect_disable == 1 */
   /* tcp sequence number connection tracking */
   u_int32_t next_tcp_seq_nr[2];
 

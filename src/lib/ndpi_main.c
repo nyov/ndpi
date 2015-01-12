@@ -3363,16 +3363,19 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
 
   packet->tcp_retransmission = 0, packet->packet_direction = 0;
 
-  if(iph != NULL && iph->saddr < iph->daddr)
-    packet->packet_direction = 1;
+  if(ndpi_struct->direction_detect_disable) {
+    packet->packet_direction = flow->packet_direction;
+  } else {
+    if(iph != NULL && iph->saddr < iph->daddr)
+      packet->packet_direction = 1;
 
 #ifdef NDPI_DETECTION_SUPPORT_IPV6
-  if(iphv6 != NULL && NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(&iphv6->saddr, &iphv6->daddr) != 0)
-    packet->packet_direction = 1;
+    if(iphv6 != NULL && NDPI_COMPARE_IPV6_ADDRESS_STRUCTS(&iphv6->saddr, &iphv6->daddr) != 0)
+      packet->packet_direction = 1;
 #endif
+  }
 
   packet->packet_lines_parsed_complete = 0;
-  packet->packet_unix_lines_parsed_complete = 0;
   if(flow == NULL)
     return;
 
@@ -3385,7 +3388,8 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
     /* reset retried bytes here before setting it */
     packet->num_retried_bytes = 0;
 
-    packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
+    if(!ndpi_struct->direction_detect_disable)
+      packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
 
     if(tcph->syn != 0 && tcph->ack == 0 && flow->l4.tcp.seen_syn == 0 && flow->l4.tcp.seen_syn_ack == 0
        && flow->l4.tcp.seen_ack == 0) {
@@ -3454,7 +3458,8 @@ void ndpi_connection_tracking(struct ndpi_detection_module_struct *ndpi_struct,
       flow->next_tcp_seq_nr[1] = 0;
     }
   } else if(udph != NULL) {
-    // packet->packet_direction = (tcph->source < tcph->dest) ? 1 : 0;
+    if(!ndpi_struct->direction_detect_disable)
+      packet->packet_direction = (udph->source < udph->dest) ? 1 : 0;
   }
 
   if(flow->packet_counter < MAX_PACKET_COUNTER && packet->payload_packet_len) {
@@ -4107,39 +4112,41 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
   }
 }
 
-void ndpi_parse_packet_line_info_unix(struct ndpi_detection_module_struct *ndpi_struct,
+void ndpi_parse_packet_line_info_any(struct ndpi_detection_module_struct *ndpi_struct,
 				      struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
   u_int32_t a;
   u_int16_t end = packet->payload_packet_len;
-  if(packet->packet_unix_lines_parsed_complete != 0)
+  if(packet->packet_lines_parsed_complete != 0)
     return;
 
 
 
-  packet->packet_unix_lines_parsed_complete = 1;
-  packet->parsed_unix_lines = 0;
+  packet->packet_lines_parsed_complete = 1;
+  packet->parsed_lines = 0;
 
   if(packet->payload_packet_len == 0)
     return;
 
-  packet->unix_line[packet->parsed_unix_lines].ptr = packet->payload;
-  packet->unix_line[packet->parsed_unix_lines].len = 0;
+  packet->line[packet->parsed_lines].ptr = packet->payload;
+  packet->line[packet->parsed_lines].len = 0;
 
   for (a = 0; a < end; a++) {
     if(packet->payload[a] == 0x0a) {
-      packet->unix_line[packet->parsed_unix_lines].len = (u_int16_t)(
-								     ((unsigned long) &packet->payload[a]) -
-								     ((unsigned long) packet->unix_line[packet->parsed_unix_lines].ptr));
+      packet->line[packet->parsed_lines].len = (u_int16_t)(
+				     ((unsigned long) &packet->payload[a]) -
+				     ((unsigned long) packet->line[packet->parsed_lines].ptr));
+      if(a > 0 && packet->payload[a-1] == 0x0d)
+	      packet->line[packet->parsed_lines].len--;
 
-      if(packet->parsed_unix_lines >= (NDPI_MAX_PARSE_LINES_PER_PACKET - 1)) {
+      if(packet->parsed_lines >= (NDPI_MAX_PARSE_LINES_PER_PACKET - 1)) {
 	break;
       }
 
-      packet->parsed_unix_lines++;
-      packet->unix_line[packet->parsed_unix_lines].ptr = &packet->payload[a + 1];
-      packet->unix_line[packet->parsed_unix_lines].len = 0;
+      packet->parsed_lines++;
+      packet->line[packet->parsed_lines].ptr = &packet->payload[a + 1];
+      packet->line[packet->parsed_lines].len = 0;
 
       if((a + 1) >= packet->payload_packet_len) {
 	break;
@@ -4148,7 +4155,6 @@ void ndpi_parse_packet_line_info_unix(struct ndpi_detection_module_struct *ndpi_
     }
   }
 }
-
 
 
 u_int16_t ndpi_check_for_email_address(struct ndpi_detection_module_struct *ndpi_struct,
