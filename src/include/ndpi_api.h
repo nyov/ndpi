@@ -1,7 +1,7 @@
 /*
  * ndpi_api.h
  *
- * Copyright (C) 2011-14 - ntop.org
+ * Copyright (C) 2011-15 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
  *
  * This file is part of nDPI, an open source deep packet inspection
@@ -51,10 +51,10 @@ extern "C" {
   void  ndpi_free(void *ptr);
   void *ndpi_realloc(void *ptr, size_t old_size, size_t new_size);
   char *ndpi_strdup(const char *s);
- /*
- * Find the first occurrence of find in s, where the search is limited to the
- * first slen characters of s.
- */
+  /*
+   * Find the first occurrence of find in s, where the search is limited to the
+   * first slen characters of s.
+   */
   char* ndpi_strnstr(const char *s, const char *find, size_t slen);
 
   /**
@@ -177,7 +177,7 @@ extern "C" {
 #define SAVE_DETECTION_BITMASK_AS_UNKNOWN    1
 #define NO_SAVE_DETECTION_BITMASK_AS_UNKNOWN 0
 
-/**
+  /**
    * This function sets a single protocol bitmask
    * @param label Protocol name
    * @param ndpi_struct the detection module
@@ -189,14 +189,30 @@ extern "C" {
    * @param b_add_detection_bitmask set true if you want add the protocol bitmask to the detection bitmask
    * NB: this function does not increment the index of the callback_buffer
    */
-   void ndpi_set_bitmask_protocol_detection(char * label, struct ndpi_detection_module_struct *ndpi_struct,
-    const NDPI_PROTOCOL_BITMASK * detection_bitmask,
-    const u_int32_t idx,
-    u_int16_t ndpi_protocol_id,
-    void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow),
-    const NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_bitmask,
-    u_int8_t b_save_bitmask_unknow,
-    u_int8_t b_add_detection_bitmask);
+  void ndpi_set_bitmask_protocol_detection(char * label, struct ndpi_detection_module_struct *ndpi_struct,
+					   const NDPI_PROTOCOL_BITMASK * detection_bitmask,
+					   const u_int32_t idx,
+					   u_int16_t ndpi_protocol_id,
+					   void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow),
+					   const NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_bitmask,
+					   u_int8_t b_save_bitmask_unknow,
+					   u_int8_t b_add_detection_bitmask);
+
+#ifdef NDPI_PROTOCOL_HTTP
+  /*
+    API used to retrieve information for HTTP flows
+  */
+  ndpi_http_method ndpi_get_http_method(struct ndpi_detection_module_struct *ndpi_mod, 
+					struct ndpi_flow_struct *flow);
+  
+  int ndpi_get_http_url(struct ndpi_detection_module_struct *ndpi_mod,
+			struct ndpi_flow_struct *flow, 
+			struct ndpi_int_one_line_struct *ret);
+  
+  int ndpi_get_http_content_type(struct ndpi_detection_module_struct *ndpi_mod, 
+				 struct ndpi_flow_struct *flow, 
+				 struct ndpi_int_one_line_struct *ret);
+#endif
 
 #ifdef __cplusplus
 }

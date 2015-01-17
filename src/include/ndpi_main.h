@@ -1,7 +1,7 @@
 /*
  * ndpi_main.h
  *
- * Copyright (C) 2011-14 - ntop.org
+ * Copyright (C) 2011-15 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
  *
  * This file is part of nDPI, an open source deep packet inspection
@@ -146,4 +146,4 @@ extern u_int8_t ndpi_ips_match(u_int32_t src, u_int32_t dst,
 
 #include "ndpi_api.h"
 
-#endif							/* __NDPI_MAIN_INCLUDE_FILE__ */
+#endif	/* __NDPI_MAIN_INCLUDE_FILE__ */

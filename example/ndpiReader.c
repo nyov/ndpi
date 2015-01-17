@@ -1,7 +1,7 @@
 /*
  * ndpiReader.c
  *
- * Copyright (C) 2011-14 - ntop.org
+ * Copyright (C) 2011-15 - ntop.org
  * Copyright (C) 2009-2011 by ipoque GmbH
  * Copyright (C) 2014 - Matteo Bogo <matteo.bogo@gmail.com> (JSON support)
  *
@@ -958,6 +958,17 @@ static unsigned int packet_processing(u_int16_t thread_id,
       snprintf(flow->ssl.client_certificate, sizeof(flow->ssl.client_certificate), "%s", flow->ndpi_flow->protos.ssl.client_certificate);
       snprintf(flow->ssl.server_certificate, sizeof(flow->ssl.server_certificate), "%s", flow->ndpi_flow->protos.ssl.server_certificate);
     }
+
+#if 0
+    {
+      struct ndpi_int_one_line_struct ret;
+      ndpi_http_method m;
+
+      ndpi_get_http_url(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow, &ret);
+      ndpi_get_http_content_type(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow, &ret);
+      m = ndpi_get_http_method(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow);
+    }
+#endif
 
     free_ndpi_flow(flow);
 
