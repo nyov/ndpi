@@ -660,7 +660,7 @@ typedef struct ndpi_detection_module_struct {
 
   ndpi_proto_defaults_t proto_defaults[NDPI_MAX_SUPPORTED_PROTOCOLS+NDPI_MAX_NUM_CUSTOM_PROTOCOLS];
 
-  u_int8_t match_dns_host_names:1;
+  u_int8_t match_dns_host_names:1, http_dissect_response:1;
   u_int8_t direction_detect_disable:1; /* disable internal detection of packet direction */
 } ndpi_detection_module_struct_t;
 
@@ -714,13 +714,25 @@ typedef struct ndpi_flow_struct {
   u_char detected_os[32];       /* Via HTTP User-Agent      */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
 
+  /* 
+     This structure below will not not stay inside the protos
+     structure below as HTTP is used by many subprotocols
+     such as FaceBook, Google... so it is hard to know
+     when to use it or not. Thus we leave it outside for the
+     time being.
+  */
+  struct {
+    ndpi_http_method method;      
+    char *url, *content_type;
+  } http;
+
   union {
     struct {
       u_int8_t num_queries, num_answers, ret_code;
       u_int8_t bad_packet /* the received packet looks bad */;
       u_int16_t query_type, query_class, rsp_type;
     } dns;
-
+    
     struct {
       char client_certificate[32], server_certificate[32];
     } ssl;

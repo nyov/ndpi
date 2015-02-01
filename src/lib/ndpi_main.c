@@ -5006,6 +5006,16 @@ int ndpi_match_content_subprotocol(struct ndpi_detection_module_struct *ndpi_str
 
 /* ****************************************************** */
 
+void ndpi_free_flow(struct ndpi_flow_struct *flow) {
+  if(flow) {
+    if(flow->http.url)          ndpi_free(flow->http.url);
+    if(flow->http.content_type) ndpi_free(flow->http.content_type);
+    ndpi_free(flow);
+  }
+}
+
+/* ****************************************************** */
+
 #ifndef __KERNEL__
 char* ndpi_revision() {
   return(NDPI_SVN_RELEASE);

@@ -69,6 +69,13 @@ extern "C" {
 								  void  (*__ndpi_free)(void *ptr),
 								  ndpi_debug_function_ptr ndpi_debug_printf);
 
+  
+  /**
+   * This function frees the memory allocated in the specified flow
+   * @param flow to free
+   */
+  void ndpi_free_flow(struct ndpi_flow_struct *flow);
+
   /**
    * This function enables cache support in nDPI used for some protocol such as Skype
    * @param cache host name
@@ -205,13 +212,11 @@ extern "C" {
   ndpi_http_method ndpi_get_http_method(struct ndpi_detection_module_struct *ndpi_mod, 
 					struct ndpi_flow_struct *flow);
   
-  int ndpi_get_http_url(struct ndpi_detection_module_struct *ndpi_mod,
-			struct ndpi_flow_struct *flow, 
-			struct ndpi_int_one_line_struct *ret);
+  char* ndpi_get_http_url(struct ndpi_detection_module_struct *ndpi_mod,
+			struct ndpi_flow_struct *flow);
   
-  int ndpi_get_http_content_type(struct ndpi_detection_module_struct *ndpi_mod, 
-				 struct ndpi_flow_struct *flow, 
-				 struct ndpi_int_one_line_struct *ret);
+  char* ndpi_get_http_content_type(struct ndpi_detection_module_struct *ndpi_mod, 
+				 struct ndpi_flow_struct *flow);
 #endif
 
 #ifdef __cplusplus

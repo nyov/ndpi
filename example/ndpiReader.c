@@ -74,7 +74,7 @@ static char *_jsonFilePath    = NULL; /**< JSON file path  */
 #ifdef HAVE_JSON_C
 static json_object *jArray_known_flows, *jArray_unknown_flows;
 #endif
-static u_int8_t live_capture = 0;
+static u_int8_t live_capture = 0, full_http_dissection = 0;
 static u_int8_t undetected_flows_deleted = 0;
 /**
  * User preferences
@@ -517,7 +517,7 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 /* ***************************************************** */
 
 static void free_ndpi_flow(struct ndpi_flow *flow) {
-  if(flow->ndpi_flow) { ndpi_free(flow->ndpi_flow); flow->ndpi_flow = NULL; }
+  if(flow->ndpi_flow) { ndpi_free_flow(flow->ndpi_flow); flow->ndpi_flow = NULL; }
   if(flow->src_id)    { ndpi_free(flow->src_id); flow->src_id = NULL;       }
   if(flow->dst_id)    { ndpi_free(flow->dst_id); flow->dst_id = NULL;       }
 }
@@ -876,6 +876,9 @@ static void setupDetection(u_int16_t thread_id) {
     exit(-1);
   }
 
+  if(full_http_dissection)
+    ndpi_thread_info[thread_id].ndpi_struct->http_dissect_response = 1;
+
   // enable all protocols
   NDPI_BITMASK_SET_ALL(all);
   ndpi_set_protocol_detection_bitmask2(ndpi_thread_info[thread_id].ndpi_struct, &all);
@@ -959,16 +962,30 @@ static unsigned int packet_processing(u_int16_t thread_id,
       snprintf(flow->ssl.server_certificate, sizeof(flow->ssl.server_certificate), "%s", flow->ndpi_flow->protos.ssl.server_certificate);
     }
 
-#if 0
-    {
-      struct ndpi_int_one_line_struct ret;
-      ndpi_http_method m;
+    if((
+	(flow->detected_protocol == NDPI_PROTOCOL_HTTP) 
+	|| (flow->detected_protocol == NDPI_SERVICE_FACEBOOK)
+	)
+       && full_http_dissection) {
+      char *method;
 
-      ndpi_get_http_url(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow, &ret);
-      ndpi_get_http_content_type(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow, &ret);
-      m = ndpi_get_http_method(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow);
+      printf("[URL] %s\n", ndpi_get_http_url(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow));
+      printf("[Content-Type] %s\n", ndpi_get_http_content_type(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow));     
+
+      switch(ndpi_get_http_method(ndpi_thread_info[thread_id].ndpi_struct, ndpi_flow)) {
+      case HTTP_METHOD_OPTIONS: method = "HTTP_METHOD_OPTIONS"; break;
+      case HTTP_METHOD_GET: method = "HTTP_METHOD_GET"; break;
+      case HTTP_METHOD_HEAD: method = "HTTP_METHOD_HEAD"; break;
+      case HTTP_METHOD_POST: method = "HTTP_METHOD_POST"; break;
+      case HTTP_METHOD_PUT: method = "HTTP_METHOD_PUT"; break;
+      case HTTP_METHOD_DELETE: method = "HTTP_METHOD_DELETE"; break;
+      case HTTP_METHOD_TRACE: method = "HTTP_METHOD_TRACE"; break;
+      case HTTP_METHOD_CONNECT: method = "HTTP_METHOD_CONNECT"; break;
+      default: method = "HTTP_METHOD_UNKNOWN"; break;
+      }
+
+      printf("[Method] %s\n", method);
     }
-#endif
 
     free_ndpi_flow(flow);
 
