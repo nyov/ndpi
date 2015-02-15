@@ -140,3 +140,73 @@ ndpi_protocol_match content_match[] = {
   { "application/x-rtsp-tunnelled",	NULL,		        NDPI_PROTOCOL_RTSP, NDPI_PROTOCOL_FUN },
   { NULL, 0 }
 };
+
+/* ****************************************************** */
+
+/*
+   Tor
+   The tor protocol uses SSL to contact peers so it could be exchanged with
+   standard SSL. However the host names such as
+
+   - www.fgd2iwya7vinfutj5wq5we.com
+   - www.qbtxzhetq4s2f.com
+   - www.fgd2iwya7vinfutj5wq5we.net
+
+   In essence www.<name>.com|net
+   
+   To do things properly we should check if host name in the certificate
+   exists or if the IP address of the SSL peer resolves to a name. Unfortunately
+   for performance reasons we can't afford to do a DNS lookup in nDPI (however apps
+   can do it if possible) and thus we have created a heuristic algorithm that tries
+   to check the host name (in the SSL certificate) to see if it looks like a
+   random name or a real name. We cannot use a dictionary (how can the kernel read a file?)
+   and this we use bigrams distribution to decide if the string looks like a
+   word or just random chars.
+
+   http://www3.nd.edu/~busiforc/handouts/cryptography/Letter%20Frequencies.html
+*/
+
+static const char *ndpi_en_bigrams[] = {
+    "aa", "ba", "ca", "da", "ea", "fa", "ga", "ha", "ia", "ja", "ka", "la", "ma", "na", "oa", "pa", "qa",
+    "ra", "sa", "ta", "ua", "va", "wa", "xa", "ya", "za", "ab", "bb", "db", "eb", "fb", "gb", "hb", "ib",
+    "kb", "lb", "mb", "nb", "ob", "pb", "rb", "sb", "tb", "ub", "wb", "yb", "ac", "bc", "cc", "dc", "ec",
+    "fc", "gc", "hc", "ic", "kc", "lc", "mc", "nc", "oc", "pc", "rc", "sc", "tc", "uc", "wc", "xc", "yc",
+    "ad", "bd", "cd", "dd", "ed", "fd", "gd", "hd", "id", "kd", "ld", "md", "nd", "od", "pd", "rd", "sd",
+    "td", "ud", "wd", "xd", "yd", "zd", "ae", "be", "ce", "de", "ee", "fe", "ge", "he", "ie", "je", "ke",
+    "le", "me", "ne", "oe", "pe", "re", "se", "te", "ue", "ve", "we", "xe", "ye", "ze", "af", "bf", "df",
+    "ef", "ff", "gf", "hf", "if", "kf", "lf", "mf", "nf", "of", "pf", "rf", "sf", "tf", "uf", "wf", "xf",
+    "yf", "zf", "ag", "bg", "dg", "eg", "fg", "gg", "hg", "ig", "kg", "lg", "ng", "og", "pg", "rg", "sg",
+    "tg", "ug", "wg", "yg", "ah", "bh", "ch", "dh", "eh", "fh", "gh", "hh", "ih", "kh", "lh", "mh", "nh",
+    "oh", "ph", "rh", "sh", "th", "uh", "wh", "xh", "yh", "ai", "bi", "ci", "di", "ei", "fi", "gi", "hi",
+    "ii", "ji", "ki", "li", "mi", "ni", "oi", "pi", "qi", "ri", "si", "ti", "ui", "vi", "wi", "xi", "yi",
+    "zi", "aj", "bj", "dj", "ej", "fj", "gj", "hj", "ij", "jj", "kj", "lj", "nj", "oj", "pj", "rj", "sj",
+    "tj", "uj", "wj", "yj", "ak", "ck", "dk", "ek", "gk", "ik", "kk", "lk", "mk", "nk", "ok", "pk", "rk",
+    "sk", "tk", "uk", "wk", "yk", "zk", "al", "bl", "cl", "dl", "el", "fl", "gl", "hl", "il", "kl", "ll",
+    "ml", "nl", "ol", "pl", "rl", "sl", "tl", "ul", "vl", "wl", "xl", "yl", "zl", "am", "bm", "cm", "dm",
+    "em", "fm", "gm", "hm", "im", "km", "lm", "mm", "nm", "om", "pm", "rm", "sm", "tm", "um", "wm", "xm",
+    "ym", "zm", "an", "bn", "cn", "dn", "en", "fn", "gn", "hn", "in", "kn", "ln", "mn", "nn", "on", "pn",
+    "rn", "sn", "tn", "un", "wn", "xn", "yn", "ao", "bo", "co", "do", "eo", "fo", "go", "ho", "io", "jo",
+    "ko", "lo", "mo", "no", "oo", "po", "ro", "so", "to", "uo", "vo", "wo", "xo", "yo", "zo", "ap", "bp",
+    "dp", "ep", "fp", "gp", "hp", "ip", "kp", "lp", "mp", "np", "op", "pp", "rp", "sp", "tp", "up", "wp",
+    "xp", "yp", "zp", "aq", "cq", "dq", "eq", "hq", "iq", "nq", "oq", "qq", "rq", "sq", "uq", "xq", "ar",
+    "br", "cr", "dr", "er", "fr", "gr", "hr", "ir", "kr", "lr", "mr", "nr", "or", "pr", "rr", "sr", "tr",
+    "ur", "vr", "wr", "xr", "yr", "as", "bs", "cs", "ds", "es", "fs", "gs", "hs", "is", "ks", "ls", "ms",
+    "ns", "os", "ps", "rs", "ss", "ts", "us", "vs", "ws", "xs", "ys", "at", "bt", "ct", "dt", "et", "ft",
+    "gt", "ht", "it", "kt", "lt", "mt", "nt", "ot", "pt", "rt", "st", "tt", "ut", "wt", "xt", "yt", "zt",
+    "au", "bu", "cu", "du", "eu", "fu", "gu", "hu", "iu", "ju", "ku", "lu", "mu", "nu", "ou", "pu", "qu",
+    "ru", "su", "tu", "uu", "vu", "wu", "xu", "yu", "zu", "av", "bv", "dv", "ev", "iv", "lv", "mv", "nv",
+    "ov", "rv", "sv", "tv", "uv", "vv", "zv", "aw", "bw", "dw", "ew", "fw", "gw", "hw", "iw", "kw", "lw",
+    "mw", "nw", "ow", "pw", "rw", "sw", "tw", "uw", "ww", "xw", "yw", "zw", "ax", "ex", "ix", "nx", "ox",
+    "rx", "ux", "xx", "yx", "ay", "by", "cy", "dy", "ey", "fy", "gy", "hy", "ky", "ly", "my", "ny", "oy",
+    "py", "ry", "sy", "ty", "uy", "vy", "wy", "xy", "yy", "zy", "az", "bz", "cz", "dz", "ez", "gz", "iz",
+    "lz", "nz", "oz", "pz", "rz", "tz", "uz", "zz", NULL };
+
+static const char *ndpi_en_impossible_bigrams[] = {
+    "bk", "bq", "bx", "cb", "cf", "cg", "cj", "cp", "cv", "cw", "cx", "dx", "fk", "fq", "fv", "fx", "ee",
+    "fz", "gq", "gv", "gx", "hh", "hk", "hv", "hx", "hz", "iy", "jb", "jc", "jd", "jf", "jg", "jh", "jk",
+    "jl", "jm", "jn", "jp", "jq", "jr", "js", "jt", "jv", "jw", "jx", "jy", "jz", "kg", "kq", "kv", "kx",
+    "kz", "lq", "lx", "mg", "mj", "mq", "mx", "mz", "pq", "pv", "px", "qb", "qc", "qd", "qe", "qf", "ii",
+    "qg", "qh", "qj", "qk", "ql", "qm", "qn", "qo", "qp", "qr", "qs", "qt", "qv", "qw", "qx", "qy", "uu",
+    "qz", "sx", "sz", "tq", "tx", "vb", "vc", "vd", "vf", "vg", "vh", "vj", "vk", "vm", "vn", "vp", "bw",
+    "vq", "vt", "vw", "vx", "vz", "wq", "wv", "wx", "wz", "xb", "xg", "xj", "xk", "xv", "xz", "xw", "yd", "yp",
+    "yj", "yq", "yv", "yz", "yw", "zb", "zc", "zg", "zh", "zj", "zn", "zq", "zr", "zs", "zx", "wh", NULL };

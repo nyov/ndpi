@@ -714,6 +714,16 @@ static void init_string_based_protocols(struct ndpi_detection_module_struct *ndp
     ndpi_add_content_subprotocol(ndpi_mod, content_match[i].string_to_match,
 				 content_match[i].protocol_id,
 				 content_match[i].protocol_breed);
+
+  for(i=0; ndpi_en_bigrams[i] != NULL; i++)
+    ndpi_string_to_automa(ndpi_mod, &ndpi_mod->bigrams_automa, 
+			  (char*)ndpi_en_bigrams[i],
+			  1, NDPI_PROTOCOL_UNRATED);
+
+  for(i=0; ndpi_en_impossible_bigrams[i] != NULL; i++)
+    ndpi_string_to_automa(ndpi_mod, &ndpi_mod->impossible_bigrams_automa, 
+			  (char*)ndpi_en_impossible_bigrams[i],
+			  1, NDPI_PROTOCOL_UNRATED);  
 }
 
 /* ******************************************************************** */
@@ -1328,6 +1338,8 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
 
   ndpi_str->host_automa.ac_automa = ac_automata_init(ac_match_handler);
   ndpi_str->content_automa.ac_automa = ac_automata_init(ac_match_handler);
+  ndpi_str->bigrams_automa.ac_automa = ac_automata_init(ac_match_handler);
+  ndpi_str->impossible_bigrams_automa.ac_automa = ac_automata_init(ac_match_handler);
 
   ndpi_init_protocol_defaults(ndpi_str);
   return ndpi_str;
@@ -1353,6 +1365,12 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 
     if(ndpi_struct->content_automa.ac_automa != NULL)
       ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->content_automa.ac_automa);
+
+    if(ndpi_struct->bigrams_automa.ac_automa != NULL)
+      ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->bigrams_automa.ac_automa);
+
+    if(ndpi_struct->impossible_bigrams_automa.ac_automa != NULL)
+      ac_automata_release((AC_AUTOMATA_t*)ndpi_struct->impossible_bigrams_automa.ac_automa);
 
     ndpi_free(ndpi_struct);
   }
@@ -5002,6 +5020,28 @@ int ndpi_match_content_subprotocol(struct ndpi_detection_module_struct *ndpi_str
 				   char *string_to_match, u_int string_to_match_len) {
   return(ndpi_automa_match_string_subprotocol(ndpi_struct, &ndpi_struct->content_automa,
 					      flow, string_to_match, string_to_match_len));
+}
+
+/* ****************************************************** */
+
+int ndpi_match_bigram(struct ndpi_detection_module_struct *ndpi_struct, 
+		      ndpi_automa *automa, char *bigram_to_match) {
+  AC_TEXT_t ac_input_text;
+  int ret = 0;
+
+  if((automa->ac_automa == NULL) || (bigram_to_match == NULL))
+    return(ret);
+
+  if(!automa->ac_automa_finalized) {
+    ac_automata_finalize((AC_AUTOMATA_t*)automa->ac_automa);
+    automa->ac_automa_finalized = 1;
+  }
+
+  ac_input_text.astring = bigram_to_match, ac_input_text.length = 2;
+  ac_automata_search(((AC_AUTOMATA_t*)automa->ac_automa), &ac_input_text, (void*)&ret);
+  ac_automata_reset(((AC_AUTOMATA_t*)automa->ac_automa));
+
+  return(ret);
 }
 
 /* ****************************************************** */

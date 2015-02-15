@@ -166,6 +166,8 @@ extern "C" {
   int ndpi_match_content_subprotocol(struct ndpi_detection_module_struct *ndpi_struct,
 				     struct ndpi_flow_struct *flow,
 				     char *string_to_match, u_int string_to_match_len);
+  int ndpi_match_bigram(struct ndpi_detection_module_struct *ndpi_struct, 
+			ndpi_automa *automa, char *bigram_to_match);
   char* ndpi_get_proto_name(struct ndpi_detection_module_struct *mod, u_int16_t proto_id);
   ndpi_protocol_breed_t ndpi_get_proto_breed(struct ndpi_detection_module_struct *ndpi_struct, u_int16_t proto);
   char* ndpi_get_proto_breed_name(struct ndpi_detection_module_struct *ndpi_struct, ndpi_protocol_breed_t breed_id);
@@ -217,6 +219,11 @@ extern "C" {
   
   char* ndpi_get_http_content_type(struct ndpi_detection_module_struct *ndpi_mod, 
 				 struct ndpi_flow_struct *flow);
+#endif
+
+#ifdef NDPI_PROTOCOL_TOR
+  int ndpi_is_ssl_tor(struct ndpi_detection_module_struct *ndpi_struct,
+		      struct ndpi_flow_struct *flow, char *certificate);
 #endif
 
 #ifdef __cplusplus

@@ -12,3 +12,7 @@ addition of begin a bit weird. As doing DNS resolution is not a task for nDPI we
 SSL-tunnelled connections.
 
 See http://www.netresec.com/?page=Blog&month=2013-04&post=Detecting-TOR-Communication-in-Network-Traffic
+
+For this reason nDPI uses a heuristic, non-DNS based, approach to detect tor communications. If possible, apps
+should validate the certificate using the DNS. This is not something nDPI can afford to do for performance
+reasons
