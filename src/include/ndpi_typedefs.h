@@ -734,7 +734,7 @@ typedef struct ndpi_flow_struct {
     } dns;
     
     struct {
-      char client_certificate[32], server_certificate[32];
+      char client_certificate[48], server_certificate[48];
     } ssl;
   } protos;
   /* ALL protocol specific 64 bit variables here */
