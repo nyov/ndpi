@@ -465,8 +465,10 @@ static void printFlow(u_int16_t thread_id, struct ndpi_flow *flow) {
 	   flow->lower_name, ntohs(flow->lower_port),
 	   flow->upper_name, ntohs(flow->upper_port));
 
-    printf("[VLAN: %u][proto: %u/%s][%u pkts/%llu bytes]",
-	   flow->vlan_id, flow->detected_protocol,
+    if(flow->vlan_id > 0) printf("[VLAN: %u]", flow->vlan_id);
+
+    printf("[proto: %u/%s][%u pkts/%llu bytes]",
+	   flow->detected_protocol,
 	   ndpi_get_proto_name(ndpi_thread_info[thread_id].ndpi_struct, flow->detected_protocol),
 	   flow->packets, (long long unsigned int)flow->bytes);
 
