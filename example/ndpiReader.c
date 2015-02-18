@@ -857,6 +857,13 @@ static struct ndpi_flow *get_ndpi_flow6(u_int16_t thread_id,
   iph.saddr = iph6->ip6_src.__u6_addr.__u6_addr32[2] + iph6->ip6_src.__u6_addr.__u6_addr32[3];
   iph.daddr = iph6->ip6_dst.__u6_addr.__u6_addr32[2] + iph6->ip6_dst.__u6_addr.__u6_addr32[3];
   iph.protocol = iph6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
+
+  if(iph.protocol == 0x3C /* IPv6 destination option */) {
+    u_int8_t *options = (u_int8_t*)iph6 + sizeof(const struct ndpi_ip6_hdr);
+    
+    iph.protocol = options[0];
+  }
+
   return(get_ndpi_flow(thread_id, 6, vlan_id, &iph, ip_offset,
 		       sizeof(struct ndpi_ip6_hdr),
 		       ntohs(iph6->ip6_ctlun.ip6_un1.ip6_un1_plen),
@@ -1569,6 +1576,14 @@ static void pcap_packet_callback(u_char *args, const struct pcap_pkthdr *header,
     iph6 = (struct ndpi_ip6_hdr *)&packet[ip_offset];
     proto = iph6->ip6_ctlun.ip6_un1.ip6_un1_nxt;
     ip_len = sizeof(struct ndpi_ip6_hdr);
+
+    if(proto == 0x3C /* IPv6 destination option */) {
+      u_int8_t *options = (u_int8_t*)&packet[ip_offset+ip_len];
+      
+      proto = options[0];
+      ip_len += 8 * (options[1] + 1);
+    }
+
     iph = NULL;
   } else {
     static u_int8_t ipv4_warning_used = 0;
