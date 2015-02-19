@@ -53,6 +53,12 @@
 #endif
 
 #if !(defined(__LITTLE_ENDIAN__) || defined(__BIG_ENDIAN__))
+#if defined(__mips__)
+#undef __LITTLE_ENDIAN__
+#undef __LITTLE_ENDIAN
+#define __BIG_ENDIAN__
+#endif
+
 /* Kernel modules */
 #if defined(__LITTLE_ENDIAN)
 #define __LITTLE_ENDIAN__
