@@ -535,16 +535,6 @@ static void ndpi_flow_freer(void *node) {
 
 /* ***************************************************** */
 
-static void node_count_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
-  struct ndpi_flow *flow = *(struct ndpi_flow**)node;
-  u_int16_t num = *((u_int16_t*)user_data);
-
-  if((which == ndpi_preorder) || (which == ndpi_leaf)) /* Avoid walking the same node multiple times */
-    *((u_int16_t*)user_data) = num + 1;
-}
-
-/* ***************************************************** */
-
 static void node_print_unknown_proto_walker(const void *node, ndpi_VISIT which, int depth, void *user_data) {
   struct ndpi_flow *flow = *(struct ndpi_flow**)node;
   u_int16_t thread_id = *((u_int16_t*)user_data);

@@ -38,7 +38,7 @@ static void ndpi_int_telegram_add_connection(struct ndpi_detection_module_struct
 void ndpi_search_telegram(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
-  u_int16_t dport, sport;
+  u_int16_t dport /* , sport */;
   
   NDPI_LOG(NDPI_PROTOCOL_TELEGRAM, ndpi_struct, NDPI_LOG_TRACE, "TELEGRAM detection...\n");
   /*
@@ -67,7 +67,8 @@ void ndpi_search_telegram(struct ndpi_detection_module_struct *ndpi_struct, stru
   if (packet->tcp != NULL) {
     if (packet->payload_packet_len > 56) {
       dport = ntohs(packet->tcp->dest);
-      sport = ntohs(packet->tcp->source);
+      /* sport = ntohs(packet->tcp->source); */
+
       if (packet->payload[0] == 0xef && (
           dport == 443 || dport == 80 || dport == 25
         )) {
