@@ -49,6 +49,8 @@
 #endif
 
 #include "ndpi_content_match.c.inc"
+#include "third_party/include/patricia.h"
+#include "third_party/src/patricia.c"
 
 #ifdef WIN32
 /* http://social.msdn.microsoft.com/Forums/uk/vcgeneral/thread/963aac07-da1a-4612-be4a-faac3f1d65ca */
@@ -1282,6 +1284,52 @@ static int ac_match_handler(AC_MATCH_t *m, void *param) {
 
 /* ******************************************************************** */
 
+#ifdef NDPI_PROTOCOL_TOR
+
+static int fill_prefix_v4(prefix_t *p, struct in_addr *a, int b, int mb) {
+  do {
+    if(b < 0 || b > mb)
+      return(-1);
+
+    memcpy(&p->add.sin, a, (mb+7)/8);
+    p->family = AF_INET;
+    p->bitlen = b;
+    p->ref_count = 0;
+  } while (0);
+
+  return(0);
+}
+
+/* ******************************************* */
+
+static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *addr, int bits) {
+  prefix_t prefix;
+  patricia_node_t *node;
+
+  fill_prefix_v4(&prefix, (struct in_addr*)addr, bits, tree->maxbits);
+  
+  node = patricia_lookup(tree, &prefix);
+  
+  return(node);
+}
+/* ******************************************* */
+
+static void ndpi_init_tor_ptree(struct ndpi_detection_module_struct *ndpi_str) {
+  struct in_addr pin;
+
+  ndpi_str->tor_ptree =  New_Patricia(32 /* IPv4 */);
+
+  if(!ndpi_str->tor_ptree) return;
+
+  {
+    
+    add_to_ptree(ndpi_str->tor_ptree, AF_INET, &pin, 32 /* bits */);
+  }
+}
+#endif
+
+/* ******************************************************************** */
+
 struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_per_second,
 								void* (*__ndpi_malloc)(unsigned long size),
 								void  (*__ndpi_free)(void *ptr),
@@ -1300,8 +1348,8 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   }
   memset(ndpi_str, 0, sizeof(struct ndpi_detection_module_struct));
 
-#ifdef HAVE_REDIS
-  ndpi_str->redis = NULL;
+#ifdef NDPI_PROTOCOL_TOR
+  ndpi_init_tor_ptree(ndpi_str);
 #endif
 
   NDPI_BITMASK_RESET(ndpi_str->detection_bitmask);
@@ -1347,6 +1395,10 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   return ndpi_str;
 }
 
+/* *********************************************** */
+
+static void free_ptree_data(void *data) { ; }
+
 /* ****************************************************** */
 
 void ndpi_exit_detection_module(struct ndpi_detection_module_struct
@@ -1358,6 +1410,11 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
       if(ndpi_struct->proto_defaults[i].protoName)
 	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
+
+#ifdef NDPI_PROTOCOL_TOR
+    if(ndpi_struct->tor_ptree)
+      Destroy_Patricia((patricia_tree_t*)ndpi_struct->tor_ptree, free_ptree_data);
+#endif
 
     ndpi_tdestroy(ndpi_struct->udpRoot, ndpi_free);
     ndpi_tdestroy(ndpi_struct->tcpRoot, ndpi_free);
