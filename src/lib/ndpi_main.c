@@ -1308,7 +1308,7 @@ static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *ad
 
   fill_prefix_v4(&prefix, (struct in_addr*)addr, bits, tree->maxbits);
   
-  node = patricia_lookup(tree, &prefix);
+  node = ndpi_patricia_lookup(tree, &prefix);
   
   return(node);
 }
@@ -1317,7 +1317,7 @@ static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *ad
 static void ndpi_init_tor_ptree(struct ndpi_detection_module_struct *ndpi_str) {
   struct in_addr pin;
 
-  ndpi_str->tor_ptree =  New_Patricia(32 /* IPv4 */);
+  ndpi_str->tor_ptree =  ndpi_New_Patricia(32 /* IPv4 */);
 
   if(!ndpi_str->tor_ptree) return;
 
@@ -1413,7 +1413,7 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 
 #ifdef NDPI_PROTOCOL_TOR
     if(ndpi_struct->tor_ptree)
-      Destroy_Patricia((patricia_tree_t*)ndpi_struct->tor_ptree, free_ptree_data);
+      ndpi_Destroy_Patricia((patricia_tree_t*)ndpi_struct->tor_ptree, free_ptree_data);
 #endif
 
     ndpi_tdestroy(ndpi_struct->udpRoot, ndpi_free);

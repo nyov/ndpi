@@ -111,27 +111,17 @@ typedef struct _patricia_tree_t {
 typedef void (*void_fn_t)(void *data);
 typedef void (*void_fn2_t)(prefix_t *prefix, void *data);
 
-
-patricia_node_t *patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
-patricia_node_t *patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
-patricia_node_t * patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, 
+/* renamed to ndpi_Patricia to avoid name conflicts */
+patricia_node_t *ndpi_patricia_search_exact (patricia_tree_t *patricia, prefix_t *prefix);
+patricia_node_t *ndpi_patricia_search_best (patricia_tree_t *patricia, prefix_t *prefix);
+patricia_node_t * ndpi_patricia_search_best2 (patricia_tree_t *patricia, prefix_t *prefix, 
 				   int inclusive);
-patricia_node_t *patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
-void patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
-patricia_tree_t *New_Patricia (int maxbits);
-void Clear_Patricia (patricia_tree_t *patricia, void_fn_t func);
-void Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func);
-void patricia_process (patricia_tree_t *patricia, void_fn2_t func);
-
-/* { from demo.c */
-
-prefix_t *
-ascii2prefix (int family, char *string);
-
-patricia_node_t *
-make_and_lookup (patricia_tree_t *tree, char *string);
-
-/* } */
+patricia_node_t *ndpi_patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix);
+void ndpi_patricia_remove (patricia_tree_t *patricia, patricia_node_t *node);
+patricia_tree_t *ndpi_New_Patricia (int maxbits);
+void ndpi_Clear_Patricia (patricia_tree_t *patricia, void_fn_t func);
+void ndpi_Destroy_Patricia (patricia_tree_t *patricia, void_fn_t func);
+void ndpi_patricia_process (patricia_tree_t *patricia, void_fn2_t func);
 
 #define PATRICIA_MAXBITS	(sizeof(struct in6_addr) * 8)
 #define PATRICIA_NBIT(x)        (0x80 >> ((x) & 0x7f))
