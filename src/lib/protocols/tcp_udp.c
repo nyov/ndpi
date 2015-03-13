@@ -21,6 +21,8 @@
 
 #include "ndpi_api.h"
 
+/* ndpi_main.c */
+extern u_int8_t  ndpi_is_tor_flow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow);
 
 u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struct, 
 				 u_int8_t protocol,
@@ -123,6 +125,11 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
   u_int proto;
   struct ndpi_packet_struct *packet = &flow->packet;
 
+  if(ndpi_is_tor_flow(ndpi_struct, flow)) {
+    ndpi_int_add_connection(ndpi_struct, flow, NDPI_PROTOCOL_TOR, NDPI_REAL_PROTOCOL);
+    return;
+  }
+
   if(packet->udp) sport = ntohs(packet->udp->source), dport = ntohs(packet->udp->dest);
   else if(packet->tcp) sport = ntohs(packet->tcp->source), dport = ntohs(packet->tcp->dest);
   else sport = dport = 0;
@@ -138,7 +145,7 @@ void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, st
 				       ntohl(packet->iph->saddr), 
 				       ntohl(packet->iph->daddr),
 				       sport, dport);
-    
+
     if(proto != NDPI_PROTOCOL_UNKNOWN)
       ndpi_int_add_connection(ndpi_struct, flow, proto, NDPI_REAL_PROTOCOL);
   }

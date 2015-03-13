@@ -1302,6 +1302,35 @@ static int fill_prefix_v4(prefix_t *p, struct in_addr *a, int b, int mb) {
 
 /* ******************************************* */
 
+static u_int8_t tor_ptree_match(struct ndpi_detection_module_struct *ndpi_struct, struct in_addr *pin) {
+  prefix_t prefix;
+
+  fill_prefix_v4(&prefix, pin, 32, ((patricia_tree_t*)ndpi_struct->tor_ptree)->maxbits);
+
+  return(ndpi_patricia_search_best(ndpi_struct->tor_ptree, &prefix) ? 1 : 0);
+}
+
+/* ******************************************* */
+
+u_int8_t ndpi_is_tor_flow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
+  struct ndpi_packet_struct *packet = &flow->packet;
+
+  if(packet->tcp != NULL) {
+    if(flow->packet.iph) {
+      // printf("******* CHECK TOR\n");
+      if(tor_ptree_match(ndpi_struct, (struct in_addr *)&packet->iph->saddr)
+         || tor_ptree_match(ndpi_struct, (struct in_addr *)&packet->iph->daddr)) {
+        // printf("======>>>> FOUND \n");
+	return(1);
+      }
+    }
+  }
+
+  return(0);
+}
+
+/* ******************************************* */
+
 static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *addr, int bits) {
   prefix_t prefix;
   patricia_node_t *node;
@@ -1315,14 +1344,16 @@ static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *ad
 /* ******************************************* */
 
 static void ndpi_init_tor_ptree(struct ndpi_detection_module_struct *ndpi_str) {
-  struct in_addr pin;
-
-  ndpi_str->tor_ptree =  ndpi_New_Patricia(32 /* IPv4 */);
+  int i;
+  
+  ndpi_str->tor_ptree = ndpi_New_Patricia(32 /* IPv4 */);
 
   if(!ndpi_str->tor_ptree) return;
 
-  {
-    
+  for(i=0; tor_host_list[i] != NULL; i++) {
+    struct in_addr pin;
+
+    pin.s_addr = inet_addr(tor_host_list[i]);
     add_to_ptree(ndpi_str->tor_ptree, AF_INET, &pin, 32 /* bits */);
   }
 }

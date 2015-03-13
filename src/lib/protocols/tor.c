@@ -80,6 +80,8 @@ int ndpi_is_ssl_tor(struct ndpi_detection_module_struct *ndpi_struct,
   return(0);
 }
 
+/* ******************************************* */
+
 void ndpi_search_tor(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
 {
   struct ndpi_packet_struct *packet = &flow->packet;
