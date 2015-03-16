@@ -7057,6 +7057,7 @@ ndpi_protocol_match host_match[] = {
   { ".google.",				"Google",		NDPI_SERVICE_GOOGLE,  NDPI_PROTOCOL_ACCEPTABLE },
   { ".spotify.",			"Spotify",		NDPI_PROTOCOL_SPOTIFY, NDPI_PROTOCOL_FUN },
   { ".pandora.com",			"Pandora",		NDPI_SERVICE_PANDORA,  NDPI_PROTOCOL_FUN },
+  { ".torproject.org",                  "Tor",                  NDPI_PROTOCOL_TOR, NDPI_PROTOCOL_POTENTIALLY_DANGEROUS },
   { NULL, 0 }
 };
 
