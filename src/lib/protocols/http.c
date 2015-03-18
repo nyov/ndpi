@@ -373,6 +373,13 @@ static void check_content_type_and_change_protocol(struct ndpi_detection_module_
 				    (char *)flow->host_server_name,
 				    strlen((const char *)flow->host_server_name));
 
+    if((flow->detected_protocol_stack[0] == NDPI_PROTOCOL_UNKNOWN)
+       && ((!ndpi_struct->http_dissect_response) || flow->http_detected)
+       && (packet->http_origin.len > 0))
+      ndpi_match_string_subprotocol(ndpi_struct, flow,
+				    (char *)packet->http_origin.ptr,
+				    packet->http_origin.len);
+
     if(flow->detected_protocol_stack[0] != NDPI_PROTOCOL_UNKNOWN) {
       if(packet->detected_protocol_stack[0] != NDPI_PROTOCOL_HTTP) {
 	ndpi_int_http_add_connection(ndpi_struct, flow, packet->detected_protocol_stack[0]);

@@ -1142,7 +1142,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ACCEPTABLE, NDPI_PROTOCOL_RADIUS, "Radius",
-			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
+			  ndpi_build_default_ports(ports_a, 1812, 1813, 0, 0, 0) /* TCP */,
 			  ndpi_build_default_ports(ports_b, 0, 0, 0, 0, 0) /* UDP */);
   ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ACCEPTABLE, NDPI_PROTOCOL_WINDOWS_UPDATE, "WindowsUpdate",
 			  ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
@@ -1468,10 +1468,8 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 
 /* ****************************************************** */
 
-static unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *ndpi_struct,
-					   u_int8_t proto,
-					   u_int32_t shost, u_int16_t sport,
-					   u_int32_t dhost, u_int16_t dport) {
+unsigned int ndpi_guess_protocol_id(struct ndpi_detection_module_struct *ndpi_struct,
+				    u_int8_t proto, u_int16_t sport, u_int16_t dport) {
   const void *ret;
   ndpi_default_ports_tree_node_t node;
 
@@ -3861,7 +3859,7 @@ unsigned int ndpi_detection_process_packet(struct ndpi_detection_module_struct *
     else sport = dport = 0;
 
     flow->guessed_protocol_id = (int16_t)ndpi_guess_protocol_id(ndpi_struct, protocol,
-								saddr, sport, daddr, dport);
+								sport, dport);
     flow->protocol_id_already_guessed = 1;
   }
 
@@ -4060,6 +4058,8 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
   packet->http_contentlen.len = 0;
   packet->http_cookie.ptr = NULL;
   packet->http_cookie.len = 0;
+  packet->http_origin.len = 0;
+  packet->http_origin.ptr = NULL;
   packet->http_x_session_type.ptr = NULL;
   packet->http_x_session_type.len = 0;
   packet->server_line.ptr = NULL;
@@ -4183,6 +4183,11 @@ void ndpi_parse_packet_line_info(struct ndpi_detection_module_struct *ndpi_struc
 	 && memcmp(packet->line[packet->parsed_lines].ptr, "Cookie: ", 8) == 0) {
 	packet->http_cookie.ptr = &packet->line[packet->parsed_lines].ptr[8];
 	packet->http_cookie.len = packet->line[packet->parsed_lines].len - 8;
+      }
+      if(packet->line[packet->parsed_lines].len > 8
+	 && memcmp(packet->line[packet->parsed_lines].ptr, "Origin: ", 8) == 0) {
+	packet->http_origin.ptr = &packet->line[packet->parsed_lines].ptr[8];
+	packet->http_origin.len = packet->line[packet->parsed_lines].len - 8;
       }
       if(packet->line[packet->parsed_lines].len > 16
 	 && memcmp(packet->line[packet->parsed_lines].ptr, "X-Session-Type: ", 16) == 0) {
@@ -4923,7 +4928,7 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
     rc = ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport);
     if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
 
-    rc = ndpi_guess_protocol_id(ndpi_struct, proto, shost, sport, dhost, dport);
+    rc = ndpi_guess_protocol_id(ndpi_struct, proto, sport, dport);
     if(rc != NDPI_PROTOCOL_UNKNOWN) {
       if(rc == NDPI_PROTOCOL_SSL)
 	goto check_guessed_skype;
@@ -4940,7 +4945,7 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 
     return(rc);
   } else {
-    return(ndpi_guess_protocol_id(ndpi_struct, proto, shost, sport, dhost, dport));
+    return(ndpi_guess_protocol_id(ndpi_struct, proto, sport, dport));
   }
 }
 

@@ -499,6 +499,7 @@ typedef struct ndpi_packet_struct {
   struct ndpi_int_one_line_struct http_transfer_encoding;
   struct ndpi_int_one_line_struct http_contentlen;
   struct ndpi_int_one_line_struct http_cookie;
+  struct ndpi_int_one_line_struct http_origin;
   struct ndpi_int_one_line_struct http_x_session_type;
   struct ndpi_int_one_line_struct server_line;
   struct ndpi_int_one_line_struct http_method;
