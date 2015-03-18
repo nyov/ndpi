@@ -118,8 +118,9 @@ extern void ndpi_int_change_protocol(struct ndpi_detection_module_struct *ndpi_s
 				     u_int16_t detected_protocol,
 				     ndpi_protocol_type_t protocol_type);
 extern void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
-				    ndpi_protocol_breed_t protoBreed,
-				    u_int16_t protoId, char *protoName,
+				    ndpi_protocol_breed_t protoBreed, u_int16_t protoId,
+				    u_int16_t tcp_alias_protoId[2], u_int16_t udp_alias_protoId[2],
+				    char *protoName,
 				    ndpi_port_range *tcpDefPorts, ndpi_port_range *udpDefPorts);
 extern void ndpi_int_reset_packet_protocol(struct ndpi_packet_struct *packet);
 extern void ndpi_int_reset_protocol(struct ndpi_flow_struct *flow);
@@ -131,6 +132,12 @@ extern char *ndpi_get_ip_string(struct ndpi_detection_module_struct *ndpi_struct
 extern char *ndpi_get_packet_src_ip_string(struct ndpi_detection_module_struct *ndpi_struct,
 					   const struct ndpi_packet_struct *packet);
 extern char* ndpi_get_proto_by_id(struct ndpi_detection_module_struct *ndpi_mod, u_int id);
+extern u_int16_t ndpi_guess_protocol_id(struct ndpi_detection_module_struct *ndpi_struct,
+					u_int8_t proto, u_int16_t sport, u_int16_t dport);
+extern int ndpi_get_protocol_id_master_proto(struct ndpi_detection_module_struct *ndpi_struct,
+					     u_int16_t protocol_id,
+					     u_int16_t** tcp_master_proto,
+					     u_int16_t** udp_master_proto);
 
 extern u_int8_t ndpi_net_match(u_int32_t ip_to_check,
 			       u_int32_t net,

@@ -557,6 +557,7 @@ typedef enum {
 typedef struct ndpi_proto_defaults {
   char *protoName;
   u_int16_t protoId, protoIdx;
+  u_int16_t master_tcp_protoId[2], master_udp_protoId[2]; /* The main protocols on which this sub-protocol sits on */
   ndpi_protocol_breed_t protoBreed;
   void (*func) (struct ndpi_detection_module_struct *, struct ndpi_flow_struct *flow);
 } ndpi_proto_defaults_t;
