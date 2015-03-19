@@ -59,7 +59,7 @@
 // #define PATRICIA_DEBUG
 
 void ndpi_DeleteEntry(void *a) {
-  free(a);
+  ndpi_free(a);
 }
 
 /* { from prefix.c */
@@ -260,7 +260,7 @@ ndpi_New_Prefix2 (int family, void *dest, int bitlen, prefix_t *prefix)
   if(family == AF_INET6) {
     default_bitlen = sizeof(struct in6_addr) * 8;
     if(prefix == NULL) {
-      prefix = (prefix_t*)calloc(1, sizeof (prefix_t));
+      prefix = (prefix_t*)ndpi_calloc(1, sizeof (prefix_t));
       dynamic_allocated++;
     }
     memcpy (&prefix->add.sin6, dest, sizeof(struct in6_addr));
@@ -270,11 +270,11 @@ ndpi_New_Prefix2 (int family, void *dest, int bitlen, prefix_t *prefix)
     if(family == AF_INET) {
       if(prefix == NULL) {
 #ifndef NT
-	prefix = (prefix_t*)calloc(1, sizeof (prefix4_t));
+	prefix = (prefix_t*)ndpi_calloc(1, sizeof (prefix4_t));
 #else
 	//for some reason, compiler is getting
 	//prefix4_t size incorrect on NT
-	prefix = calloc(1, sizeof (prefix_t)); 
+	prefix = ndpi_calloc(1, sizeof (prefix_t)); 
 #endif /* NT */
 		
 	dynamic_allocated++;
@@ -413,7 +413,7 @@ static int num_active_patricia = 0;
 patricia_tree_t *
 ndpi_New_Patricia (int maxbits)
 {
-  patricia_tree_t *patricia = (patricia_tree_t*)calloc(1, sizeof *patricia);
+  patricia_tree_t *patricia = (patricia_tree_t*)ndpi_calloc(1, sizeof *patricia);
 
   patricia->maxbits = maxbits;
   patricia->head = NULL;
@@ -704,7 +704,7 @@ ndpi_patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix)
   assert (prefix->bitlen <= patricia->maxbits);
 
   if(patricia->head == NULL) {
-    node = (patricia_node_t*)calloc(1, sizeof *node);
+    node = (patricia_node_t*)ndpi_calloc(1, sizeof *node);
     node->bit = prefix->bitlen;
     node->prefix = ndpi_Ref_Prefix (prefix);
     node->parent = NULL;
@@ -817,7 +817,7 @@ ndpi_patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix)
     return (node);
   }
 
-  new_node = (patricia_node_t*)calloc(1, sizeof *new_node);
+  new_node = (patricia_node_t*)ndpi_calloc(1, sizeof *new_node);
   new_node->bit = prefix->bitlen;
   new_node->prefix = ndpi_Ref_Prefix (prefix);
   new_node->parent = NULL;
@@ -869,7 +869,7 @@ ndpi_patricia_lookup (patricia_tree_t *patricia, prefix_t *prefix)
 #endif /* PATRICIA_DEBUG */
   }
   else {
-    glue = (patricia_node_t*)calloc(1, sizeof *glue);
+    glue = (patricia_node_t*)ndpi_calloc(1, sizeof *glue);
     glue->bit = differ_bit;
     glue->prefix = NULL;
     glue->parent = node->parent;
