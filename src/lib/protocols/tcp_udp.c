@@ -61,6 +61,15 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
     }
 
     /*
+      Viber
+      54.171.62.0/24
+    */
+    if(((saddr & 0xFFFFFF00 /* 255.255.240.0 */) == 0x36AB3E00)
+       || ((daddr & 0xFFFFFF00 /* 255.255.240.0 */) == 0x36AB3E00)) {
+      return(NDPI_PROTOCOL_VIBER);
+    }
+
+    /*
       Apple (FaceTime, iMessage,...)
       17.0.0.0/8
     */
