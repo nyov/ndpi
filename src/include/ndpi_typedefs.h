@@ -621,8 +621,8 @@ typedef struct ndpi_detection_module_struct {
   /* HTTP/DNS/HTTPS host matching */
   ndpi_automa host_automa, content_automa, bigrams_automa, impossible_bigrams_automa;
 
-  /* Tor */
-  void *tor_ptree;
+  /* IP-based protocol detection */
+  void *protocols_ptree;
 
   /* irc parameters */
   u_int32_t irc_timeout;

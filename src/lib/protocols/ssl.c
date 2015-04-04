@@ -31,6 +31,10 @@
 
 #define NDPI_MAX_SSL_REQUEST_SIZE 10000
 
+/* Skype.c */
+extern u_int8_t is_skype_flow(struct ndpi_detection_module_struct *ndpi_struct,
+			      struct ndpi_flow_struct *flow);
+
 static void ndpi_int_ssl_add_connection(struct ndpi_detection_module_struct *ndpi_struct,
 					struct ndpi_flow_struct *flow, u_int32_t protocol)
 {

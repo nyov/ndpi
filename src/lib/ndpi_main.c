@@ -543,7 +543,7 @@ void ndpi_set_proto_defaults(struct ndpi_detection_module_struct *ndpi_mod,
   ndpi_mod->proto_defaults[protoId].protoName = name,
     ndpi_mod->proto_defaults[protoId].protoId = protoId,
     ndpi_mod->proto_defaults[protoId].protoBreed = breed;
-  
+
   memcpy(&ndpi_mod->proto_defaults[protoId].master_tcp_protoId, tcp_master_protoId, 2*sizeof(u_int16_t));
   memcpy(&ndpi_mod->proto_defaults[protoId].master_udp_protoId, udp_master_protoId, 2*sizeof(u_int16_t));
 
@@ -744,7 +744,7 @@ static void ndpi_init_protocol_defaults(struct ndpi_detection_module_struct *ndp
   ndpi_port_range ports_a[MAX_DEFAULT_PORTS], ports_b[MAX_DEFAULT_PORTS];
   u_int16_t no_master[2] = { NDPI_PROTOCOL_NO_MASTER_PROTO, NDPI_PROTOCOL_NO_MASTER_PROTO },
     custom_master[2], custom_master1[2];
-  
+
   /* Reset all settings */
   memset(ndpi_mod->proto_defaults, 0, sizeof(ndpi_mod->proto_defaults));
 
@@ -1694,25 +1694,42 @@ static int fill_prefix_v4(prefix_t *p, struct in_addr *a, int b, int mb) {
 
 /* ******************************************* */
 
-static u_int8_t tor_ptree_match(struct ndpi_detection_module_struct *ndpi_struct, struct in_addr *pin) {
+u_int16_t ndpi_network_ptree_match(struct ndpi_detection_module_struct *ndpi_struct, struct in_addr *pin) {
   prefix_t prefix;
+  patricia_node_t *node;
+  
+  fill_prefix_v4(&prefix, pin, 32, ((patricia_tree_t*)ndpi_struct->protocols_ptree)->maxbits);
+  node = ndpi_patricia_search_best(ndpi_struct->protocols_ptree, &prefix);
 
-  fill_prefix_v4(&prefix, pin, 32, ((patricia_tree_t*)ndpi_struct->tor_ptree)->maxbits);
-
-  return(ndpi_patricia_search_best(ndpi_struct->tor_ptree, &prefix) ? 1 : 0);
+  return(node ? node->value.user_value : NDPI_PROTOCOL_UNKNOWN);
 }
 
 /* ******************************************* */
 
-u_int8_t ndpi_is_tor_flow(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
-  struct ndpi_packet_struct *packet = &flow->packet;
+u_int16_t ndpi_host_ptree_match(struct ndpi_detection_module_struct *ndpi_struct, u_int32_t host) {
+  struct in_addr pin;
+  
+  pin.s_addr = host;
+  
+  return(ndpi_network_ptree_match(ndpi_struct, &pin));
+}
 
+/* ******************************************* */
+
+static u_int8_t tor_ptree_match(struct ndpi_detection_module_struct *ndpi_struct, struct in_addr *pin) {
+  return((ndpi_network_ptree_match(ndpi_struct, pin) == NDPI_PROTOCOL_TOR) ? 1 : 0);
+}
+
+/* ******************************************* */
+
+u_int8_t ndpi_is_tor_flow(struct ndpi_detection_module_struct *ndpi_struct,
+			  struct ndpi_flow_struct *flow) {
+  struct ndpi_packet_struct *packet = &flow->packet;
+  
   if(packet->tcp != NULL) {
     if(flow->packet.iph) {
-      // printf("******* CHECK TOR\n");
       if(tor_ptree_match(ndpi_struct, (struct in_addr *)&packet->iph->saddr)
          || tor_ptree_match(ndpi_struct, (struct in_addr *)&packet->iph->daddr)) {
-        // printf("======>>>> FOUND \n");
 	return(1);
       }
     }
@@ -1723,7 +1740,8 @@ u_int8_t ndpi_is_tor_flow(struct ndpi_detection_module_struct *ndpi_struct, stru
 
 /* ******************************************* */
 
-static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *addr, int bits) {
+static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, 
+				     void *addr, int bits) {
   prefix_t prefix;
   patricia_node_t *node;
 
@@ -1735,18 +1753,17 @@ static patricia_node_t* add_to_ptree(patricia_tree_t *tree, int family, void *ad
 }
 /* ******************************************* */
 
-static void ndpi_init_tor_ptree(struct ndpi_detection_module_struct *ndpi_str) {
+static void ndpi_init_ptree_ipv4(struct ndpi_detection_module_struct *ndpi_str,
+				 void *ptree, ndpi_network host_list[]) {
   int i;
 
-  ndpi_str->tor_ptree = ndpi_New_Patricia(32 /* IPv4 */);
-
-  if(!ndpi_str->tor_ptree) return;
-
-  for(i=0; tor_host_list[i] != NULL; i++) {
+  for(i=0; host_list[i].network != 0x0; i++) {
     struct in_addr pin;
-
-    pin.s_addr = inet_addr(tor_host_list[i]);
-    add_to_ptree(ndpi_str->tor_ptree, AF_INET, &pin, 32 /* bits */);
+    patricia_node_t *node;
+    
+    pin.s_addr = host_list[i].network;
+    if((node = add_to_ptree(ptree, AF_INET, &pin, host_list[i].cidr /* bits */)) != NULL)
+      node->value.user_value = host_list[i].value;
   }
 }
 #endif
@@ -1771,10 +1788,9 @@ struct ndpi_detection_module_struct *ndpi_init_detection_module(u_int32_t ticks_
   }
   memset(ndpi_str, 0, sizeof(struct ndpi_detection_module_struct));
 
-#ifdef NDPI_PROTOCOL_TOR
-  ndpi_init_tor_ptree(ndpi_str);
-#endif
-
+  if((ndpi_str->protocols_ptree = ndpi_New_Patricia(32 /* IPv4 */)) != NULL)
+    ndpi_init_ptree_ipv4(ndpi_str, ndpi_str->protocols_ptree, host_protocol_list);
+  
   NDPI_BITMASK_RESET(ndpi_str->detection_bitmask);
 #ifdef NDPI_ENABLE_DEBUG_MESSAGES
   ndpi_str->ndpi_debug_printf = ndpi_debug_printf;
@@ -1834,10 +1850,8 @@ void ndpi_exit_detection_module(struct ndpi_detection_module_struct
 	ndpi_free(ndpi_struct->proto_defaults[i].protoName);
     }
 
-#ifdef NDPI_PROTOCOL_TOR
-    if(ndpi_struct->tor_ptree)
-      ndpi_Destroy_Patricia((patricia_tree_t*)ndpi_struct->tor_ptree, free_ptree_data);
-#endif
+    if(ndpi_struct->protocols_ptree)
+      ndpi_Destroy_Patricia((patricia_tree_t*)ndpi_struct->protocols_ptree, free_ptree_data);
 
     ndpi_tdestroy(ndpi_struct->udpRoot, ndpi_free);
     ndpi_tdestroy(ndpi_struct->tcpRoot, ndpi_free);
@@ -2034,7 +2048,7 @@ int ndpi_handle_rule(struct ndpi_detection_module_struct *ndpi_mod, char* rule, 
 
       ndpi_set_proto_defaults(ndpi_mod, NDPI_PROTOCOL_ACCEPTABLE,
 			      ndpi_mod->ndpi_num_supported_protocols,
-			      no_master, 
+			      no_master,
 			      no_master,
 			      ndpi_strdup(proto),
 			      ndpi_build_default_ports(ports_a, 0, 0, 0, 0, 0) /* TCP */,
@@ -5336,6 +5350,7 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
 					    u_int32_t shost /* host byte order */, u_int16_t sport,
 					    u_int32_t dhost /* host byte order */, u_int16_t dport) {
   unsigned int rc;
+  struct in_addr addr;
 
   if((proto == IPPROTO_TCP) || (proto == IPPROTO_UDP)) {
     rc = ndpi_search_tcp_or_udp_raw(ndpi_struct, proto, shost, dhost, sport, dport);
@@ -5353,8 +5368,11 @@ unsigned int ndpi_guess_undetected_protocol(struct ndpi_detection_module_struct 
     if(rc != NDPI_PROTOCOL_UNKNOWN) return(rc);
 
   check_guessed_skype:
-    if(is_skype_host(shost) || is_skype_host(dhost))
-      return(NDPI_PROTOCOL_SKYPE);
+    addr.s_addr = shost;
+    if(ndpi_network_ptree_match(ndpi_struct, &addr) == NDPI_PROTOCOL_SKYPE) return(NDPI_PROTOCOL_SKYPE);
+
+    addr.s_addr = dhost;
+    if(ndpi_network_ptree_match(ndpi_struct, &addr) == NDPI_PROTOCOL_SKYPE) return(NDPI_PROTOCOL_SKYPE);
 
     return(rc);
   } else {

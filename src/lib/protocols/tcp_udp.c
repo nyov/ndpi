@@ -29,103 +29,17 @@ u_int ndpi_search_tcp_or_udp_raw(struct ndpi_detection_module_struct *ndpi_struc
 				 u_int32_t saddr, u_int32_t daddr, /* host endianess */
 				 u_int16_t sport, u_int16_t dport) /* host endianess */
 {
+  u_int16_t rc;
+
   if(protocol == IPPROTO_UDP) {
     if((sport == dport) && (sport == 17500)) {
       return(NDPI_PROTOCOL_DROPBOX);
     }
   }
 
-    /*
-      Citrix GotoMeeting (AS16815, AS21866)
-      216.115.208.0/20
-      216.219.112.0/20
-    */
-    /* printf("[SSL] %08X / %08X\n", saddr , daddr); */
-
-    if(((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0xD873D000 /* 216.115.208.0 */)
-       || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0xD873D000 /* 216.115.208.0 */)
-
-       || ((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
-       || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0xD8DB7000 /* 216.219.112.0 */)
-       ) {
-      return(NDPI_PROTOCOL_CITRIX_ONLINE);
-    }
-
-    /*
-      Webex
-      66.114.160.0/20
-    */
-    if(((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x4272A000 /* 66.114.160.0 */)
-       || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) ==0x4272A000 /* 66.114.160.0 */)) {
-      return(NDPI_PROTOCOL_WEBEX);
-    }
-
-    /*
-      Viber
-      54.171.62.0/24
-    */
-    if(((saddr & 0xFFFFFF00 /* 255.255.240.0 */) == 0x36AB3E00)
-       || ((daddr & 0xFFFFFF00 /* 255.255.240.0 */) == 0x36AB3E00)) {
-      return(NDPI_PROTOCOL_VIBER);
-    }
-
-    /*
-      Apple (FaceTime, iMessage,...)
-      17.0.0.0/8
-    */
-    if(((saddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)
-       || ((daddr & 0xFF000000 /* 255.0.0.0 */) == 0x11000000 /* 17.0.0.0 */)) {
-      return(NDPI_SERVICE_APPLE);
-    }
-
-    /*
-      Dropbox
-      108.160.160.0/20
-      199.47.216.0/22
-    */
-    if(((saddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */) || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
-       || ((saddr & 0xFFFFFC00 /* 255.255.240.0 */) == 0xC72FD800 /* 199.47.216.0 */) || ((daddr & 0xFFFFFC00 /* 255.255.240.0 */) == 0xC72FD800 /* 199.47.216.0 */)
-       ) {
-      return(NDPI_PROTOCOL_DROPBOX);
-    }
-
-    if(((saddr & 0xFFFFF000 /* 255.255.240.0.0 */) == 0x6CA0A000 /* 108.160.160.0 */)
-       || ((daddr & 0xFFFFF000 /* 255.255.240.0 */) == 0x6CA0A000 /* 108.160.160.0 */)) {
-      return(NDPI_PROTOCOL_DROPBOX);
-    }
-
-    /* 
-       Skype
-       157.56.0.0/14, 157.60.0.0/16, 157.54.0.0/15
-    */
-    if(
-       (((saddr & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000 /* 157.56.0.0/ */) || ((daddr & 0xFF3F0000 /* 255.63.0.0 */) == 0x9D380000))
-       || (((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3C0000 /* 157.60.0.0/ */) || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) == 0x9D3D0000))
-       || (((saddr & 0xFF7F0000 /* 255.255.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFF7F0000 /* 255.127.0.0 */) == 0x9D360000))
-       || (((saddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000 /* 157.54.0.0/ */) || ((daddr & 0xFFFE0000 /* 255.254.0.0 */) == 0x9D360000))
-       ) {
-      return(NDPI_PROTOCOL_SKYPE);
-    }
+  if((rc = ndpi_host_ptree_match(ndpi_struct, saddr)) != NDPI_PROTOCOL_UNKNOWN) return(rc);
   
-    /*
-      Google
-      173.194.0.0/16
-    */
-    if(((saddr & 0xFFFF0000 /* 255.255.0.0 */) == 0xADC20000  /* 173.194.0.0 */)
-       || ((daddr & 0xFFFF0000 /* 255.255.0.0 */) ==0xADC20000 /* 173.194.0.0 */)) {      
-      return(NDPI_SERVICE_GOOGLE);
-    }
-
-    /*
-      Ubuntu One
-      91.189.89.0/21 (255.255.248.0)
-    */
-    if(((saddr & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0 */)
-       || ((daddr & 0xFFFFF800 /* 255.255.248.0 */) == 0x5BBD5900 /* 91.189.89.0 */)) {
-      return(NDPI_PROTOCOL_UBUNTUONE);
-    }    
-
-  return(NDPI_PROTOCOL_UNKNOWN);
+  return(ndpi_host_ptree_match(ndpi_struct, daddr));
 }
 
 void ndpi_search_tcp_or_udp(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
