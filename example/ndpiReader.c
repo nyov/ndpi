@@ -206,8 +206,7 @@ static void help(u_int long_help) {
 	 "  -d                        | Disable protocol guess and use only DPI\n"
 	 "  -t                        | Dissect GTP tunnels\n"
 	 "  -h                        | This help\n"
-	 "  -v <1|2>                  | Verbose 'unknown protocol' packet print. 1=verbose, 2=very verbose\n"
-	 "  -V <1|2>                  | Verbose nDPI trace log print. 1=trace, 2=debug\n");
+	 "  -v <1|2>                  | Verbose 'unknown protocol' packet print. 1=verbose, 2=very verbose\n");
 
   if(long_help) {
     printf("\n\nSupported protocols:\n");
