@@ -356,6 +356,12 @@ typedef struct ndpi_flow_struct {
     struct ndpi_flow_udp_struct udp;
   } l4;
   
+  struct ndpi_id_struct *server_id; /* 
+				       Pointer to src or dst
+				       that identifies the 
+				       server of this connection
+				     */
+  
   ndpi_result_ip_t ndpi_result_ip;
   ndpi_result_base_t ndpi_result_base;
   ndpi_result_app_t ndpi_result_app;
@@ -368,7 +374,12 @@ typedef struct ndpi_flow_struct {
   u_int8_t ndpi_excluded_service;
   u_int8_t ndpi_excluded_cdn;
 
-  u_char host_server_name[256]; /* HTTP host or DNS query */
+#ifndef __KERNEL__
+   u_char host_server_name[256]; /* HTTP host or DNS query   */ 
+#else
+   u_char host_server_name[160];
+#endif
+
   u_char detected_os[32];       /* Via HTTP User-Agent    */
   u_char nat_ip[24];            /* Via HTTP X-Forwarded-For */
   u_char client_certificate[64];

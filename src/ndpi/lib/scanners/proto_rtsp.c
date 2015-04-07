@@ -58,7 +58,7 @@ void ndpi_search_rtsp(struct ndpi_detection_module_struct *ndpi_struct, struct n
   }
 
   if (packet->payload_packet_len > 20 && flow->rtsprdt_stage == 2 - packet->packet_direction) {
-    char buf[32];
+    char buf[32] = { 0 };
     u_int len = packet->payload_packet_len;
 
     if (len >= (sizeof(buf)-1)) {
