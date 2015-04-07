@@ -49,6 +49,12 @@
 #endif
 
 #if !(defined(__LITTLE_ENDIAN__) || defined(__BIG_ENDIAN__))
+#if defined(__mips__)
+#undef __LITTLE_ENDIAN__
+#undef __LITTLE_ENDIAN
+#define __BIG_ENDIAN__
+#endif
+
 /* Kernel modules */
 #if defined(__LITTLE_ENDIAN)
 #define __LITTLE_ENDIAN__
@@ -140,7 +146,7 @@
 /* TODO: rebuild all memory areas to have a more aligned memory block here */
 
 /* DEFINITION OF MAX LINE NUMBERS FOR line parse algorithm */
-#define NDPI_MAX_PARSE_LINES_PER_PACKET                        200
+#define NDPI_MAX_PARSE_LINES_PER_PACKET                        64
 #define MAX_PACKET_COUNTER 65000
 
 

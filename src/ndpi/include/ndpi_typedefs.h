@@ -111,6 +111,7 @@ struct ndpi_flow_tcp_struct {
   u_int8_t tds_login_version;
   u_int8_t irc_stage;
   u_int8_t irc_port;
+  u_int8_t h323_valid_packets;
   u_int8_t gnutella_msg_id[3];
   u_int32_t irc_3a_counter:3;
   u_int32_t irc_stage2:5;

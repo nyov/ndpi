@@ -24,7 +24,13 @@
 
 #include "ndpi_api.h"
 
-void ndpi_search_h323(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow) {
+struct tpkt {
+  u_int8_t version, reserved;
+  u_int16_t len;
+};
+
+void ndpi_search_h323(struct ndpi_detection_module_struct *ndpi_struct, struct ndpi_flow_struct *flow)
+{
   struct ndpi_packet_struct *packet = &flow->packet;
   u_int16_t dport = 0, sport = 0;
 
@@ -34,45 +40,75 @@ void ndpi_search_h323(struct ndpi_detection_module_struct *ndpi_struct, struct n
     NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over tcp.\n");
 
     /* H323  */
-    if (packet->payload[0] == 0x03 && packet->payload[1] == 0x00 && packet->payload[2] == 0x00)
+    if((packet->payload[0] == 0x03) && (packet->payload[1] == 0x00) && (packet->payload[2] == 0x00)) {
+	struct tpkt *t = (struct tpkt*)packet->payload;
+	u_int16_t len = ntohs(t->len);
+
+	if(packet->payload_packet_len == len) {
+	  /*
+	    We need to check if this packet is in reality
+	    a RDP (Remote Desktop) packet encapsulated on TPTK
+	   */
+
+	  if(packet->payload[4] == (packet->payload_packet_len - sizeof(struct tpkt) - 1)) {
+	    /* ISO 8073/X.224 */
+	    if((packet->payload[5] == 0xE0 /* CC Connect Request */)
+	       || (packet->payload[5] == 0xD0 /* CC Connect Confirm */)) {
+	      flow->ndpi_result_app = NDPI_RESULT_APP_H323;
+	      flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
+	      return;
+	    }
+	  }
+
+	  flow->l4.tcp.h323_valid_packets++;
+
+	  if(flow->l4.tcp.h323_valid_packets >= 2) {
+	    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found H323 broadcast.\n");
+	    flow->ndpi_result_app = NDPI_RESULT_APP_H323;
+	    flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
+	  }
+	} else {
+	  /* This is not H.323 */
+	  flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
+	}
+      }    
+  } else if(packet->udp != NULL) {
+    sport = ntohs(packet->udp->source), dport = ntohs(packet->udp->dest);
+    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over udp.\n");
+
+    if(packet->payload[0] == 0x80 && packet->payload[1] == 0x08 && (packet->payload[2] == 0xe7 || packet->payload[2] == 0x26) &&
+       packet->payload[4] == 0x00 && packet->payload[5] == 0x00)
       {
 	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found H323 broadcast.\n");
 	flow->ndpi_result_app = NDPI_RESULT_APP_H323;
 	flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
 	return;
       }
-  }
-
-  if (packet->udp != NULL) {
-    sport = ntohs(packet->udp->source), dport = ntohs(packet->udp->dest);
-    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "calculated dport over udp.\n");
-
-    if(packet->payload[0] == 0x80 && packet->payload[1] == 0x08 && (packet->payload[2] == 0xe7 || packet->payload[2] == 0x26) &&
-       packet->payload[4] == 0x00 && packet->payload[5] == 0x00) {
-	NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found H323 broadcast.\n");
-	flow->ndpi_result_app = NDPI_RESULT_APP_H323;
-	flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
-	return;
-      }
-      
     /* H323  */
-    if (sport == 1719 || dport == 1719) {
-        if (packet->payload[0] == 0x16 && packet->payload[1] == 0x80 && packet->payload[4] == 0x06 && packet->payload[5] == 0x00) {
+    if(sport == 1719 || dport == 1719)
+      {
+        if(packet->payload[0] == 0x16 && packet->payload[1] == 0x80 && packet->payload[4] == 0x06 && packet->payload[5] == 0x00)
+	  {
 	    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found H323 broadcast.\n");
 	    flow->ndpi_result_app = NDPI_RESULT_APP_H323;
 	    flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
 	    return;
-	  } else if(packet->payload_packet_len >= 20 || packet->payload_packet_len <= 117) {
+	  }
+        else if(packet->payload_packet_len >= 20 || packet->payload_packet_len <= 117)
+	  {
 	    NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "found H323 broadcast.\n");
 	    flow->ndpi_result_app = NDPI_RESULT_APP_H323;
 	    flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
 	    return;
-	  } else {
+	  }
+        else
+	  {
 	    flow->ndpi_excluded_app[NDPI_RESULT_APP_H323] = 1;
 	    return;
 	  }
       }
   }
+
 }
 
 void ndpi_register_proto_h323 (struct ndpi_detection_module_struct *ndpi_mod) {

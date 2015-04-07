@@ -32,7 +32,6 @@ void ndpi_search_mail_imap(struct ndpi_detection_module_struct *ndpi_struct, str
   u_int16_t space_pos = 0;
   u_int16_t command_start = 0;
   u_int8_t saw_command = 0;
-  const u_int8_t *command = 0;
 
   NDPI_LOG(0, ndpi_struct, NDPI_LOG_DEBUG, "search IMAP.\n");
 
@@ -81,10 +80,8 @@ void ndpi_search_mail_imap(struct ndpi_detection_module_struct *ndpi_struct, str
 	  }
 	}
 	command_start = space_pos + 1;
-	command = &(packet->payload[command_start]);
       } else {
 	command_start = 0;
-	command = &(packet->payload[command_start]);
       }
 
       if ((command_start + 3) < packet->payload_packet_len) {
