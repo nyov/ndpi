@@ -2,7 +2,7 @@
  * proto_oracle.c
  *
  * Copyright (C) 2013 Remy Mudingay <mudingay@ill.fr>
- * Copyright (C) 2014 Tomasz Bujlow <tomasz@bujlow.com>
+ * Copyright (C) 2014-15 Tomasz Bujlow <tomasz@bujlow.com>
  *
  * This file is part of nDPIng, an open source deep packet inspection
  * library based on nDPI, OpenDPI, and PACE technology by ipoque GmbH
