@@ -205,7 +205,6 @@ typedef struct ndpi_packet_struct {
   u_int32_t tick_timestamp;
 
   struct ndpi_int_one_line_struct line[NDPI_MAX_PARSE_LINES_PER_PACKET];
-  struct ndpi_int_one_line_struct unix_line[NDPI_MAX_PARSE_LINES_PER_PACKET];
   struct ndpi_int_one_line_struct host_line;
   struct ndpi_int_one_line_struct forwarded_line;
   struct ndpi_int_one_line_struct referer_line;
@@ -217,6 +216,7 @@ typedef struct ndpi_packet_struct {
   struct ndpi_int_one_line_struct http_transfer_encoding;
   struct ndpi_int_one_line_struct http_contentlen;
   struct ndpi_int_one_line_struct http_cookie;
+  struct ndpi_int_one_line_struct http_origin;
   struct ndpi_int_one_line_struct http_x_session_type;
   struct ndpi_int_one_line_struct server_line;
   struct ndpi_int_one_line_struct http_method;
@@ -232,12 +232,11 @@ typedef struct ndpi_packet_struct {
   u_int16_t empty_line_position;
   u_int8_t tcp_retransmission;
   u_int8_t l4_protocol;
-
-  u_int8_t packet_lines_parsed_complete;
-  u_int8_t packet_unix_lines_parsed_complete;
-  u_int8_t empty_line_position_set;
-  u_int8_t packet_direction:1;
+  
   u_int8_t ssl_certificate_detected:4, ssl_certificate_num_checks:4;
+  u_int8_t packet_lines_parsed_complete:1,
+  packet_direction:1,
+  empty_line_position_set:1;
   
   NDPI_SELECTION_BITMASK_PROTOCOL_SIZE ndpi_selection_packet;
   
