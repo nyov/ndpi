@@ -41,26 +41,6 @@ void ndpi_search_telegram(struct ndpi_detection_module_struct *ndpi_struct, stru
   u_int16_t dport /* , sport */;
   
   NDPI_LOG(NDPI_PROTOCOL_TELEGRAM, ndpi_struct, NDPI_LOG_TRACE, "TELEGRAM detection...\n");
-  /*
-    Telegram
-    149.154.164.0 - 149.154.167.255
-    149.154.168.0 - 149.154.171.255
-
-    http://myip.ms/view/web_hosting/363906/Telegram_Messenger_Network.html
-  */
-  if (flow->packet.iph) {
-    u_int32_t src = ntohl(flow->packet.iph->saddr);
-    u_int32_t dst = ntohl(flow->packet.iph->daddr);
-
-    if (((src >= 2509939712) && (src <= 2509940735))
-       || ((dst >= 2509939712) && (dst <= 2509940735))
-       || ((src >= 2509940736) && (src <= 2509941759))
-       || ((dst >= 2509940736) && (dst <= 2509941759))
-       ) {
-      ndpi_int_telegram_add_connection(ndpi_struct, flow);
-      return;
-    }
-  }
 
   if (packet->payload_packet_len == 0)
     return;

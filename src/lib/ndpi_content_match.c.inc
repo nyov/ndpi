@@ -90,6 +90,27 @@ static ndpi_network host_protocol_list[] = {
     91.189.89.0/21 (255.255.248.0)
   */
   { 0x5BBD5900 /* 91.189.89.0 */, 21, NDPI_PROTOCOL_UBUNTUONE},
+
+  /*
+    Telegram
+    route:          149.154.164.0/22
+    descr:          Telegram Messenger Amsterdam Network
+    origin:         AS62041
+    mnt-by:         MNT-TELEGRAM
+    source:         RIPE # Filtered
+
+    route:          149.154.168.0/22
+    descr:          Telegram Messenger DC5 Network
+    origin:         AS62014
+    mnt-by:         MNT-TELEGRAM
+    source:         RIPE # Filtered
+    
+    http://myip.ms/view/web_hosting/363906/Telegram_Messenger_Network.html
+  */
+  { 0x959AA400 /* 149.154.164.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM},
+  { 0x959AA800 /* 149.154.168.0/22 */, 22, NDPI_PROTOCOL_TELEGRAM},
+
+  /* Skype */
   { 0x17600000, 14, NDPI_PROTOCOL_SKYPE },
   { 0x17613000, 20, NDPI_PROTOCOL_SKYPE },
   { 0x17614000, 19, NDPI_PROTOCOL_SKYPE },
