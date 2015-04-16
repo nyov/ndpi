@@ -7,17 +7,15 @@ decided to create my own source tree
 
 In order to compile this library do
 
-./configure
-make
-
-==========
-
-In case you want to add new protocols or / and if you happen
-to change .am files (e.g. Makefile.am) remember to do:
-
 # ./autogen.sh
 # ./configure
 # make
+
+Please note that the pre-requisites for compilation include:
+- GNU tools (autogen, automake, autoconf)
+- GNU C compiler (gcc)
+
+==========
 
 The entire procedure of adding new protocols in detail:
 
@@ -46,10 +44,8 @@ src/lib/ndpi_main.c
 8. Add the new protocol file to:
 src/lib/Makefile.am
 
-9. autoreconf -ivf
-
-10. ./configure -with-pic
-
+9.  ./autogen.sh
+10. ./configure
 11. make
 
 ==========
@@ -59,5 +55,4 @@ If you want to distribute a source tar file of nDPI do:
 # make dist
 
 --------------------------
-Luca Deri <deri@ntop.org>
-Tomasz Bujlow <tomasz@skatnet.dk>
+April 2015 - ntop 
