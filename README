@@ -12,7 +12,7 @@ In order to compile this library do
 # make
 
 Please note that the pre-requisites for compilation include:
-- GNU tools (autogen, automake, autoconf)
+- GNU tools (autogen, automake, autoconf, libtool)
 - GNU C compiler (gcc)
 
 ==========
